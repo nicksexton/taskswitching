@@ -3,6 +3,9 @@
 #include "pdp_objects.h"
 #include "activation_functions.h"
 
+/* only for offsetof macro */
+#include <stddef.h>
+
 
 #define ACT_MAX 1.0
 #define ACT_MIN -1.0
@@ -16,17 +19,9 @@
 
 
 pdp_units * pdp_units_create (int size) {
+
     pdp_units * a_units_element;
-
-    /*
-    a_units_element = malloc ( sizeof(int) +
-			       sizeof(double *) + 
-			       2 * sizeof(pdp_units *) );
-
-    */
-
     a_units_element = malloc(sizeof(pdp_units));
-
     a_units_element->activations = malloc (size * (sizeof(double)));
 
     return a_units_element;
@@ -37,12 +32,12 @@ pdp_units * pdp_units_create (int size) {
 void pdp_units_free (pdp_units * some_units) {
   /* frees from head (initial) -> tail (latest) of list */
   if (some_units == NULL) {
-    printf ("end of list reached, all done!\n");
+    printf ("end of (units) list reached, all done!\n");
     return;
   }
   else {
     pdp_units * tmp = some_units->next;
-    printf ("freeing memory at %p\n", some_units);
+    printf ("freeing pdp_units struct from memory at %p\n", some_units);
     free (some_units->activations);
     free (some_units);
     pdp_units_free (tmp);
@@ -71,8 +66,7 @@ pdp_layer * pdp_layer_create(int size) {
     new_layer->units_initial.previous = NULL;
     new_layer->units_initial.next = NULL;
     new_layer->units_initial.cycle = 0;
-    new_layer->units_initial.activations = (double *)malloc (size * (sizeof(double)));
-
+    new_layer->units_initial.activations = malloc (size * (sizeof(double)));
     new_layer->units_latest = &(new_layer->units_initial);
     
     /* inputs list pointer defaults to NULL */
@@ -87,25 +81,27 @@ pdp_layer * pdp_layer_create(int size) {
 void pdp_layer_free (pdp_layer * some_layer) {
 
     if (some_layer == NULL) {
-        printf ("end of list reached, all done!\n");
+      // printf ("end of list reached, all done!\n");
         return;
     }
     else {
 
       /* first free the upstream input list */
-
       if (some_layer->upstream_layers != NULL) {
 	pdp_input_free (some_layer->upstream_layers);
       }
+      some_layer->units_latest = NULL; // list no longer exists
 
 
       /* then free the units */
         pdp_units_free (some_layer->units_initial.next);
-        some_layer->units_latest = NULL; // list no longer exists
+	free (some_layer->units_initial.activations);
+        
 
 	/* free the input accumulators */
 	free (some_layer->net_inputs);
-        free (some_layer);
+        
+	free (some_layer);
 	
 	return;
     }
@@ -318,35 +314,31 @@ int pdp_layer_cycle (pdp_layer * some_layer) {
   /* calculates a new iteration of the layer based on its upstream inputs */
       /* create new units element */
   
-      pdp_units * units_new = pdp_units_create (some_layer->size);
-      units_new->next = NULL;
-      units_new->previous = some_layer->units_latest;      
-      units_new->cycle = (units_new->previous->cycle) + 1;
+  pdp_input * input_iterator; 
+  pdp_units * units_new = pdp_units_create (some_layer->size);
 
-      pdp_input * input_iterator;
+
+  units_new->next = NULL;
+  units_new->previous = some_layer->units_latest;      
+  units_new->cycle = (units_new->previous->cycle) + 1;
+  
+ 
 
 
       /* make new linkages */
-      // some_layer->upstream_layers = NULL; // avoid proliferating links to single pdp_input list
-
-
- 
-      some_layer->units_latest = units_new;
-
+  some_layer->units_latest->next = units_new;
+  some_layer->units_latest = units_new;
       
-      /* get the input iterator */
-      input_iterator = some_layer->upstream_layers;
+  /* get the input iterator */
+  input_iterator = some_layer->upstream_layers;
       
 
-	/* calculate inputs */
+      /* calculate inputs */
+  while (input_iterator != NULL) {
 
-      
-
-      while (input_iterator != NULL) {
-
-	pdp_calc_input_fromlayer (some_layer->size, some_layer, 
-				  input_iterator->input_layer->size, input_iterator->input_layer, 
-				  input_iterator->input_weights);
+    pdp_calc_input_fromlayer (some_layer->size, some_layer, 
+			      input_iterator->input_layer->size, input_iterator->input_layer, 
+			      input_iterator->input_weights);
 
 
 	/* <--------- test code: -----------> */
@@ -390,9 +382,6 @@ int main () {
     pdp_layer_set_activation(an_input, 5, initial_input_activations);
     pdp_layer_set_activation(an_output, 3, initial_output_activations);
 
-
-
-
     /* init some weights */
     pdp_weights_matrix * some_weights;
     some_weights = pdp_weights_create (3,5);
@@ -407,9 +396,6 @@ int main () {
 
     pdp_weights_set (some_weights, 3, 5, local_weights_matrix);
 
-
-
-    /* NEW CODE testing pdp_input_connect */
     pdp_input_connect (an_output, an_input, some_weights);
 
 
@@ -424,20 +410,16 @@ int main () {
     }
 
 
-
     //    pdp_weights_print (some_weights);
 
     pdp_layer_free (an_input);
     pdp_layer_free (an_output);
     pdp_weights_free (some_weights);
 
-    printf ("size of pdp_input: %lu", sizeof(pdp_input));
-    printf ("size of pdp_layer: %lu", sizeof(pdp_layer));
-    printf ("size of pdp_weights: %lu", sizeof(pdp_weights_matrix));
-
+    //    printf ("size of pdp_input: %lu", sizeof(pdp_input));
+    // printf ("size of pdp_layer: %lu", sizeof(pdp_layer));
+    // printf ("size of pdp_weights: %lu", sizeof(pdp_weights_matrix));
 
     return 0;
-
-
 
 }
