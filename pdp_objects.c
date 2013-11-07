@@ -15,6 +15,41 @@
 /* 3. dump all activation values (ie. for drawing a graph of act vs. time) */
 
 
+pdp_units * pdp_units_create (int size) {
+    pdp_units * a_units_element;
+
+    /*
+    a_units_element = malloc ( sizeof(int) +
+			       sizeof(double *) + 
+			       2 * sizeof(pdp_units *) );
+
+    */
+
+    a_units_element = malloc(sizeof(pdp_units));
+
+    a_units_element->activations = malloc (size * (sizeof(double)));
+
+    return a_units_element;
+}
+
+
+
+void pdp_units_free (pdp_units * some_units) {
+  /* frees from head (initial) -> tail (latest) of list */
+  if (some_units == NULL) {
+    printf ("end of list reached, all done!\n");
+    return;
+  }
+  else {
+    pdp_units * tmp = some_units->next;
+    printf ("freeing memory at %p\n", some_units);
+    free (some_units->activations);
+    free (some_units);
+    pdp_units_free (tmp);
+
+    return;
+  }
+}
 
 
 pdp_layer * pdp_layer_create(int size) {
@@ -22,29 +57,35 @@ pdp_layer * pdp_layer_create(int size) {
     pdp_layer * new_layer;
     int i;
 
-    new_layer = (pdp_layer *)malloc (sizeof(pdp_layer));
-    new_layer->previous = NULL;
-    new_layer->next = NULL;
+    new_layer = malloc (sizeof(pdp_layer));
     new_layer->size = size;
-    new_layer->units = (double *)malloc (size * (sizeof(double)));
-    
-    /* layer should contain an array of accumulators, to sum net input  */
-    new_layer->net_inputs = (double *)malloc (size * (sizeof(double)));
+
+    /* array of accumulators, to sum net input  */
+    new_layer->net_inputs = malloc (size * (sizeof(double)));
 
     for (i = 0; i < size; i++) {
       new_layer->net_inputs[i] = 0;
     }
 
+    /* instead of calling pdp_units_create, init the head of the units list here */
+    new_layer->units_initial.previous = NULL;
+    new_layer->units_initial.next = NULL;
+    new_layer->units_initial.cycle = 0;
+    new_layer->units_initial.activations = (double *)malloc (size * (sizeof(double)));
+
+    new_layer->units_latest = &(new_layer->units_initial);
+    
     /* inputs list pointer defaults to NULL */
     new_layer->upstream_layers = NULL;
-
 
     return new_layer;
 }
 
 
-void pdp_layer_free_fromtail(pdp_layer * some_layer) {
-    /* recursively frees all iterations by following *previous* links */
+    
+
+void pdp_layer_free (pdp_layer * some_layer) {
+
     if (some_layer == NULL) {
         printf ("end of list reached, all done!\n");
         return;
@@ -58,25 +99,25 @@ void pdp_layer_free_fromtail(pdp_layer * some_layer) {
       }
 
 
-      /* then recursively free the list */
-        pdp_layer * tmp;
-        tmp = some_layer->previous;
-        printf ("freeing memory at %p\n", some_layer);
-        free (some_layer->units);
+      /* then free the units */
+        pdp_units_free (some_layer->units_initial.next);
+        some_layer->units_latest = NULL; // list no longer exists
+
+	/* free the input accumulators */
 	free (some_layer->net_inputs);
-
-	/* unnecessary function call most of the time? */
-	// pdp_input_free (some_layer->upstream_layers);
-
         free (some_layer);
-        pdp_layer_free_fromtail(tmp);
-
-	/* need to free the pdp_inputs list */
+	
+	return;
     }
 }
 
 
 int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array[size]){
+  /* sets the activation of the unit_activation state referenced by
+     the TAIL pointer ie. sets activation for MOST RECENT CYCLE
+     only. If this is called on initialising the model then this is
+     the initial state. */
+
   int i;
   
   if (some_layer->size != size) {
@@ -86,7 +127,7 @@ int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array
   }
 
   for (i = 0; i < size; i++) {
-    some_layer->units[i] = init_array[i];
+    some_layer->units_latest->activations[i] = init_array[i];
   }
   return 0;
 }
@@ -99,7 +140,7 @@ pdp_weights_matrix * pdp_weights_create(int size_output, int size_input) {
       initialise it */
 
   pdp_weights_matrix * new_weights;
-  new_weights = (pdp_weights_matrix*)malloc (sizeof(pdp_weights_matrix));
+  new_weights = malloc (sizeof(pdp_weights_matrix));
   new_weights->size_input = size_input;
   new_weights->size_output = size_output;
   new_weights->weights = malloc (size_output * sizeof(double*));
@@ -220,10 +261,16 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
   else {
     /* do the matrix multiplication */
 
+
+    
+
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
 
+    /* remember to zero the accumulators! */
+      output->net_inputs[i] = 0;
+
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
-	output->net_inputs[i] += input->units[j] * weights->weights[i][j];
+	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
       }
     }
 
@@ -239,7 +286,7 @@ int pdp_input_connect (pdp_layer * downstream_layer, pdp_layer * upstream_layer,
   /* TODO - code to check size of matrix and layers corresponds */
 
   pdp_input * p_input_tmp;
-  p_input_tmp = (pdp_input *) malloc (sizeof (pdp_input));
+  p_input_tmp = malloc (sizeof (pdp_input));
   
   p_input_tmp->next = downstream_layer->upstream_layers;
   p_input_tmp->input_layer = upstream_layer;
@@ -262,33 +309,33 @@ void pdp_input_free (pdp_input * input_to_free) {
   }
 }
 
-pdp_layer * pdp_layer_cycle (pdp_layer * some_layer) {
+int pdp_layer_cycle (pdp_layer * some_layer) {
 
 
 
   /* TODO - activation function should be pointer to a function */
 
   /* calculates a new iteration of the layer based on its upstream inputs */
-      /* create layer for new cycle */
-
+      /* create new units element */
   
+      pdp_units * units_new = pdp_units_create (some_layer->size);
+      units_new->next = NULL;
+      units_new->previous = some_layer->units_latest;      
+      units_new->cycle = (units_new->previous->cycle) + 1;
 
-      // pdp_layer * tmp = some_layer;
       pdp_input * input_iterator;
-      pdp_layer * new_iteration = pdp_layer_create (some_layer->size);
 
-      /* copy the relevant bits of the old iteration */
-      new_iteration->size = some_layer->size;
-      new_iteration->upstream_layers = some_layer->upstream_layers;
 
       /* make new linkages */
       // some_layer->upstream_layers = NULL; // avoid proliferating links to single pdp_input list
-      some_layer->next = new_iteration;
-      new_iteration->previous = some_layer;      
+
+
+ 
+      some_layer->units_latest = units_new;
+
       
       /* get the input iterator */
       input_iterator = some_layer->upstream_layers;
-      some_layer = new_iteration;
       
 
 	/* calculate inputs */
@@ -306,12 +353,13 @@ pdp_layer * pdp_layer_cycle (pdp_layer * some_layer) {
 	printf ("output unit activations: ");
 
 	int outputunit = 0;
-	for (outputunit = 0; outputunit < 3; outputunit ++) {
-	  some_layer->units[outputunit] = act_gs(some_layer->net_inputs[outputunit],
-						some_layer->previous->units[outputunit],
-						STEP_SIZE, ACT_MAX, ACT_MIN);
+	for (outputunit = 0; outputunit < some_layer->size; outputunit ++) {
+	  some_layer->units_latest->activations[outputunit] = 
+	    act_gs(some_layer->net_inputs[outputunit],
+		   some_layer->units_latest->previous->activations[outputunit],
+		   STEP_SIZE, ACT_MAX, ACT_MIN);
 	  
-	  printf ("\t[%d]: %4.2f\t", outputunit, some_layer->units[outputunit]);
+	  printf ("\t[%d]: %4.2f\t", outputunit, some_layer->units_latest->activations[outputunit]);
 	}
 
 
@@ -321,7 +369,7 @@ pdp_layer * pdp_layer_cycle (pdp_layer * some_layer) {
 	input_iterator = input_iterator->next;
       }
 
-      return some_layer;
+      return 0;
 }
 
 
@@ -371,7 +419,7 @@ int main () {
     int i;
     for (i = 0; i < 10; i++) {
 
-      an_output = pdp_layer_cycle (an_output);
+      pdp_layer_cycle (an_output);
 
     }
 
@@ -379,8 +427,8 @@ int main () {
 
     //    pdp_weights_print (some_weights);
 
-    pdp_layer_free_fromtail (an_input);
-    pdp_layer_free_fromtail (an_output);
+    pdp_layer_free (an_input);
+    pdp_layer_free (an_output);
     pdp_weights_free (some_weights);
 
     printf ("size of pdp_input: %lu", sizeof(pdp_input));

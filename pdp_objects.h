@@ -2,16 +2,30 @@
 typedef struct pdp_input pdp_input;
 typedef struct pdp_layer pdp_layer;
 
+
+/* linked list for tracking unit activation states over time */
+typedef struct pdp_units {
+  int cycle;
+  double * activations;
+  struct pdp_units * next;
+  struct pdp_units * previous;
+} pdp_units;
+  
+
 /* A layer of units */
 typedef struct pdp_layer {
 
-    struct pdp_layer * previous; // past iterations
-    struct pdp_layer * next;     // future iterations
     int size;
-    double * units; // pointer to array (ie. row matrix) of unit activation values, UNINITIALISED
-    double * net_inputs; // accumulators for summing net input, initialised to zero
 
-    struct pdp_input * upstream_layers; // pointer to the first input (NULL by default and if nothing connected)
+  //     struct pdp_layer * previous; // past iterations
+  //     struct pdp_layer * next;     // future iterations
+
+  //     double * units; // pointer to array (ie. row matrix) of unit activation values, UNINITIALISED
+    double * net_inputs; // accumulators for summing net input, initialised to zero
+    struct pdp_units units_initial; // INITIAL ACTIVATION STATE ie. cycle 0, head of list
+    struct pdp_units * units_latest; // MOST RECENT STATE ie. tail of list
+    struct pdp_input * upstream_layers; // pointer to the first input (NULL by 
+                                        // default and if nothing connected)
 
 } pdp_layer;
 
@@ -47,7 +61,9 @@ typedef struct pdp_input {
 
 
 pdp_layer * pdp_layer_create(int size); 
-void pdp_layer_free_fromtail(pdp_layer * some_layer);
+
+void pdp_units_free (pdp_units * some_units);
+void pdp_layer_free (pdp_layer * some_layer);
 int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array[size]);
 
 
@@ -79,4 +95,4 @@ int pdp_input_connect (pdp_layer * this_layer,
 void pdp_input_free (pdp_input * input_to_free);
 
 
-struct pdp_layer * pdp_layer_cycle (pdp_layer * some_layer); // calculate new iteration of the layer based on the current inputs of connected upstream layers
+int pdp_layer_cycle (pdp_layer * some_layer); // calculate new iteration of the layer based on the current inputs of connected upstream layers
