@@ -9,7 +9,7 @@ double act_gs(double net_input, double old_activation,
     }
     else {
         if (net_input < 0) {
-            eta = net_input * (old_activation - act_max);
+            eta = net_input * (old_activation - act_min);
         }
         else
             eta = 0;

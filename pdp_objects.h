@@ -60,11 +60,16 @@ typedef struct pdp_input {
 
 
 
-pdp_layer * pdp_layer_create(int size); 
+
 
 void pdp_units_free (pdp_units * some_units);
+
+pdp_layer * pdp_layer_create(int size); 
 void pdp_layer_free (pdp_layer * some_layer);
+
+
 int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array[size]);
+void pdp_layer_print_current_output (pdp_layer * some_layer);
 
 
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input);

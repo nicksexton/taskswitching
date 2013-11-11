@@ -3,13 +3,10 @@
 #include "pdp_objects.h"
 #include "activation_functions.h"
 
-/* only for offsetof macro */
-#include <stddef.h>
-
 
 #define ACT_MAX 1.0
 #define ACT_MIN -1.0
-#define STEP_SIZE 0.0015
+#define STEP_SIZE 0.01
 
 
 /* Access functions: */
@@ -127,6 +124,16 @@ int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array
   }
   return 0;
 }
+
+void pdp_layer_print_current_output (pdp_layer * some_layer) {
+  int i;
+  for (i = 0; i < some_layer->size; i++) {
+    printf ("[%d]: %4.2f  ", i, some_layer->units_latest->activations[i]);
+  }
+  printf ("\n");
+}
+  
+
 
 
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input) {
@@ -262,9 +269,6 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
 
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
 
-    /* remember to zero the accumulators! */
-      output->net_inputs[i] = 0;
-
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
 	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
       }
@@ -305,6 +309,7 @@ void pdp_input_free (pdp_input * input_to_free) {
   }
 }
 
+
 int pdp_layer_cycle (pdp_layer * some_layer) {
 
 
@@ -316,7 +321,7 @@ int pdp_layer_cycle (pdp_layer * some_layer) {
   
   pdp_input * input_iterator; 
   pdp_units * units_new = pdp_units_create (some_layer->size);
-
+  int j; // iterates across output units
 
   units_new->next = NULL;
   units_new->previous = some_layer->units_latest;      
@@ -325,43 +330,47 @@ int pdp_layer_cycle (pdp_layer * some_layer) {
  
 
 
-      /* make new linkages */
+  /* make new linkages */
   some_layer->units_latest->next = units_new;
   some_layer->units_latest = units_new;
       
   /* get the input iterator */
   input_iterator = some_layer->upstream_layers;
-      
 
-      /* calculate inputs */
+  /* remember to zero the accumulators! */
+  for (j = 0; j < some_layer->size; j++) {
+    some_layer->net_inputs[j] = 0;
+  }
+
+  /* calculate net inputs */
   while (input_iterator != NULL) {
-
+    
     pdp_calc_input_fromlayer (some_layer->size, some_layer, 
 			      input_iterator->input_layer->size, input_iterator->input_layer, 
 			      input_iterator->input_weights);
+	
+    input_iterator = input_iterator->next;
+  }
+
+  /* <--------------- DEBUG ------------------- */
+  printf ("net inputs:\n");
+  for (j = 0; j < some_layer->size; j++) {
+    printf ("[%d]:, %4.2f  ", j, some_layer->net_inputs[j]);
+  }
+  printf ("\n");
 
 
-	/* <--------- test code: -----------> */
-	printf ("output unit activations: ");
+  /* ----------------END DEBUG---------------- */
 
-	int outputunit = 0;
-	for (outputunit = 0; outputunit < some_layer->size; outputunit ++) {
-	  some_layer->units_latest->activations[outputunit] = 
-	    act_gs(some_layer->net_inputs[outputunit],
-		   some_layer->units_latest->previous->activations[outputunit],
-		   STEP_SIZE, ACT_MAX, ACT_MIN);
-	  
-	  printf ("\t[%d]: %4.2f\t", outputunit, some_layer->units_latest->activations[outputunit]);
-	}
+  /* now update activation */
+  for (j = 0; j < some_layer->size; j ++) {
+    some_layer->units_latest->activations[j] = 
+      act_gs(some_layer->net_inputs[j],
+	     some_layer->units_latest->previous->activations[j],
+	     STEP_SIZE, ACT_MAX, ACT_MIN);	  
+  }
 
-
-	printf ("\n");
-
-	/* <--------- end test code ---------> */
-	input_iterator = input_iterator->next;
-      }
-
-      return 0;
+  return 0;
 }
 
 
@@ -377,7 +386,7 @@ int main () {
     an_output = pdp_layer_create(3);
 
     double initial_input_activations[5] = {0.1, 1.0, 0.1, 0.5, 0.1};
-    double initial_output_activations[3] = {0.1, 0.1, 0.1};
+    double initial_output_activations[3] = {0.1, 0.9, 0.1};
 
     pdp_layer_set_activation(an_input, 5, initial_input_activations);
     pdp_layer_set_activation(an_output, 3, initial_output_activations);
@@ -389,7 +398,7 @@ int main () {
 
     double local_weights_matrix[3][5] = {
       {0.0,  1.0, -4.0,  3.1,  2.5},
-      {5.3, -1.3,  0.4, -5.2,  1.4},
+      {5.3, -5.3,  0.4, -5.2,  1.4},
       {3.0, -7.3, -3.5,  1.2,  7.1},
     };
 
@@ -403,10 +412,10 @@ int main () {
     /* cycle the model 10 times */
 
     int i;
-    for (i = 0; i < 10; i++) {
+    for (i = 0; i < 50; i++) {
 
       pdp_layer_cycle (an_output);
-
+      pdp_layer_print_current_output (an_output);
     }
 
 
@@ -416,9 +425,6 @@ int main () {
     pdp_layer_free (an_output);
     pdp_weights_free (some_weights);
 
-    //    printf ("size of pdp_input: %lu", sizeof(pdp_input));
-    // printf ("size of pdp_layer: %lu", sizeof(pdp_layer));
-    // printf ("size of pdp_weights: %lu", sizeof(pdp_weights_matrix));
 
     return 0;
 
