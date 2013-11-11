@@ -89,15 +89,12 @@ void pdp_layer_free (pdp_layer * some_layer) {
       }
       some_layer->units_latest = NULL; // list no longer exists
 
-
       /* then free the units */
         pdp_units_free (some_layer->units_initial.next);
 	free (some_layer->units_initial.activations);
         
-
 	/* free the input accumulators */
 	free (some_layer->net_inputs);
-        
 	free (some_layer);
 	
 	return;
@@ -304,45 +301,25 @@ void pdp_input_free (pdp_input * input_to_free) {
   else {
     printf ("freeing input list item\n");
     pdp_input * tmp = input_to_free->next;
-    free (input_to_free);
+    pdp_weights_free (input_to_free->input_weights);
+    free (input_to_free);    
     pdp_input_free (tmp);
   }
 }
 
 
-int pdp_layer_cycle (pdp_layer * some_layer) {
+int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
 
-
-
-  /* TODO - activation function should be pointer to a function */
-
-  /* calculates a new iteration of the layer based on its upstream inputs */
-      /* create new units element */
-  
   pdp_input * input_iterator; 
-  pdp_units * units_new = pdp_units_create (some_layer->size);
-  int j; // iterates across output units
-
-  units_new->next = NULL;
-  units_new->previous = some_layer->units_latest;      
-  units_new->cycle = (units_new->previous->cycle) + 1;
-  
- 
-
-
-  /* make new linkages */
-  some_layer->units_latest->next = units_new;
-  some_layer->units_latest = units_new;
-      
-  /* get the input iterator */
   input_iterator = some_layer->upstream_layers;
 
   /* remember to zero the accumulators! */
+  int j;
   for (j = 0; j < some_layer->size; j++) {
     some_layer->net_inputs[j] = 0;
   }
 
-  /* calculate net inputs */
+  /* update the inputs */
   while (input_iterator != NULL) {
     
     pdp_calc_input_fromlayer (some_layer->size, some_layer, 
@@ -353,14 +330,34 @@ int pdp_layer_cycle (pdp_layer * some_layer) {
   }
 
   /* <--------------- DEBUG ------------------- */
+  /*
   printf ("net inputs:\n");
   for (j = 0; j < some_layer->size; j++) {
     printf ("[%d]:, %4.2f  ", j, some_layer->net_inputs[j]);
   }
   printf ("\n");
+  */
+
+  return 0;
+}
 
 
-  /* ----------------END DEBUG---------------- */
+int pdp_layer_cycle_activation (pdp_layer * some_layer) {
+
+  /* TODO - activation function should be pointer to a function */
+  /* calculates a new iteration of the layer based on its upstream inputs */
+      /* create new units element */
+  
+  pdp_units * units_new = pdp_units_create (some_layer->size);
+  int j; // iterates across output units
+
+  units_new->next = NULL;
+  units_new->previous = some_layer->units_latest;      
+  units_new->cycle = (units_new->previous->cycle) + 1;  
+
+  /* make new linkages */
+  some_layer->units_latest->next = units_new;
+  some_layer->units_latest = units_new;
 
   /* now update activation */
   for (j = 0; j < some_layer->size; j ++) {
@@ -374,13 +371,105 @@ int pdp_layer_cycle (pdp_layer * some_layer) {
 }
 
 
+pdp_model * pdp_model_create () {
+  pdp_model * this_model = malloc (sizeof(pdp_model));
+  this_model->components = NULL;
+  return (this_model);
+  
+}
 
+
+void pdp_model_free (pdp_model * some_model) {
+  /* TODO - free all other members */
+
+  /* free the components */
+  pdp_model_component_free (some_model->components);
+  free (some_model);
+  return;
+}
+
+
+
+
+pdp_model_component * pdp_model_component_create () {
+  pdp_model_component * this_component;
+  this_component = malloc (sizeof(pdp_model_component));
+  this_component->layer = NULL;
+  this_component->next = NULL;
+  return (this_component);
+}
+
+void pdp_model_component_free (pdp_model_component * some_component) {
+  if (some_component == NULL) {
+    return;
+  }
+  else {
+    pdp_model_component * next;
+    pdp_layer_free (some_component->layer);
+    next = some_component->next;
+    free (some_component);
+    pdp_model_component_free (next);  
+    return;
+  }
+}
+
+void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_component, int id) {
+  /* check id does not already exist in model */
+  if (pdp_model_component_find(some_model, id) != NULL) {
+    printf ("\nError! adding component id: %d to model, id already exists in model\n", id);
+    return;
+  }
+  else {
+    pdp_model_component * new_component;
+      /* add data members */
+    new_component = pdp_model_component_create();
+    new_component->layer = layer_add_as_component;
+    new_component->id = id;
+    
+    /* linkages */
+    new_component->next = some_model->components;
+    some_model->components = new_component;
+    return;
+  }
+}
+
+pdp_model_component * pdp_model_component_find(pdp_model * some_model, int id) {
+  pdp_model_component * component_i; // iterator
+  component_i = some_model->components;
+  while (component_i != NULL) {
+    if (component_i->id == id) {
+      return (component_i);
+    }
+    component_i = component_i->next;
+  }
+  return component_i;
+}
+
+
+void pdp_model_cycle (pdp_model * some_model) {
+  pdp_model_component * component_i;
+
+  /* first calc the summed inputs */
+  component_i = some_model->components;
+  while (component_i != NULL) {
+    pdp_layer_cycle_inputs (component_i->layer);
+    component_i = component_i->next;
+  }
+
+  /* now update activations */
+  component_i = some_model->components;
+  while (component_i != NULL) {
+    pdp_layer_cycle_activation (component_i->layer);
+    component_i = component_i->next;
+  }
+
+  return;
+}
 
 int main () {
  
     pdp_layer * an_input;
     pdp_layer * an_output;
-
 
     an_input = pdp_layer_create(5);
     an_output = pdp_layer_create(3);
@@ -395,7 +484,6 @@ int main () {
     pdp_weights_matrix * some_weights;
     some_weights = pdp_weights_create (3,5);
 
-
     double local_weights_matrix[3][5] = {
       {0.0,  1.0, -4.0,  3.1,  2.5},
       {5.3, -5.3,  0.4, -5.2,  1.4},
@@ -404,28 +492,27 @@ int main () {
 
 
     pdp_weights_set (some_weights, 3, 5, local_weights_matrix);
-
     pdp_input_connect (an_output, an_input, some_weights);
 
-
+    pdp_model * test_model;
+    test_model = pdp_model_create();
+    pdp_model_component_push(test_model, an_input, 1);
+    pdp_model_component_push(test_model, an_output, 2);
 
     /* cycle the model 10 times */
 
     int i;
     for (i = 0; i < 50; i++) {
+      // pdp_layer_cycle_inputs (an_output);
+      // pdp_layer_cycle_activation (an_output);
+      pdp_model_cycle (test_model);
 
-      pdp_layer_cycle (an_output);
-      pdp_layer_print_current_output (an_output);
+      // print output activation
+      pdp_layer_print_current_output (pdp_model_component_find(test_model, 2)->layer); 
     }
 
-
-    //    pdp_weights_print (some_weights);
-
-    pdp_layer_free (an_input);
-    pdp_layer_free (an_output);
-    pdp_weights_free (some_weights);
-
+    pdp_weights_print (some_weights);
+    pdp_model_free (test_model);
 
     return 0;
-
 }

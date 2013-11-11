@@ -1,7 +1,8 @@
 
 typedef struct pdp_input pdp_input;
 typedef struct pdp_layer pdp_layer;
-
+typedef struct pdp_model_component pdp_model_component;
+typedef struct pdp_model pdp_model;
 
 /* linked list for tracking unit activation states over time */
 typedef struct pdp_units {
@@ -31,7 +32,6 @@ typedef struct pdp_layer {
 
 
 
-
 /* A weights structure */
 typedef struct pdp_weights_matrix {
 
@@ -47,7 +47,6 @@ typedef struct pdp_weights_matrix {
 /* container object for the input to a layer - contains links to the
    head of the input layer and the weights matrix */
 
-
 typedef struct pdp_input {
 
   pdp_layer * input_layer;
@@ -57,6 +56,23 @@ typedef struct pdp_input {
 } pdp_input;
 
 
+typedef struct pdp_model_component {
+
+  int id;
+  pdp_layer * layer;
+  pdp_model_component * next;
+} pdp_model_component;
+
+typedef struct pdp_model {
+
+  /* model global parameters */
+  /* components */
+  pdp_model_component * components;
+  /* pointers to access functions (ie. dump data) */
+  /* stopping condition */
+
+} pdp_model;
+
 
 
 
@@ -65,15 +81,16 @@ typedef struct pdp_input {
 void pdp_units_free (pdp_units * some_units);
 
 pdp_layer * pdp_layer_create(int size); 
+
 void pdp_layer_free (pdp_layer * some_layer);
 
-
 int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array[size]);
+
 void pdp_layer_print_current_output (pdp_layer * some_layer);
 
-
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input);
-void pdp_weights_set (pdp_weights_matrix * some_weights, 
+
+void pdp_weights_set (struct pdp_weights_matrix * some_weights, 
 			 int size_output, int size_input, double init_array[size_output][size_input]);
 
 /* <-------------- Alternate version --------------------->
@@ -85,19 +102,35 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
 			      int size_input, struct pdp_layer * input, 
 			      struct pdp_weights_matrix * weights);
 
-
-
 void pdp_weights_print(struct pdp_weights_matrix * a_weights_matrix);
+
 void pdp_weights_free (struct pdp_weights_matrix * some_weights);
 
-int pdp_input_connect (pdp_layer * this_layer, 
-		       pdp_layer * input_layer_to_connect, pdp_weights_matrix * weights_to_connect);
-
-
-/* constructor function which adds a specified input layer & weights matrix to the pdp_input object associated with a layer */
+int pdp_input_connect (struct pdp_layer * this_layer, 
+		       struct pdp_layer * input_layer_to_connect, 
+		       struct pdp_weights_matrix * weights_to_connect);
+/* constructor function which adds a specified input layer & weights
+   matrix to the pdp_input object associated with a layer */
 
 
 void pdp_input_free (pdp_input * input_to_free);
 
+int pdp_layer_cycle_inputs (pdp_layer * some_layer);
+/* Model cycle consists of two stages - 1) sum all inputs, and 2)
+   update all activations */
 
-int pdp_layer_cycle (pdp_layer * some_layer); // calculate new iteration of the layer based on the current inputs of connected upstream layers
+int pdp_layer_cycle_activation (pdp_layer * some_layer); 
+/* calculate new iteration of the layer based on the current inputs of
+   connected upstream layers */
+
+
+pdp_model * pdp_model_create ();
+void pdp_model_free (pdp_model * some_model);
+pdp_model_component * pdp_model_component_create ();
+void pdp_model_component_free (pdp_model_component * some_component);
+void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_component, int id);
+pdp_model_component * pdp_model_component_find(pdp_model * some_model, int id);
+
+void pdp_model_cycle (pdp_model * some_model); 
+/* updates inputs for all layers, then updates activation for all
+   layers */
