@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "activation_functions.h"
+#include "activation_funcs.h"
 #include "pdp_objects.h"
 
 
