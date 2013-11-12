@@ -11,6 +11,7 @@ typedef struct act_func_gs_parameters {
 } act_func_gs_parameters;
 
 
+
 typedef union act_func_params_union {
   
   // struct - gs params
@@ -18,7 +19,7 @@ typedef union act_func_params_union {
 
 } act_func_params_union;
 
-
+// wrapper struct - variable 'type' defines what activation fuction is implemented
 typedef struct act_func_params {
   union act_func_params_union params;
   act_function_type type; // which union member is active?
@@ -26,11 +27,6 @@ typedef struct act_func_params {
 } act_func_params;
 
 
-
-
-
-double act_gs(double net_input, double old_activation, double step_size, 
-	      double act_max, double act_min);
 
 
 
