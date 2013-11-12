@@ -11,7 +11,7 @@ typedef struct pdp_units {
   struct pdp_units * next;
   struct pdp_units * previous;
 } pdp_units;
-  
+ 
 
 /* A layer of units */
 typedef struct pdp_layer {
@@ -78,8 +78,8 @@ typedef union {
 typedef struct pdp_model {
 
   /* model global parameters */
-  /* activation function */
-  pdp_activation_function activation_function;
+
+  /* enum indicating which activation function to use */
 
   /* components */
   pdp_model_component * components;
@@ -134,8 +134,7 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer);
 /* Model cycle consists of two stages - 1) sum all inputs, and 2)
    update all activations */
 
-// int pdp_layer_cycle_activation (pdp_layer * some_layer); 
-int pdp_layer_cycle_activation (pdp_layer * some_layer, pdp_activation_function);
+int pdp_layer_cycle_activation (pdp_layer * some_layer); 
 
 /* calculate new iteration of the layer based on the current inputs of
    connected upstream layers */

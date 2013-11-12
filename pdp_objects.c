@@ -9,6 +9,8 @@
 #define ACT_MIN -1.0
 #define STEP_SIZE 0.01
 
+/* TODO - connect bias nodes as inputs */
+
 
 /* Access functions: */
 /* 1. reaction time (number of cycles to reach stopping condition) */
@@ -262,11 +264,8 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
   else {
     /* do the matrix multiplication */
 
-
-    
-
+  
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
-
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
 	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
       }
@@ -343,7 +342,7 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
 }
 
 
-int pdp_layer_cycle_activation (pdp_layer * some_layer, pdp_activation_function act_func) {
+int pdp_layer_cycle_activation (pdp_layer * some_layer) {
 
   /* TODO - activation function should be pointer to a function */
   /* calculates a new iteration of the layer based on its upstream inputs */
@@ -363,7 +362,7 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer, pdp_activation_function 
   /* now update activation */
   for (j = 0; j < some_layer->size; j ++) {
     some_layer->units_latest->activations[j] = 
-      (*act_func)(some_layer->net_inputs[j],
+      act_gs(some_layer->net_inputs[j],
 	     some_layer->units_latest->previous->activations[j],
 	     STEP_SIZE, ACT_MAX, ACT_MIN);	  
   }
@@ -372,10 +371,9 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer, pdp_activation_function 
 }
 
 
-pdp_model * pdp_model_create (pdp_activation_function act_func) {
+pdp_model * pdp_model_create () {
   pdp_model * this_model = malloc (sizeof(pdp_model));
   this_model->components = NULL;
-  this_model->activation_function = act_func;
   return (this_model);
   
 }
@@ -387,10 +385,9 @@ void pdp_model_free (pdp_model * some_model) {
   /* free the components */
   pdp_model_component_free (some_model->components);
   free (some_model);
+  printf ("model freed, returning...\n");
   return;
 }
-
-
 
 
 pdp_model_component * pdp_model_component_create () {
@@ -401,24 +398,28 @@ pdp_model_component * pdp_model_component_create () {
   return (this_component);
 }
 
+
 void pdp_model_component_free (pdp_model_component * some_component) {
   if (some_component == NULL) {
+    printf ("no more components to free, returning...\n");
     return;
   }
   else {
     pdp_model_component * next;
     pdp_layer_free (some_component->layer);
     next = some_component->next;
+    printf ("freeing component id %d at %p\n", some_component->id, some_component);
     free (some_component);
     pdp_model_component_free (next);  
     return;
   }
 }
 
+
 void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_component, int id) {
   /* check id does not already exist in model */
   if (pdp_model_component_find(some_model, id) != NULL) {
-    printf ("\nError! adding component id: %d to model, id already exists in model\n", id);
+    // printf ("\nError! adding component id: %d to model, id already exists in model\n", id);
     return;
   }
   else {
@@ -427,10 +428,12 @@ void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_
     new_component = pdp_model_component_create();
     new_component->layer = layer_add_as_component;
     new_component->id = id;
+    // printf ("adding component id %d: location %p\n", id, new_component);
     
     /* linkages */
     new_component->next = some_model->components;
     some_model->components = new_component;
+    // printf ("some_model->components now points to %p\n", some_model->components); 
     return;
   }
 }
@@ -461,18 +464,18 @@ void pdp_model_cycle (pdp_model * some_model) {
   /* now update activations */
   component_i = some_model->components;
   while (component_i != NULL) {
-    pdp_layer_cycle_activation (component_i->layer, some_model->activation_function);
+    pdp_layer_cycle_activation (component_i->layer);
     component_i = component_i->next;
   }
 
   return;
 }
 
-int main () {
- 
-    pdp_activation_function gs_activation_fn;
-    gs_activation_fn.gs_activation_func = act_gs;
 
+/* TEST CODE */
+ 
+/*   
+int main () {
 
     pdp_layer * an_input;
     pdp_layer * an_output;
@@ -486,7 +489,7 @@ int main () {
     pdp_layer_set_activation(an_input, 5, initial_input_activations);
     pdp_layer_set_activation(an_output, 3, initial_output_activations);
 
-    /* init some weights */
+    // init some weights 
     pdp_weights_matrix * some_weights;
     some_weights = pdp_weights_create (3,5);
 
@@ -501,11 +504,11 @@ int main () {
     pdp_input_connect (an_output, an_input, some_weights);
 
     pdp_model * test_model;
-    test_model = pdp_model_create(gs_activation_fn);
+    test_model = pdp_model_create();
     pdp_model_component_push(test_model, an_input, 1);
     pdp_model_component_push(test_model, an_output, 2);
 
-    /* cycle the model 10 times */
+    // cycle the model 10 times 
 
     int i;
     for (i = 0; i < 50; i++) {
@@ -522,3 +525,4 @@ int main () {
 
     return 0;
 }
+*/
