@@ -133,6 +133,8 @@ int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array
 
 void pdp_layer_print_current_output (pdp_layer * some_layer);
 
+void pdp_layer_print_activation (pdp_layer * some_layer);
+
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input);
 
 void pdp_weights_set (struct pdp_weights_matrix * some_weights, 

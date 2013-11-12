@@ -5,6 +5,7 @@
 // #include "activation_functions.h"
 #include "pdp_objects.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 /* Global parameters */
 #define ACTIVATION_MAX 1.0
@@ -129,15 +130,15 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_weights_matrix *wts_taskdemand_wordout, *wts_taskdemand_colourout;
 
   double wts_taskdemand_wordout_matrix[3][2] = {
-    { 2.5,  0.0},
-    { 2.5,  0.0},
-    { 2.5,  0.0},
+    { 2.5, -2.5},
+    { 2.5, -2.5},
+    { 2.5, -2.5},
   };
 
   double wts_taskdemand_colourout_matrix[3][2] = {
-    { 0.0,  2.5},
-    { 0.0,  2.5},
-    { 0.0,  2.5},
+    {-2.5,  2.5},
+    {-2.5,  2.5},
+    {-2.5,  2.5},
   };
 
   wts_taskdemand_wordout = pdp_weights_create (3,2);
@@ -214,7 +215,7 @@ int main () {
 
 
 
-  for (t = 0; t < 50; t ++) {
+  for (t = 0; t < 300; t ++) {
 
     /* TODO - introduce flags in pdp_layer for whether you want
        activation free (to update) or clamped(ie. does not update) */
@@ -238,10 +239,16 @@ int main () {
     // 4) noise 
 
     // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
-    pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
+    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
  
   }
-  
+
+  printf ("Word out layer:\n");
+  pdp_layer_print_activation (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
+
+  printf ("Colour out layer:\n");
+  pdp_layer_print_activation (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
+ 
 
   free (gs_stroop_model->activation_parameters);
   pdp_model_free (gs_stroop_model);

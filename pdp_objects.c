@@ -5,10 +5,6 @@
 
 
 
-// #define ACT_MAX 1.0
-// #define ACT_MIN -1.0
-// #define STEP_SIZE 0.01
-
 /* TODO - connect bias nodes as inputs */
 
 
@@ -32,12 +28,12 @@ pdp_units * pdp_units_create (int size) {
 void pdp_units_free (pdp_units * some_units) {
   /* frees from head (initial) -> tail (latest) of list */
   if (some_units == NULL) {
-    printf ("end of (units) list reached, all done!\n");
+    // printf ("end of (units) list reached, all done!\n");
     return;
   }
   else {
     pdp_units * tmp = some_units->next;
-    printf ("freeing pdp_units struct from memory at %p\n", some_units);
+    // printf ("freeing pdp_units struct from memory at %p\n", some_units);
     free (some_units->activations);
     free (some_units);
     pdp_units_free (tmp);
@@ -134,8 +130,23 @@ void pdp_layer_print_current_output (pdp_layer * some_layer) {
   printf ("\n");
 }
   
+void pdp_layer_print_activation (pdp_layer * some_layer) {
+  int i;
+  pdp_units *units_i;
+  units_i = &some_layer->units_initial;
+  
+  printf ("\n");
 
+  while (units_i != NULL) {
+    printf ("cycle:%d\t", units_i->cycle);
+    for (i = 0; i < some_layer->size; i++) {
+      printf ("%4.2f\t", units_i->activations[i]);
+    }
+    printf ("\n");
+    units_i = units_i->next;
 
+  }
+}
 
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input) {
 
@@ -302,7 +313,7 @@ void pdp_input_free (pdp_input * input_to_free) {
     return;
   }
   else {
-    printf ("freeing input list item\n");
+    // printf ("freeing input list item\n");
     pdp_input * tmp = input_to_free->next;
     pdp_weights_free (input_to_free->input_weights);
     free (input_to_free);    
@@ -405,7 +416,7 @@ void pdp_model_free (pdp_model * some_model) {
   pdp_model_component_free (some_model->components);
   some_model->components = NULL; // poss optional?
   free (some_model);
-  printf ("model freed, returning...\n");
+  // printf ("model freed, returning...\n");
   return;
 }
 
@@ -421,14 +432,14 @@ pdp_model_component * pdp_model_component_create () {
 
 void pdp_model_component_free (pdp_model_component * some_component) {
   if (some_component == NULL) {
-    printf ("no more components to free, returning...\n");
+    // printf ("no more components to free, returning...\n");
     return;
   }
   else {
     pdp_model_component * next;
     pdp_layer_free (some_component->layer);
     next = some_component->next;
-    printf ("freeing component id %d at %p\n", some_component->id, some_component);
+    // printf ("freeing component id %d at %p\n", some_component->id, some_component);
     free (some_component);
     pdp_model_component_free (next);  
     return;
