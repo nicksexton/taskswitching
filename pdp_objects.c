@@ -5,9 +5,9 @@
 
 
 
-#define ACT_MAX 1.0
-#define ACT_MIN -1.0
-#define STEP_SIZE 0.01
+// #define ACT_MAX 1.0
+// #define ACT_MIN -1.0
+// #define STEP_SIZE 0.01
 
 /* TODO - connect bias nodes as inputs */
 
@@ -47,13 +47,14 @@ void pdp_units_free (pdp_units * some_units) {
 }
 
 
-pdp_layer * pdp_layer_create(int size) {
+pdp_layer * pdp_layer_create(int size, double bias) {
 
     pdp_layer * new_layer;
     int i;
 
     new_layer = malloc (sizeof(pdp_layer));
     new_layer->size = size;
+    new_layer->input_bias = bias;
 
     /* array of accumulators, to sum net input  */
     new_layer->net_inputs = malloc (size * (sizeof(double)));
@@ -269,6 +270,8 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
 	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
       }
+      // add bias
+      output->net_inputs[i] += input->input_bias;
     }
 
   return 0;
@@ -384,6 +387,7 @@ void pdp_model_free (pdp_model * some_model) {
 
   /* free the components */
   pdp_model_component_free (some_model->components);
+  some_model->components = NULL; // poss optional?
   free (some_model);
   printf ("model freed, returning...\n");
   return;

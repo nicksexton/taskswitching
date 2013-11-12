@@ -18,11 +18,8 @@ typedef struct pdp_layer {
 
     int size;
 
-  //     struct pdp_layer * previous; // past iterations
-  //     struct pdp_layer * next;     // future iterations
-
-  //     double * units; // pointer to array (ie. row matrix) of unit activation values, UNINITIALISED
     double * net_inputs; // accumulators for summing net input, initialised to zero
+    double input_bias; // activation value for bias node (if any, default is 0)
     struct pdp_units units_initial; // INITIAL ACTIVATION STATE ie. cycle 0, head of list
     struct pdp_units * units_latest; // MOST RECENT STATE ie. tail of list
     struct pdp_input * upstream_layers; // pointer to the first input (NULL by 
@@ -95,7 +92,7 @@ typedef struct pdp_model {
 
 void pdp_units_free (pdp_units * some_units);
 
-pdp_layer * pdp_layer_create(int size); 
+pdp_layer * pdp_layer_create(int size, double bias); 
 
 void pdp_layer_free (pdp_layer * some_layer);
 
