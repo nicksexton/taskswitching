@@ -2,9 +2,9 @@
  model. Should do classic stroop effects (ie. response inhibition) and
  task switching */
 
-#include "activation_functions.h"
+// #include "activation_functions.h"
 #include "pdp_objects.h"
-
+#include <stdlib.h>
 
 /* Global parameters */
 #define ACTIVATION_MAX 1.0
@@ -196,6 +196,14 @@ int main () {
   pdp_model * gs_stroop_model = pdp_model_create();
   int t; // model cycle
 
+  // Specify activation function
+  act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+  activation_parameters->params.gs.step_size = STEP_SIZE;
+  activation_parameters->params.gs.act_max = ACTIVATION_MAX;
+  activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+
+  gs_stroop_model->activation_parameters = activation_parameters;
+
   // set up model
   model_init (gs_stroop_model);
 
@@ -235,8 +243,9 @@ int main () {
   }
   
 
-
+  free (gs_stroop_model->activation_parameters);
   pdp_model_free (gs_stroop_model);
-
+  
+  
   return 0;
 }

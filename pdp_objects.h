@@ -1,4 +1,41 @@
 
+/* ACTIVATION FUNCTIONS */
+typedef enum {ACT_GS, DUMMY} act_function_type;
+
+typedef struct act_func_gs_parameters {
+  double net_input;
+  double old_activation;
+  double step_size;
+  double act_max;
+  double act_min;
+} act_func_gs_parameters;
+
+
+typedef union act_func_params_union {
+  
+  // struct - gs params
+  struct act_func_gs_parameters gs; //gilbert & shallice 2002
+
+} act_func_params_union;
+
+
+typedef struct act_func_params {
+  union act_func_params_union params;
+  act_function_type type; // which union member is active?
+
+} act_func_params;
+
+
+
+
+
+double act_gs(double net_input, double old_activation, double step_size, 
+	      double act_max, double act_min);
+
+
+
+/* PDP OBJECTS & FUNCTIONS */
+
 typedef struct pdp_input pdp_input;
 typedef struct pdp_layer pdp_layer;
 typedef struct pdp_model_component pdp_model_component;
@@ -75,7 +112,7 @@ typedef union {
 typedef struct pdp_model {
 
   /* model global parameters */
-
+  act_func_params * activation_parameters;
   /* enum indicating which activation function to use */
 
   /* components */
@@ -131,10 +168,13 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer);
 /* Model cycle consists of two stages - 1) sum all inputs, and 2)
    update all activations */
 
-int pdp_layer_cycle_activation (pdp_layer * some_layer); 
+int pdp_layer_cycle_activation (pdp_layer * some_layer, 
+				act_func_params * activation_parameters); 
 
 /* calculate new iteration of the layer based on the current inputs of
-   connected upstream layers */
+   connected upstream layers. Note takes a pointer to a union as an
+   arguments, union needs to be initialised with activation parameters
+   (specific to a particular activation function */
 
 
 pdp_model * pdp_model_create ();

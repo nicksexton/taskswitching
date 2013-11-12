@@ -1,7 +1,30 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "activation_functions.h"
+// #include "activation_functions.h"
 #include "pdp_objects.h"
+
+
+double act_gs(double net_input, double old_activation,
+              double step_size, double act_max, double act_min) {
+
+  /* TODO - make activation function generic, so that a variety of
+     functions can be implmented*/
+
+    double eta;
+    if (net_input > 0) {
+        eta = net_input * (act_max - old_activation);
+    }
+    else {
+        if (net_input < 0) {
+            eta = net_input * (old_activation - act_min);
+        }
+        else
+            eta = 0;
+    }
+
+    /*    printf ("activation function returning\n"); */    
+    return  old_activation + (step_size * eta);
+}
 
 
 
@@ -345,7 +368,8 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
 }
 
 
-int pdp_layer_cycle_activation (pdp_layer * some_layer) {
+int pdp_layer_cycle_activation (pdp_layer * some_layer, 
+				act_func_params * activation_parameters) {
 
   /* TODO - activation function should be pointer to a function */
   /* calculates a new iteration of the layer based on its upstream inputs */
@@ -362,12 +386,27 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer) {
   some_layer->units_latest->next = units_new;
   some_layer->units_latest = units_new;
 
-  /* now update activation */
-  for (j = 0; j < some_layer->size; j ++) {
-    some_layer->units_latest->activations[j] = 
+  switch (activation_parameters->type) {
+  case ACT_GS : {
+
+    /* now update activation */
+    for (j = 0; j < some_layer->size; j ++) {
+      some_layer->units_latest->activations[j] = 
       act_gs(some_layer->net_inputs[j],
 	     some_layer->units_latest->previous->activations[j],
-	     STEP_SIZE, ACT_MAX, ACT_MIN);	  
+	     activation_parameters->params.gs.step_size, 
+	     activation_parameters->params.gs.act_max,
+	     activation_parameters->params.gs.act_min);  
+    }
+    break;
+  }
+    case DUMMY : {
+      // other activation functions can be slotted in like so
+      printf ("\nerror! DUMMY is proof of concept,");
+      printf ("not a real activation function\n");
+      break;
+    }
+      
   }
 
   return 0;
@@ -468,7 +507,8 @@ void pdp_model_cycle (pdp_model * some_model) {
   /* now update activations */
   component_i = some_model->components;
   while (component_i != NULL) {
-    pdp_layer_cycle_activation (component_i->layer);
+    pdp_layer_cycle_activation (component_i->layer, 
+				some_model->activation_parameters);
     component_i = component_i->next;
   }
 
