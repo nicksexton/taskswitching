@@ -449,7 +449,7 @@ pdp_model_component * pdp_model_component_find(pdp_model * some_model, int id) {
 void pdp_model_cycle (pdp_model * some_model) {
   pdp_model_component * component_i;
 
-  /* first calc the summed inputs */
+  /* first calc the summed inputs for all components*/
   component_i = some_model->components;
   while (component_i != NULL) {
     pdp_layer_cycle_inputs (component_i->layer);
