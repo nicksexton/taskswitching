@@ -63,9 +63,24 @@ typedef struct pdp_model_component {
   pdp_model_component * next;
 } pdp_model_component;
 
+
+/* Union wrapper for pointer to an activation function needed as
+   different activation functions take various arguments */
+typedef union {
+  double (*gs_activation_func) (double net_in, double old_act, 
+				double step_sz, double act_max, double act_min);
+  // proof of concept
+  double (*dummy_act_func) (double some_param, double some_other_param); 
+
+} pdp_activation_function;
+
+
 typedef struct pdp_model {
 
   /* model global parameters */
+  /* activation function */
+  pdp_activation_function activation_function;
+
   /* components */
   pdp_model_component * components;
   /* pointers to access functions (ie. dump data) */
@@ -119,7 +134,9 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer);
 /* Model cycle consists of two stages - 1) sum all inputs, and 2)
    update all activations */
 
-int pdp_layer_cycle_activation (pdp_layer * some_layer); 
+// int pdp_layer_cycle_activation (pdp_layer * some_layer); 
+int pdp_layer_cycle_activation (pdp_layer * some_layer, pdp_activation_function);
+
 /* calculate new iteration of the layer based on the current inputs of
    connected upstream layers */
 

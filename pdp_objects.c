@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "pdp_objects.h"
 #include "activation_functions.h"
+#include "pdp_objects.h"
+
 
 
 #define ACT_MAX 1.0
@@ -342,7 +343,7 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
 }
 
 
-int pdp_layer_cycle_activation (pdp_layer * some_layer) {
+int pdp_layer_cycle_activation (pdp_layer * some_layer, pdp_activation_function act_func) {
 
   /* TODO - activation function should be pointer to a function */
   /* calculates a new iteration of the layer based on its upstream inputs */
@@ -362,7 +363,7 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer) {
   /* now update activation */
   for (j = 0; j < some_layer->size; j ++) {
     some_layer->units_latest->activations[j] = 
-      act_gs(some_layer->net_inputs[j],
+      (*act_func)(some_layer->net_inputs[j],
 	     some_layer->units_latest->previous->activations[j],
 	     STEP_SIZE, ACT_MAX, ACT_MIN);	  
   }
@@ -371,9 +372,10 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer) {
 }
 
 
-pdp_model * pdp_model_create () {
+pdp_model * pdp_model_create (pdp_activation_function act_func) {
   pdp_model * this_model = malloc (sizeof(pdp_model));
   this_model->components = NULL;
+  this_model->activation_function = act_func;
   return (this_model);
   
 }
@@ -459,7 +461,7 @@ void pdp_model_cycle (pdp_model * some_model) {
   /* now update activations */
   component_i = some_model->components;
   while (component_i != NULL) {
-    pdp_layer_cycle_activation (component_i->layer);
+    pdp_layer_cycle_activation (component_i->layer, some_model->activation_function);
     component_i = component_i->next;
   }
 
@@ -468,6 +470,10 @@ void pdp_model_cycle (pdp_model * some_model) {
 
 int main () {
  
+    pdp_activation_function gs_activation_fn;
+    gs_activation_fn.gs_activation_func = act_gs;
+
+
     pdp_layer * an_input;
     pdp_layer * an_output;
 
@@ -495,7 +501,7 @@ int main () {
     pdp_input_connect (an_output, an_input, some_weights);
 
     pdp_model * test_model;
-    test_model = pdp_model_create();
+    test_model = pdp_model_create(gs_activation_fn);
     pdp_model_component_push(test_model, an_input, 1);
     pdp_model_component_push(test_model, an_output, 2);
 
@@ -504,7 +510,7 @@ int main () {
     int i;
     for (i = 0; i < 50; i++) {
       // pdp_layer_cycle_inputs (an_output);
-      // pdp_layer_cycle_activation (an_output);
+      // pdp_layer_cycle_activation (an_output, gs_activation);
       pdp_model_cycle (test_model);
 
       // print output activation
