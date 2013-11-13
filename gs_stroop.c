@@ -5,9 +5,12 @@
 
 #include "pdp_objects.h"
 #include "gs_stroop.h"
+#include "random_generator_functions.h" // for gaussian noise
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+
+
 
 /* Global parameters */
 #define ACTIVATION_MAX 1.0
@@ -33,6 +36,9 @@
 
 
 #define ECHO // echo console output
+
+
+
 
 
 
@@ -281,6 +287,7 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_weights_set (wts_colourout_taskdemand, 2, 3, wts_colourout_taskdemand_matrix);
   pdp_input_connect (taskdemand, colour_output, wts_colourout_taskdemand);
 
+
   /**************************** */
   /* Taskdemand -> output units */
   /**************************** */
@@ -355,6 +362,10 @@ int model_init (pdp_model * gs_stroop_model) {
 
 int main () {
 
+  gsl_rng * random_generator = random_generator_create();
+
+
+
 
   pdp_model * gs_stroop_model = pdp_model_create();
 
@@ -388,7 +399,13 @@ int main () {
     pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
 			      2, topdown_control_initial_act);
 
+    /* recalculate activation */
+
     pdp_model_cycle (gs_stroop_model);
+
+
+    /* add noise to units */
+    
 
 
 #if defined ECHO
@@ -421,7 +438,7 @@ int main () {
 
   free (gs_stroop_model->activation_parameters);
   pdp_model_free (gs_stroop_model);
-  
+  random_generator_free (random_generator);  
   
   return 0;
 }
