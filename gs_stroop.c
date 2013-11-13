@@ -17,8 +17,8 @@
 #define SQUASHING_PARAM 0.8
 
 #define NOISE 0.006
-#define OUTPUTUNIT_BIAS -6
-#define TASKDEMAND_BIAS -4
+#define OUTPUTUNIT_BIAS -6.0
+#define TASKDEMAND_BIAS -4.0
 #define BIAS_NONE 0
 #define TOPDOWN_CONTROL_STRENGTH_WORD 6.0
 #define TOPDOWN_CONTROL_STRENGTH_COLOUR 15.0
@@ -30,6 +30,9 @@
 #define ID_COLOUROUT 4
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
+
+
+#define ECHO // echo console output
 
 
 
@@ -185,8 +188,10 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_layer_set_activation(topdown_control, 2, initial_activation_topdown_control);
 
 
-  /* <------------------------------ SET WEIGHTS --------------------------------> */
+  /* <------------------------------ NETWORK CONNECTIVITY --------------------------------> */
+  /****************************** */
   /* Input units -> output units */
+  /***************************** */
   pdp_weights_matrix *wts_wordin_wordout, *wts_colourin_colourout;
 
   double wts_wordin_wordout_matrix[3][3] = {
@@ -209,8 +214,10 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_weights_set (wts_colourin_colourout, 3, 3, wts_colourin_colourout_matrix);
   pdp_input_connect (colour_output, colour_input, wts_colourin_colourout);
 
-
+  /******************************** */
   /* Output unit lateral inhibition */
+  /******************************** */
+
   pdp_weights_matrix *wts_wordout_wordout, *wts_colourout_colourout;
 
   double wts_alloutputs_lateral_matrix[3][3] = {
@@ -228,7 +235,32 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_input_connect (colour_output, colour_output, wts_colourout_colourout);
 
 
+  /*****************************************/
+  /* Output units cross-module connections */
+  /*****************************************/
+  pdp_weights_matrix *wts_wordout_colourout, *wts_colourout_wordout;
+
+  double wts_crossoutputs_matrix[3][3] = {
+    { 2.0, -2.0, -2.0},
+    {-2.0,  2.0, -2.0},
+    {-2.0, -2.0,  2.0}, 
+  };
+
+  /* wordout -> colourout */
+  wts_wordout_colourout = pdp_weights_create (3,3);
+  pdp_weights_set (wts_wordout_colourout, 3, 3, wts_crossoutputs_matrix);
+  pdp_input_connect (colour_output, word_output, wts_wordout_colourout);
+
+
+  /* colourout -> wordout */
+  wts_colourout_wordout = pdp_weights_create (3,3);
+  pdp_weights_set (wts_colourout_wordout, 3, 3, wts_crossoutputs_matrix);
+  pdp_input_connect (word_output, colour_output, wts_colourout_wordout);
+
+
+  /***************************** */
   /* Output units -> task demand */
+  /***************************** */
   pdp_weights_matrix *wts_wordout_taskdemand, *wts_colourout_taskdemand;
 
   double wts_wordout_taskdemand_matrix[2][3] = {
@@ -250,7 +282,9 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_input_connect (taskdemand, colour_output, wts_colourout_taskdemand);
 
 
+  /**************************** */
   /* Taskdemand -> output units */
+  /**************************** */
 
   pdp_weights_matrix *wts_taskdemand_wordout, *wts_taskdemand_colourout;
 
@@ -274,8 +308,9 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_weights_set (wts_taskdemand_colourout, 3, 2, wts_taskdemand_colourout_matrix);
   pdp_input_connect (colour_output, taskdemand, wts_taskdemand_colourout);
 
-
+  /******************************** */
   /* Taskdemand -> taskdemand units */
+  /******************************** */
   pdp_weights_matrix *wts_taskdemand_taskdemand;
   double wts_taskdemand_taskdemand_matrix[2][2] = {
     { 0.0, -2.0},
@@ -287,7 +322,10 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_input_connect (taskdemand, taskdemand, wts_taskdemand_taskdemand);
 
 
+  /************************************** */
   /* Top down control -> taskdemand units */
+  /************************************** */
+
   pdp_weights_matrix *wts_topdown_taskdemand;
   double wts_topdown_taskdemand_matrix[2][2] = {
     { TOPDOWN_CONTROL_STRENGTH_WORD,  0.0},
@@ -339,7 +377,7 @@ int main () {
 
 
 
-  while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 3000))  {
+  while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 1500))  {
 
     /* TODO - introduce flags in pdp_layer for whether you want
        activation free (to update) or clamped(ie. does not update) */
@@ -353,6 +391,17 @@ int main () {
 
     pdp_model_cycle (gs_stroop_model);
 
+
+#if defined ECHO
+
+    printf ("\ncyc:%d\t", gs_stroop_model->cycle);
+    pdp_layer_print_current_output (
+		    pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
+    pdp_layer_print_current_output (
+		    pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
+
+    
+#endif
 
     // TODO:
     // 0.5) sort out activation function so that it takes parameters
@@ -369,12 +418,7 @@ int main () {
     
   }
 
-  printf ("Word out layer:\n");
-  pdp_layer_print_activation (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
-
-  printf ("Colour out layer:\n");
-  pdp_layer_print_activation (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
- 
+  printf ("\n");
 
   free (gs_stroop_model->activation_parameters);
   pdp_model_free (gs_stroop_model);

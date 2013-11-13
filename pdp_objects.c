@@ -125,9 +125,10 @@ int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array
 void pdp_layer_print_current_output (pdp_layer * some_layer) {
   int i;
   for (i = 0; i < some_layer->size; i++) {
-    printf ("[%d]: %4.2f  ", i, some_layer->units_latest->activations[i]);
+    // printf ("[%d]: %4.2f  ", i, some_layer->units_latest->activations[i]);
+    printf ("%5.4f\t", some_layer->units_latest->activations[i]);
   }
-  printf ("\n");
+  // printf ("\n");
 }
   
 void pdp_layer_print_activation (pdp_layer * some_layer) {
@@ -278,11 +279,10 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
 
   
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
+      
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
 	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
       }
-      // add bias
-      output->net_inputs[i] += input->input_bias;
     }
 
   return 0;
@@ -327,10 +327,11 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
   pdp_input * input_iterator; 
   input_iterator = some_layer->upstream_layers;
 
-  /* remember to zero the accumulators! */
+  /* remember to zero the accumulators, then add bias now */
   int j;
   for (j = 0; j < some_layer->size; j++) {
-    some_layer->net_inputs[j] = 0;
+    // some_layer->net_inputs[j] = 0;
+    some_layer->net_inputs[j] = some_layer->input_bias;
   }
 
   /* update the inputs */

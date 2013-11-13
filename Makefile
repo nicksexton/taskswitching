@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -W -g
+CFLAGS=-Wall -W -g -pg
 
 all:  gs_stroop
 
