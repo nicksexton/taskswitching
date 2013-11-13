@@ -1,11 +1,11 @@
 CC=gcc
-CFLAGS=-Wall -W -g -pg -I/usr/include -L/usr/lib/ 
+CFLAGS=-Wall -W -g -pg -I/usr/include -L/usr/include
 
 all:  gs_stroop
 
 # gs_stroop: gs_stroop.o pdp_objects.o activation_functions.o
 gs_stroop: gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o
-	$(CC) $(CFLAGS) gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o -o gs_stroop -lgsl -lgslcblas -lm
+	$(CC) $(CFLAGS) -lgsl -lgslcblas -lm gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o -o gs_stroop 
 
 pdp_objects: pdp_objects.o 
 pdp_objects.o: pdp_objects.c activation_funcs.o

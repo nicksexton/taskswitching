@@ -3,13 +3,14 @@
  task switching */
 
 
-#include "pdp_objects.h"
-#include "gs_stroop.h"
-#include "random_generator_functions.h" // for gaussian noise
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-
+#include <gsl/gsl_randist.h>
+#include "pdp_objects.h"
+#include "random_generator_functions.h" // for gaussian noise
+#include "gs_stroop.h"
 
 
 /* Global parameters */
@@ -40,6 +41,16 @@
 
 
 
+void add_noise_to_units (pdp_layer * some_layer, double noise_sd, gsl_rng *r) {
+  
+  int i, sz = some_layer->size;
+  
+  for (i = 0; i < sz; i ++) {
+    some_layer->units_latest->activations[i] += gsl_ran_gaussian (r, noise_sd);
+  }
+}
+
+  
 
 
 stroop_response * make_stroop_response (int node, double activation) {
@@ -403,9 +414,15 @@ int main () {
 
     pdp_model_cycle (gs_stroop_model);
 
-
     /* add noise to units */
-    
+    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
+			NOISE, random_generator);
+    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
+			NOISE, random_generator);
+    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer, 
+			NOISE, random_generator);
+
+      
 
 
 #if defined ECHO
