@@ -5,6 +5,7 @@ all:  gs_stroop
 
 # gs_stroop: gs_stroop.o pdp_objects.o activation_functions.o
 gs_stroop: gs_stroop.o pdp_objects.o activation_funcs.o
+	$(CC) $(CFLAGS) gs_stroop.o pdp_objects.o activation_funcs.o -o gs_stroop
 
 pdp_objects: pdp_objects.o 
 pdp_objects.o: pdp_objects.c activation_funcs.o

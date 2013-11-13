@@ -281,7 +281,6 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_weights_set (wts_colourout_taskdemand, 2, 3, wts_colourout_taskdemand_matrix);
   pdp_input_connect (taskdemand, colour_output, wts_colourout_taskdemand);
 
-
   /**************************** */
   /* Taskdemand -> output units */
   /**************************** */

@@ -276,8 +276,6 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
 
   else {
     /* do the matrix multiplication */
-
-  
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
       
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
@@ -287,7 +285,6 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
 
   return 0;
   }
-
 }
       
 int pdp_input_connect (pdp_layer * downstream_layer, pdp_layer * upstream_layer, 
