@@ -2,10 +2,12 @@
  model. Should do classic stroop effects (ie. response inhibition) and
  task switching */
 
-// #include "activation_functions.h"
+
 #include "pdp_objects.h"
+#include "gs_stroop.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 /* Global parameters */
 #define ACTIVATION_MAX 1.0
@@ -28,6 +30,129 @@
 #define ID_COLOUROUT 4
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
+
+
+
+stroop_response * make_stroop_response (int node, double activation) {
+  // NB code for nodes: 1 = wordR, 2 = wordG, 3 = wordB, 4 = colourR, 5 = colourG, 6 = colourB
+  stroop_response * response = malloc (sizeof(stroop_response));
+  response->this_node = node;
+  response->activation = activation;
+  return response;
+}
+
+
+bool stopping_condition (pdp_model * gs_stroop) {
+
+  /* evaluates whether model should stop on this cycle and returns
+     true/false. CURRENT CRITERION: most active output node is > next
+     most active output node that is not the same coloured node */
+
+  // NB code for responses: 1 = wordR, 2 = wordG, 3 = wordB, 4 = colourR, 5 = colourG, 6 = colourB
+  // ie. if abs(response[0] - response[1]) == 3, then the nodes correspond
+
+  int outputnode;
+  stroop_response * biggest_act[3] = {NULL, NULL, NULL}; // stores 3 biggest activations, to compare
+                         // [0] vs. [1] or [2] if [0] and [1] are same colour
+
+  int i; // does an insertion sort
+  int o; // iterates output layers (0 or 1)
+  pdp_layer * output_layers[2];
+
+  output_layers[0] = (pdp_model_component_find (gs_stroop, ID_WORDOUT)->layer);  
+  output_layers[1] = (pdp_model_component_find (gs_stroop, ID_COLOUROUT)->layer);  
+
+  /* do both output layers */
+  for (o = 0; o < 2; o ++) {
+
+    /* outer loop iterates all the output nodes */
+    for (outputnode = 0; outputnode < 3; outputnode ++) {
+    
+      /* inner loop does an insertion sort */
+      for (i = 0; i < 3; i ++) {
+      
+	/*  if slot is empty, insert the new response right here */
+	if (biggest_act[i] == NULL) {
+	  biggest_act[i] = make_stroop_response (
+		                 (3*o + outputnode), 
+		                 output_layers[o]->units_latest->activations[outputnode]);
+	  break;
+	}
+	
+	/* else, compare size of activations */
+	else {
+	  if (biggest_act[i]->activation < output_layers[o]->units_latest->activations[outputnode]) {
+	    /* insert new response here, move everything down */
+	    if (i == 2) {
+	      free (biggest_act[2]);
+	      biggest_act[2] = make_stroop_response (
+                                     (3*o + outputnode), 
+				     output_layers[o]->units_latest->activations[outputnode]);
+	      break;
+	    }
+	    else {
+	      if (i == 1) {
+		free (biggest_act[2]);
+		biggest_act[2] = biggest_act[1];
+		biggest_act[1] = make_stroop_response (
+				       (3*o + outputnode), 
+				       output_layers[o]->units_latest->activations[outputnode]);
+		break;
+	      }
+	      else {
+		// i == 0, presumably
+		free (biggest_act[2]);
+		biggest_act[2] = biggest_act[1];
+		biggest_act[1] = biggest_act[0];
+		biggest_act[0] = make_stroop_response (
+				       (3*o + outputnode), 
+				       output_layers[o]->units_latest->activations[outputnode]);
+		break;
+	      }
+	    }
+	  
+	    
+	  }
+	  /* when i = 2, we're done */
+	}
+
+
+      } // <-- inner loop
+    } // <-- outer loop
+  } // <- output layers
+
+  // now, we can evaluate stopping condition
+
+  switch (abs(biggest_act[0]->this_node - biggest_act[1]->this_node)) {
+    case 3: { 
+      // contingency where [0] and [1] correspond
+      if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[2]->activation) {
+	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
+	return true; // [0] and [1] correspond, but ([0] - 15) > [2]
+      }
+      else {
+	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
+	return false; // [0] and [1] correspond, and ([0] - 15) > [2]
+      }
+    }
+
+    default: { 
+     // contingency where [0] and [2] do not correspond
+      if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[1]->activation) {
+	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
+	return true;
+      }
+      else {
+	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
+	return false;
+      }
+    }
+  }
+}
+
+  
+
+
 
 
 int model_init (pdp_model * gs_stroop_model) {
@@ -195,7 +320,6 @@ int main () {
 
 
   pdp_model * gs_stroop_model = pdp_model_create();
-  int t; // model cycle
 
   // Specify activation function
   act_func_params * activation_parameters = malloc (sizeof(act_func_params));
@@ -215,7 +339,7 @@ int main () {
 
 
 
-  for (t = 0; t < 300; t ++) {
+  while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 3000))  {
 
     /* TODO - introduce flags in pdp_layer for whether you want
        activation free (to update) or clamped(ie. does not update) */
@@ -229,6 +353,7 @@ int main () {
 
     pdp_model_cycle (gs_stroop_model);
 
+
     // TODO:
     // 0.5) sort out activation function so that it takes parameters
     //      which can be specified inside this file (ie as an act_params
@@ -241,6 +366,7 @@ int main () {
     // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
     // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
  
+    
   }
 
   printf ("Word out layer:\n");

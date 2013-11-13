@@ -404,6 +404,7 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
 pdp_model * pdp_model_create () {
   pdp_model * this_model = malloc (sizeof(pdp_model));
   this_model->components = NULL;
+  this_model->cycle = 0;
   return (this_model);
   
 }
@@ -500,6 +501,7 @@ void pdp_model_cycle (pdp_model * some_model) {
     component_i = component_i->next;
   }
 
+  some_model->cycle ++;
   return;
 }
 

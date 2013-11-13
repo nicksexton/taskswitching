@@ -107,6 +107,7 @@ typedef union {
 
 typedef struct pdp_model {
 
+  int cycle;
   /* model global parameters */
   act_func_params * activation_parameters;
   /* enum indicating which activation function to use */
