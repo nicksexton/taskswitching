@@ -18,3 +18,5 @@ stroop_response * make_stroop_response (int node, double activation);
 bool stopping_condition (pdp_model * gs_stroop);
 
 int model_init (pdp_model * gs_stroop_model);
+
+int run_stroop_trial (stroop_trial_data * subject_data);

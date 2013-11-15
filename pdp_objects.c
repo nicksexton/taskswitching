@@ -423,6 +423,7 @@ pdp_model * pdp_model_create () {
   this_model->components = NULL;
   this_model->cycle = 0;
   return (this_model);
+  this_model->model_data = NULL;
   
 }
 
@@ -435,6 +436,12 @@ void pdp_model_free (pdp_model * some_model) {
   some_model->components = NULL; // poss optional?
   free (some_model);
   // printf ("model freed, returning...\n");
+  return;
+}
+
+void pdp_model_set_data (pdp_model * some_model, void * some_data) {
+
+  some_model->model_data = some_data;
   return;
 }
 

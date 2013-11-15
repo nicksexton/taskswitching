@@ -1,15 +1,15 @@
 #include <glib.h>
 
-typedef enum {FIXED, MIXED} blocktype;
+typedef enum {NONE, FIXED, MIXED} blocktype;
 
 
 typedef struct stroop_trial_data {
 
   int trial_id;
   blocktype block_type; 
+  int stim_task; // 0 = word naming, 1 = colour reading
   int stim_word;
   int stim_colour;
-  int stim_task; // 0 = word naming, 1 = colour reading
   int stim_correct_response;
   int response;
   int response_time;
@@ -43,6 +43,8 @@ typedef struct subject_popn {
 } subject_popn;
 
 
+stroop_trial_data * stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
+					      int stim_word, int stim_colour);
 subject * subject_create (int num_of_trials);
 void subject_free (subject * subject_to_free);
 subject_popn * subject_popn_create (int number_of_subjects);

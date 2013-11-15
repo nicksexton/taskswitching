@@ -10,6 +10,8 @@
 #include <gsl/gsl_randist.h>
 #include "pdp_objects.h"
 #include "random_generator_functions.h" // for gaussian noise
+#include "simulated_subjects.h" // objects for representing subject params and data
+
 #include "gs_stroop.h"
 
 
@@ -148,6 +150,8 @@ bool stopping_condition (pdp_model * gs_stroop) {
       // contingency where [0] and [1] correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[2]->activation) {
 	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
+	// RECORD RESPONSE
+	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[1]->this_node;
 	return true; // [0] and [1] correspond, but ([0] - 15) > [2]
       }
       else {
@@ -160,6 +164,8 @@ bool stopping_condition (pdp_model * gs_stroop) {
      // contingency where [0] and [2] do not correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[1]->activation) {
 	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
+	// RECORD RESPONSE
+	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[1]->this_node;
 	return true;
       }
       else {
@@ -371,11 +377,16 @@ int model_init (pdp_model * gs_stroop_model) {
   return 0;
 }
 
-int main () {
-
-  gsl_rng * random_generator = random_generator_create();
 
 
+/*****************************************************************/
+/* Takes a pointer to a stroop_trial_data that has been init'd   */
+/* with trial parameters. Fills in the response data and returns */
+/*****************************************************************/
+int run_stroop_trial (stroop_trial_data * subject_data) {
+
+  
+  gsl_rng * random_generator = random_generator_create(); // clean up this function
 
 
   pdp_model * gs_stroop_model = pdp_model_create();
@@ -387,6 +398,154 @@ int main () {
   activation_parameters->params.gs.act_min = ACTIVATION_MIN;
 
   gs_stroop_model->activation_parameters = activation_parameters;
+
+
+
+
+  // set up model
+  model_init (gs_stroop_model);
+
+  pdp_model_set_data (gs_stroop_model, subject_data); // maybe need to cast to void *?
+
+// init inputs
+
+  double word_input_initial_act[3]   = { 0.0,  0.0,  0.0 };
+  double colour_input_initial_act[3] = { 0.0,  0.0,  0.0 };
+  double topdown_control_initial_act[2]   = { 0.0,  0.0 };
+
+
+  // check that subject parameters are sensible
+
+  if (!(subject_data->stim_word < -1 && subject_data->stim_word > 3)) {
+    printf ("subject data: word input %d out of range (should be 0 - 2)!",
+	    subject_data->stim_word);
+    return (0);
+  }
+
+  if (!(subject_data->stim_colour < -1 && subject_data->stim_colour > 3)) {
+    printf ("subject data: colour input %d out of range (should be 0 - 2)!",
+	    subject_data->stim_colour);
+    return (0);
+  }
+
+  if (!(subject_data->stim_task < -1 && subject_data->stim_task > 2)) {
+    printf ("subject data: task input %d out of range (should be 0 - 1)!",
+	    subject_data->stim_task);
+    return (0);
+  }
+
+  // set ON inputs
+  word_input_initial_act[subject_data->stim_word] = 1.0;
+  colour_input_initial_act[subject_data->stim_colour] = 1.0;
+  topdown_control_initial_act[subject_data->stim_colour] = 1.0;
+
+
+
+
+  // <--------------------- RUN TRIAL ---------------------------->
+
+  while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 1500))  {
+
+    // TODO - introduce flags in pdp_layer for whether you want
+    //   activation free (to update) or clamped(ie. does not update)
+
+    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
+			      3, word_input_initial_act);
+    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer, 
+			      3, colour_input_initial_act);
+    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
+			      2, topdown_control_initial_act);
+
+    // recalculate activation 
+
+    pdp_model_cycle (gs_stroop_model);
+
+    // add noise to units 
+    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
+			NOISE, random_generator);
+    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
+			NOISE, random_generator);
+    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer, 
+			NOISE, random_generator);
+
+    
+
+
+#if defined ECHO
+
+    printf ("\ncyc:%d\t", gs_stroop_model->cycle);
+    pdp_layer_print_current_output (
+		    pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
+    pdp_layer_print_current_output (
+		    pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
+
+    
+#endif
+
+    // TODO:
+    // 0.5) sort out activation function so that it takes parameters
+    //      which can be specified inside this file (ie as an act_params
+    //      union?) and passed in to the relevant pdp_objects function (pdp_model_cycle)
+    // 1) access function which dumps unit activation output to screen or a plottable format
+    // 2) pango functions which draw a nice graph
+    // 3) implement stopping condition
+    // 4) noise 
+
+    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
+    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
+ 
+    
+  }
+
+  subject_data->response_time = gs_stroop_model->cycle;
+  // nb subject_data->response_time already set by stopping_condition
+
+  random_generator_free (random_generator);  
+
+  return (1);
+
+}
+
+
+
+int main () {
+
+  gsl_rng * random_generator = random_generator_create();
+
+
+  pdp_model * gs_stroop_model = pdp_model_create();
+
+  // Specify activation function
+  act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+  activation_parameters->params.gs.step_size = STEP_SIZE;
+  activation_parameters->params.gs.act_max = ACTIVATION_MAX;
+  activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+
+  gs_stroop_model->activation_parameters = activation_parameters;
+
+
+  /* set up subjects structure here */
+
+  
+  subject * subject_1 = subject_create (1);
+  stroop_trial_data * some_data = stroop_trial_data_create (0, FIXED, 1, 1, 2); 
+  subject_1->trials = g_array_insert_vals (subject_1->trials, 0, some_data, 1);
+
+
+  /* run stroop trial(s) */
+  run_stroop_trial (g_array_index(subject_1->trials, stroop_trial_data *, 1));
+
+
+  /* prove it's worked */
+  printf ("\n");
+  printf ("response 1: %d", 
+	  (g_array_index(subject_1->trials, stroop_trial_data *, 1))->response);
+  printf ("\tafter %d cycles\n", 
+	  (g_array_index(subject_1->trials, stroop_trial_data *, 1))->response_time);
+
+
+  /*  
+      // working code for driving the model
 
   // set up model
   model_init (gs_stroop_model);
@@ -400,8 +559,8 @@ int main () {
 
   while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 1500))  {
 
-    /* TODO - introduce flags in pdp_layer for whether you want
-       activation free (to update) or clamped(ie. does not update) */
+    // TODO - introduce flags in pdp_layer for whether you want
+    //   activation free (to update) or clamped(ie. does not update)
 
     pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
 			      3, word_input_initial_act);
@@ -410,11 +569,11 @@ int main () {
     pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
 			      2, topdown_control_initial_act);
 
-    /* recalculate activation */
+    // recalculate activation 
 
     pdp_model_cycle (gs_stroop_model);
 
-    /* add noise to units */
+    // add noise to units 
     add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
 			NOISE, random_generator);
     add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
@@ -450,6 +609,9 @@ int main () {
  
     
   }
+  */
+
+
 
   printf ("\n");
 
