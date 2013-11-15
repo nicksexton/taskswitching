@@ -1,16 +1,25 @@
 CC=gcc
-CFLAGS=-Wall -W -g -pg -I/usr/include -L/usr/include
+CFLAGS= `pkg-config --cflags glib-2.0` -Wall -Werror -g
+LIBS = `pkg-config --libs glib-2.0` 
+
+OBJECTS = gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o simulated_subjects.o
 
 all:  gs_stroop
 
 # gs_stroop: gs_stroop.o pdp_objects.o activation_functions.o
-gs_stroop: gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o
-	$(CC) $(CFLAGS) -lgsl -lgslcblas -lm gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o -o gs_stroop 
+gs_stroop: $(OBJECTS) 
+	$(CC) -o $@ $(CFLAGS) -lgsl -lgslcblas -lm $(OBJECTS) $(LIBS) 
 
 pdp_objects: pdp_objects.o 
-pdp_objects.o: pdp_objects.c activation_funcs.o
-activation_funcs.o: activation_funcs.c
-random_generator_functions.o: random_generator_functions.c
-	$(CC) $(CFLAGS) -lgsl -lgslcblas -lm -c random_generator_functions.c 
 
-clean: rm -f gs_stroop gs_stroop.o pdp_objects.o activation_funcs.o
+pdp_objects.o: pdp_objects.c activation_funcs.o
+# activation_funcs.o: activation_funcs.c
+
+random_generator_functions.o: 
+	$(CC) -o $@ $(CFLAGS) -lgsl -lgslcblas -lm 
+
+simulated_subjects.o:
+	$(CC) -c simulated_subjects.c $(CFLAGS) $(LIBS)
+
+clean: 
+	rm -f gs_stroop *.o 
