@@ -3,7 +3,6 @@
 
 #include <glib.h>
 
-typedef enum {NONE, FIXED, MIXED} blocktype;
 
 
 

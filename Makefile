@@ -11,7 +11,7 @@ gs_stroop: $(OBJECTS)
 	$(CC) -o $@ $(CFLAGS) $(OBJECTS) -lgsl -lgslcblas -lm $(LIBS) 
 
 gs_stroop_subjects.o: simulated_subjects.o 
-	$(CC) -c gs_stroop_subjects.c $(CFLAGS) $(LIBS)
+	$(CC) -c gs_stroop_subjects.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 pdp_objects: pdp_objects.o 
 

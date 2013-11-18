@@ -40,8 +40,16 @@
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
 
+#define NUM_TRIALS 100
+#define PPN_CONGRUENT 50
+#define PPN_INCONGRUENT 50
+#define PPN_NEUTRAL 0
+#define PPN_WORDREADING 50
+#define PPN_COLOURNAMING 50
 
-#define ECHO // echo console output
+
+
+// #define ECHO // echo console output
 
 
 
@@ -384,6 +392,9 @@ int model_init (pdp_model * gs_stroop_model) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
 
+  // zero cycle counter
+  gs_stroop_model->cycle = 0;
+
   word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
   colour_input = pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer;
   word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
@@ -453,6 +464,8 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
 
   // check that subject parameters are sensible
+
+  // TODO: HANDLE NEUTRAL TRIALS
 
   if (subject_data->stim_word < -1 || subject_data->stim_word > 3) {
     printf ("subject data: word input %d out of range (should be 0 - 2)!",
@@ -564,30 +577,45 @@ int main () {
   /* set up subjects structure here */
   
   subject * subject_1 = subject_create (1);
-  stroop_trial_data some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
 
   // write trials data to the array
-  g_array_append_val (subject_1->trials, some_data);
+  // stroop_trial_data some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
+  // g_array_append_val (subject_1->trials, some_data);
+
+  subject_init_trialblock_fixed (random_generator, subject_1, 
+				 NUM_TRIALS, 
+				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
+				 PPN_WORDREADING, PPN_COLOURNAMING);
+				 
 
 
-  // associate the data for THIS TRIAL with the model
-  pdp_model_set_data (gs_stroop_model, 
-		      &(g_array_index(subject_1->trials, stroop_trial_data, 0))); 
+  int trial;
+  for (trial = 0; trial < NUM_TRIALS; trial++) {
+    
+    model_init (gs_stroop_model); // zero activations
 
-  /* run stroop trial(s) */
-  run_stroop_trial (gs_stroop_model, random_generator);
+    // associate the data for THIS TRIAL with the model
+    pdp_model_set_data (gs_stroop_model, 
+			&(g_array_index(subject_1->trials, stroop_trial_data, trial))); 
+
+    /* run stroop trial(s) */
+    run_stroop_trial (gs_stroop_model, random_generator);
 
 
   /* prove it's worked */
-  printf ("\n");
-  printf ("response 1: %d", 
-	  (g_array_index(subject_1->trials, stroop_trial_data, 0)).response);
-  printf ("\tafter %d cycles\n", 
-	  (g_array_index(subject_1->trials, stroop_trial_data, 0)).response_time);
+    // TODO - save and analyse data
+    printf ("\n");
+    printf ("response %d: %d", 
+	    (g_array_index(subject_1->trials, stroop_trial_data, trial)).trial_id,
+	    (g_array_index(subject_1->trials, stroop_trial_data, trial)).response);
+    printf ("\tafter %d cycles\n", 
+	    (g_array_index(subject_1->trials, stroop_trial_data, trial)).response_time);
+    
+
+    printf ("\n");
 
 
-  printf ("\n");
-
+  }
 
 
 
