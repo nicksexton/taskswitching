@@ -19,7 +19,6 @@ int model_init (pdp_model * gs_stroop_model);
 
 
 int run_stroop_trial (pdp_model * gs_stroop_model, 
-		      stroop_trial_data * subject_data, 
 		      gsl_rng * random_generator);
 
 #endif

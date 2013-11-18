@@ -347,9 +347,9 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   pdp_input_connect (taskdemand, taskdemand, wts_taskdemand_taskdemand);
 
 
-  /************************************** */
-  /* Top down control -> taskdemand units */
-  /************************************** */
+  /*+--------------------------------------+*/
+  /*| Top down control -> taskdemand units |*/
+  /*+--------------------------------------+*/
 
   pdp_weights_matrix *wts_topdown_taskdemand;
   double wts_topdown_taskdemand_matrix[2][2] = {
@@ -418,11 +418,16 @@ int model_init (pdp_model * gs_stroop_model) {
 /* Takes a pointer to a stroop_trial_data that has been init'd   */
 /* with trial parameters. Fills in the response data and returns */
 /*****************************************************************/
-int run_stroop_trial (pdp_model * gs_stroop_model, 
-		      stroop_trial_data * subject_data, 
+int run_stroop_trial (pdp_model * gs_stroop_model,  
 		      gsl_rng * random_generator) {
 
-  
+  if (gs_stroop_model->model_data == NULL) {
+    printf ("run stroop trial error! model_data pointer is null\n");
+    return 0;
+  }
+
+  stroop_trial_data * subject_data = gs_stroop_model->model_data;
+
   // gsl_rng * random_generator = random_generator_create(); // clean up this function
   // pdp_model * gs_stroop_model = pdp_model_create();
 
@@ -570,9 +575,7 @@ int main () {
 		      &(g_array_index(subject_1->trials, stroop_trial_data, 0))); 
 
   /* run stroop trial(s) */
-  run_stroop_trial (gs_stroop_model,
-		    &(g_array_index(subject_1->trials, stroop_trial_data, 0)), 
-		    random_generator);
+  run_stroop_trial (gs_stroop_model, random_generator);
 
 
   /* prove it's worked */
