@@ -387,9 +387,8 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
 
   
   gsl_rng * random_generator = random_generator_create(); // clean up this function
-
-
   pdp_model * gs_stroop_model = pdp_model_create();
+
 
   // Specify activation function
   act_func_params * activation_parameters = malloc (sizeof(act_func_params));
@@ -500,8 +499,10 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
   subject_data->response_time = gs_stroop_model->cycle;
   // nb subject_data->response_time already set by stopping_condition
 
+  free (gs_stroop_model->activation_parameters);
+  pdp_model_free (gs_stroop_model);
   random_generator_free (random_generator);  
-
+  
   return (1);
 
 }
@@ -513,112 +514,45 @@ int main () {
   gsl_rng * random_generator = random_generator_create();
 
 
-  pdp_model * gs_stroop_model = pdp_model_create();
+  // pdp_model * gs_stroop_model = pdp_model_create();
 
   // Specify activation function
-  act_func_params * activation_parameters = malloc (sizeof(act_func_params));
-  activation_parameters->params.gs.step_size = STEP_SIZE;
-  activation_parameters->params.gs.act_max = ACTIVATION_MAX;
-  activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+  // act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+  // activation_parameters->params.gs.step_size = STEP_SIZE;
+  // activation_parameters->params.gs.act_max = ACTIVATION_MAX;
+  // activation_parameters->params.gs.act_min = ACTIVATION_MIN;
 
-  gs_stroop_model->activation_parameters = activation_parameters;
+  // gs_stroop_model->activation_parameters = activation_parameters;
 
 
   /* set up subjects structure here */
 
   
   subject * subject_1 = subject_create (1);
-  stroop_trial_data * some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
+  // stroop_trial_data * some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
+  stroop_trial_data some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
 
   // write trials data to the array
-  g_array_index (subject_1->trials, stroop_trial_data *, 0) = some_data;
+  g_array_append_val (subject_1->trials, some_data);
 
 
   /* run stroop trial(s) */
-  run_stroop_trial (g_array_index(subject_1->trials, stroop_trial_data *, 0));
+  run_stroop_trial (&(g_array_index(subject_1->trials, stroop_trial_data, 0)));
 
 
   /* prove it's worked */
   printf ("\n");
   printf ("response 1: %d", 
-	  (g_array_index(subject_1->trials, stroop_trial_data *, 0))->response);
+	  (g_array_index(subject_1->trials, stroop_trial_data, 0)).response);
   printf ("\tafter %d cycles\n", 
-	  (g_array_index(subject_1->trials, stroop_trial_data *, 0))->response_time);
-
-
-  /*  
-      // working code for driving the model
-
-  // set up model
-  model_init (gs_stroop_model);
-
-  // test trial
-  double word_input_initial_act[3]   = { 1.0,  0.0,  0.0 };
-  double colour_input_initial_act[3] = { 0.0,  1.0,  0.0 };
-  double topdown_control_initial_act[2]   = { 0.0,  1.0 };
-
-
-
-  while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 1500))  {
-
-    // TODO - introduce flags in pdp_layer for whether you want
-    //   activation free (to update) or clamped(ie. does not update)
-
-    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
-			      3, word_input_initial_act);
-    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer, 
-			      3, colour_input_initial_act);
-    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
-			      2, topdown_control_initial_act);
-
-    // recalculate activation 
-
-    pdp_model_cycle (gs_stroop_model);
-
-    // add noise to units 
-    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
-			NOISE, random_generator);
-    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
-			NOISE, random_generator);
-    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer, 
-			NOISE, random_generator);
-
-      
-
-
-#if defined ECHO
-
-    printf ("\ncyc:%d\t", gs_stroop_model->cycle);
-    pdp_layer_print_current_output (
-		    pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
-    pdp_layer_print_current_output (
-		    pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
-
-    
-#endif
-
-    // TODO:
-    // 0.5) sort out activation function so that it takes parameters
-    //      which can be specified inside this file (ie as an act_params
-    //      union?) and passed in to the relevant pdp_objects function (pdp_model_cycle)
-    // 1) access function which dumps unit activation output to screen or a plottable format
-    // 2) pango functions which draw a nice graph
-    // 3) implement stopping condition
-    // 4) noise 
-
-    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
-    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
- 
-    
-  }
-  */
-
+	  (g_array_index(subject_1->trials, stroop_trial_data, 0)).response_time);
 
 
   printf ("\n");
 
-  free (gs_stroop_model->activation_parameters);
-  pdp_model_free (gs_stroop_model);
+  subject_free (subject_1);
+  // free (gs_stroop_model->activation_parameters);
+  // pdp_model_free (gs_stroop_model);
   random_generator_free (random_generator);  
   
   return 0;

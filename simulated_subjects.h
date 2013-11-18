@@ -43,8 +43,9 @@ typedef struct subject_popn {
 } subject_popn;
 
 
-stroop_trial_data * stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
+stroop_trial_data stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
 					      int stim_word, int stim_colour);
+void stroop_trial_data_free (stroop_trial_data * data_to_free);
 subject * subject_create (int num_of_trials);
 void subject_free (subject * subject_to_free);
 subject_popn * subject_popn_create (int number_of_subjects);
