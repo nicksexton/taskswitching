@@ -441,7 +441,7 @@ void pdp_model_free (pdp_model * some_model) {
 }
 
 void pdp_model_set_data (pdp_model * some_model, void * some_data) {
-
+  // deprecated???
   some_model->model_data = some_data;
   return;
 }

@@ -30,6 +30,8 @@
 #define TOPDOWN_CONTROL_STRENGTH_WORD 6.0
 #define TOPDOWN_CONTROL_STRENGTH_COLOUR 15.0
 #define LEARNING_RATE 1.0
+#define MAX_CYCLES 1500 // how long to let model run - NB check G&S defaults
+
 
 #define ID_WORDIN 1
 #define ID_COLOURIN 2
@@ -177,12 +179,11 @@ bool stopping_condition (pdp_model * gs_stroop) {
   }
 }
 
-  
 
+// fully creates the Gilbert & Shallice model, weights, connections etc.
+// sets initial activations to 0 (init's model)
 
-
-
-int model_init (pdp_model * gs_stroop_model) {
+int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
 
@@ -377,33 +378,67 @@ int model_init (pdp_model * gs_stroop_model) {
   return 0;
 }
 
+// Zeros activation levels of all nodes
+// DOES NOT RESET WEIGHTS!!
+int model_init (pdp_model * gs_stroop_model) {
+
+  pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
+
+  word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
+  colour_input = pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer;
+  word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
+  colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
+  taskdemand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
+  topdown_control = pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer;
+
+
+  double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
+  double initial_activation_colourin[3] = {0.0, 0.0, 0.0};
+  double initial_activation_wordout[3] = {0.0, 0.0, 0.0};
+  double initial_activation_colourout[3] = {0.0, 0.0, 0.0};
+  double initial_activation_taskdemand[2] = {0.0, 0.0};
+  double initial_activation_topdown_control[2] = {0.0, 0.0};
+  
+
+  /* set initial activation */
+  pdp_layer_set_activation(word_input, 3, initial_activation_wordin);
+  pdp_layer_set_activation(word_output, 3, initial_activation_wordout);
+  pdp_layer_set_activation(colour_input, 3, initial_activation_colourin);
+  pdp_layer_set_activation(colour_output, 3, initial_activation_colourout);
+  pdp_layer_set_activation(taskdemand, 2, initial_activation_taskdemand);
+  pdp_layer_set_activation(topdown_control, 2, initial_activation_topdown_control);
+
+  return 0;
+
+}
+
 
 
 /*****************************************************************/
 /* Takes a pointer to a stroop_trial_data that has been init'd   */
 /* with trial parameters. Fills in the response data and returns */
 /*****************************************************************/
-int run_stroop_trial (stroop_trial_data * subject_data) {
+int run_stroop_trial (pdp_model * gs_stroop_model, 
+		      stroop_trial_data * subject_data, 
+		      gsl_rng * random_generator) {
 
   
-  gsl_rng * random_generator = random_generator_create(); // clean up this function
-  pdp_model * gs_stroop_model = pdp_model_create();
+  // gsl_rng * random_generator = random_generator_create(); // clean up this function
+  // pdp_model * gs_stroop_model = pdp_model_create();
 
 
   // Specify activation function
-  act_func_params * activation_parameters = malloc (sizeof(act_func_params));
-  activation_parameters->params.gs.step_size = STEP_SIZE;
-  activation_parameters->params.gs.act_max = ACTIVATION_MAX;
-  activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+  // act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+  // activation_parameters->params.gs.step_size = STEP_SIZE;
+  // activation_parameters->params.gs.act_max = ACTIVATION_MAX;
+  // activation_parameters->params.gs.act_min = ACTIVATION_MIN;
 
-  gs_stroop_model->activation_parameters = activation_parameters;
-
-
+  //   gs_stroop_model->activation_parameters = activation_parameters;
 
   // set up model
-  model_init (gs_stroop_model);
+  //  model_init (gs_stroop_model);
 
-  pdp_model_set_data (gs_stroop_model, subject_data); 
+  // pdp_model_set_data (gs_stroop_model, subject_data); 
 
 // init inputs
 
@@ -442,15 +477,16 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
 			    3, word_input_initial_act);
   pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer, 
 			    3, colour_input_initial_act);
-  pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
-			    2, topdown_control_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (
+                                 gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
+	   		    2, topdown_control_initial_act);
 
 
 
   // <--------------------- RUN TRIAL ---------------------------->
 
-  while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 1500))  {
-
+  while ((stopping_condition(gs_stroop_model) != true && 
+	  gs_stroop_model->cycle < MAX_CYCLES))  {
 
 
     // recalculate activation 
@@ -486,9 +522,9 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
   subject_data->response_time = gs_stroop_model->cycle;
   // nb subject_data->response_time already set by stopping_condition
 
-  free (gs_stroop_model->activation_parameters);
-  pdp_model_free (gs_stroop_model);
-  random_generator_free (random_generator);  
+  //  free (gs_stroop_model->activation_parameters);
+  // pdp_model_free (gs_stroop_model);
+  // random_generator_free (random_generator);  
   
   return (1);
 
@@ -505,18 +541,20 @@ int main () {
   // TODO - can optimise model creation & initialisation - ie. use single model rather than 
   // re-initialising for each trial
   // <-------------------- MODEL INIT ---------------------->
-  // pdp_model * gs_stroop_model = pdp_model_create();
+  pdp_model * gs_stroop_model = pdp_model_create();
 
   // Specify activation function
-  // act_func_params * activation_parameters = malloc (sizeof(act_func_params));
-  // activation_parameters->params.gs.step_size = STEP_SIZE;
-  // activation_parameters->params.gs.act_max = ACTIVATION_MAX;
-  // activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+  act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+  activation_parameters->params.gs.step_size = STEP_SIZE;
+  activation_parameters->params.gs.act_max = ACTIVATION_MAX;
+  activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+  gs_stroop_model->activation_parameters = activation_parameters;
 
-  // gs_stroop_model->activation_parameters = activation_parameters;
+
+  // create the network & set weights
+  gs_stroop_model_build (gs_stroop_model); // also inits the model for 1st sim
+
   // <-------------------- MODEL INIT -------------------->
-
-
 
   /* set up subjects structure here */
   
@@ -527,8 +565,14 @@ int main () {
   g_array_append_val (subject_1->trials, some_data);
 
 
+  // associate the data for THIS TRIAL with the model
+  pdp_model_set_data (gs_stroop_model, 
+		      &(g_array_index(subject_1->trials, stroop_trial_data, 0))); 
+
   /* run stroop trial(s) */
-  run_stroop_trial (&(g_array_index(subject_1->trials, stroop_trial_data, 0)));
+  run_stroop_trial (gs_stroop_model,
+		    &(g_array_index(subject_1->trials, stroop_trial_data, 0)), 
+		    random_generator);
 
 
   /* prove it's worked */
@@ -541,9 +585,12 @@ int main () {
 
   printf ("\n");
 
+
+
+
   subject_free (subject_1);
-  // free (gs_stroop_model->activation_parameters);
-  // pdp_model_free (gs_stroop_model);
+  free (gs_stroop_model->activation_parameters);
+  pdp_model_free (gs_stroop_model);
   random_generator_free (random_generator);  
   
   return 0;
