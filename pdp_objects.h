@@ -89,6 +89,8 @@ typedef struct pdp_input {
 typedef struct pdp_model_component {
 
   int id;
+  bool update_activation; // should model_cycle should recalc activation for this component. 
+  // For most PDP layers this will be TRUE unless eg. activation values clamped
   pdp_layer * layer;
   pdp_model_component * next;
 } pdp_model_component;
@@ -185,7 +187,10 @@ void pdp_model_set_data (pdp_model * some_model, void * some_data);
 
 pdp_model_component * pdp_model_component_create ();
 void pdp_model_component_free (pdp_model_component * some_component);
-void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_component, int id);
+void pdp_model_component_push (pdp_model * some_model, 
+			       pdp_layer * layer_add_as_component, 
+			       int id,
+			       bool update_activation);
 pdp_model_component * pdp_model_component_find(pdp_model * some_model, int id);
 
 void pdp_model_cycle (pdp_model * some_model); 

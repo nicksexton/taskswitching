@@ -11,6 +11,7 @@
 #include "pdp_objects.h"
 #include "random_generator_functions.h" // for gaussian noise
 #include "simulated_subjects.h" // objects for representing subject params and data
+#include "gs_stroop_subjects.h" // specialises simulated_subjects to stroop data/stimuli/paramsi
 
 #include "gs_stroop.h"
 
@@ -366,13 +367,12 @@ int model_init (pdp_model * gs_stroop_model) {
 
   /* Now init model object and push components */
 
-
-  pdp_model_component_push(gs_stroop_model, word_input, ID_WORDIN); 
-  pdp_model_component_push(gs_stroop_model, colour_input, ID_COLOURIN);
-  pdp_model_component_push(gs_stroop_model, word_output, ID_WORDOUT);
-  pdp_model_component_push(gs_stroop_model, colour_output, ID_COLOUROUT);
-  pdp_model_component_push(gs_stroop_model, taskdemand, ID_TASKDEMAND);
-  pdp_model_component_push(gs_stroop_model, topdown_control, ID_TOPDOWNCONTROL);
+  pdp_model_component_push(gs_stroop_model, word_input, ID_WORDIN, FALSE); 
+  pdp_model_component_push(gs_stroop_model, colour_input, ID_COLOURIN, FALSE);
+  pdp_model_component_push(gs_stroop_model, word_output, ID_WORDOUT, TRUE);
+  pdp_model_component_push(gs_stroop_model, colour_output, ID_COLOUROUT, TRUE);
+  pdp_model_component_push(gs_stroop_model, taskdemand, ID_TASKDEMAND, TRUE);
+  pdp_model_component_push(gs_stroop_model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
 
   return 0;
 }
@@ -397,7 +397,6 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
   activation_parameters->params.gs.act_min = ACTIVATION_MIN;
 
   gs_stroop_model->activation_parameters = activation_parameters;
-
 
 
 
@@ -433,11 +432,18 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
     return (0);
   }
 
+
   // set ON inputs
   word_input_initial_act[subject_data->stim_word] = 1.0;
   colour_input_initial_act[subject_data->stim_colour] = 1.0;
   topdown_control_initial_act[subject_data->stim_task] = 1.0;
 
+  pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
+			    3, word_input_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer, 
+			    3, colour_input_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
+			    2, topdown_control_initial_act);
 
 
 
@@ -445,15 +451,7 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
 
   while ((stopping_condition(gs_stroop_model) != true && gs_stroop_model->cycle < 1500))  {
 
-    // TODO - introduce flags in pdp_layer for whether you want
-    //   activation free (to update) or clamped(ie. does not update)
 
-    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
-			      3, word_input_initial_act);
-    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer, 
-			      3, colour_input_initial_act);
-    pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer, 
-			      2, topdown_control_initial_act);
 
     // recalculate activation 
 
@@ -481,17 +479,6 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
     
 #endif
 
-    // TODO:
-    // 0.5) sort out activation function so that it takes parameters
-    //      which can be specified inside this file (ie as an act_params
-    //      union?) and passed in to the relevant pdp_objects function (pdp_model_cycle)
-    // 1) access function which dumps unit activation output to screen or a plottable format
-    // 2) pango functions which draw a nice graph
-    // 3) implement stopping condition
-    // 4) noise 
-
-    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
-    // pdp_layer_print_current_output (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
  
     
   }
@@ -514,6 +501,10 @@ int main () {
   gsl_rng * random_generator = random_generator_create();
 
 
+
+  // TODO - can optimise model creation & initialisation - ie. use single model rather than 
+  // re-initialising for each trial
+  // <-------------------- MODEL INIT ---------------------->
   // pdp_model * gs_stroop_model = pdp_model_create();
 
   // Specify activation function
@@ -523,13 +514,13 @@ int main () {
   // activation_parameters->params.gs.act_min = ACTIVATION_MIN;
 
   // gs_stroop_model->activation_parameters = activation_parameters;
+  // <-------------------- MODEL INIT -------------------->
+
 
 
   /* set up subjects structure here */
-
   
   subject * subject_1 = subject_create (1);
-  // stroop_trial_data * some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
   stroop_trial_data some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
 
   // write trials data to the array

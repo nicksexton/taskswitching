@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "activation_funcs.h"
 #include "pdp_objects.h"
@@ -80,8 +81,8 @@ void pdp_layer_free (pdp_layer * some_layer) {
     if (some_layer == NULL) {
       // printf ("end of list reached, all done!\n");
         return;
-    }
-    else {
+    } 
+   else {
 
       /* first free the upstream input list */
       if (some_layer->upstream_layers != NULL) {
@@ -472,7 +473,10 @@ void pdp_model_component_free (pdp_model_component * some_component) {
 }
 
 
-void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_component, int id) {
+void pdp_model_component_push (pdp_model * some_model, 
+			       pdp_layer * layer_add_as_component, 
+			       int id, 
+			       bool update_activation) {
   /* check id does not already exist in model */
   if (pdp_model_component_find(some_model, id) != NULL) {
     // printf ("\nError! adding component id: %d to model, id already exists in model\n", id);
@@ -484,6 +488,7 @@ void pdp_model_component_push (pdp_model * some_model, pdp_layer * layer_add_as_
     new_component = pdp_model_component_create();
     new_component->layer = layer_add_as_component;
     new_component->id = id;
+    new_component->update_activation = update_activation;
     // printf ("adding component id %d: location %p\n", id, new_component);
     
     /* linkages */
@@ -520,8 +525,12 @@ void pdp_model_cycle (pdp_model * some_model) {
   /* now update activations */
   component_i = some_model->components;
   while (component_i != NULL) {
-    pdp_layer_cycle_activation (component_i->layer, 
-				some_model->activation_parameters);
+
+    if (component_i->update_activation == true) {
+      pdp_layer_cycle_activation (component_i->layer, 
+				  some_model->activation_parameters);
+    }
+
     component_i = component_i->next;
   }
 
