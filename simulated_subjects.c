@@ -14,17 +14,17 @@ stroop_trial_data * stroop_trial_data_create (int id, blocktype block_type, int 
   stroop_trial_data * a_data_container = malloc (sizeof (stroop_trial_data));
   a_data_container->trial_id = id;
   a_data_container->block_type = NONE;
+  a_data_container->stim_task = stim_task;
   a_data_container->stim_word = stim_word;
   a_data_container->stim_colour = stim_colour;
-  a_data_container->stim_task = stim_task;
 
   a_data_container->response = 0;
   a_data_container->response_time = 0;
 
   // stim_task is word naming if =0, colour otherwise 
   (stim_task == 0) ? 
-    a_data_container->stim_correct_response = stim_word : 
-    a_data_container->stim_correct_response = stim_colour;
+    (a_data_container->stim_correct_response = stim_word) : 
+    (a_data_container->stim_correct_response = stim_colour);
 
   return a_data_container;
 } 

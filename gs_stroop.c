@@ -149,9 +149,9 @@ bool stopping_condition (pdp_model * gs_stroop) {
     case 3: { 
       // contingency where [0] and [1] correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[2]->activation) {
-	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	// RECORD RESPONSE
-	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[1]->this_node;
+	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
+	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	return true; // [0] and [1] correspond, but ([0] - 15) > [2]
       }
       else {
@@ -163,9 +163,9 @@ bool stopping_condition (pdp_model * gs_stroop) {
     default: { 
      // contingency where [0] and [2] do not correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[1]->activation) {
-	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	// RECORD RESPONSE
-	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[1]->this_node;
+	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
+	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	return true;
       }
       else {
@@ -405,7 +405,7 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
   // set up model
   model_init (gs_stroop_model);
 
-  pdp_model_set_data (gs_stroop_model, subject_data); // maybe need to cast to void *?
+  pdp_model_set_data (gs_stroop_model, subject_data); 
 
 // init inputs
 
@@ -416,19 +416,19 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
 
   // check that subject parameters are sensible
 
-  if (!(subject_data->stim_word < -1 && subject_data->stim_word > 3)) {
+  if (subject_data->stim_word < -1 || subject_data->stim_word > 3) {
     printf ("subject data: word input %d out of range (should be 0 - 2)!",
 	    subject_data->stim_word);
     return (0);
   }
 
-  if (!(subject_data->stim_colour < -1 && subject_data->stim_colour > 3)) {
+  if (subject_data->stim_colour < -1 || subject_data->stim_colour > 3) {
     printf ("subject data: colour input %d out of range (should be 0 - 2)!",
 	    subject_data->stim_colour);
     return (0);
   }
 
-  if (!(subject_data->stim_task < -1 && subject_data->stim_task > 2)) {
+  if (subject_data->stim_task < -1 || subject_data->stim_task > 2) {
     printf ("subject data: task input %d out of range (should be 0 - 1)!",
 	    subject_data->stim_task);
     return (0);
@@ -437,7 +437,7 @@ int run_stroop_trial (stroop_trial_data * subject_data) {
   // set ON inputs
   word_input_initial_act[subject_data->stim_word] = 1.0;
   colour_input_initial_act[subject_data->stim_colour] = 1.0;
-  topdown_control_initial_act[subject_data->stim_colour] = 1.0;
+  topdown_control_initial_act[subject_data->stim_task] = 1.0;
 
 
 
@@ -528,20 +528,22 @@ int main () {
 
   
   subject * subject_1 = subject_create (1);
-  stroop_trial_data * some_data = stroop_trial_data_create (0, FIXED, 1, 1, 2); 
-  subject_1->trials = g_array_insert_vals (subject_1->trials, 0, some_data, 1);
+  stroop_trial_data * some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
+
+  // write trials data to the array
+  g_array_index (subject_1->trials, stroop_trial_data *, 0) = some_data;
 
 
   /* run stroop trial(s) */
-  run_stroop_trial (g_array_index(subject_1->trials, stroop_trial_data *, 1));
+  run_stroop_trial (g_array_index(subject_1->trials, stroop_trial_data *, 0));
 
 
   /* prove it's worked */
   printf ("\n");
   printf ("response 1: %d", 
-	  (g_array_index(subject_1->trials, stroop_trial_data *, 1))->response);
+	  (g_array_index(subject_1->trials, stroop_trial_data *, 0))->response);
   printf ("\tafter %d cycles\n", 
-	  (g_array_index(subject_1->trials, stroop_trial_data *, 1))->response_time);
+	  (g_array_index(subject_1->trials, stroop_trial_data *, 0))->response_time);
 
 
   /*  
