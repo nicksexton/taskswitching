@@ -540,7 +540,6 @@ int main () {
   gsl_rng * random_generator = random_generator_create();
 
 
-
   // TODO - can optimise model creation & initialisation - ie. use single model rather than 
   // re-initialising for each trial
   // <-------------------- MODEL INIT ---------------------->
@@ -585,7 +584,7 @@ int main () {
 
     /* run stroop trial(s) */
     run_stroop_trial (gs_stroop_model, 
-		      &(g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)), 
+		      subject_1->fixed_trials[trial], 
 		      random_generator);
 
 
@@ -593,10 +592,10 @@ int main () {
     // TODO - save and analyse data
     printf ("\n");
     printf ("response %d: %d", 
-	    (g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)).trial_id,
-	    (g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)).response);
+	    subject_1->fixed_trials[trial]->trial_id,
+	    subject_1->fixed_trials[trial]->response);
     printf ("\tafter %d cycles\n", 
-	    (g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)).response_time);
+	    subject_1->fixed_trials[trial]->response_time);
     
 
     printf ("\n");

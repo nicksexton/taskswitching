@@ -39,7 +39,9 @@ typedef struct gs_stroop_params {
 
 typedef struct subject {
 
-  GArray * fixed_trials;
+  // GArray * fixed_trials;
+  stroop_trial_data ** fixed_trials;
+
   int num_fixed_trials;
   void * params; 
 
@@ -62,7 +64,7 @@ void subject_popn_free (subject_popn * some_subjects);
 
 
 
-stroop_trial_data stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
+stroop_trial_data * stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
 					      int stim_word, int stim_colour);
 
 
