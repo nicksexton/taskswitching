@@ -596,7 +596,7 @@ int main () {
 
     // associate the data for THIS TRIAL with the model
     pdp_model_set_data (gs_stroop_model, 
-			&(g_array_index(subject_1->trials, stroop_trial_data, trial))); 
+			&(g_array_index(subject_1->fixed_trials, stroop_trial_data, trial))); 
 
     /* run stroop trial(s) */
     run_stroop_trial (gs_stroop_model, random_generator);
@@ -606,10 +606,10 @@ int main () {
     // TODO - save and analyse data
     printf ("\n");
     printf ("response %d: %d", 
-	    (g_array_index(subject_1->trials, stroop_trial_data, trial)).trial_id,
-	    (g_array_index(subject_1->trials, stroop_trial_data, trial)).response);
+	    (g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)).trial_id,
+	    (g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)).response);
     printf ("\tafter %d cycles\n", 
-	    (g_array_index(subject_1->trials, stroop_trial_data, trial)).response_time);
+	    (g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)).response_time);
     
 
     printf ("\n");

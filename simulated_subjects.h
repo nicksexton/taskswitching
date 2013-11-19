@@ -8,8 +8,8 @@
 
 typedef struct subject {
 
-  GArray * trials;
-  int num_of_trials;
+  GArray * fixed_trials;
+  int num_fixed_trials;
   void * params; 
 
 } subject; 

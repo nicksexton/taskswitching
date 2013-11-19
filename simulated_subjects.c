@@ -15,7 +15,7 @@
 void subject_free (subject * subject_to_free) {
 
   free (subject_to_free->params);
-  g_array_free (subject_to_free->trials, TRUE); // 2nd arg frees the data as well
+  g_array_free (subject_to_free->fixed_trials, TRUE); // 2nd arg frees the data as well
   free (subject_to_free);
 
   return;
@@ -35,10 +35,9 @@ subject_popn * subject_popn_create (int number_of_subjects) {
 
 
 void subject_popn_free (subject_popn * some_subjects) {
+
   g_array_free (some_subjects->subjects, TRUE);
   free (some_subjects);
 
   return;
 }
-
-
