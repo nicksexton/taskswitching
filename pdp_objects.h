@@ -120,7 +120,9 @@ typedef struct pdp_model {
   /* stopping condition */
 
   /* subject data ie. inputs and outputs */
-  void * model_data;
+
+  // DEPRECATED
+  // void * model_data;
 
 } pdp_model;
 
@@ -183,7 +185,9 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
 
 pdp_model * pdp_model_create ();
 void pdp_model_free (pdp_model * some_model);
-void pdp_model_set_data (pdp_model * some_model, void * some_data);
+
+// DEPRECATED DO NOT USE
+// void pdp_model_set_data (pdp_model * some_model, void * some_data);
 
 pdp_model_component * pdp_model_component_create ();
 void pdp_model_component_free (pdp_model_component * some_component);

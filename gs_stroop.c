@@ -75,7 +75,7 @@ stroop_response * make_stroop_response (int node, double activation) {
 }
 
 
-bool stopping_condition (pdp_model * gs_stroop) {
+bool stopping_condition (pdp_model * gs_stroop, stroop_trial_data * this_trial) {
 
   /* evaluates whether model should stop on this cycle and returns
      true/false. CURRENT CRITERION: most active output node is > next
@@ -161,7 +161,10 @@ bool stopping_condition (pdp_model * gs_stroop) {
       // contingency where [0] and [1] correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[2]->activation) {
 	// RECORD RESPONSE
-	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
+	// ((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
+	this_trial->response = biggest_act[0]->this_node;
+	
+
 	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	return true; // [0] and [1] correspond, but ([0] - 15) > [2]
       }
@@ -175,7 +178,8 @@ bool stopping_condition (pdp_model * gs_stroop) {
      // contingency where [0] and [2] do not correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[1]->activation) {
 	// RECORD RESPONSE
-	((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
+	// ((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
+	this_trial->response = biggest_act[0]->this_node;
 	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	return true;
       }
@@ -430,31 +434,16 @@ int model_init (pdp_model * gs_stroop_model) {
 /* with trial parameters. Fills in the response data and returns */
 /*****************************************************************/
 int run_stroop_trial (pdp_model * gs_stroop_model,  
+		      stroop_trial_data * this_trial,
 		      gsl_rng * random_generator) {
 
-  if (gs_stroop_model->model_data == NULL) {
-    printf ("run stroop trial error! model_data pointer is null\n");
-    return 0;
-  }
-
-  stroop_trial_data * subject_data = gs_stroop_model->model_data;
-
-  // gsl_rng * random_generator = random_generator_create(); // clean up this function
-  // pdp_model * gs_stroop_model = pdp_model_create();
+  // if (gs_stroop_model->model_data == NULL) {
+  //   printf ("run stroop trial error! model_data pointer is null\n");
+  //   return 0;
+  // }
+  // stroop_trial_data * subject_data = gs_stroop_model->model_data;
 
 
-  // Specify activation function
-  // act_func_params * activation_parameters = malloc (sizeof(act_func_params));
-  // activation_parameters->params.gs.step_size = STEP_SIZE;
-  // activation_parameters->params.gs.act_max = ACTIVATION_MAX;
-  // activation_parameters->params.gs.act_min = ACTIVATION_MIN;
-
-  //   gs_stroop_model->activation_parameters = activation_parameters;
-
-  // set up model
-  //  model_init (gs_stroop_model);
-
-  // pdp_model_set_data (gs_stroop_model, subject_data); 
 
 // init inputs
 
@@ -467,29 +456,29 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // TODO: HANDLE NEUTRAL TRIALS
 
-  if (subject_data->stim_word < -1 || subject_data->stim_word > 3) {
+  if (this_trial->stim_word < -1 || this_trial->stim_word > 3) {
     printf ("subject data: word input %d out of range (should be 0 - 2)!",
-	    subject_data->stim_word);
+	    this_trial->stim_word);
     return (0);
   }
 
-  if (subject_data->stim_colour < -1 || subject_data->stim_colour > 3) {
+  if (this_trial->stim_colour < -1 || this_trial->stim_colour > 3) {
     printf ("subject data: colour input %d out of range (should be 0 - 2)!",
-	    subject_data->stim_colour);
+	    this_trial->stim_colour);
     return (0);
   }
 
-  if (subject_data->stim_task < -1 || subject_data->stim_task > 2) {
+  if (this_trial->stim_task < -1 || this_trial->stim_task > 2) {
     printf ("subject data: task input %d out of range (should be 0 - 1)!",
-	    subject_data->stim_task);
+	    this_trial->stim_task);
     return (0);
   }
 
 
   // set ON inputs
-  word_input_initial_act[subject_data->stim_word] = 1.0;
-  colour_input_initial_act[subject_data->stim_colour] = 1.0;
-  topdown_control_initial_act[subject_data->stim_task] = 1.0;
+  word_input_initial_act[this_trial->stim_word] = 1.0;
+  colour_input_initial_act[this_trial->stim_colour] = 1.0;
+  topdown_control_initial_act[this_trial->stim_task] = 1.0;
 
   pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
 			    3, word_input_initial_act);
@@ -503,7 +492,7 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // <--------------------- RUN TRIAL ---------------------------->
 
-  while ((stopping_condition(gs_stroop_model) != true && 
+  while ((stopping_condition(gs_stroop_model, this_trial) != true && 
 	  gs_stroop_model->cycle < MAX_CYCLES))  {
 
 
@@ -537,13 +526,9 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
     
   }
 
-  subject_data->response_time = gs_stroop_model->cycle;
+  this_trial->response_time = gs_stroop_model->cycle;
   // nb subject_data->response_time already set by stopping_condition
 
-  //  free (gs_stroop_model->activation_parameters);
-  // pdp_model_free (gs_stroop_model);
-  // random_generator_free (random_generator);  
-  
   return (1);
 
 }
@@ -595,11 +580,13 @@ int main () {
     model_init (gs_stroop_model); // zero activations
 
     // associate the data for THIS TRIAL with the model
-    pdp_model_set_data (gs_stroop_model, 
-			&(g_array_index(subject_1->fixed_trials, stroop_trial_data, trial))); 
+    // pdp_model_set_data (gs_stroop_model, 
+    //		&(g_array_index(subject_1->fixed_trials, stroop_trial_data, trial))); 
 
     /* run stroop trial(s) */
-    run_stroop_trial (gs_stroop_model, random_generator);
+    run_stroop_trial (gs_stroop_model, 
+		      &(g_array_index(subject_1->fixed_trials, stroop_trial_data, trial)), 
+		      random_generator);
 
 
   /* prove it's worked */

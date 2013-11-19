@@ -38,7 +38,8 @@ subject * subject_create (int num_fixed_trials) {
   subject * new_subject = malloc (sizeof(subject));
   new_subject->params = (gs_stroop_params*) malloc (sizeof(gs_stroop_params));
   new_subject->num_fixed_trials = num_fixed_trials;
-  new_subject->fixed_trials = g_array_sized_new (FALSE, FALSE, sizeof(stroop_trial_data), num_fixed_trials);
+  new_subject->fixed_trials = 
+    g_array_sized_new (FALSE, FALSE, sizeof(stroop_trial_data), num_fixed_trials);
   // g_array_set_clear_func (new_subject->trials, (gpointer) stroop_trial_data_free); // Might not work
 
   // TODO - code to create params object here 

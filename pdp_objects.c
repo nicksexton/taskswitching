@@ -424,7 +424,7 @@ pdp_model * pdp_model_create () {
   this_model->components = NULL;
   this_model->cycle = 0;
   return (this_model);
-  this_model->model_data = NULL;
+  // this_model->model_data = NULL;
   
 }
 
@@ -440,11 +440,12 @@ void pdp_model_free (pdp_model * some_model) {
   return;
 }
 
-void pdp_model_set_data (pdp_model * some_model, void * some_data) {
-  // deprecated???
-  some_model->model_data = some_data;
-  return;
-}
+
+// void pdp_model_set_data (pdp_model * some_model, void * some_data) {
+//   // deprecated???
+//   some_model->model_data = some_data;
+//   return;
+// }
 
 
 pdp_model_component * pdp_model_component_create () {
