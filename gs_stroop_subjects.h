@@ -1,6 +1,8 @@
 #ifndef gs_stroop_subjects_h
 #define gs_stroop_subjects_h
 
+#include <glib.h>
+
 typedef enum {NONE, FIXED, MIXED} blocktype;
 typedef enum {NEUTRAL, CONGRUENT, INCONGRUENT} trialtype;
 
@@ -27,13 +29,35 @@ typedef struct stroop_trial_data {
 } stroop_trial_data;
 
 
-
 typedef struct gs_stroop_params {
 
   double taskdemand_weights_inhibitory;
   double taskdemand_weights_excitatory;
 
 } gs_stroop_params;
+
+
+typedef struct subject {
+
+  GArray * fixed_trials;
+  int num_fixed_trials;
+  void * params; 
+
+} subject; 
+
+
+typedef struct subject_popn {
+
+  GArray * subjects;
+  int number_of_subjects;
+
+} subject_popn;
+
+
+
+void subject_free (subject * subject_to_free);
+subject_popn * subject_popn_create (int number_of_subjects);
+void subject_popn_free (subject_popn * some_subjects);
 
 
 

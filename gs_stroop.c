@@ -10,7 +10,7 @@
 #include <gsl/gsl_randist.h>
 #include "pdp_objects.h"
 #include "random_generator_functions.h" // for gaussian noise
-#include "simulated_subjects.h" // objects for representing subject params and data
+// #include "simulated_subjects.h" // objects for representing subject params and data
 #include "gs_stroop_subjects.h" // specialises simulated_subjects to stroop data/stimuli/paramsi
 
 #include "gs_stroop.h"
