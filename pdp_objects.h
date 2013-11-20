@@ -49,8 +49,9 @@ typedef struct pdp_units {
 /* A layer of units */
 typedef struct pdp_layer {
 
-    int size;
-
+    const int id;
+    const int size;
+    
     double * net_inputs; // accumulators for summing net input, initialised to zero
     double input_bias; // activation value for bias node (if any, default is 0)
     struct pdp_units units_initial; // INITIAL ACTIVATION STATE ie. cycle 0, head of list
@@ -79,6 +80,7 @@ typedef struct pdp_weights_matrix {
 
 typedef struct pdp_input {
 
+  const int id_of_input_layer;
   const pdp_layer * input_layer;
   pdp_weights_matrix * input_weights;
   pdp_input * next;
@@ -133,7 +135,7 @@ pdp_units * pdp_units_create (int size);
 
 void pdp_units_free (pdp_units * some_units);
 
-pdp_layer * pdp_layer_create(int size, double bias); 
+pdp_layer * pdp_layer_create(const int id, const int size, double bias); 
 
 void pdp_layer_free (pdp_layer * some_layer);
 

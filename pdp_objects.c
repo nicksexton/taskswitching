@@ -45,13 +45,16 @@ void pdp_units_free (pdp_units * some_units) {
 }
 
 
-pdp_layer * pdp_layer_create(int size, double bias) {
+pdp_layer * pdp_layer_create(const int id, const int size, double bias) {
+
+    pdp_layer init = { .id = id, .size = size };
 
     pdp_layer * new_layer;
-    int i;
+    int i;  
 
     new_layer = malloc (sizeof(pdp_layer));
-    new_layer->size = size;
+    memcpy (new_layer, &init, sizeof (*new_layer));
+  
     new_layer->input_bias = bias;
 
     /* array of accumulators, to sum net input  */
@@ -314,14 +317,13 @@ int pdp_input_connect (pdp_layer * downstream_layer, const pdp_layer * upstream_
   
   /* TODO - code to check size of matrix and layers corresponds */
 
-  pdp_input init = { .input_layer = upstream_layer };
+  pdp_input init = { .id_of_input_layer = upstream_layer->id, 
+		     .input_layer = upstream_layer };
 
   pdp_input * p_input_tmp = malloc (sizeof (pdp_input));
-  
   memcpy (p_input_tmp, &init, sizeof (*p_input_tmp));
 
   p_input_tmp->next = downstream_layer->upstream_layers;
-  // p_input_tmp->input_layer = upstream_layer;
   p_input_tmp->input_weights = upstream_weights;
 
   downstream_layer->upstream_layers = p_input_tmp;

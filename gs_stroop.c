@@ -200,12 +200,12 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
 
-  word_input = pdp_layer_create(3, BIAS_NONE);
-  word_output = pdp_layer_create(3, OUTPUTUNIT_BIAS);
-  colour_input = pdp_layer_create(3, BIAS_NONE);
-  colour_output = pdp_layer_create(3, OUTPUTUNIT_BIAS);
-  taskdemand = pdp_layer_create(2, TASKDEMAND_BIAS);
-  topdown_control = pdp_layer_create(2, BIAS_NONE);
+  word_input = pdp_layer_create(ID_WORDIN, 3, BIAS_NONE);
+  word_output = pdp_layer_create(ID_WORDOUT, 3, OUTPUTUNIT_BIAS);
+  colour_input = pdp_layer_create(ID_COLOURIN, 3, BIAS_NONE);
+  colour_output = pdp_layer_create(ID_COLOUROUT, 3, OUTPUTUNIT_BIAS);
+  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, TASKDEMAND_BIAS);
+  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, BIAS_NONE);
 
   
   double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
@@ -360,9 +360,9 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   pdp_input_connect (taskdemand, taskdemand, wts_taskdemand_taskdemand);
 
 
-  /*+--------------------------------------+*/
-  /*| Top down control -> taskdemand units |*/
-  /*+--------------------------------------+*/
+  /*  +--------------------------------------+  */
+  /*  | Top down control -> taskdemand units |  */
+  /*  +--------------------------------------+  */
 
   pdp_weights_matrix *wts_topdown_taskdemand;
   double wts_topdown_taskdemand_matrix[2][2] = {
@@ -376,7 +376,12 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 
 
 
-  /* TODO - remember feed forward (hebbian learning) connections from inputs to task demand */
+  /*  TODO - remember feed forward (hebbian learning) connections from inputs to task demand */
+  //  +----------------------------------------+//
+  //  | Associative learning FF weights        |
+  //  +----------------------------------------+
+
+
 
 
   /* Now init model object and push components */
