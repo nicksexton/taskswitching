@@ -12,6 +12,7 @@
 #include "random_generator_functions.h" // for gaussian noise
 // #include "simulated_subjects.h" // objects for representing subject params and data
 #include "gs_stroop_subjects.h" // specialises simulated_subjects to stroop data/stimuli/paramsi
+#include "gs_stroop_analyse.h"
 
 #include "gs_stroop.h"
 
@@ -547,6 +548,7 @@ int main () {
 
   // Specify activation function
   act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+  activation_parameters->type = ACT_GS;
   activation_parameters->params.gs.step_size = STEP_SIZE;
   activation_parameters->params.gs.act_max = ACTIVATION_MAX;
   activation_parameters->params.gs.act_min = ACTIVATION_MIN;
@@ -561,10 +563,6 @@ int main () {
   /* set up subjects structure here */
   
   subject * subject_1 = subject_create (NUM_TRIALS);
-
-  // write trials data to the array
-  // stroop_trial_data some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
-  // g_array_append_val (subject_1->trials, some_data);
 
   subject_init_trialblock_fixed (random_generator, subject_1, 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
@@ -593,14 +591,19 @@ int main () {
     printf ("response %d: %d", 
 	    subject_1->fixed_trials[trial].trial_id,
 	    subject_1->fixed_trials[trial].response);
-    printf ("\tafter %d cycles\n", 
+    printf ("\tafter %d cycles", 
 	    subject_1->fixed_trials[trial].response_time);
     
 
-    printf ("\n");
-
-
   }
+
+
+  printf ("All subjects means: All trials\n");
+  gs_stroop_analyse_subject (subject_1, ALL_TRIALS);
+
+
+  printf ("All subjects means: Correct trials only\n");
+  gs_stroop_analyse_subject (subject_1, CORRECT_TRIALS);
 
 
   subject_free (subject_1);

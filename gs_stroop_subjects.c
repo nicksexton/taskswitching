@@ -35,18 +35,21 @@ void subject_popn_free (subject_popn * some_subjects) {
 
 
 
-stroop_trial_data stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
-					      int stim_word, int stim_colour) {
+stroop_trial_data stroop_trial_data_create (int id, 
+					    blocktype block_type, 
+					    trialtype trial_type, 
+					    int stim_task, int stim_word, int stim_colour) {
   // stroop_trial_data * a_data_container = malloc (sizeof (stroop_trial_data));
   stroop_trial_data a_data_container;
   a_data_container.trial_id = id;
   a_data_container.block_type = block_type;
+  a_data_container.trial_type = trial_type;
   a_data_container.stim_task = stim_task;
   a_data_container.stim_word = stim_word;
   a_data_container.stim_colour = stim_colour;
 
-  a_data_container.response = 0;
-  a_data_container.response_time = 0;
+  a_data_container.response = -99;
+  a_data_container.response_time = -99;
 
   // stim_task is word naming if =0, colour otherwise 
   (stim_task == 0) ? 
@@ -62,8 +65,8 @@ stroop_trial_data stroop_trial_data_create (int id, blocktype block_type, int st
 subject * subject_create (int num_fixed_trials) {
 
   // int i;
-  subject * new_subject = malloc (sizeof(subject));
-  new_subject->params = (gs_stroop_params*) malloc (sizeof(gs_stroop_params));
+  subject * new_subject = malloc (sizeof(subject)); 
+ new_subject->params = (gs_stroop_params*) malloc (sizeof(gs_stroop_params));
   new_subject->num_fixed_trials = num_fixed_trials;
   // new_subject->fixed_trials = 
   //  g_array_sized_new (FALSE, FALSE, sizeof(stroop_trial_data), num_fixed_trials);
@@ -183,7 +186,7 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
     }  
 
     a_subject->fixed_trials[i] = 
-      stroop_trial_data_create (i, FIXED, task_order[i], stim_word, stim_colour); 
+      stroop_trial_data_create (i, FIXED, trial_order[i], task_order[i], stim_word, stim_colour); 
 
     // write trials data to the array
     //g_array_append_val (a_subject->fixed_trials, some_data);
