@@ -169,7 +169,7 @@ int pdp_input_connect (struct pdp_layer * this_layer,
 /* constructor function which adds a specified input layer & weights
    matrix to the pdp_input object associated with a layer */
 
-
+pdp_input * pdp_input_find (const pdp_layer * some_layer, int id);
 void pdp_input_free (pdp_input * input_to_free);
 
 int pdp_layer_cycle_inputs (pdp_layer * some_layer);
@@ -197,6 +197,9 @@ void pdp_model_component_push (pdp_model * some_model,
 			       pdp_layer * layer_add_as_component, 
 			       int id,
 			       bool update_activation);
+
+
+
 pdp_model_component * pdp_model_component_find(const pdp_model * some_model, int id);
 
 void pdp_model_cycle (pdp_model * some_model); 

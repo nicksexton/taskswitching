@@ -44,7 +44,7 @@
 #define NUM_TRIALS 100
 #define PPN_CONGRUENT 33
 #define PPN_INCONGRUENT 33
-#define PPN_NEUTRAL 0
+#define PPN_NEUTRAL 33
 #define PPN_WORDREADING 50
 #define PPN_COLOURNAMING 50
 
@@ -381,7 +381,21 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   //  | Associative learning FF weights        |
   //  +----------------------------------------+
 
+  pdp_weights_matrix *wts_wordin_taskdemand, *wts_colourin_taskdemand;
 
+  double wts_inputgeneric_taskdemand_matrix[2][3] = {
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0},
+  };
+  // ok to use generic initialiser as pdp_weights_create creates copy of array anyway
+
+  
+  wts_wordin_taskdemand = pdp_weights_create (2,3);
+  wts_colourin_taskdemand = pdp_weights_create (2,3);
+  pdp_weights_set (wts_wordin_taskdemand, 2, 3, wts_inputgeneric_taskdemand_matrix);
+  pdp_weights_set (wts_colourin_taskdemand, 2, 3, wts_inputgeneric_taskdemand_matrix);
+  pdp_input_connect (taskdemand, word_input, wts_wordin_taskdemand);
+  pdp_input_connect (taskdemand, colour_input, wts_colourin_taskdemand);
 
 
   /* Now init model object and push components */
@@ -428,6 +442,51 @@ int model_init (pdp_model * gs_stroop_model) {
   pdp_layer_set_activation(colour_output, 3, initial_activation_colourout);
   pdp_layer_set_activation(taskdemand, 2, initial_activation_taskdemand);
   pdp_layer_set_activation(topdown_control, 2, initial_activation_topdown_control);
+
+  return 0;
+
+}
+
+int update_associative_weights (pdp_model * gs_stroop_model) {
+
+  int i, j;
+
+  pdp_layer *word_input, *colour_input, *task_demand;
+  word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
+  colour_input = pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer;
+  task_demand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
+  
+
+  double wts_wordinput_taskdemand_matrix[2][3] = {
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0},
+  };
+
+  double wts_colourinput_taskdemand_matrix[2][3] = {
+    {0.0, 0.0, 0.0},
+    {0.0, 0.0, 0.0},
+  };
+  
+
+ 
+  for (i = 0; i < 2; i ++) { // outer loop, output unit (i)
+    for (j = 0; j < 3; j ++) {// inner loop, input unit (j)
+      wts_wordinput_taskdemand_matrix[i][j] = 
+	task_demand->units_latest->activations[i] *
+	word_input->units_latest->activations[j] * LEARNING_RATE;
+
+      wts_colourinput_taskdemand_matrix[i][j] = 
+	task_demand->units_latest->activations[i] *
+	colour_input->units_latest->activations[j] * LEARNING_RATE;
+
+
+    }
+  }
+
+  pdp_weights_set (pdp_input_find (task_demand, ID_WORDIN)->input_weights, 
+		   2, 3, wts_wordinput_taskdemand_matrix);
+  pdp_weights_set (pdp_input_find (task_demand, ID_COLOURIN)->input_weights, 
+		   2, 3, wts_colourinput_taskdemand_matrix);
 
   return 0;
 
@@ -593,6 +652,8 @@ int main () {
 		      &(subject_1->fixed_trials[trial]), 
 		      random_generator);
 
+    /* update weights */
+    update_associative_weights (gs_stroop_model);
 
   /* prove it's worked */
     // TODO - save and analyse data

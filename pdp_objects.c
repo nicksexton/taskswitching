@@ -331,6 +331,20 @@ int pdp_input_connect (pdp_layer * downstream_layer, const pdp_layer * upstream_
   return 0;
 }
 
+
+// returns pointer to an upstream connected input 
+pdp_input * pdp_input_find (const pdp_layer * some_layer, int id) {
+  pdp_input * input_i = some_layer->upstream_layers;
+  while (input_i != NULL) {
+    if (input_i->id_of_input_layer == id) {
+      return (input_i);
+    }
+    input_i = input_i->next;
+  }
+  return input_i;
+}
+
+
 void pdp_input_free (pdp_input * input_to_free) {
   if (input_to_free == NULL) {
     return;
@@ -506,6 +520,8 @@ void pdp_model_component_push (pdp_model * some_model,
   }
 }
 
+
+
 pdp_model_component * pdp_model_component_find(const pdp_model * some_model, int id) {
   pdp_model_component * component_i; // iterator
   component_i = some_model->components;
@@ -517,6 +533,7 @@ pdp_model_component * pdp_model_component_find(const pdp_model * some_model, int
   }
   return component_i;
 }
+
 
 
 void pdp_model_cycle (pdp_model * some_model) {
