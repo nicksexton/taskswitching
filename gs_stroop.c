@@ -41,11 +41,16 @@
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
 
-#define NUM_TRIALS 100
-#define PPN_CONGRUENT 33
+
+#define NUM_TRIALS 100 // total number of trials
+
+// relative proportion of congruent, incongruent, neutral trials 
+#define PPN_CONGRUENT 33 
 #define PPN_INCONGRUENT 33
 #define PPN_NEUTRAL 33
-#define PPN_WORDREADING 50
+
+// relative proportion of word reading vs. colour naming trials
+#define PPN_WORDREADING 50 
 #define PPN_COLOURNAMING 50
 
 
@@ -448,6 +453,7 @@ int model_init (pdp_model * gs_stroop_model) {
 }
 
 int update_associative_weights (pdp_model * gs_stroop_model) {
+  // NB running this function immediately after initing model SHOULD zero associative weights
 
   int i, j;
 
@@ -641,6 +647,9 @@ int main () {
   int trial;
   for (trial = 0; trial < NUM_TRIALS; trial++) {
     
+    // Note: need to run model_init immediately followed by update_associative_weights 
+    // to zero associative weights for new subject, in mixed blocks trials 
+
     model_init (gs_stroop_model); // zero activations
 
     // associate the data for THIS TRIAL with the model
