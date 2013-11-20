@@ -42,8 +42,8 @@
 #define ID_TOPDOWNCONTROL 6
 
 #define NUM_TRIALS 100
-#define PPN_CONGRUENT 50
-#define PPN_INCONGRUENT 50
+#define PPN_CONGRUENT 33
+#define PPN_INCONGRUENT 33
 #define PPN_NEUTRAL 0
 #define PPN_WORDREADING 50
 #define PPN_COLOURNAMING 50
@@ -455,30 +455,34 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // check that subject parameters are sensible
 
-  // TODO: HANDLE NEUTRAL TRIALS
-
-  if (this_trial->stim_word < -1 || this_trial->stim_word > 3) {
-    printf ("subject data: word input %d out of range (should be 0 - 2)!",
+  if (this_trial->stim_word < -2 || this_trial->stim_word > 3) {
+    printf ("subject data: word input %d out of range (should be -1 (neutral) or 0 - 2)!",
 	    this_trial->stim_word);
     return (0);
   }
 
-  if (this_trial->stim_colour < -1 || this_trial->stim_colour > 3) {
-    printf ("subject data: colour input %d out of range (should be 0 - 2)!",
+  if (this_trial->stim_colour < -2 || this_trial->stim_colour > 3) {
+    printf ("subject data: colour input %d out of range (should be -1 (neutral) or 0 - 2)!",
 	    this_trial->stim_colour);
     return (0);
   }
 
-  if (this_trial->stim_task < -1 || this_trial->stim_task > 2) {
-    printf ("subject data: task input %d out of range (should be 0 - 1)!",
+  if (this_trial->stim_task < -2 || this_trial->stim_task > 2) {
+    printf ("subject data: task input %d out of range (should be 0 or 1)!",
 	    this_trial->stim_task);
     return (0);
   }
 
 
   // set ON inputs
-  word_input_initial_act[this_trial->stim_word] = 1.0;
-  colour_input_initial_act[this_trial->stim_colour] = 1.0;
+  if (this_trial->stim_word >= 0) { // check for neutral trial condition where stim is -1
+      word_input_initial_act[this_trial->stim_word] = 1.0;
+  }
+
+  if (this_trial->stim_colour >= 0) {
+      word_input_initial_act[this_trial->stim_colour] = 1.0;
+  }
+
   topdown_control_initial_act[this_trial->stim_task] = 1.0;
 
   pdp_layer_set_activation (pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer, 
