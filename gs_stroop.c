@@ -54,7 +54,7 @@
 
 
 
-void add_noise_to_units (pdp_layer * some_layer, double noise_sd, gsl_rng *r) {
+void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r) {
   
   int i, sz = some_layer->size;
   
@@ -75,7 +75,7 @@ stroop_response * make_stroop_response (int node, double activation) {
 }
 
 
-bool stopping_condition (pdp_model * gs_stroop, stroop_trial_data * this_trial) {
+bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_trial) {
 
   /* evaluates whether model should stop on this cycle and returns
      true/false. CURRENT CRITERION: most active output node is > next
@@ -435,7 +435,7 @@ int model_init (pdp_model * gs_stroop_model) {
 /*****************************************************************/
 int run_stroop_trial (pdp_model * gs_stroop_model,  
 		      stroop_trial_data * this_trial,
-		      gsl_rng * random_generator) {
+		      const gsl_rng * random_generator) {
 
   // if (gs_stroop_model->model_data == NULL) {
   //   printf ("run stroop trial error! model_data pointer is null\n");
@@ -567,7 +567,6 @@ int main () {
   // g_array_append_val (subject_1->trials, some_data);
 
   subject_init_trialblock_fixed (random_generator, subject_1, 
-				 NUM_TRIALS, 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
 				 PPN_WORDREADING, PPN_COLOURNAMING);
 				 
@@ -584,7 +583,7 @@ int main () {
 
     /* run stroop trial(s) */
     run_stroop_trial (gs_stroop_model, 
-		      subject_1->fixed_trials[trial], 
+		      &(subject_1->fixed_trials[trial]), 
 		      random_generator);
 
 
@@ -592,10 +591,10 @@ int main () {
     // TODO - save and analyse data
     printf ("\n");
     printf ("response %d: %d", 
-	    subject_1->fixed_trials[trial]->trial_id,
-	    subject_1->fixed_trials[trial]->response);
+	    subject_1->fixed_trials[trial].trial_id,
+	    subject_1->fixed_trials[trial].response);
     printf ("\tafter %d cycles\n", 
-	    subject_1->fixed_trials[trial]->response_time);
+	    subject_1->fixed_trials[trial].response_time);
     
 
     printf ("\n");

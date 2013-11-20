@@ -79,7 +79,7 @@ typedef struct pdp_weights_matrix {
 
 typedef struct pdp_input {
 
-  pdp_layer * input_layer;
+  const pdp_layer * input_layer;
   pdp_weights_matrix * input_weights;
   pdp_input * next;
 
@@ -129,7 +129,7 @@ typedef struct pdp_model {
 
 
 
-
+pdp_units * pdp_units_create (int size);
 
 void pdp_units_free (pdp_units * some_units);
 
@@ -139,9 +139,9 @@ void pdp_layer_free (pdp_layer * some_layer);
 
 int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array[size]);
 
-void pdp_layer_print_current_output (pdp_layer * some_layer);
+void pdp_layer_print_current_output (const pdp_layer * some_layer);
 
-void pdp_layer_print_activation (pdp_layer * some_layer);
+void pdp_layer_print_activation (const pdp_layer * some_layer);
 
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input);
 
@@ -154,7 +154,7 @@ void pdp_weights_set_v1 (pdp_weights_matrix * some_weights,
 */
 
 int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output, 
-			      int size_input, struct pdp_layer * input, 
+			      int size_input, const struct pdp_layer * input, 
 			      struct pdp_weights_matrix * weights);
 
 void pdp_weights_print(struct pdp_weights_matrix * a_weights_matrix);
@@ -162,7 +162,7 @@ void pdp_weights_print(struct pdp_weights_matrix * a_weights_matrix);
 void pdp_weights_free (struct pdp_weights_matrix * some_weights);
 
 int pdp_input_connect (struct pdp_layer * this_layer, 
-		       struct pdp_layer * input_layer_to_connect, 
+		       const struct pdp_layer * input_layer_to_connect, 
 		       struct pdp_weights_matrix * weights_to_connect);
 /* constructor function which adds a specified input layer & weights
    matrix to the pdp_input object associated with a layer */
@@ -195,7 +195,7 @@ void pdp_model_component_push (pdp_model * some_model,
 			       pdp_layer * layer_add_as_component, 
 			       int id,
 			       bool update_activation);
-pdp_model_component * pdp_model_component_find(pdp_model * some_model, int id);
+pdp_model_component * pdp_model_component_find(const pdp_model * some_model, int id);
 
 void pdp_model_cycle (pdp_model * some_model); 
 /* updates inputs for all layers, then updates activation for all

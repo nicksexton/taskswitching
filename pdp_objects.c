@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include "activation_funcs.h"
 #include "pdp_objects.h"
 
@@ -142,7 +143,7 @@ int pdp_layer_modulate_activation (pdp_layer * some_layer, int size, double modu
 }
 
 
-void pdp_layer_print_current_output (pdp_layer * some_layer) {
+void pdp_layer_print_current_output (const pdp_layer * some_layer) {
   int i;
   for (i = 0; i < some_layer->size; i++) {
     // printf ("[%d]: %4.2f  ", i, some_layer->units_latest->activations[i]);
@@ -151,10 +152,10 @@ void pdp_layer_print_current_output (pdp_layer * some_layer) {
   // printf ("\n");
 }
   
-void pdp_layer_print_activation (pdp_layer * some_layer) {
+
+void pdp_layer_print_activation (const pdp_layer * some_layer) {
   int i;
-  pdp_units *units_i;
-  units_i = &some_layer->units_initial;
+  const pdp_units *units_i = &(some_layer->units_initial);
   
   printf ("\n");
 
@@ -269,7 +270,7 @@ void pdp_weights_free (struct pdp_weights_matrix * some_weights) {
    set of accumulators in a specified output matrix. */
 
 int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output, 
-			      int size_input, struct pdp_layer * input, 
+			      int size_input, const struct pdp_layer * input, 
 			       struct pdp_weights_matrix * weights) {
 
   /* check sizes */
@@ -307,17 +308,20 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
   }
 }
       
-int pdp_input_connect (pdp_layer * downstream_layer, pdp_layer * upstream_layer, 
+int pdp_input_connect (pdp_layer * downstream_layer, const pdp_layer * upstream_layer, 
 		       pdp_weights_matrix * upstream_weights) {
   /* connects a single upstream layer (via set of connection weights) */
   
   /* TODO - code to check size of matrix and layers corresponds */
 
-  pdp_input * p_input_tmp;
-  p_input_tmp = malloc (sizeof (pdp_input));
+  pdp_input init = { .input_layer = upstream_layer };
+
+  pdp_input * p_input_tmp = malloc (sizeof (pdp_input));
   
+  memcpy (p_input_tmp, &init, sizeof (*p_input_tmp));
+
   p_input_tmp->next = downstream_layer->upstream_layers;
-  p_input_tmp->input_layer = upstream_layer;
+  // p_input_tmp->input_layer = upstream_layer;
   p_input_tmp->input_weights = upstream_weights;
 
   downstream_layer->upstream_layers = p_input_tmp;
@@ -500,7 +504,7 @@ void pdp_model_component_push (pdp_model * some_model,
   }
 }
 
-pdp_model_component * pdp_model_component_find(pdp_model * some_model, int id) {
+pdp_model_component * pdp_model_component_find(const pdp_model * some_model, int id) {
   pdp_model_component * component_i; // iterator
   component_i = some_model->components;
   while (component_i != NULL) {

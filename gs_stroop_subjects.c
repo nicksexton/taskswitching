@@ -35,23 +35,23 @@ void subject_popn_free (subject_popn * some_subjects) {
 
 
 
-stroop_trial_data * stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
+stroop_trial_data stroop_trial_data_create (int id, blocktype block_type, int stim_task, 
 					      int stim_word, int stim_colour) {
-  stroop_trial_data * a_data_container = malloc (sizeof (stroop_trial_data));
-  // stroop_trial_data a_data_container;
-  a_data_container->trial_id = id;
-  a_data_container->block_type = block_type;
-  a_data_container->stim_task = stim_task;
-  a_data_container->stim_word = stim_word;
-  a_data_container->stim_colour = stim_colour;
+  // stroop_trial_data * a_data_container = malloc (sizeof (stroop_trial_data));
+  stroop_trial_data a_data_container;
+  a_data_container.trial_id = id;
+  a_data_container.block_type = block_type;
+  a_data_container.stim_task = stim_task;
+  a_data_container.stim_word = stim_word;
+  a_data_container.stim_colour = stim_colour;
 
-  a_data_container->response = 0;
-  a_data_container->response_time = 0;
+  a_data_container.response = 0;
+  a_data_container.response_time = 0;
 
   // stim_task is word naming if =0, colour otherwise 
   (stim_task == 0) ? 
-    (a_data_container->stim_correct_response = stim_word) : 
-    (a_data_container->stim_correct_response = stim_colour);
+    (a_data_container.stim_correct_response = stim_word) : 
+    (a_data_container.stim_correct_response = stim_colour);
 
   return a_data_container;
 } 
@@ -68,7 +68,7 @@ subject * subject_create (int num_fixed_trials) {
   // new_subject->fixed_trials = 
   //  g_array_sized_new (FALSE, FALSE, sizeof(stroop_trial_data), num_fixed_trials);
   
-  new_subject->fixed_trials = malloc (num_fixed_trials * sizeof(stroop_trial_data*));
+  new_subject->fixed_trials = malloc (num_fixed_trials * sizeof(stroop_trial_data));
   // for (i = 0; i < num_fixed_trials; i ++) {
   //   new_subject->fixed_trials[i] = NULL; 
   // }
@@ -84,16 +84,16 @@ subject * subject_create (int num_fixed_trials) {
 
 void subject_free (subject * subject_to_free) {
 
-  int i;
+  // int i;
 
   free (subject_to_free->params);
   // g_array_free (subject_to_free->fixed_trials, TRUE); // 2nd arg frees the data as well
 
-  for (i = 0; i < subject_to_free->num_fixed_trials; i ++) {
-     free (subject_to_free->fixed_trials[i]);
-  }
-  free (subject_to_free->fixed_trials);
-  
+  // for (i = 0; i < subject_to_free->num_fixed_trials; i ++) {
+  //   free (subject_to_free->fixed_trials[i]);
+  //}
+
+  free (subject_to_free->fixed_trials);  
   free (subject_to_free);
 
   
@@ -104,19 +104,23 @@ void subject_free (subject * subject_to_free) {
 
 
 // Creates block of num_trials in proportion N:C:I 
-int subject_init_trialblock_fixed (gsl_rng * random_generator, 
+int subject_init_trialblock_fixed (const gsl_rng * random_generator, 
 				   subject * a_subject, 
-				   int num_trials, 
 				   int ppn_N, int ppn_C, int ppn_I,
 				   int ppn_WR, int ppn_CN) {
 
   // TODO - check that the subject is init'd and does not already have trials init'd
 
+  
+
 // first create an array to randomly permute:
+  
+  int num_trials = a_subject->num_fixed_trials;    
   trialtype trial_order[num_trials];
   int task_order[num_trials]; // 0 = word reading, 1 = colour naming
   int num_N, num_C, num_WR, i;
   
+
   int ppn_total = ppn_N + ppn_C + ppn_I; // explicit cast for double division
   int task_ppn_total = ppn_WR + ppn_CN;
   
@@ -179,7 +183,7 @@ int subject_init_trialblock_fixed (gsl_rng * random_generator,
     }  
 
     a_subject->fixed_trials[i] = 
-         stroop_trial_data_create (i, FIXED, task_order[i], stim_word, stim_colour); 
+      stroop_trial_data_create (i, FIXED, task_order[i], stim_word, stim_colour); 
 
     // write trials data to the array
     //g_array_append_val (a_subject->fixed_trials, some_data);
