@@ -84,15 +84,15 @@ subject * subject_create (int num_fixed_trials) {
 
 void subject_free (subject * subject_to_free) {
 
-  // int i;
+  int i;
 
   free (subject_to_free->params);
   // g_array_free (subject_to_free->fixed_trials, TRUE); // 2nd arg frees the data as well
 
-  // for (i = 0; i < subject_to_free->num_fixed_trials; i ++) {
-  //   free (subject_to_free->fixed_trials[i]);
-  // }
-  // free (subject_to_free->fixed_trials);
+  for (i = 0; i < subject_to_free->num_fixed_trials; i ++) {
+     free (subject_to_free->fixed_trials[i]);
+  }
+  free (subject_to_free->fixed_trials);
   
   free (subject_to_free);
 

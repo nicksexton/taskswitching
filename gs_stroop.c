@@ -560,7 +560,7 @@ int main () {
 
   /* set up subjects structure here */
   
-  subject * subject_1 = subject_create (1);
+  subject * subject_1 = subject_create (NUM_TRIALS);
 
   // write trials data to the array
   // stroop_trial_data some_data = stroop_trial_data_create (0, FIXED, 1, 0, 2); 
@@ -602,7 +602,6 @@ int main () {
 
 
   }
-
 
 
   subject_free (subject_1);
