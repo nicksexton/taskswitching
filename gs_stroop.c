@@ -28,6 +28,9 @@
 #define OUTPUTUNIT_BIAS -6.0
 #define TASKDEMAND_BIAS -4.0
 #define BIAS_NONE 0
+#define STIMULUS_INPUT_STRENGTH_WORD 3.5
+#define STIMULUS_INPUT_STRENGTH_COLOUR 1.9
+
 #define TOPDOWN_CONTROL_STRENGTH_WORD 6.0
 #define TOPDOWN_CONTROL_STRENGTH_COLOUR 15.0
 #define LEARNING_RATE 1.0
@@ -66,7 +69,17 @@ void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng 
   
   for (i = 0; i < sz; i ++) {
     some_layer->units_latest->activations[i] += gsl_ran_gaussian (r, noise_sd);
+
+
+    // remember to clip values to between -1.0 and +1.0
+    if (some_layer->units_latest->activations[i] > 1.0) 
+      some_layer->units_latest->activations[i] = 1.0;
+    else if (some_layer->units_latest->activations[i] < -1.0) 
+      some_layer->units_latest->activations[i] = -1.0;
+  
   }
+
+  return;
 }
 
   
@@ -238,15 +251,15 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   pdp_weights_matrix *wts_wordin_wordout, *wts_colourin_colourout;
 
   double wts_wordin_wordout_matrix[3][3] = {
-    {3.5, 0.0, 0.0},
-    {0.0, 3.5, 0.0},
-    {0.0, 0.0, 3.5}, 
+    {STIMULUS_INPUT_STRENGTH_WORD, 0.0, 0.0},
+    {0.0, STIMULUS_INPUT_STRENGTH_WORD, 0.0},
+    {0.0, 0.0, STIMULUS_INPUT_STRENGTH_WORD}, 
   };
 
   double wts_colourin_colourout_matrix[3][3] = {
-    {1.9, 0.0, 0.0},
-    {0.0, 1.9, 0.0},
-    {0.0, 0.0, 1.9}, 
+    {STIMULUS_INPUT_STRENGTH_COLOUR, 0.0, 0.0},
+    {0.0, STIMULUS_INPUT_STRENGTH_COLOUR, 0.0},
+    {0.0, 0.0, STIMULUS_INPUT_STRENGTH_COLOUR}, 
   };
 
   wts_wordin_wordout = pdp_weights_create (3,3);
@@ -310,7 +323,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
     {1.0, 1.0, 1.0},
     {0.0, 0.0, 0.0},
   };
-
+  // see G&S - should be 1.0 and 0.0 or 1.0 and -1.0?!
   double wts_colourout_taskdemand_matrix[2][3] = {
     {0.0, 0.0, 0.0},
     {1.0, 1.0, 1.0},
@@ -525,19 +538,19 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // check that subject parameters are sensible
 
-  if (this_trial->stim_word < -2 || this_trial->stim_word > 3) {
+  if (this_trial->stim_word < -1 || this_trial->stim_word > 3) {
     printf ("subject data: word input %d out of range (should be -1 (neutral) or 0 - 2)!",
 	    this_trial->stim_word);
     return (0);
   }
 
-  if (this_trial->stim_colour < -2 || this_trial->stim_colour > 3) {
+  if (this_trial->stim_colour < -1 || this_trial->stim_colour > 3) {
     printf ("subject data: colour input %d out of range (should be -1 (neutral) or 0 - 2)!",
 	    this_trial->stim_colour);
     return (0);
   }
 
-  if (this_trial->stim_task < -2 || this_trial->stim_task > 2) {
+  if (this_trial->stim_task < 0 || this_trial->stim_task > 2) {
     printf ("subject data: task input %d out of range (should be 0 or 1)!",
 	    this_trial->stim_task);
     return (0);
@@ -645,6 +658,8 @@ int main () {
 
 
   int trial;
+
+  printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
   for (trial = 0; trial < NUM_TRIALS; trial++) {
     
     // Note: need to run model_init immediately followed by update_associative_weights 
@@ -666,23 +681,25 @@ int main () {
 
   /* prove it's worked */
     // TODO - save and analyse data
-    printf ("\n");
-    printf ("response %d: %d", 
-	    subject_1->fixed_trials[trial].trial_id,
-	    subject_1->fixed_trials[trial].response);
-    printf ("\tafter %d cycles", 
-	    subject_1->fixed_trials[trial].response_time);
+  
+        printf ("%d:\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", 
+    	    subject_1->fixed_trials[trial].trial_id,
+    	    subject_1->fixed_trials[trial].trial_type, 
+    	    subject_1->fixed_trials[trial].stim_task,
+    	    subject_1->fixed_trials[trial].stim_word,
+    	    subject_1->fixed_trials[trial].stim_colour,
+    	    subject_1->fixed_trials[trial].stim_correct_response,
+    	    (subject_1->fixed_trials[trial].response % 3), 
+    	    subject_1->fixed_trials[trial].response_time);
     
-
-  }
-
-
-  printf ("All subjects means: All trials\n");
-  gs_stroop_analyse_subject (subject_1, ALL_TRIALS);
+    }
 
 
-  printf ("All subjects means: Correct trials only\n");
-  gs_stroop_analyse_subject (subject_1, CORRECT_TRIALS);
+  // printf ("All subjects means: All trials\n");
+  //gs_stroop_analyse_subject (subject_1, ALL_TRIALS);
+
+  // printf ("All subjects means: Correct trials only\n");
+  // gs_stroop_analyse_subject (subject_1, CORRECT_TRIALS);
 
 
   subject_free (subject_1);
