@@ -45,7 +45,7 @@
 #define ID_TOPDOWNCONTROL 6
 
 
-#define NUM_TRIALS 100 // total number of trials
+#define NUM_TRIALS 1000 // total number of trials
 
 // relative proportion of congruent, incongruent, neutral trials 
 #define PPN_CONGRUENT 33 
@@ -320,13 +320,13 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   pdp_weights_matrix *wts_wordout_taskdemand, *wts_colourout_taskdemand;
 
   double wts_wordout_taskdemand_matrix[2][3] = {
-    {1.0, 1.0, 1.0},
-    {0.0, 0.0, 0.0},
+    { 1.0,  1.0,  1.0},
+    {-1.0, -1.0, -1.0},
   };
   // see G&S - should be 1.0 and 0.0 or 1.0 and -1.0?!
   double wts_colourout_taskdemand_matrix[2][3] = {
-    {0.0, 0.0, 0.0},
-    {1.0, 1.0, 1.0},
+    {-1.0, -1.0, -1.0},
+    { 1.0,  1.0,  1.0},
   };
 
   wts_wordout_taskdemand = pdp_weights_create (2,3);
@@ -563,7 +563,7 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
   }
 
   if (this_trial->stim_colour >= 0) {
-      word_input_initial_act[this_trial->stim_colour] = 1.0;
+      colour_input_initial_act[this_trial->stim_colour] = 1.0;
   }
 
   topdown_control_initial_act[this_trial->stim_task] = 1.0;
