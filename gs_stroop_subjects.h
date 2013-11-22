@@ -39,6 +39,11 @@ typedef struct subject_aggregate_data {
   double fixed_congruent_WR_RT;
   double fixed_incongruent_WR_RT;
 
+  double fixed_inhibition_score;
+
+  double mixed_TSwc;
+  double mixed_TScw;
+
 } subject_aggregate_data;
 
 typedef struct gs_stroop_params {
