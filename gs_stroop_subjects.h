@@ -5,7 +5,7 @@
 
 typedef enum {NONE, FIXED, MIXED} blocktype;
 typedef enum {NEUTRAL = 0, CONGRUENT = 1, INCONGRUENT = 2} trialtype;
-
+typedef enum {WORDREADING = 0, COLOURNAMING = 1} tasktype;
 
 typedef struct stroop_response {
   int this_node; 
@@ -55,7 +55,8 @@ typedef struct subject {
   stroop_trial_data ** mixed_trials; // 2d array
 
   int num_fixed_trials;
-  int num_mixed_trials;
+  int num_mixed_runs;
+  int num_mixed_trials_in_run;
   subject_aggregate_data DVs;
   void * params; 
 
@@ -81,16 +82,16 @@ stroop_trial_data stroop_trial_data_create (int id,
 					    int stim_task, int stim_word, int stim_colour);
 
 
-// unnecessary, handled by GList??
-//void stroop_trial_data_free (stroop_trial_data * data_to_free);
 
+subject * subject_create (int num_fixed_trials, 
+			  int num_mixed_runs, int num_mixed_trials_in_run);
 
-subject * subject_create (int num_fixed_trials, int num_mixed_trials);
 
 int subject_init_trialblock_fixed (const gsl_rng * random_generator, 
 				   subject * a_subject, 
    				   int ppn_N, int ppn_C, int ppn_I,
 				   int ppn_WR, int ppn_CN);
 
+int subject_init_trialblock_mixed ( subject * a_subject);
 
 #endif

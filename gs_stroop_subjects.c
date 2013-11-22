@@ -62,21 +62,24 @@ stroop_trial_data stroop_trial_data_create (int id,
 
 
 /* subject constructor */ // TODO - incl subject parameters as argument
-subject * subject_create (int num_fixed_trials, int num_mixed_trials) {
+subject * subject_create (int num_fixed_trials, 
+			  int num_mixed_runs, int num_mixed_trials_in_run) {
 
   int i;
   subject * new_subject = malloc (sizeof(subject)); 
   new_subject->params = (gs_stroop_params*) malloc (sizeof(gs_stroop_params));
 
   new_subject->num_fixed_trials = num_fixed_trials;
-  new_subject->num_mixed_trials = num_mixed_trials;
+  new_subject->num_mixed_runs = num_mixed_runs;
+  new_subject->num_mixed_trials_in_run = num_mixed_trials_in_run;
 
   new_subject->fixed_trials = malloc (num_fixed_trials * sizeof(stroop_trial_data));
 
-  new_subject->mixed_trials = malloc (num_mixed_trials * sizeof(stroop_trial_data*));
+  // mixed_trials is a (eg, 12x100) 2d array, implemented as an array of pointers to arrays
+  new_subject->mixed_trials = malloc (num_mixed_runs * sizeof(stroop_trial_data*));
 
-  for (i = 0; i < num_mixed_trials; i++) {
-    new_subject->mixed_trials[i] = malloc(MIXED_BLOCK_LENGTH * sizeof(stroop_trial_data));
+  for (i = 0; i < num_mixed_runs; i++) {
+    new_subject->mixed_trials[i] = malloc(num_mixed_trials_in_run * sizeof(stroop_trial_data));
   }
 
 
@@ -91,12 +94,12 @@ subject * subject_create (int num_fixed_trials, int num_mixed_trials) {
 
 void subject_free (subject * subject_to_free) {
 
-  // int i;
+  int i;
 
   free (subject_to_free->params);
   free (subject_to_free->fixed_trials);  
 
-  for (i = 0; i < subject_to_free->num_mixed_trials; i ++) {
+  for (i = 0; i < subject_to_free->num_mixed_runs; i ++) {
     free (subject_to_free->mixed_trials[i]);
   }
   free (subject_to_free->mixed_trials);
@@ -169,7 +172,6 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 	stim_colour = gsl_rng_uniform_int (random_generator, 3);
       } 
       break;
-    
 
     case CONGRUENT: 
       stim_word = gsl_rng_uniform_int (random_generator, 3); 
@@ -180,18 +182,44 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
       stim_word = gsl_rng_uniform_int (random_generator, 3); 
       int incr = gsl_rng_uniform_int (random_generator, 2);
       stim_colour = (stim_word + incr) % 3;
-	break;
+      break;
     
     }  
 
     a_subject->fixed_trials[i] = 
-      stroop_trial_data_create (i, FIXED, trial_order[i], task_order[i], stim_word, stim_colour); 
-
-    // write trials data to the array
-    //g_array_append_val (a_subject->fixed_trials, some_data);
+      stroop_trial_data_create (i, FIXED, 
+				trial_order[i], task_order[i], 
+				stim_word, stim_colour); 
   }					  
-
   return 0;
 }
 
+// num_trials = number of trials to a run (default, 12)
+// num_runs = number of runs to a blocks (default, 100)
+int subject_init_trialblock_mixed ( subject * a_subject) {
 
+  int trial, run;
+  tasktype task;
+
+  for (run = 0; run < a_subject->num_mixed_runs; run ++) {
+    for (trial = 0; trial < a_subject->num_mixed_trials_in_run; trial ++) {
+ 
+      // establish which task
+      if (trial / 4 >= 1) {
+	if (trial / 4 >= 2) {
+	  task = WORDREADING;
+	}
+	else task = COLOURNAMING;
+      }
+      else task = WORDREADING;
+
+      a_subject->mixed_trials[run][trial] = stroop_trial_data_create (trial, MIXED, 
+								      INCONGRUENT, task, 
+								      0, 1);  
+      // NB in mixed blocks, stimuli are identical for all trials
+
+    }
+  }
+
+  return 0;
+}

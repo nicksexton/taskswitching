@@ -11,7 +11,8 @@
 #include "pdp_objects.h"
 #include "random_generator_functions.h" // for gaussian noise
 // #include "simulated_subjects.h" // objects for representing subject params and data
-#include "gs_stroop_subjects.h" // specialises simulated_subjects to stroop data/stimuli/paramsi
+#include "gs_stroop_subjects.h" // specialises simulated_subjects to
+                                //stroop data/stimuli/params
 #include "gs_stroop_analyse.h"
 
 #include "gs_stroop.h"
@@ -35,7 +36,7 @@
 #define TOPDOWN_CONTROL_STRENGTH_COLOUR 15.0
 #define LEARNING_RATE 1.0
 #define MAX_CYCLES 1500 // how long to let model run - NB check G&S defaults
-
+                        // TODO - need to track and handle 'no response' trials
 
 #define ID_WORDIN 1
 #define ID_COLOURIN 2
@@ -46,7 +47,7 @@
 
 
 #define NUM_TRIALS 100 // total number of trials
-#define MIXED_BLOCK_LENGTH 12 // must be multiple of 3??
+#define MIXED_BLOCK_RUN_LENGTH 12 // must be multiple of 3??
 
 // relative proportion of congruent, incongruent, neutral trials 
 #define PPN_CONGRUENT 33 
@@ -180,8 +181,8 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
     case 3: { 
       // contingency where [0] and [1] correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[2]->activation) {
+
 	// RECORD RESPONSE
-	// ((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
 	this_trial->response = biggest_act[0]->this_node;
 	
 
@@ -197,8 +198,8 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
     default: { 
      // contingency where [0] and [2] do not correspond
       if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[1]->activation) {
+
 	// RECORD RESPONSE
-	// ((stroop_trial_data * )(gs_stroop->model_data))->response = biggest_act[0]->this_node;
 	this_trial->response = biggest_act[0]->this_node;
 	for (i = 0; i < 3; i ++) { free (biggest_act[i]); }
 	return true;
@@ -658,13 +659,13 @@ int main () {
 
   /* set up subjects structure here */
   
-  subject * subject_1 = subject_create (NUM_TRIALS);
+  subject * subject_1 = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
 
   subject_init_trialblock_fixed (random_generator, subject_1, 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
 				 PPN_WORDREADING, PPN_COLOURNAMING);
 				 
-
+  subject_init_trialblock_mixed (subject_1);
 
   int trial;
 
