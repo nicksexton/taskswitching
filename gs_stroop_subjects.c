@@ -62,19 +62,23 @@ stroop_trial_data stroop_trial_data_create (int id,
 
 
 /* subject constructor */ // TODO - incl subject parameters as argument
-subject * subject_create (int num_fixed_trials) {
+subject * subject_create (int num_fixed_trials, int num_mixed_trials) {
 
-  // int i;
+  int i;
   subject * new_subject = malloc (sizeof(subject)); 
- new_subject->params = (gs_stroop_params*) malloc (sizeof(gs_stroop_params));
+  new_subject->params = (gs_stroop_params*) malloc (sizeof(gs_stroop_params));
+
   new_subject->num_fixed_trials = num_fixed_trials;
-  // new_subject->fixed_trials = 
-  //  g_array_sized_new (FALSE, FALSE, sizeof(stroop_trial_data), num_fixed_trials);
-  
+  new_subject->num_mixed_trials = num_mixed_trials;
+
   new_subject->fixed_trials = malloc (num_fixed_trials * sizeof(stroop_trial_data));
-  // for (i = 0; i < num_fixed_trials; i ++) {
-  //   new_subject->fixed_trials[i] = NULL; 
-  // }
+
+  new_subject->mixed_trials = malloc (num_mixed_trials * sizeof(stroop_trial_data*));
+
+  for (i = 0; i < num_mixed_trials; i++) {
+    new_subject->mixed_trials[i] = malloc(MIXED_BLOCK_LENGTH * sizeof(stroop_trial_data));
+  }
+
 
   // TODO - code to create params object here 
   ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_inhibitory = -2.5; // TEMP CODE!!!
@@ -90,17 +94,16 @@ void subject_free (subject * subject_to_free) {
   // int i;
 
   free (subject_to_free->params);
-  // g_array_free (subject_to_free->fixed_trials, TRUE); // 2nd arg frees the data as well
-
-  // for (i = 0; i < subject_to_free->num_fixed_trials; i ++) {
-  //   free (subject_to_free->fixed_trials[i]);
-  //}
-
   free (subject_to_free->fixed_trials);  
+
+  for (i = 0; i < subject_to_free->num_mixed_trials; i ++) {
+    free (subject_to_free->mixed_trials[i]);
+  }
+  free (subject_to_free->mixed_trials);
+
   free (subject_to_free);
 
   
-
   return;
 }
 
@@ -114,8 +117,7 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 
   // TODO - check that the subject is init'd and does not already have trials init'd
 
-  
-
+ 
 // first create an array to randomly permute:
   
   int num_trials = a_subject->num_fixed_trials;    
@@ -131,12 +133,9 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 
   num_N = num_trials * ppn_N / ppn_total; 
   num_C = num_trials * ppn_C / ppn_total; 
-  
   num_WR = num_trials * ppn_WR / task_ppn_total;
-  
 
-  for (i = 0; i < num_trials; i++) { 
-    
+  for (i = 0; i < num_trials; i++) {     
 
     if (i < num_N) 
       trial_order[i] = NEUTRAL; 
@@ -194,3 +193,5 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 
   return 0;
 }
+
+

@@ -51,9 +51,11 @@ typedef struct gs_stroop_params {
 
 typedef struct subject {
 
-  // GArray * fixed_trials;
   stroop_trial_data * fixed_trials; // pointer to array
+  stroop_trial_data ** mixed_trials; // 2d array
+
   int num_fixed_trials;
+  int num_mixed_trials;
   subject_aggregate_data DVs;
   void * params; 
 
@@ -83,7 +85,7 @@ stroop_trial_data stroop_trial_data_create (int id,
 //void stroop_trial_data_free (stroop_trial_data * data_to_free);
 
 
-subject * subject_create (int num_of_trials);
+subject * subject_create (int num_fixed_trials, int num_mixed_trials);
 
 int subject_init_trialblock_fixed (const gsl_rng * random_generator, 
 				   subject * a_subject, 

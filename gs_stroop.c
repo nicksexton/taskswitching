@@ -45,7 +45,8 @@
 #define ID_TOPDOWNCONTROL 6
 
 
-#define NUM_TRIALS 1000 // total number of trials
+#define NUM_TRIALS 100 // total number of trials
+#define MIXED_BLOCK_LENGTH 12 // must be multiple of 3??
 
 // relative proportion of congruent, incongruent, neutral trials 
 #define PPN_CONGRUENT 33 
@@ -430,9 +431,12 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 
 // Zeros activation levels of all nodes
 // DOES NOT RESET WEIGHTS!!
-int model_init (pdp_model * gs_stroop_model) {
+// persist_taskdemand_activation sets proportion of TD activation to carry over to
+// next trial ie. .20 = 20% of activation on previous
+int model_init (pdp_model * gs_stroop_model, double persist_taskdemand_activation) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
+  int i;
 
   // zero cycle counter
   gs_stroop_model->cycle = 0;
@@ -449,8 +453,13 @@ int model_init (pdp_model * gs_stroop_model) {
   double initial_activation_colourin[3] = {0.0, 0.0, 0.0};
   double initial_activation_wordout[3] = {0.0, 0.0, 0.0};
   double initial_activation_colourout[3] = {0.0, 0.0, 0.0};
-  double initial_activation_taskdemand[2] = {0.0, 0.0};
   double initial_activation_topdown_control[2] = {0.0, 0.0};
+  double initial_activation_taskdemand[2];
+
+  for (i = 0; i < taskdemand->size; i ++) {
+    initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] * 
+                                       persist_taskdemand_activation;
+  } 
   
 
   /* set initial activation */
@@ -665,7 +674,7 @@ int main () {
     // Note: need to run model_init immediately followed by update_associative_weights 
     // to zero associative weights for new subject, in mixed blocks trials 
 
-    model_init (gs_stroop_model); // zero activations
+    model_init (gs_stroop_model, 0.0); // zero activations (zero persisting taskdemand act.)
 
     // associate the data for THIS TRIAL with the model
     // pdp_model_set_data (gs_stroop_model, 
@@ -681,15 +690,15 @@ int main () {
 
   /* prove it's worked */
     // TODO - save and analyse data
-  
-        printf ("%d:\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", 
-    	    subject_1->fixed_trials[trial].trial_id,
-    	    subject_1->fixed_trials[trial].trial_type, 
-    	    subject_1->fixed_trials[trial].stim_task,
-    	    subject_1->fixed_trials[trial].stim_word,
-    	    subject_1->fixed_trials[trial].stim_colour,
-    	    subject_1->fixed_trials[trial].stim_correct_response,
-    	    (subject_1->fixed_trials[trial].response % 3), 
+    
+    printf ("%d:\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", 
+	    subject_1->fixed_trials[trial].trial_id,
+	    subject_1->fixed_trials[trial].trial_type, 
+	    subject_1->fixed_trials[trial].stim_task,
+	    subject_1->fixed_trials[trial].stim_word,
+	    subject_1->fixed_trials[trial].stim_colour,
+	    subject_1->fixed_trials[trial].stim_correct_response,
+	   (subject_1->fixed_trials[trial].response % 3), // disambiguate the response 
     	    subject_1->fixed_trials[trial].response_time);
     
     }

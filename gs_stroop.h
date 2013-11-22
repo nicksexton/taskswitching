@@ -15,7 +15,10 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
 
 int gs_stroop_model_build (pdp_model * gs_stroop_model);
 
-int model_init (pdp_model * gs_stroop_model);
+
+int model_init (pdp_model * gs_stroop_model, double persist_taskdemand_activation);
+// persist_taskdemand_activation sets proportion of TD activation to carry over to
+// next trial ie. .20 = 20% of final activation on previous trial
 
 
 int run_stroop_trial (pdp_model * gs_stroop_model,
