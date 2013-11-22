@@ -93,5 +93,6 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 				   int ppn_WR, int ppn_CN);
 
 int subject_init_trialblock_mixed ( subject * a_subject);
+int subject_print_fixed_trial_data (subject * a_subject);
 
 #endif

@@ -223,3 +223,25 @@ int subject_init_trialblock_mixed ( subject * a_subject) {
 
   return 0;
 }
+
+
+int subject_print_fixed_trial_data (subject * a_subject) {
+  
+  int trial;
+  for (trial = 0; trial < a_subject->num_fixed_trials; trial ++) {
+
+  // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
+
+    printf ("%d:\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", 
+    	    a_subject->fixed_trials[trial].trial_id,
+    	    a_subject->fixed_trials[trial].trial_type, 
+    	    a_subject->fixed_trials[trial].stim_task,
+   	    a_subject->fixed_trials[trial].stim_word,
+    	    a_subject->fixed_trials[trial].stim_colour,
+    	    a_subject->fixed_trials[trial].stim_correct_response,
+    	   (a_subject->fixed_trials[trial].response % 3), // disambiguate the response 
+   	    a_subject->fixed_trials[trial].response_time);
+  }
+  return 0;
+
+ }

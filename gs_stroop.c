@@ -667,21 +667,23 @@ int main () {
 				 
   subject_init_trialblock_mixed (subject_1);
 
-  int trial;
+  int trial, run;
 
-  printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
-  for (trial = 0; trial < NUM_TRIALS; trial++) {
+  printf ("\nsubject_1:");
+
+  // <--------------------- RUN FIXED BLOCKS ---------------------->
+
+  // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
+
+  for (trial = 0; trial < subject_1->num_fixed_trials; trial++) {
     
+    printf (" F%d", trial);
     // Note: need to run model_init immediately followed by update_associative_weights 
     // to zero associative weights for new subject, in mixed blocks trials 
 
     model_init (gs_stroop_model, 0.0); // zero activations (zero persisting taskdemand act.)
 
-    // associate the data for THIS TRIAL with the model
-    // pdp_model_set_data (gs_stroop_model, 
-    //		&(g_array_index(subject_1->fixed_trials, stroop_trial_data, trial))); 
-
-    /* run stroop trial(s) */
+      /* run stroop trial(s) */
     run_stroop_trial (gs_stroop_model, 
 		      &(subject_1->fixed_trials[trial]), 
 		      random_generator);
@@ -689,20 +691,44 @@ int main () {
     /* update weights */
     update_associative_weights (gs_stroop_model);
 
-  /* prove it's worked */
-    // TODO - save and analyse data
-    
-    printf ("%d:\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n", 
-	    subject_1->fixed_trials[trial].trial_id,
-	    subject_1->fixed_trials[trial].trial_type, 
-	    subject_1->fixed_trials[trial].stim_task,
-	    subject_1->fixed_trials[trial].stim_word,
-	    subject_1->fixed_trials[trial].stim_colour,
-	    subject_1->fixed_trials[trial].stim_correct_response,
-	   (subject_1->fixed_trials[trial].response % 3), // disambiguate the response 
-    	    subject_1->fixed_trials[trial].response_time);
+
+       
     
     }
+
+  printf ("\n");
+  //<------------------------- RUN MIXED BLOCKS -------------------------->
+
+  for (run = 0; run < subject_1->num_mixed_runs; run ++) {
+    printf ("Mixed: %d", run);
+    // Note: need to run model_init immediately followed by update_associative_weights 
+    // to zero associative weights for new subject, in mixed blocks trials 
+    model_init (gs_stroop_model, 0.0); // zero activations (zero persisting taskdemand act.)
+    update_associative_weights (gs_stroop_model);
+
+    // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
+    for (trial = 0; trial < subject_1->num_mixed_trials_in_run; trial++) {
+      printf (" %d", trial);
+      model_init (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
+                                                         // (persisting taskdemand act.)
+
+      /* run stroop trial(s) */
+      run_stroop_trial (gs_stroop_model, 
+			&(subject_1->mixed_trials[run][trial]), 
+			random_generator);
+
+      /* update weights */
+      update_associative_weights (gs_stroop_model);
+    
+    }
+    printf ("\n");
+  }
+
+
+  /* prove it's worked */
+    // TODO - save and analyse data
+
+    // subject_print_fixed_trial_data(subject_1);
 
 
   // printf ("All subjects means: All trials\n");
