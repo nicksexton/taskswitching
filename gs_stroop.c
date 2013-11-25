@@ -728,20 +728,9 @@ int main () {
   /* prove it's worked */
     // TODO - save and analyse data
 
-    // subject_print_fixed_trial_data(subject_1);
+  gs_stroop_analyse_subject_fixedblocks (subject_1);
+  gs_stroop_analyse_subject_mixedblocks (subject_1);
 
-
-  printf ("All subjects means: All trials\n");
-  gs_stroop_analyse_subject_mixedblocks (subject_1, ALL_TRIALS);
-  gs_stroop_analyse_subject_fixedblocks (subject_1, ALL_TRIALS);
-
-  printf ("All subjects means: Correct trials only\n");
-  gs_stroop_analyse_subject_mixedblocks (subject_1, CORRECT_TRIALS);
-  gs_stroop_analyse_subject_fixedblocks (subject_1, CORRECT_TRIALS);
-
-  printf ("All subjects means: Incorrect trials only\n");
-  gs_stroop_analyse_subject_mixedblocks (subject_1, INCORRECT_TRIALS);
-  gs_stroop_analyse_subject_fixedblocks (subject_1, INCORRECT_TRIALS);
 
   subject_free (subject_1);
   free (gs_stroop_model->activation_parameters);

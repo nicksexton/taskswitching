@@ -34,13 +34,12 @@ typedef struct subject_aggregate_data {
   double fixed_neutral_CN_RT;
   double fixed_congruent_CN_RT;
   double fixed_incongruent_CN_RT;
-
   double fixed_neutral_WR_RT;
   double fixed_congruent_WR_RT;
   double fixed_incongruent_WR_RT;
 
+  // Top line DVs
   double fixed_inhibition_score;
-
   double mixed_TSwc;
   double mixed_TScw;
 
@@ -62,7 +61,9 @@ typedef struct subject {
   int num_fixed_trials;
   int num_mixed_runs;
   int num_mixed_trials_in_run;
-  subject_aggregate_data DVs;
+  subject_aggregate_data DVs_alltrials;
+  subject_aggregate_data DVs_correct;
+  subject_aggregate_data DVs_errors;
   void * params; 
 
 } subject; 
