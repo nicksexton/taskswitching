@@ -430,6 +430,37 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   return 0;
 }
 
+
+// sets model parameters (eg., weights) specific to gs_stroop_params defined in 
+// gs_stroop_subjects.c
+int model_init_params (pdp_model * gs_stroop_model, gs_stroop_params * my_params) {
+
+  word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
+  colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
+
+  double wts_taskdemand_wordout_matrix[3][2] = {
+    { my_params->taskdemand_weights_excitatory, my_params->taskdemand_weights_inhibitory},
+    { my_params->taskdemand_weights_excitatory, my_params->taskdemand_weights_inhibitory},
+    { my_params->taskdemand_weights_excitatory, my_params->taskdemand_weights_inhibitory},
+  };
+
+  double wts_taskdemand_colourout_matrix[3][2] = {
+    { my_params->taskdemand_weights_inhibitory,  my_params->taskdemand_weights_excitatory },
+    { my_params->taskdemand_weights_inhibitory,  my_params->taskdemand_weights_excitatory },
+    { my_params->taskdemand_weights_inhibitory,  my_params->taskdemand_weights_excitatory },
+  };
+
+
+  pdp_weights_set (pdp_input_find (word_output, ID_TASKDEMAND)->input_weights, 
+		   3, 2, wts_taskdemand_wordout_matrix);
+  pdp_weights_set (pdp_input_find (colour_output, ID_TASKDEMAND)->input_weights, 
+		   3, 2, wts_taskdemand_colourout_matrix);
+
+  return 0;
+  
+}
+
+
 // Zeros activation levels of all nodes
 // DOES NOT RESET WEIGHTS!!
 // persist_taskdemand_activation sets proportion of TD activation to carry over to
@@ -657,8 +688,8 @@ int main () {
 
   // <-------------------- MODEL INIT -------------------->
 
+
   /* set up subjects structure here */
-  
   subject * subject_1 = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
 
   subject_init_trialblock_fixed (random_generator, subject_1, 
