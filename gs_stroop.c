@@ -434,7 +434,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 // DOES NOT RESET WEIGHTS!!
 // persist_taskdemand_activation sets proportion of TD activation to carry over to
 // next trial ie. .20 = 20% of activation on previous
-int model_init (pdp_model * gs_stroop_model, double persist_taskdemand_activation) {
+int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdemand_activation) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
   int i;
@@ -681,7 +681,7 @@ int main () {
     // Note: need to run model_init immediately followed by update_associative_weights 
     // to zero associative weights for new subject, in mixed blocks trials 
 
-    model_init (gs_stroop_model, 0.0); // zero activations (zero persisting taskdemand act.)
+    model_init_activation (gs_stroop_model, 0.0); // zero activations 
 
       /* run stroop trial(s) */
     run_stroop_trial (gs_stroop_model, 
@@ -703,13 +703,13 @@ int main () {
     printf ("Mixed: %d", run);
     // Note: need to run model_init immediately followed by update_associative_weights 
     // to zero associative weights for new subject, in mixed blocks trials 
-    model_init (gs_stroop_model, 0.0); // zero activations (zero persisting taskdemand act.)
+    model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
     update_associative_weights (gs_stroop_model);
 
     // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
     for (trial = 0; trial < subject_1->num_mixed_trials_in_run; trial++) {
       printf (" %d", trial);
-      model_init (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
+      model_init_activation (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
                                                          // (persisting taskdemand act.)
 
       /* run stroop trial(s) */
