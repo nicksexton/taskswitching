@@ -45,7 +45,7 @@
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
 
-
+#define NUM_SUBJECTS 100
 #define NUM_TRIALS 100 // total number of trials
 #define MIXED_BLOCK_RUN_LENGTH 12 // must be multiple of 3??
 
@@ -435,6 +435,8 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 // gs_stroop_subjects.c
 int model_init_params (pdp_model * gs_stroop_model, gs_stroop_params * my_params) {
 
+  pdp_layer *word_output, *colour_output;
+
   word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
   colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
 
@@ -667,11 +669,11 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 int main () {
 
   gsl_rng * random_generator = random_generator_create();
-
+  int n;
 
   // TODO - can optimise model creation & initialisation - ie. use single model rather than 
   // re-initialising for each trial
-  // <-------------------- MODEL INIT ---------------------->
+  // <-------------------- GLOBAL MODEL INIT ---------------------->
   pdp_model * gs_stroop_model = pdp_model_create();
 
   // Specify activation function
@@ -682,88 +684,105 @@ int main () {
   activation_parameters->params.gs.act_min = ACTIVATION_MIN;
   gs_stroop_model->activation_parameters = activation_parameters;
 
-
   // create the network & set weights
   gs_stroop_model_build (gs_stroop_model); // also inits the model for 1st sim
 
-  // <-------------------- MODEL INIT -------------------->
+  // <-------------------- SUBJECTS INIT -------------------->
 
+  // create subject population
+  
+  subject_popn * my_subjects = subject_popn_create (NUM_SUBJECTS);
 
-  /* set up subjects structure here */
-  subject * subject_1 = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
+  for (n = 0; n < my_subjects->number_of_subjects; n++) {
+    
+    my_subjects->subj[n] = *(subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH));
 
-  subject_init_trialblock_fixed (random_generator, subject_1, 
+    // subject * subject_1 = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
+
+    subject_init_trialblock_fixed (random_generator, &(my_subjects->subj[n]), 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
 				 PPN_WORDREADING, PPN_COLOURNAMING);
 				 
-  subject_init_trialblock_mixed (subject_1);
+    subject_init_trialblock_mixed (&(my_subjects->subj[n]));
+
+    // init subject->params here!
+
+  }
 
   int trial, run;
-
   printf ("\nsubject_1:");
 
-  // <--------------------- RUN FIXED BLOCKS ---------------------->
 
-  // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
+  // <----------------------RUN SIMULATION ----------------------->
+  for (n = 0; n < my_subjects->number_of_subjects; n++) {
 
-  for (trial = 0; trial < subject_1->num_fixed_trials; trial++) {
-    
-    printf (" F%d", trial);
-    // Note: need to run model_init immediately followed by update_associative_weights 
-    // to zero associative weights for new subject, in mixed blocks trials 
-
-    model_init_activation (gs_stroop_model, 0.0); // zero activations 
-
-      /* run stroop trial(s) */
-    run_stroop_trial (gs_stroop_model, 
-		      &(subject_1->fixed_trials[trial]), 
-		      random_generator);
-
-    /* update weights */
-    update_associative_weights (gs_stroop_model);
-
-
-       
-    
-    }
-
-  printf ("\n");
-  //<------------------------- RUN MIXED BLOCKS -------------------------->
-
-  for (run = 0; run < subject_1->num_mixed_runs; run ++) {
-    printf ("Mixed: %d", run);
-    // Note: need to run model_init immediately followed by update_associative_weights 
-    // to zero associative weights for new subject, in mixed blocks trials 
-    model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
-    update_associative_weights (gs_stroop_model);
+    // <--------------------- a) RUN FIXED BLOCKS ---------------------->
 
     // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
-    for (trial = 0; trial < subject_1->num_mixed_trials_in_run; trial++) {
-      printf (" %d", trial);
-      model_init_activation (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
-                                                         // (persisting taskdemand act.)
 
+    for (trial = 0; trial < my_subjects->subj[n].num_fixed_trials; trial++) {
+      
+      printf (" F%d", trial);
+      // Note: need to run model_init immediately followed by update_associative_weights 
+      // to zero associative weights for new subject, in mixed blocks trials 
+      
+      model_init_activation (gs_stroop_model, 0.0); // zero activations 
+      
       /* run stroop trial(s) */
       run_stroop_trial (gs_stroop_model, 
-			&(subject_1->mixed_trials[run][trial]), 
-			random_generator);
+		      &(my_subjects->subj[n].fixed_trials[trial]), 
+		      random_generator);
 
       /* update weights */
-      update_associative_weights (gs_stroop_model);
-    
+      update_associative_weights (gs_stroop_model); // ?!? remove this line for fixed blocks??
+      
+      
     }
+    
     printf ("\n");
-  }
+    //<------------------------- b) RUN MIXED BLOCKS -------------------------->
+    
+    for (run = 0; run < my_subjects->subj[n].num_mixed_runs; run ++) {
+      printf ("Mixed: %d", run);
+      // Note: need to run model_init immediately followed by update_associative_weights 
+      // to zero associative weights for new subject, in mixed blocks trials 
+      model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
+      update_associative_weights (gs_stroop_model);
+      
+      // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
+      for (trial = 0; trial < my_subjects->subj[n].num_mixed_trials_in_run; trial++) {
+	printf (" %d", trial);
+	model_init_activation (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
+	// (persisting taskdemand act.)
+	
+	/* run stroop trial(s) */
+	run_stroop_trial (gs_stroop_model, 
+			  &(my_subjects->subj[n].mixed_trials[run][trial]), 
+			  random_generator);
+	
+	/* update weights */
+	update_associative_weights (gs_stroop_model);
+	
+      }
+      printf ("\n");
+    }
+
+
+  } //<---------------- CLOSE SIMULATION LOOP (per subject)--------------->
 
 
   /* prove it's worked */
     // TODO - save and analyse data
 
-  gs_stroop_analyse_subject_fixedblocks (subject_1);
-  gs_stroop_analyse_subject_mixedblocks (subject_1);
+  for (n = 0; n < my_subjects->number_of_subjects; n++) {
+
+    gs_stroop_analyse_subject_fixedblocks (&(my_subjects->subj[n]));
+    gs_stroop_analyse_subject_mixedblocks (&(my_subjects->subj[n]));
+  }
 
 
-  subject_free (subject_1);
+  //   subject_free (subject_1); // temp
+  subject_popn_free (my_subjects);
   free (gs_stroop_model->activation_parameters);
   pdp_model_free (gs_stroop_model);
   random_generator_free (random_generator);  
