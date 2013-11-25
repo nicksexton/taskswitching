@@ -171,6 +171,7 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 
     switch (trial_order[i]) {
     case NEUTRAL: 
+      
       if (task_order[i] == 0) {
 	stim_word = gsl_rng_uniform_int (random_generator, 3); 
 	stim_colour = -1;
@@ -179,17 +180,44 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 	stim_word = -1;
 	stim_colour = gsl_rng_uniform_int (random_generator, 3);
       } 
+      
+      /*
+      // TEST CODE
+      if (task_order[i] == 0) {
+	stim_word = 0;
+	stim_colour = -1;
+      }
+      else {
+	stim_word = -1;
+	stim_colour = 0;
+      }
+      */
       break;
 
-    case CONGRUENT: 
+    case CONGRUENT:
+       
       stim_word = gsl_rng_uniform_int (random_generator, 3); 
       stim_colour = stim_word;
+      
+      // TEST CODE
+      /*
+      stim_word = 0;
+      stim_colour = 0;
+      */
+
       break;
     
     case INCONGRUENT: 
+      
       stim_word = gsl_rng_uniform_int (random_generator, 3); 
       int incr = gsl_rng_uniform_int (random_generator, 2);
       stim_colour = (stim_word + incr) % 3;
+      
+      /*
+      // TEST CODE
+      stim_word = 0;
+      stim_colour = 1;
+      */
       break;
     
     }  

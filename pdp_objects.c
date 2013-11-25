@@ -29,6 +29,7 @@ pdp_units * pdp_units_create (int size) {
 
 void pdp_units_free (pdp_units * some_units) {
   /* frees from head (initial) -> tail (latest) of list */
+  /*
   if (some_units == NULL) {
     // printf ("end of (units) list reached, all done!\n");
     return;
@@ -41,7 +42,19 @@ void pdp_units_free (pdp_units * some_units) {
     pdp_units_free (tmp);
 
     return;
+
+  
   }
+  */
+  // Non-recursive version
+  while (some_units != NULL) {
+    pdp_units * tmp = some_units->next;
+    free (some_units->activations);
+    free (some_units);
+    some_units = tmp;
+  }
+  return;
+
 }
 
 

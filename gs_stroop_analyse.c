@@ -106,7 +106,7 @@ int gs_stroop_analyse_subject_fixedblocks (subject * a_subject) {
                a_subject->DVs_errors.fixed_congruent_CN_RT; 
 
 
-
+  /*
 
   printf ("Mean RTs: CN (all trials): neutral %6.3f, congruent %6.3f, incongruent %6.3f\n", 
 	  a_subject->DVs_alltrials.fixed_neutral_CN_RT, 
@@ -158,6 +158,7 @@ int gs_stroop_analyse_subject_fixedblocks (subject * a_subject) {
   printf ("Inhibition score (RTi - RTc) (error trials only): %5.3f\n", 
 	  a_subject->DVs_errors.fixed_inhibition_score);
 
+  */
   return 0;
 
 }
@@ -245,7 +246,7 @@ int gs_stroop_analyse_subject_mixedblocks (subject * a_subject) {
         (mean_RT_errors[5] + mean_RT_errors[6] + mean_RT_errors[7])/3;
   a_subject->DVs_errors.mixed_TScw = mean_RT_errors[8] - 
         (mean_RT_errors[9] + mean_RT_errors[10] + mean_RT_errors[11])/3;
-
+  /*
   printf ("Task switching scores (all trials): TSwc: %5.3f, TScw: %5.3f\n", 
 	  a_subject->DVs_alltrials.mixed_TSwc, a_subject->DVs_alltrials.mixed_TScw);
 
@@ -254,6 +255,40 @@ int gs_stroop_analyse_subject_mixedblocks (subject * a_subject) {
 
   printf ("Task switching scores (error trials only): TSwc: %5.3f, TScw: %5.3f\n", 
 	  a_subject->DVs_errors.mixed_TSwc, a_subject->DVs_errors.mixed_TScw);
+  */
+  return 0;
+}
+
+int gs_stroop_print_allsubs_data (subject_popn * some_subjects) {
+
+  int n;
+  subject * this_subj;
+
+  // print header
+  printf ("id\t"
+	  "TDwt_i\t" // task demand weight inhibitory
+	  "RT-CNn\t" // mean RT - colour naming, neutral
+	  "RT-CNc\t" // mean RT - colour naming, congruent
+	  "RT-CNi\t" // mean RT - colour naming, incongruent
+	  "RI\t" // response inhibition score (RTi - RTc)
+	  "TSwc\t" // task switching (word -> colour)
+	  "TScw\t\n"); // task switching (colour -> word)
+
+
+  for (n = 0; n < some_subjects->number_of_subjects; n++) {
+    this_subj = some_subjects->subj[n];
+
+    printf ("%d\t", n);
+    printf ("%4.2f\t", ((gs_stroop_params *)(this_subj->params))->taskdemand_weights_inhibitory);
+    printf ("%5.3f\t", this_subj->DVs_correct.fixed_neutral_CN_RT);
+    printf ("%5.3f\t", this_subj->DVs_correct.fixed_congruent_CN_RT);
+    printf ("%5.3f\t", this_subj->DVs_correct.fixed_incongruent_CN_RT);
+    printf ("%5.3f\t", this_subj->DVs_correct.fixed_inhibition_score);
+    printf ("%5.3f\t", this_subj->DVs_correct.mixed_TSwc);
+    printf ("%5.3f\t", this_subj->DVs_correct.mixed_TScw);
+
+    printf ("\n");
+  }
 
   return 0;
 }

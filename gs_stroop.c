@@ -25,7 +25,7 @@
 #define STEP_SIZE 0.0015
 #define SQUASHING_PARAM 0.8
 
-#define NOISE 0.006
+#define NOISE 0.0 // 0.006
 #define OUTPUTUNIT_BIAS -6.0
 #define TASKDEMAND_BIAS -4.0
 #define BIAS_NONE 0
@@ -45,7 +45,7 @@
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
 
-#define NUM_SUBJECTS 2
+#define NUM_SUBJECTS 100
 #define NUM_TRIALS 100 // total number of trials
 #define MIXED_BLOCK_RUN_LENGTH 12 // must be multiple of 3??
 
@@ -631,13 +631,15 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
     pdp_model_cycle (gs_stroop_model);
 
     // add noise to units 
+
+    
     add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
 			NOISE, random_generator);
     add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
 			NOISE, random_generator);
     add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer, 
 			NOISE, random_generator);
-
+    
     
 
 
@@ -689,6 +691,11 @@ int main () {
   // <-------------------- SUBJECTS INIT -------------------->
 
   // create subject population
+
+  // ***************
+  // **** TODO *****
+  // ***************
+  // NEED TO REBUILD MODEL FOR EACH TRIAL (else, model history persists)
   
   subject_popn * my_subjects = subject_popn_create (NUM_SUBJECTS);
 
@@ -714,6 +721,9 @@ int main () {
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
     printf ("%d ", n);
 
+    model_init_params (gs_stroop_model, 
+		       ((gs_stroop_params *)(my_subjects->subj[n]->params)));
+
     // <--------------------- a) RUN FIXED BLOCKS ---------------------->
 
     // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
@@ -732,7 +742,7 @@ int main () {
 		      random_generator);
 
       /* update weights */
-      update_associative_weights (gs_stroop_model); // ?!? remove this line for fixed blocks??
+      // update_associative_weights (gs_stroop_model); // ?!? remove this line for fixed blocks??
       
       
     }
@@ -778,6 +788,7 @@ int main () {
     gs_stroop_analyse_subject_mixedblocks (my_subjects->subj[n]);
   }
 
+  gs_stroop_print_allsubs_data (my_subjects);
 
   //   subject_free (subject_1); // temp
   subject_popn_free (my_subjects);
