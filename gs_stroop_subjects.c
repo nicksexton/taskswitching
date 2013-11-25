@@ -14,12 +14,11 @@
 
 subject_popn * subject_popn_create (int number_of_subjects) {
 
-  subject_popn * some_subjects;
+  subject_popn * some_subjects; // array of pointers to subjects
   some_subjects = malloc (sizeof(subject_popn));
   // some_subjects->subjects = g_array_sized_new (FALSE, FALSE, sizeof(subject), number_of_subjects);
 
-  some_subjects->subj = malloc (number_of_subjects * sizeof(subject));
-  
+  some_subjects->subj = malloc (number_of_subjects * sizeof(subject *));  
   some_subjects->number_of_subjects = number_of_subjects;
 
   return some_subjects;
@@ -31,11 +30,11 @@ void subject_popn_free (subject_popn * some_subjects) {
 
   // g_array_free (some_subjects->subjects, TRUE);
 
-  //int i;
-  //for (i = 0; i < some_subjects->number_of_subjects; i++) {
-  //  free (some_subjects->subj[i]);
-  //}
-
+  int i;
+  for (i = 0; i < some_subjects->number_of_subjects; i++) {
+    subject_free (some_subjects->subj[i]);
+  }
+  free (some_subjects->subj);
   free (some_subjects);
 
   return;

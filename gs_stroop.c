@@ -45,7 +45,7 @@
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
 
-#define NUM_SUBJECTS 100
+#define NUM_SUBJECTS 2
 #define NUM_TRIALS 100 // total number of trials
 #define MIXED_BLOCK_RUN_LENGTH 12 // must be multiple of 3??
 
@@ -541,7 +541,6 @@ int update_associative_weights (pdp_model * gs_stroop_model) {
 	task_demand->units_latest->activations[i] *
 	colour_input->units_latest->activations[j] * LEARNING_RATE;
 
-
     }
   }
 
@@ -695,34 +694,33 @@ int main () {
 
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
     
-    my_subjects->subj[n] = *(subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH));
-
+    my_subjects->subj[n] = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
     // subject * subject_1 = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
 
-    subject_init_trialblock_fixed (random_generator, &(my_subjects->subj[n]), 
+    subject_init_trialblock_fixed (random_generator, my_subjects->subj[n], 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
 				 PPN_WORDREADING, PPN_COLOURNAMING);
 				 
-    subject_init_trialblock_mixed (&(my_subjects->subj[n]));
+    subject_init_trialblock_mixed (my_subjects->subj[n]);
 
     // init subject->params here!
 
   }
 
   int trial, run;
-  printf ("\nsubject_1:");
-
+  printf ("\nsubject: ");
 
   // <----------------------RUN SIMULATION ----------------------->
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
+    printf ("%d ", n);
 
     // <--------------------- a) RUN FIXED BLOCKS ---------------------->
 
     // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
 
-    for (trial = 0; trial < my_subjects->subj[n].num_fixed_trials; trial++) {
+    for (trial = 0; trial < my_subjects->subj[n]->num_fixed_trials; trial++) {
       
-      printf (" F%d", trial);
+      // printf (" F%d", trial);
       // Note: need to run model_init immediately followed by update_associative_weights 
       // to zero associative weights for new subject, in mixed blocks trials 
       
@@ -730,7 +728,7 @@ int main () {
       
       /* run stroop trial(s) */
       run_stroop_trial (gs_stroop_model, 
-		      &(my_subjects->subj[n].fixed_trials[trial]), 
+			&(my_subjects->subj[n]->fixed_trials[trial]), 
 		      random_generator);
 
       /* update weights */
@@ -742,29 +740,29 @@ int main () {
     printf ("\n");
     //<------------------------- b) RUN MIXED BLOCKS -------------------------->
     
-    for (run = 0; run < my_subjects->subj[n].num_mixed_runs; run ++) {
-      printf ("Mixed: %d", run);
+    for (run = 0; run < my_subjects->subj[n]->num_mixed_runs; run ++) {
+      // printf ("Mixed: %d", run);
       // Note: need to run model_init immediately followed by update_associative_weights 
       // to zero associative weights for new subject, in mixed blocks trials 
       model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
       update_associative_weights (gs_stroop_model);
       
       // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
-      for (trial = 0; trial < my_subjects->subj[n].num_mixed_trials_in_run; trial++) {
-	printf (" %d", trial);
+      for (trial = 0; trial < my_subjects->subj[n]->num_mixed_trials_in_run; trial++) {
+	// printf (" %d", trial);
 	model_init_activation (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
 	// (persisting taskdemand act.)
 	
 	/* run stroop trial(s) */
 	run_stroop_trial (gs_stroop_model, 
-			  &(my_subjects->subj[n].mixed_trials[run][trial]), 
+			  &(my_subjects->subj[n]->mixed_trials[run][trial]), 
 			  random_generator);
 	
 	/* update weights */
 	update_associative_weights (gs_stroop_model);
 	
       }
-      printf ("\n");
+      // printf ("\n");
     }
 
 
@@ -776,8 +774,8 @@ int main () {
 
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
 
-    gs_stroop_analyse_subject_fixedblocks (&(my_subjects->subj[n]));
-    gs_stroop_analyse_subject_mixedblocks (&(my_subjects->subj[n]));
+    gs_stroop_analyse_subject_fixedblocks (my_subjects->subj[n]);
+    gs_stroop_analyse_subject_mixedblocks (my_subjects->subj[n]);
   }
 
 
