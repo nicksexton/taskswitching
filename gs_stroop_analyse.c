@@ -112,12 +112,12 @@ int gs_stroop_analyse_subject_fixedblocks (subject * a_subject) {
 					 counter_alltrials);
 
   gs_stroop_record_means (&(a_subject->DVs_correct),
-					 total_RT_alltrials, 
-					 counter_alltrials);
+					 total_RT_correct, 
+					 counter_correct);
 
   gs_stroop_record_means (&(a_subject->DVs_errors),
-					 total_RT_alltrials, 
-					 counter_alltrials);
+					 total_RT_errors, 
+					 counter_errors);
 
 
   // treat SD as mean of ssq_var with df = N-1 
@@ -365,7 +365,7 @@ int gs_stroop_data_filedump (subject_popn * some_subjects) {
   fp = fopen (DATAFILE, "w+");
 
   fprintf (fp, 
-	   // "id\t"
+	   "result\t"
 	   "TDwt_i\t" // task demand weight inhibitory
 	   "RT-Cn\tCnSD\t" // mean RT - colour naming, neutral
 	   "RT-Cc\tCcSD\t" // mean RT - colour naming, congruent
@@ -374,10 +374,12 @@ int gs_stroop_data_filedump (subject_popn * some_subjects) {
 	   "TSwc\t" // task switching (word -> colour)
 	   "TScw\t\n"); // task switching (colour -> word)
 
+  // OUTPUT CORRECT TRIALS
+
   for (n = 0; n < some_subjects->number_of_subjects; n++) {
     this_subj = some_subjects->subj[n];
 
-    // fprintf (fp, "%d\t", n); // subj id not needed, R creates this
+    fprintf (fp, "Cor\t"); // subj id not needed, R creates this
     fprintf (fp, "%4.2f\t", ((gs_stroop_params *)(this_subj->params))->taskdemand_weights_inhibitory);
     fprintf (fp, "%4.2f\t%4.2f\t", this_subj->DVs_correct.fixed_neutral_CN_RT,
 	                      this_subj->DVs_correct_sd.fixed_neutral_CN_RT);
@@ -391,6 +393,29 @@ int gs_stroop_data_filedump (subject_popn * some_subjects) {
 
     fprintf (fp, "\n");
   }
+
+  for (n = 0; n < some_subjects->number_of_subjects; n++) {
+    this_subj = some_subjects->subj[n];
+
+    fprintf (fp, "Err\t"); // subj id not needed, R creates this
+    fprintf (fp, "%4.2f\t", ((gs_stroop_params *)(this_subj->params))->taskdemand_weights_inhibitory);
+    fprintf (fp, "%4.2f\t%4.2f\t", this_subj->DVs_errors.fixed_neutral_CN_RT,
+	                      this_subj->DVs_errors_sd.fixed_neutral_CN_RT);
+    fprintf (fp, "%4.2f\t%4.2f\t", this_subj->DVs_errors.fixed_congruent_CN_RT,
+	                      this_subj->DVs_errors_sd.fixed_congruent_CN_RT);
+    fprintf (fp, "%4.2f\t%4.2f\t", this_subj->DVs_errors.fixed_incongruent_CN_RT,
+	                      this_subj->DVs_errors_sd.fixed_incongruent_CN_RT);
+    fprintf (fp, "%4.2f\t", this_subj->DVs_errors.fixed_inhibition_score);
+    fprintf (fp, "%4.2f\t", this_subj->DVs_errors.mixed_TSwc);
+    fprintf (fp, "%4.2f\t", this_subj->DVs_errors.mixed_TScw);
+
+    fprintf (fp, "\n");
+  }
+
+
+
+  // OUTPUT ERROR TRIALS
+
   /*
   fprintf (fp, "Key: \n"
 	   "id: subject id"
