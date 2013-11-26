@@ -33,7 +33,7 @@
 #define ID_TASKDEMAND 5
 #define ID_TOPDOWNCONTROL 6
 
-#define NUM_SUBJECTS 100
+#define NUM_SUBJECTS 500
 #define NUM_TRIALS 100 // total number of trials
 #define MIXED_BLOCK_RUN_LENGTH 12 // must be multiple of 3??
 
