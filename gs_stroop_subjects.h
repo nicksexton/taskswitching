@@ -82,7 +82,7 @@ typedef struct subject_popn {
 
 
 
-void subject_free (subject * subject_to_free);
+
 subject_popn * subject_popn_create (int number_of_subjects);
 void subject_popn_free (subject_popn * some_subjects);
 
@@ -91,10 +91,13 @@ stroop_trial_data stroop_trial_data_create (int id,
 					    trialtype trial_type, 
 					    int stim_task, int stim_word, int stim_colour);
 
-
-
-subject * subject_create (int num_fixed_trials, 
+struct subject * subject_create (int num_fixed_trials, 
 			  int num_mixed_runs, int num_mixed_trials_in_run);
+void subject_free (subject * subject_to_free);
+
+
+int subject_params_vary(subject * some_subject, double td_wt_inh, double td_wt_exc);
+// check global_params.h for varyingparameters
 
 
 int subject_init_trialblock_fixed (const gsl_rng * random_generator, 

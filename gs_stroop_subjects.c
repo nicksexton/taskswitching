@@ -92,8 +92,8 @@ subject * subject_create (int num_fixed_trials,
 
 
   // TODO - code to create params object here 
-  ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_inhibitory = -2.5; // TEMP CODE!!!
-  ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_excitatory = 2.5;
+  // ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_inhibitory = -2.5; // TEMP CODE!!!
+  // ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_excitatory = 2.5;
 
   return new_subject;
 
@@ -117,6 +117,19 @@ void subject_free (subject * subject_to_free) {
   
   return;
 }
+
+
+int subject_params_vary(subject * some_subject, double td_wt_inh, double td_wt_exc) {
+
+  ((gs_stroop_params*)(some_subject->params))->
+    taskdemand_weights_inhibitory = td_wt_inh; // TEMP CODE!!!
+  ((gs_stroop_params*)(some_subject->params))->
+    taskdemand_weights_excitatory = td_wt_exc;
+
+  return 0;
+
+}
+
 
 
 

@@ -18,49 +18,7 @@
 #include "gs_stroop.h"
 #include "global_params.h"
 
-/* Global parameters */
-/*
-#define ACTIVATION_MAX 1.0
-#define ACTIVATION_MIN -1.0
-#define RESPONSE_THRESHOLD 0.15
-#define STEP_SIZE 0.0015
-#define SQUASHING_PARAM 0.8
 
-#define NOISE 0.006
-#define OUTPUTUNIT_BIAS -6.0
-#define TASKDEMAND_BIAS -4.0
-#define BIAS_NONE 0
-#define STIMULUS_INPUT_STRENGTH_WORD 3.5
-#define STIMULUS_INPUT_STRENGTH_COLOUR 1.9
-
-#define TOPDOWN_CONTROL_STRENGTH_WORD 6.0
-#define TOPDOWN_CONTROL_STRENGTH_COLOUR 15.0
-#define LEARNING_RATE 1.0
-#define MAX_CYCLES 1500 // how long to let model run - NB check G&S defaults
-                        // TODO - need to track and handle 'no response' trials
-
-#define ID_WORDIN 1
-#define ID_COLOURIN 2
-#define ID_WORDOUT 3
-#define ID_COLOUROUT 4
-#define ID_TASKDEMAND 5
-#define ID_TOPDOWNCONTROL 6
-
-#define NUM_SUBJECTS 100
-#define NUM_TRIALS 100 // total number of trials
-#define MIXED_BLOCK_RUN_LENGTH 12 // must be multiple of 3??
-
-// relative proportion of congruent, incongruent, neutral trials 
-#define PPN_CONGRUENT 33 
-#define PPN_INCONGRUENT 33
-#define PPN_NEUTRAL 33
-
-// relative proportion of word reading vs. colour naming trials
-#define PPN_WORDREADING 50 
-#define PPN_COLOURNAMING 50
-
-#define DATAFILE "gs_stroop_data.txt"
-*/
 
 
 
@@ -659,7 +617,6 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
     
     
 
-
 #if defined ECHO
 
     printf ("\ncyc:%d\t", gs_stroop_model->cycle);
@@ -684,13 +641,13 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
 
 
+
 int main () {
 
   gsl_rng * random_generator = random_generator_create();
   int n;
 
-  // TODO - can optimise model creation & initialisation - ie. use single model rather than 
-  // re-initialising for each trial
+
   // <-------------------- GLOBAL MODEL INIT ---------------------->
   pdp_model * gs_stroop_model = pdp_model_create();
 
@@ -708,18 +665,21 @@ int main () {
   // <-------------------- SUBJECTS INIT -------------------->
 
   // create subject population
-
-  // ***************
-  // **** TODO *****
-  // ***************
-  // NEED TO REBUILD MODEL FOR EACH TRIAL (else, model history persists)
   
   subject_popn * my_subjects = subject_popn_create (NUM_SUBJECTS);
 
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
-    
+
     my_subjects->subj[n] = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
-    // subject * subject_1 = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
+
+    // parameterise subject
+    subject_params_vary (my_subjects->subj[n], 
+			 gsl_ran_flat (random_generator, 
+				       TASKDEMAND_OUTPUT_INHIB_VARY_MIN, 
+				       TASKDEMAND_OUTPUT_INHIB_VARY_MAX),
+			 TASKDEMAND_OUTPUT_EXCITATORY_WT);
+
+    // create subject data
 
     subject_init_trialblock_fixed (random_generator, my_subjects->subj[n], 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
@@ -727,7 +687,7 @@ int main () {
 				 
     subject_init_trialblock_mixed (my_subjects->subj[n]);
 
-    // init subject->params here!
+
 
   }
 
@@ -742,8 +702,6 @@ int main () {
 		       ((gs_stroop_params *)(my_subjects->subj[n]->params)));
 
     // <--------------------- a) RUN FIXED BLOCKS ---------------------->
-
-    // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
 
     for (trial = 0; trial < my_subjects->subj[n]->num_fixed_trials; trial++) {
       
@@ -774,11 +732,9 @@ int main () {
       model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
       update_associative_weights (gs_stroop_model);
       
-      // printf ("trialid\ttrial\ttask\tWin\tCin\tcorrect\trespns\trt\n");
       for (trial = 0; trial < my_subjects->subj[n]->num_mixed_trials_in_run; trial++) {
-	// printf (" %d", trial);
+
 	model_init_activation (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
-	// (persisting taskdemand act.)
 	
 	/* run stroop trial(s) */
 	run_stroop_trial (gs_stroop_model, 
@@ -789,7 +745,6 @@ int main () {
 	update_associative_weights (gs_stroop_model);
 	
       }
-      // printf ("\n");
     }
 
 
