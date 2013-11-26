@@ -6,11 +6,31 @@
 
 
 // takes [2][3] matrices
-int gs_stroop_analyse_fixedblock_matrix (double * output_matrix_mean,
-					 double * output_matrix_sd,
-					 int * totals_matrix, 
-					 int * counter_matrix) {
+int gs_stroop_analyse_fixedblocks_matrix (struct subject_aggregate_data * my_data_means,
+					 // struct subject_aggregate_data * my_data_sd,
+					 int totals_matrix[2][3], 
+					 int counter_matrix[2][3]) {
 
+  my_data_means->fixed_neutral_CN_RT = 
+               (double) totals_matrix[1][0] / counter_matrix[1][0];
+  my_data_means->fixed_congruent_CN_RT  = 
+               (double) totals_matrix[1][1] / counter_matrix[1][1];
+  my_data_means->fixed_incongruent_CN_RT  = 
+               (double) totals_matrix[1][2] / counter_matrix[1][2];
+
+  my_data_means->fixed_neutral_WR_RT  = 
+               (double) totals_matrix[0][0] / counter_matrix[0][0];
+  my_data_means->fixed_congruent_WR_RT  = 
+               (double) totals_matrix[0][1] / counter_matrix[0][1];
+  my_data_means->fixed_incongruent_WR_RT  = 
+               (double) totals_matrix[0][2] / counter_matrix[0][2];
+
+  my_data_means->fixed_inhibition_score = 
+               my_data_means->fixed_incongruent_CN_RT - 
+               my_data_means->fixed_congruent_CN_RT; 
+  
+  // TODO - strore number of trials (eg for correct/incorrect trials)
+  return 0;
 
 }
 
@@ -54,7 +74,7 @@ int gs_stroop_analyse_subject_fixedblocks (subject * a_subject) {
     }    
   }
   
-
+  /*
 
 // calculate data for all trials
   a_subject->DVs_alltrials.fixed_neutral_CN_RT = 
@@ -114,6 +134,21 @@ int gs_stroop_analyse_subject_fixedblocks (subject * a_subject) {
   a_subject->DVs_errors.fixed_inhibition_score = 
                a_subject->DVs_errors.fixed_incongruent_CN_RT - 
                a_subject->DVs_errors.fixed_congruent_CN_RT; 
+
+  */
+
+  gs_stroop_analyse_fixedblocks_matrix (&(a_subject->DVs_alltrials),
+					 total_RT_alltrials, 
+					 counter_alltrials);
+
+  gs_stroop_analyse_fixedblocks_matrix (&(a_subject->DVs_correct),
+					 total_RT_alltrials, 
+					 counter_alltrials);
+
+  gs_stroop_analyse_fixedblocks_matrix (&(a_subject->DVs_errors),
+					 total_RT_alltrials, 
+					 counter_alltrials);
+
 
 
   /*
