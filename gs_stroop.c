@@ -16,9 +16,10 @@
 #include "gs_stroop_analyse.h"
 
 #include "gs_stroop.h"
-
+#include "global_params.h"
 
 /* Global parameters */
+/*
 #define ACTIVATION_MAX 1.0
 #define ACTIVATION_MIN -1.0
 #define RESPONSE_THRESHOLD 0.15
@@ -58,9 +59,10 @@
 #define PPN_WORDREADING 50 
 #define PPN_COLOURNAMING 50
 
+#define DATAFILE "gs_stroop_data.txt"
+*/
 
 
-// #define ECHO // echo console output
 
 
 
@@ -804,6 +806,7 @@ int main () {
   }
 
   gs_stroop_print_allsubs_data (my_subjects);
+  gs_stroop_data_filedump (my_subjects);
 
   //   subject_free (subject_1); // temp
   subject_popn_free (my_subjects);

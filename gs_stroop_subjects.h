@@ -62,8 +62,11 @@ typedef struct subject {
   int num_mixed_runs;
   int num_mixed_trials_in_run;
   subject_aggregate_data DVs_alltrials;
+  subject_aggregate_data DVs_alltrials_sd;
   subject_aggregate_data DVs_correct;
+  subject_aggregate_data DVs_correct_sd;
   subject_aggregate_data DVs_errors;
+  subject_aggregate_data DVs_errors_sd;
   void * params; 
 
 } subject; 
