@@ -25,7 +25,7 @@
 #define STEP_SIZE 0.0015
 #define SQUASHING_PARAM 0.8
 
-#define NOISE 0.0 // 0.006
+#define NOISE 0.006
 #define OUTPUTUNIT_BIAS -6.0
 #define TASKDEMAND_BIAS -4.0
 #define BIAS_NONE 0
@@ -464,6 +464,7 @@ int model_init_params (pdp_model * gs_stroop_model, gs_stroop_params * my_params
 
 
 // Zeros activation levels of all nodes
+// also resets & frees activation history of all units in all layers
 // DOES NOT RESET WEIGHTS!!
 // persist_taskdemand_activation sets proportion of TD activation to carry over to
 // next trial ie. .20 = 20% of activation on previous
@@ -475,13 +476,27 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
   // zero cycle counter
   gs_stroop_model->cycle = 0;
 
+
+
+  // clear & free history
+
+  pdp_model_component * comp_i;
+  for (comp_i = gs_stroop_model->components; comp_i != NULL; comp_i = comp_i->next) {
+    pdp_units_free (comp_i->layer->units_initial.next);
+    comp_i->layer->units_latest = &(comp_i->layer->units_initial);
+    comp_i->layer->units_initial.next = NULL;
+  }
+
+
+
+  // Zero activations
+
   word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
   colour_input = pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer;
   word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
   colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
   taskdemand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
   topdown_control = pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer;
-
 
   double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
   double initial_activation_colourin[3] = {0.0, 0.0, 0.0};
