@@ -5,6 +5,16 @@
 #include "gs_stroop_analyse.h"
 
 
+// takes [2][3] matrices
+int gs_stroop_analyse_fixedblock_matrix (double * output_matrix_mean,
+					 double * output_matrix_sd,
+					 int * totals_matrix, 
+					 int * counter_matrix) {
+
+
+}
+
+
 
 
 int gs_stroop_analyse_subject_fixedblocks (subject * a_subject) {
