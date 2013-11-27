@@ -691,11 +691,13 @@ int main () {
 
   }
 
-  int trial, run;
+  
   printf ("\nsubject: ");
 
   // <----------------------RUN SIMULATION ----------------------->
+  
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
+    int trial, run;
     printf ("%d ", n);
 
     model_init_params (gs_stroop_model, 
