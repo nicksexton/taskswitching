@@ -648,19 +648,7 @@ int main () {
   int n;
 
 
-  // <-------------------- GLOBAL MODEL INIT ---------------------->
-  pdp_model * gs_stroop_model = pdp_model_create();
 
-  // Specify activation function
-  act_func_params * activation_parameters = malloc (sizeof(act_func_params));
-  activation_parameters->type = ACT_GS;
-  activation_parameters->params.gs.step_size = STEP_SIZE;
-  activation_parameters->params.gs.act_max = ACTIVATION_MAX;
-  activation_parameters->params.gs.act_min = ACTIVATION_MIN;
-  gs_stroop_model->activation_parameters = activation_parameters;
-
-  // create the network & set weights
-  gs_stroop_model_build (gs_stroop_model); // also inits the model for 1st sim
 
   // <-------------------- SUBJECTS INIT -------------------->
 
@@ -695,16 +683,30 @@ int main () {
   printf ("\nsubject: ");
 
   // <----------------------RUN SIMULATION ----------------------->
-  
+#pragma omp parallel for  
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
-    int trial, run;
-    printf ("%d ", n);
 
+    // <-------------------- GLOBAL MODEL INIT ---------------------->
+    pdp_model * gs_stroop_model = pdp_model_create();
+    
+    act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+    activation_parameters->type = ACT_GS;
+    activation_parameters->params.gs.step_size = STEP_SIZE;
+    activation_parameters->params.gs.act_max = ACTIVATION_MAX;
+    activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+    gs_stroop_model->activation_parameters = activation_parameters;
+    
+  // create the network & set weights
+    gs_stroop_model_build (gs_stroop_model); // also inits the model for 1st sim
+
+    
+    printf ("%d ", n);
     model_init_params (gs_stroop_model, 
 		       ((gs_stroop_params *)(my_subjects->subj[n]->params)));
 
     // <--------------------- a) RUN FIXED BLOCKS ---------------------->
 
+    int trial, run;
     for (trial = 0; trial < my_subjects->subj[n]->num_fixed_trials; trial++) {
       
       // printf (" F%d", trial);
@@ -749,6 +751,8 @@ int main () {
       }
     }
 
+    free (gs_stroop_model->activation_parameters);
+    pdp_model_free (gs_stroop_model);
 
   } //<---------------- CLOSE SIMULATION LOOP (per subject)--------------->
 
@@ -767,8 +771,6 @@ int main () {
 
   //   subject_free (subject_1); // temp
   subject_popn_free (my_subjects);
-  free (gs_stroop_model->activation_parameters);
-  pdp_model_free (gs_stroop_model);
   random_generator_free (random_generator);  
   
   return 0;
