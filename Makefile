@@ -4,11 +4,13 @@ LIBS = `pkg-config --libs glib-2.0`
 
 OBJECTS = gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o
 
-all:  gs_stroop
+all:  gs_stroop gs_stroop_threaded
 
-# gs_stroop: gs_stroop.o pdp_objects.o activation_functions.o
 gs_stroop: $(OBJECTS) 
 	$(CC) -o $@ $(CFLAGS) $(OBJECTS) -lgsl -lgslcblas -lm $(LIBS) 
+
+gs_stroop_threaded: $(OBJECTS) 
+	$(CC) -o $@ -DTHREADED $(CFLAGS) $(OBJECTS) -lgsl -lgslcblas -lm $(LIBS) 
 
 gs_stroop_subjects.o: 
 	$(CC) -c gs_stroop_subjects.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)

@@ -683,9 +683,12 @@ int main () {
   printf ("\nsubject: ");
 
   // <----------------------RUN SIMULATION ----------------------->
-#pragma omp parallel for  
+#ifdef THREADED
+#pragma omp parallel for
+#endif
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
 
+    printf ("%d ", n);
     // <-------------------- GLOBAL MODEL INIT ---------------------->
     pdp_model * gs_stroop_model = pdp_model_create();
     
@@ -699,8 +702,8 @@ int main () {
   // create the network & set weights
     gs_stroop_model_build (gs_stroop_model); // also inits the model for 1st sim
 
-    
-    printf ("%d ", n);
+
+
     model_init_params (gs_stroop_model, 
 		       ((gs_stroop_params *)(my_subjects->subj[n]->params)));
 
@@ -726,7 +729,6 @@ int main () {
       
     }
     
-    printf ("\n");
     //<------------------------- b) RUN MIXED BLOCKS -------------------------->
     
     for (run = 0; run < my_subjects->subj[n]->num_mixed_runs; run ++) {
