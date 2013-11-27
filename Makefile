@@ -4,13 +4,13 @@ LIBS = `pkg-config --libs glib-2.0`
 
 OBJECTS = gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o
 
-all:  gs_stroop gs_stroop_threaded
+all:  gs_stroop
 
 gs_stroop: $(OBJECTS) 
-	$(CC) -o $@ $(CFLAGS) $(OBJECTS) -lgsl -lgslcblas -lm $(LIBS) 
+	$(CC) -o $@ -D_THREADED_ $(CFLAGS) $(OBJECTS) -lgsl -lgslcblas -lm $(LIBS) 
 
-gs_stroop_threaded: $(OBJECTS) 
-	$(CC) -o $@ -DTHREADED $(CFLAGS) $(OBJECTS) -lgsl -lgslcblas -lm $(LIBS) 
+gs_stroop.o:
+	$(CC) -c gs_stroop.c -D_THREADED_ $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 gs_stroop_subjects.o: 
 	$(CC) -c gs_stroop_subjects.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
@@ -30,4 +30,4 @@ random_generator_functions.o:
 #	$(CC) -c simulated_subjects.c $(CFLAGS) $(LIBS)
 
 clean: 
-	rm -f gs_stroop *.o *.[ch]~
+	rm -f gs_stroop gs_stroop_threaded *.o *.[ch]~

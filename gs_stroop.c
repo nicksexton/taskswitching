@@ -682,13 +682,22 @@ int main () {
   
   printf ("\nsubject: ");
 
+
   // <----------------------RUN SIMULATION ----------------------->
-#ifdef THREADED
+
+#ifdef _THREADED_
 #pragma omp parallel for
 #endif
   for (n = 0; n < my_subjects->number_of_subjects; n++) {
 
     printf ("%d ", n);
+#ifdef _THREADED_
+    if (n < my_subjects->number_of_subjects/4) {
+#endif
+    printf ("\n");
+#ifdef _THREADED_
+    }
+#endif
     // <-------------------- GLOBAL MODEL INIT ---------------------->
     pdp_model * gs_stroop_model = pdp_model_create();
     
