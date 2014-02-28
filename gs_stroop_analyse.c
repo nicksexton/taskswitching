@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "global_params.h"
+#include "gs_stroop_global_params.h"
 #include "gs_stroop_subjects.h"
 #include "gs_stroop_analyse.h"
 

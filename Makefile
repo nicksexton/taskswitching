@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS= -fopenmp `pkg-config --cflags glib-2.0` -Wall -Werror -g
 LIBS = `pkg-config --libs glib-2.0` 
 
-OBJECTS = gs_stroop.o pdp_objects.o activation_funcs.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o
+OBJECTS = gs_stroop.o pdp_objects.o pdp_activation_funcs.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o
 
 all:  gs_stroop
 
@@ -20,7 +20,7 @@ gs_stroop_analyse.o:
 
 pdp_objects: pdp_objects.o 
 
-pdp_objects.o: pdp_objects.c activation_funcs.o
+pdp_objects.o: pdp_objects.c pdp_activation_funcs.o
 # activation_funcs.o: activation_funcs.c
 
 random_generator_functions.o: 
@@ -30,4 +30,5 @@ random_generator_functions.o:
 #	$(CC) -c simulated_subjects.c $(CFLAGS) $(LIBS)
 
 clean: 
-	rm -f gs_stroop gs_stroop_threaded *.o *.[ch]~
+#	rm -f gs_stroop gs_stroop_threaded *.o *.[ch]~
+	rm -f gs_stroop *.o *.[ch]~
