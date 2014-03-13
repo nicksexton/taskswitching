@@ -503,6 +503,8 @@ void pdp_model_free (pdp_model * some_model) {
     some_model->next->prev = some_model->prev;
   }
 
+
+
   // now free the model itself
   // printf ("freeing model name\n");
   free (some_model->name);  
