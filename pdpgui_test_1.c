@@ -174,41 +174,7 @@ However, in sufficient amounts, copper can be poisonous and even fatal to organi
 }
 
 
-  
-static void activate(GtkApplication *app, PdpSimulation * simulation) {
 
-  GtkWidget *window;
-  GtkWidget *grid;
-  GtkWidget *notes;
-
-  // Create a window with a title, default size, and set border width
-  window = gtk_application_window_new (app);
-  gtk_window_set_title (GTK_WINDOW(window), "GUI: notebook");
-  gtk_window_set_default_size(GTK_WINDOW(window), 800, 800);
-  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-  gtk_container_set_border_width (GTK_CONTAINER(window), 10);
-
-
-  // ------------- NOTEPAD -----------------
-
-  notes = gtk_notebook_new();
-
-  gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
-			   create_notepage_model_main(simulation), 
-			   gtk_label_new("Model"));
-
-  // Create a full-window grid to contain toolbar and the notebook
-  grid = gtk_grid_new();
-  
-  // options for notebook
-  gtk_widget_set_hexpand (notes, TRUE);
-  gtk_widget_set_vexpand (notes, TRUE);
-  gtk_grid_attach (GTK_GRID(grid), notes, 0, 1, 1, 1);
-
-  gtk_container_add (GTK_CONTAINER(window), GTK_WIDGET(grid));
-
-  gtk_widget_show_all (window);
-}
 
 
 PdpSimulation * init_simulation () {
@@ -272,28 +238,58 @@ void free_simulation (PdpSimulation * simulation) {
 
 }
 
+static void main_quit (GtkWidget *window, PdpSimulation *simulation) {
 
+  
+  free_simulation (simulation);
+  gtk_main_quit ();
+
+}
 
 
 int main (int argc, char *argv[]) {
-
-  GtkApplication *app;
-  int status;
 
 
   PdpSimulation * simulation = init_simulation();
 
 
-  app = gtk_application_new ("PDP.gui", G_APPLICATION_FLAGS_NONE);
-  g_signal_connect (app, "activate", G_CALLBACK(activate), (gpointer) simulation);
-  status = g_application_run (G_APPLICATION(app), argc, argv);
+  GtkWidget *window;
+  GtkWidget *grid;
+  GtkWidget *notes;
+
+  gtk_init (&argc, &argv);
+
+  // Create a window with a title, default size, and set border width
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title (GTK_WINDOW(window), "GUI: notebook");
+  gtk_window_set_default_size(GTK_WINDOW(window), 800, 800);
+  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width (GTK_CONTAINER(window), 10);
+  g_signal_connect (window, "destroy", G_CALLBACK(main_quit), (gpointer) simulation);
 
 
-  // free the model
+  // ------------- NOTEPAD -----------------
 
+  notes = gtk_notebook_new();
+
+  gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
+			   create_notepage_model_main(simulation), 
+			   gtk_label_new("Model"));
+
+  // Create a full-window grid to contain toolbar and the notebook
+  grid = gtk_grid_new();
   
-  free_simulation (simulation);
-  g_object_unref (app);
+  // options for notebook
+  gtk_widget_set_hexpand (notes, TRUE);
+  gtk_widget_set_vexpand (notes, TRUE);
+  gtk_grid_attach (GTK_GRID(grid), notes, 0, 1, 1, 1);
 
-  return status;
+  gtk_container_add (GTK_CONTAINER(window), GTK_WIDGET(grid));
+
+  gtk_widget_show_all (window);
+
+  gtk_main();
+
+
+  return 0;
 }

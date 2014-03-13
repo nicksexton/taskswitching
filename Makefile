@@ -33,9 +33,10 @@ gs_stroop_analyse.o:
 	$(CC) -c gs_stroop_analyse.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 
-pdp_objects: pdp_objects.o 
+# pdp_objects: pdp_objects.o 
 
-pdp_objects.o: pdp_objects.c pdp_activation_funcs.o
+pdp_objects.o: pdp_activation_funcs.o
+	$(CC) -c pdp_objects.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 
 random_generator_functions.o: 
