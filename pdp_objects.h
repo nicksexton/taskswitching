@@ -47,6 +47,7 @@ typedef struct pdp_units {
   struct pdp_units * next;
   struct pdp_units * previous;
 } pdp_units;
+
  
 
 /* A layer of units */
@@ -121,9 +122,10 @@ typedef struct pdp_model {
   pdp_model *prev;
 
   int cycle;
-  /* model global parameters */
-  act_func_params * activation_parameters;
-  // enum indicating which activation function to use
+  /* model parameters */
+  // parameters object (g_hash_table???)
+  act_func_params * activation_parameters;  
+    // enum indicating active activation function
 
   /* components */
   pdp_model_component * components;
@@ -136,6 +138,12 @@ typedef struct pdp_model {
 } pdp_model;
 
 
+
+typedef struct pdp_simulation {
+
+  pdp_model *model; // head of a possible list of models
+
+} PdpSimulation;
 
 
 pdp_units * pdp_units_create (int size);

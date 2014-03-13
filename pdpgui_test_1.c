@@ -3,7 +3,12 @@
 #include "gs_stroop.h"
 #include "pdp_objects.h"
 
-static GtkWidget* create_notepage_model_main() {
+
+
+
+
+
+static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
 
   GtkWidget *grid;
   GtkWidget *toolbar;
@@ -17,17 +22,29 @@ static GtkWidget* create_notepage_model_main() {
   toolbar = gtk_toolbar_new();
   gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_REFRESH);
-  // connect button callback here!
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_FIRST);
+  // connect model init callback here!
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
-  tool_item = gtk_separator_tool_item_new();
-  gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(tool_item), FALSE);
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GO_FORWARD);
+  // connect model step callback here!
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_CLOSE);
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
+  // connect model run callback here!
+  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+
+
+
+
+  // code for close button on toolbar:
+  // tool_item = gtk_separator_tool_item_new();
+  // gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(tool_item), FALSE);
+  // gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+
+  //  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_CLOSE);
   // connect application quit callback here
-  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+  //  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // options for toolbar
   gtk_widget_set_hexpand (toolbar, TRUE);
@@ -54,12 +71,10 @@ However, in sufficient amounts, copper can be poisonous and even fatal to organi
 
   gtk_widget_show_all(grid);
   return (grid);
-
 }
 
-
   
-static void activate(GtkApplication *app, gpointer user_data) {
+static void activate(GtkApplication *app, PdpSimulation * simulation) {
 
   GtkWidget *window;
   GtkWidget *grid;
@@ -78,7 +93,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   notes = gtk_notebook_new();
 
   gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
-			   create_notepage_model_main(), 
+			   create_notepage_model_main(simulation), 
 			   gtk_label_new("Model"));
 
   // Create a full-window grid to contain toolbar and the notebook
@@ -95,27 +110,24 @@ static void activate(GtkApplication *app, gpointer user_data) {
 }
 
 
+
 int main (int argc, char *argv[]) {
 
   GtkApplication *app;
   int status;
 
-  // init a model here:
-  struct {
-    pdp_model * model;
-  } simulation;
-
-  simulation.model = pdp_model_create (0, "gs_stroop");
-  gs_stroop_model_build (simulation.model);
+  PdpSimulation *simulation = g_malloc (sizeof(PdpSimulation));
+  simulation->model = pdp_model_create (0, "gs_stroop");
+  gs_stroop_model_build (simulation->model);
 
   app = gtk_application_new ("PDP.gui", G_APPLICATION_FLAGS_NONE);
-  g_signal_connect (app, "activate", G_CALLBACK(activate), NULL);
+  g_signal_connect (app, "activate", G_CALLBACK(activate), (gpointer) simulation);
   status = g_application_run (G_APPLICATION(app), argc, argv);
 
 
   // free the model
-  pdp_model_free (simulation.model);
-
+  pdp_model_free (simulation->model);
+  g_free (simulation);
   g_object_unref (app);
 
   return status;
