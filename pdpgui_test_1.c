@@ -1,11 +1,35 @@
+#define NUMBER_OF_SUBJECTS 1
+
 // inits a model with basic controls to run it
+#include <stdbool.h>
 #include <gtk/gtk.h>
 #include "gs_stroop.h"
 #include "pdp_objects.h"
 
+#include <gsl/gsl_randist.h>
+#include "random_generator_functions.h" // for gaussian noise
+#include "gs_stroop_subjects.h"
+#include "gs_stroop_global_params.h"
+
+#include "pdpgui.h"
 
 
 static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+
+  int n;
+  for (n = 0; n < NUMBER_OF_SUBJECTS; n ++) {
+
+    // initialise gs_stroop_params here for now
+    model_init_params (simulation->model, 
+		     ((gs_stroop_params *)(simulation->subjects->subj[n]->params)));
+  }
+
+  model_init_activation (simulation->model, 0.0); // zero activations 
+
+  // init current trial and current subject
+  simulation->current_subject = 0;
+  simulation->current_trial = 0;
+
 
   printf ("model simulation %s initialised\n", simulation->model->name);
 
@@ -14,18 +38,37 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation
 static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
   printf ("model %s step once\n", simulation->model->name);
+  bool running = run_model_step (simulation->model, simulation->random_generator);
+
+  if (running) {
+    // do something?
+  }
+
+  else {
+    printf ("model stopped\n");
+  }
 
 }
 
 static void model_controls_step_many_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
-  printf ("model %s step many\n", simulation->model->name);
-
+  printf ("model %s step many (not implemented)\n", simulation->model->name);
 }
 
 static void model_controls_run_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
-  printf ("model %s run to end\n", simulation->model->name);
+
+  run_stroop_trial (simulation->model, 
+		    &(simulation->subjects->subj[simulation->current_subject]
+		      ->fixed_trials[simulation->current_trial]), 
+		    simulation->random_generator);
+
+
+  printf ("model %s run trial \n", simulation->model->name);
+
+  // current version only runs a single trial; uncomment this when checks are in place that current_trial does not
+  // exceed max trials
+  // simulation->current_trial ++;
 
 }
 
@@ -146,15 +189,79 @@ static void activate(GtkApplication *app, PdpSimulation * simulation) {
 }
 
 
+PdpSimulation * init_simulation () {
+  // just allocate memory for simulation and run constructors
+
+  PdpSimulation *simulation = g_malloc (sizeof(PdpSimulation));
+  int n;
+
+  simulation->random_generator = random_generator_create();
+
+  simulation->model = pdp_model_create (0, "gs_stroop");
+
+  gs_stroop_model_build (simulation->model); // probably defer building the model in later versions
+
+  act_func_params * act_params = act_params = malloc (sizeof(act_func_params));
+
+  act_params->type = ACT_GS;
+  act_params->params.gs.step_size = STEP_SIZE;
+  act_params->params.gs.act_max = ACTIVATION_MAX;
+  act_params->params.gs.act_min = ACTIVATION_MIN;
+
+  simulation->model->activation_parameters = act_params;
+
+
+  simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
+
+
+  for (n = 0; n < simulation->subjects->number_of_subjects; n++) {
+
+    simulation->subjects->subj[n] = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
+
+    // parameterise subject
+    subject_params_vary (simulation->subjects->subj[n], 
+			 TASKDEMAND_OUTPUT_INHIBITORY_WT,
+			 TASKDEMAND_OUTPUT_EXCITATORY_WT);
+
+    // create subject data
+
+    subject_init_trialblock_fixed (simulation->random_generator, simulation->subjects->subj[n], 
+				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
+				 PPN_WORDREADING, PPN_COLOURNAMING);
+
+    // don't do mixed trials yet in this simulation				 
+    // subject_init_trialblock_mixed (my_subjects->subj[n]);
+ 
+  }
+  simulation->current_subject = 0;
+  simulation->current_trial = 0;
+
+  return simulation;
+
+}
+
+
+void free_simulation (PdpSimulation * simulation) {
+  // free memory for simulation
+
+  pdp_model_free (simulation->model);
+  free (simulation->params);
+
+  subject_popn_free (simulation->subjects);
+  random_generator_free (simulation->random_generator);  
+  g_free (simulation);
+
+}
+
 
 int main (int argc, char *argv[]) {
 
   GtkApplication *app;
   int status;
 
-  PdpSimulation *simulation = g_malloc (sizeof(PdpSimulation));
-  simulation->model = pdp_model_create (0, "gs_stroop");
-  gs_stroop_model_build (simulation->model);
+
+  PdpSimulation * simulation = init_simulation();
+
 
   app = gtk_application_new ("PDP.gui", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK(activate), (gpointer) simulation);
@@ -162,8 +269,9 @@ int main (int argc, char *argv[]) {
 
 
   // free the model
-  pdp_model_free (simulation->model);
-  g_free (simulation);
+
+  
+  free_simulation (simulation);
   g_object_unref (app);
 
   return status;

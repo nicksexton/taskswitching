@@ -138,12 +138,16 @@ typedef struct pdp_model {
 } pdp_model;
 
 
-
+// pdpsimulation currently defined inside pdpgui.h
+// final production version should be fully generic (ie independent of a specific simulation)
+// and defined here.
+/*
 typedef struct pdp_simulation {
 
   pdp_model *model; // head of a possible list of models
 
 } PdpSimulation;
+*/
 
 
 pdp_units * pdp_units_create (int size);

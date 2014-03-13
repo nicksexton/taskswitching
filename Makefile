@@ -44,8 +44,8 @@ random_generator_functions.o:
 
 # gui
 
-pdpgui_test_1: pdpgui_test_1.o pdp_objects.o gs_stroop_model.o pdp_activation_funcs.o
-	$(CC) -o $@ $(CFLAGS) pdpgui_test_1.o pdp_objects.o gs_stroop_model.o pdp_activation_funcs.o -lgsl -lgslcblas -lm $(LIBS) 	
+pdpgui_test_1: pdpgui_test_1.o $(OBJECTS) 
+	$(CC) -o $@ $(CFLAGS) pdpgui_test_1.o $(OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
 pdpgui_test_1.o:
 	$(CC) -c pdpgui_test_1.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 

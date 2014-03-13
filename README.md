@@ -30,3 +30,9 @@ initial test of a gui
 needs to init and run a model
 simple model controls (re-initialise, step, run)
 output to console for now
+
+  ######TODO
+  * current model params are very simply defined.
+  * model should store params in a generic format (g_hash_table?)
+  * model currently initialises params inside model_controls_initialise_cb. hash table of params should be
+    stored in pdp_model

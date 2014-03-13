@@ -26,7 +26,7 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
 int update_associative_weights (pdp_model * gs_stroop_model);
   // NB running this function immediately after initing model SHOULD zero associative weights
 
-
+bool run_model_step (pdp_model * gs_stroop_model, const gsl_rng * random_generator);
 int run_stroop_trial (pdp_model * gs_stroop_model,
 		      stroop_trial_data * this_trial,
 		      const gsl_rng * random_generator);

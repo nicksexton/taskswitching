@@ -18,7 +18,7 @@
 #include "gs_stroop.h"
 #include "gs_stroop_global_params.h"
 
-
+#define ECHO
 
 
 
@@ -527,6 +527,48 @@ int update_associative_weights (pdp_model * gs_stroop_model) {
 
 }
 
+// returns true while model is still running (does not satisfy stopping condition), false otherwise
+bool run_model_step (pdp_model * gs_stroop_model, const gsl_rng * random_generator) {
+
+
+  if (stopping_condition(gs_stroop_model, this_trial) != true && 
+      gs_stroop_model->cycle < MAX_CYCLES)  {
+    return false;
+  }
+  else {
+
+    // recalculate activation 
+  pdp_model_cycle (gs_stroop_model);
+
+
+    // add noise to units 
+  add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
+		      NOISE, random_generator);
+  add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
+			NOISE, random_generator);
+  add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer, 
+			NOISE, random_generator);
+    
+    
+
+#if defined ECHO
+
+  printf ("\ncyc:%d\t", gs_stroop_model->cycle);
+  pdp_layer_print_current_output (
+				  pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
+  pdp_layer_print_current_output (
+				  pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
+
+    
+#endif
+
+    return true;
+  }
+
+
+}
+
+
 
 
 /*****************************************************************/
@@ -596,10 +638,12 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // <--------------------- RUN TRIAL ---------------------------->
 
-  while ((stopping_condition(gs_stroop_model, this_trial) != true && 
-	  gs_stroop_model->cycle < MAX_CYCLES))  {
+  //  while ((stopping_condition(gs_stroop_model, this_trial) != true && 
+  //	  gs_stroop_model->cycle < MAX_CYCLES))  {
 
 
+    while (run_model_step (gs_stroop_model, random_generator));
+    /*
     // recalculate activation 
 
     pdp_model_cycle (gs_stroop_model);
@@ -627,9 +671,9 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
     
 #endif
 
- 
+    */ 
     
-  }
+  
 
   this_trial->response_time = gs_stroop_model->cycle;
   // nb subject_data->response_time already set by stopping_condition
