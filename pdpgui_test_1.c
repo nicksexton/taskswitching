@@ -5,6 +5,30 @@
 
 
 
+static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+
+  printf ("model simulation %s initialised\n", simulation->model->name);
+
+}
+
+static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+
+  printf ("model %s step once\n", simulation->model->name);
+
+}
+
+static void model_controls_step_many_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+
+  printf ("model %s step many\n", simulation->model->name);
+
+}
+
+static void model_controls_run_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+
+  printf ("model %s run to end\n", simulation->model->name);
+
+}
+
 
 
 
@@ -22,16 +46,28 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   toolbar = gtk_toolbar_new();
   gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_FIRST);
-  // connect model init callback here!
+  // initialise
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PREVIOUS);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(model_controls_initialise_cb), (gpointer) simulation);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GO_FORWARD);
-  // connect model step callback here!
+  // step once
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(model_controls_step_once_cb), (gpointer) simulation);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
-  // connect model run callback here!
+  // step many
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_FORWARD);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(model_controls_step_many_cb), (gpointer) simulation);
+  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+
+  // run to end
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_NEXT);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(model_controls_run_cb), (gpointer) simulation);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
