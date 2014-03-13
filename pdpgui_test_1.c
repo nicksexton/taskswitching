@@ -173,6 +173,7 @@ However, in sufficient amounts, copper can be poisonous and even fatal to organi
   return (grid);
 }
 
+
   
 static void activate(GtkApplication *app, PdpSimulation * simulation) {
 
@@ -186,7 +187,7 @@ static void activate(GtkApplication *app, PdpSimulation * simulation) {
   gtk_window_set_default_size(GTK_WINDOW(window), 800, 800);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width (GTK_CONTAINER(window), 10);
-  
+
 
   // ------------- NOTEPAD -----------------
 
@@ -264,13 +265,14 @@ void free_simulation (PdpSimulation * simulation) {
   // free memory for simulation
 
   pdp_model_free (simulation->model);
-  free (simulation->params);
 
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
   g_free (simulation);
 
 }
+
+
 
 
 int main (int argc, char *argv[]) {

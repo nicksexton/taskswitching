@@ -5,6 +5,7 @@
 #include "pdp_activation_funcs.h"
 #include "pdp_objects.h"
 
+#define MODEL_NAME_MAX_LENGTH 30
 
 
 /* TODO - connect bias nodes as inputs */
@@ -451,13 +452,13 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
 
 pdp_model * pdp_model_create (int id, char *model_name) {
   pdp_model * this_model = malloc (sizeof(pdp_model));
-  this_model->name = malloc (sizeof(*model_name));
+  this_model->name = malloc (MODEL_NAME_MAX_LENGTH * sizeof (char));
 
   this_model->next = NULL;
   this_model->prev = NULL;
 
   this_model->id = id;
-  strcpy (this_model->name, model_name);
+  strncpy (this_model->name, model_name, MODEL_NAME_MAX_LENGTH);
   
   this_model->components = NULL;
   this_model->cycle = 0;

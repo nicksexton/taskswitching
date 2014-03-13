@@ -9,7 +9,7 @@ typedef struct pdp_simulation {
   gsl_rng * random_generator;
 
   // should make params and subject(s) generic
-  gs_stroop_params *params;
+  
 
   subject_popn *subjects;
 
