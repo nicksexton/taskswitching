@@ -1,3 +1,6 @@
+
+
+
 pdp models implemented in C
 ===========================
 
@@ -19,4 +22,11 @@ Various models implemented within generic PDP library
   * use gs_stroop model out-of-the-box to explore empirical effects not discussed in published material
   * extend gs_stroop model (eg with inhibition/conflict monitoring mechanisms, to implement n-2 inhibition effects.
 
-  
+
+#### gui branch####
+
+* pdpgui_test_1.c
+initial test of a gui
+needs to init and run a model
+simple model controls (re-initialise, step, run)
+output to console for now
