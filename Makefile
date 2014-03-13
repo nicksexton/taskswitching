@@ -4,7 +4,9 @@ LIBS = `pkg-config --libs glib-2.0`
 
 OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o
 
-all:  gs_stroop_sim_indiffs
+BINARIES = gs_stroop_sim_indiffs
+
+all: $(BINARIES)
 
 
 gs_stroop_sim_indiffs: gs_stroop_sim_indiffs.o $(OBJECTS) 
@@ -33,4 +35,4 @@ random_generator_functions.o:
 
 
 clean: 
-	rm -f gs_stroop *.o *.[ch]~
+	rm -f gs_stroop *.o *.[ch]~ $(BINARIES)
