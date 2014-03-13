@@ -72,8 +72,9 @@ int main () {
     }
 #endif
     // <-------------------- GLOBAL MODEL INIT ---------------------->
-    pdp_model * gs_stroop_model = pdp_model_create();
-    
+    pdp_model * gs_stroop_model = pdp_model_create(n, "gs_stroop");
+
+
     act_func_params * activation_parameters = malloc (sizeof(act_func_params));
     activation_parameters->type = ACT_GS;
     activation_parameters->params.gs.step_size = STEP_SIZE;

@@ -203,7 +203,6 @@ pdp_weights_matrix * pdp_weights_create(int size_output, int size_input) {
     new_weights->weights[i] = malloc(size_input * sizeof(double));
   }
 
-
   return new_weights;
 }
 
@@ -219,7 +218,6 @@ void pdp_weights_set (pdp_weights_matrix * some_weights,
   }
 
   return;
-
 }
 
 
@@ -444,20 +442,43 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
       printf ("\nerror! DUMMY is proof of concept,");
       printf ("not a real activation function\n");
       break;
-    }
-      
+    }      
   }
 
   return 0;
 }
 
 
-pdp_model * pdp_model_create () {
+pdp_model * pdp_model_create (int id, char *model_name) {
   pdp_model * this_model = malloc (sizeof(pdp_model));
+  this_model->name = malloc (sizeof(*model_name));
+
+  this_model->next = NULL;
+  this_model->prev = NULL;
+
+  this_model->id = id;
+  strcpy (this_model->name, model_name);
+  
   this_model->components = NULL;
   this_model->cycle = 0;
   return (this_model);
-  // this_model->model_data = NULL;
+  
+}
+
+// creates a new pdp model and inserts it into a list of models
+pdp_model * pdp_model_insert_new (pdp_model * insert_after, int id, char *model_name) {
+  pdp_model * this_model = malloc (sizeof(pdp_model));
+  this_model->name = malloc (sizeof(*model_name));
+
+  this_model->next = insert_after->next;
+  this_model->prev = insert_after;
+
+  this_model->id = id;
+  strcpy (this_model->name, model_name);
+  
+  this_model->components = NULL;
+  this_model->cycle = 0;
+  return (this_model);
   
 }
 
@@ -468,11 +489,50 @@ void pdp_model_free (pdp_model * some_model) {
   /* free the components */
   pdp_model_component_free (some_model->components);
   some_model->components = NULL; // poss optional?
+
+  // Remember to fix up the links!
+
+  if (some_model->prev != NULL) {    
+    some_model->prev->next = some_model->next;
+  }
+  if (some_model->next != NULL) {
+    some_model->next->prev = some_model->prev;
+  }
+
+  // now free the model itself
+  free (some_model->name);  
   free (some_model);
   // printf ("model freed, returning...\n");
   return;
 }
 
+
+void pdp_model_free_list (pdp_model * some_model) {
+
+  // two iterators
+  pdp_model *this, *prev, *next;
+  
+  prev = some_model->prev;
+
+  while (prev != NULL) {
+    this = prev;
+    prev = prev->prev;
+    pdp_model_free (this);
+  }
+
+  next = some_model->next;
+
+  while (next != NULL) {
+    this = next;
+    next = next->next;
+    pdp_model_free (next);
+  }
+
+  some_model->next = NULL;
+  some_model->prev = NULL;
+  pdp_model_free (some_model);
+
+}
 
 // void pdp_model_set_data (pdp_model * some_model, void * some_data) {
 //   // deprecated???

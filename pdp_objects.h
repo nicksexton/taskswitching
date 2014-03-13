@@ -111,20 +111,24 @@ typedef union {
 
 typedef struct pdp_model {
 
+  // linked list functionality to cope with simulation of multiple models (eg in gui)
+  int id;
+  char *name;
+  pdp_model *next;
+  pdp_model *prev;
+
   int cycle;
   /* model global parameters */
   act_func_params * activation_parameters;
-  /* enum indicating which activation function to use */
+  // enum indicating which activation function to use
 
   /* components */
   pdp_model_component * components;
-  /* pointers to access functions (ie. dump data) */
-  /* stopping condition */
+  // pointers to access functions (ie. dump data) 
+  // stopping condition 
 
   /* subject data ie. inputs and outputs */
 
-  // DEPRECATED
-  // void * model_data;
 
 } pdp_model;
 
@@ -185,11 +189,16 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
    (specific to a particular activation function */
 
 
-pdp_model * pdp_model_create ();
+pdp_model * pdp_model_create (int id, char *model_name);
+
+pdp_model * pdp_model_insert_new (pdp_model * insert_after, int id, char *model_name);
+// creates a new pdp model and inserts it into a list of models
+
 void pdp_model_free (pdp_model * some_model);
 
-// DEPRECATED DO NOT USE
-// void pdp_model_set_data (pdp_model * some_model, void * some_data);
+void pdp_model_free_list (pdp_model * some_model);
+// frees the list of models in both directions while links are non-NULL
+
 
 pdp_model_component * pdp_model_component_create ();
 void pdp_model_component_free (pdp_model_component * some_component);
