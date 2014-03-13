@@ -30,7 +30,6 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation
   simulation->current_subject = 0;
   simulation->current_trial = 0;
 
-
   printf ("model simulation %s initialised\n", simulation->model->name);
 
 }
@@ -38,7 +37,10 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation
 static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
   printf ("model %s step once\n", simulation->model->name);
-  bool running = run_model_step (simulation->model, simulation->random_generator);
+  bool running = run_model_step (simulation->model, 
+				 &(simulation->subjects->subj[simulation->current_subject]
+				   ->fixed_trials[simulation->current_trial]), 
+				 simulation->random_generator);
 
   if (running) {
     // do something?
@@ -55,8 +57,8 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item, PdpSimulation 
   printf ("model %s step many (not implemented)\n", simulation->model->name);
 }
 
-static void model_controls_run_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
+static void model_controls_run_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
   run_stroop_trial (simulation->model, 
 		    &(simulation->subjects->subj[simulation->current_subject]
@@ -80,6 +82,7 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   GtkWidget *grid;
   GtkWidget *toolbar;
   GtkToolItem *tool_item;
+  GtkWidget *grid_headerbar;
   GtkWidget *label1;
 
   int position = 0; // toolbar position
@@ -129,6 +132,21 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   gtk_widget_set_hexpand (toolbar, TRUE);
   gtk_widget_set_vexpand (toolbar, FALSE);
 
+  // -------------- page header with current status -------
+
+  grid_headerbar = gtk_grid_new();
+
+
+  char textbuf[50];
+  sprintf (textbuf, "Subject: %d", simulation->current_subject);
+  label1 = gtk_label_new (textbuf);
+  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 0, 0, 1, 1);
+
+  sprintf (textbuf, "Trial: %d", simulation->current_trial);
+  label1 = gtk_label_new (textbuf);
+  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 1, 0, 1, 1);
+    
+
   // -------------- OTHER NOTEPAGE CONTENT ----------------
 
   label1 = gtk_label_new("Copper is an essential trace nutrient to all high \
@@ -140,12 +158,15 @@ However, in sufficient amounts, copper can be poisonous and even fatal to organi
   gtk_widget_set_vexpand(label1, TRUE);
 
 
+
+
   // -------------- SHOW WIDGETS --------------------
 
   grid = gtk_grid_new();
 
-  gtk_grid_attach (GTK_GRID(grid), toolbar, 0, 0, 1, 1);
-  gtk_grid_attach (GTK_GRID(grid), label1, 0, 1, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), grid_headerbar, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), toolbar, 0, 1, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), label1, 0, 2, 1, 1);
   gtk_widget_set_vexpand (GTK_WIDGET(grid), TRUE);
 
   gtk_widget_show_all(grid);
@@ -196,7 +217,6 @@ PdpSimulation * init_simulation () {
   int n;
 
   simulation->random_generator = random_generator_create();
-
   simulation->model = pdp_model_create (0, "gs_stroop");
 
   gs_stroop_model_build (simulation->model); // probably defer building the model in later versions
@@ -211,8 +231,8 @@ PdpSimulation * init_simulation () {
   simulation->model->activation_parameters = act_params;
 
 
+  // initialise subjects
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
-
 
   for (n = 0; n < simulation->subjects->number_of_subjects; n++) {
 
@@ -224,20 +244,19 @@ PdpSimulation * init_simulation () {
 			 TASKDEMAND_OUTPUT_EXCITATORY_WT);
 
     // create subject data
-
     subject_init_trialblock_fixed (simulation->random_generator, simulation->subjects->subj[n], 
 				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
 				 PPN_WORDREADING, PPN_COLOURNAMING);
 
     // don't do mixed trials yet in this simulation				 
     // subject_init_trialblock_mixed (my_subjects->subj[n]);
- 
   }
+
   simulation->current_subject = 0;
   simulation->current_trial = 0;
 
-  return simulation;
 
+  return simulation;
 }
 
 

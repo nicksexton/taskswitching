@@ -528,7 +528,7 @@ int update_associative_weights (pdp_model * gs_stroop_model) {
 }
 
 // returns true while model is still running (does not satisfy stopping condition), false otherwise
-bool run_model_step (pdp_model * gs_stroop_model, const gsl_rng * random_generator) {
+bool run_model_step (pdp_model * gs_stroop_model, stroop_trial_data * this_trial, const gsl_rng * random_generator) {
 
 
   if (stopping_condition(gs_stroop_model, this_trial) != true && 
@@ -642,7 +642,7 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
   //	  gs_stroop_model->cycle < MAX_CYCLES))  {
 
 
-    while (run_model_step (gs_stroop_model, random_generator));
+  while (run_model_step (gs_stroop_model, this_trial, random_generator));
     /*
     // recalculate activation 
 
