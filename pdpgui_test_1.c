@@ -1,6 +1,7 @@
 // inits a model with basic controls to run it
 #include <gtk/gtk.h>
-
+#include "gs_stroop.h"
+#include "pdp_objects.h"
 
 static GtkWidget* create_notepage_model_main() {
 
@@ -99,9 +100,22 @@ int main (int argc, char *argv[]) {
   GtkApplication *app;
   int status;
 
+  // init a model here:
+  struct {
+    pdp_model * model;
+  } simulation;
+
+  simulation.model = pdp_model_create (0, "gs_stroop");
+  gs_stroop_model_build (simulation.model);
+
   app = gtk_application_new ("PDP.gui", G_APPLICATION_FLAGS_NONE);
   g_signal_connect (app, "activate", G_CALLBACK(activate), NULL);
   status = g_application_run (G_APPLICATION(app), argc, argv);
+
+
+  // free the model
+  pdp_model_free (simulation.model);
+
   g_object_unref (app);
 
   return status;

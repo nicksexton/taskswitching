@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <gsl/gsl_rng.h>
+#include "pdp_objects.h"
 #include "gs_stroop_subjects.h"
 
 

@@ -383,6 +383,9 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   pdp_model_component_push(gs_stroop_model, taskdemand, ID_TASKDEMAND, TRUE);
   pdp_model_component_push(gs_stroop_model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
 
+  //debug
+  printf ("gs_stroop model created!\n");
+
   return 0;
 }
 

@@ -1,3 +1,6 @@
+#ifndef pdp_objects_h
+#define pdp_objects_h
+
 
 /* ACTIVATION FUNCTIONS */
 typedef enum {ACT_GS, DUMMY} act_function_type;
@@ -214,3 +217,5 @@ pdp_model_component * pdp_model_component_find(const pdp_model * some_model, int
 void pdp_model_cycle (pdp_model * some_model); 
 /* updates inputs for all layers, then updates activation for all
    layers */
+
+#endif
