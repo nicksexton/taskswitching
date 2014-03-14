@@ -14,19 +14,14 @@
 #include "pdpgui_plot.h"
 #include "pdpgui.h"
 
-
 // temp!
 #include <math.h>
+
 
 void pdpgui_plot_network_activation (GtkWidget *widget, 
 				     cairo_t *cr, 
 				     PdpSimulation *simulation) {
 
-  // cairo_scale (cr, WINDOW_WIDTH, WINDOW_HEIGHT);
-  // set colour for background
-  // cairo_set_source_rgb (cr, 1, 1, 1);
-  // fill background colour
-  // cairo_paint (cr);
 
   guint widget_width, widget_height;
   widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
@@ -34,43 +29,86 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 
   printf ("%d x %d\n", widget_width, widget_height);
 
-  pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 0.0, 200.0, 0.0, 5.0);
+  pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
+			 0.0, simulation->model->cycle * 1.1, 
+			 -1.0, 0.1);
 
 
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
-    .x_max = 200, 
-    .y_min = 0.0, 
-    .y_max = 5.0
+    .x_max = simulation->model->cycle * 1.1, 
+    .y_min = -1.0, 
+    .y_max = 0.1
   };
 
-  PdpguiColourRgb plot_colour = { 
-    .r = 1.0, 
-    .g = 0.0, 
-    .b = 0.0 
-  };
+  PdpguiColourRgb plot_colour[3] = {{ 
+      .r = 1.0, 
+      .g = 0.0, 
+      .b = 0.0 
+    }, {
+      .r = 0.0, 
+      .g = 6.0, 
+      .b = 0.0 
+    }, {
+      .r = 0.0, 
+      .g = 0.0, 
+      .b = 1.0 
+    }};
+
 
   // now construct an arbitrary vector;
+  double * units_activation; // check this doesn't overflow??
 
-  double log_function[40];
-  int i;
 
-  printf ("log function: ");
+  // <------------ FIRST PLOT WORDOUT UNITS ------------
+  pdp_layer * current_layer = pdp_model_component_find (simulation->model, 
+							ID_WORDOUT)->layer; 
+  int unit;
 
-  for (i = 0; i < 40; i ++) {
-    log_function[i] = log (i + 1);
-    printf( "%4.2f ", log_function[i]);
+
+  for (unit = 0; unit < current_layer->size; unit ++) {
+
+    units_activation = 
+      pdp_layer_get_unit_activation_history (current_layer, unit, simulation->model->cycle);
+  
+    
+    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+			simulation->model->cycle, units_activation, &(plot_colour[unit]));
+
+    // want more sophisticated rendering algorithm using buffering, 
+    // this will probably cause flicker
+
+    free(units_activation);
   }
-  printf ("\n");
 
-  pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 40, log_function, &plot_colour);
+
+  // <------------ NEXT PLOT COLOUROUT UNITS
+  current_layer = pdp_model_component_find (simulation->model, 
+							ID_COLOUROUT)->layer; 
+
+  for (unit = 0; unit < current_layer->size; unit ++) {
+
+    units_activation = 
+      pdp_layer_get_unit_activation_history (current_layer, unit, simulation->model->cycle);
+  
+    
+    pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
+			       simulation->model->cycle, units_activation, 
+			       &(plot_colour[unit]));
+
+    // want more sophisticated rendering algorithm using buffering, 
+    // this will probably cause flicker
+
+    free(units_activation);
+  }
+
   
 }
 
 
 
 static GtkWidget* 
-create_sub_notepage_model_plot_activation (PdpSimulation * simulation) {
+create_sub_notepage_model_plot_activation (PdpGuiObjects * objects) {
   // plots network activation for current trial
 
 
@@ -85,7 +123,7 @@ create_sub_notepage_model_plot_activation (PdpSimulation * simulation) {
 
   drawing_area = gtk_drawing_area_new();
   g_signal_connect (drawing_area, "draw", 
-		    G_CALLBACK(pdpgui_plot_network_activation), simulation);
+		    G_CALLBACK(pdpgui_plot_network_activation), objects->simulation);
   gtk_widget_set_hexpand (drawing_area, TRUE);
   gtk_widget_set_vexpand (drawing_area, TRUE);
 
@@ -100,7 +138,7 @@ create_sub_notepage_model_plot_activation (PdpSimulation * simulation) {
 
 
 static GtkWidget* 
-create_sub_notepage_model_display_architecture (PdpSimulation * simulation) {
+create_sub_notepage_model_display_architecture (PdpGuiObjects * objects) {
 
   GtkWidget *grid;
   GtkWidget *label;
@@ -118,9 +156,12 @@ create_sub_notepage_model_display_architecture (PdpSimulation * simulation) {
 }
 
 
-static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+static void model_controls_initialise_cb (GtkToolItem * tool_item, 
+					  PdpGuiObjects * objects) {
 
+  PdpSimulation * simulation = objects->simulation;
   int n;
+
   for (n = 0; n < NUMBER_OF_SUBJECTS; n ++) {
 
     // initialise gs_stroop_params here for now
@@ -134,11 +175,18 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation
   simulation->current_subject = 0;
   simulation->current_trial = 0;
 
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
   printf ("model simulation %s initialised\n", simulation->model->name);
 
 }
 
-static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+static void model_controls_step_once_cb (GtkToolItem * tool_item, 
+					 PdpGuiObjects * objects) {
+
+  PdpSimulation * simulation = objects->simulation;
 
   // printf ("model %s step once\n", simulation->model->name);
   bool running = run_model_step (simulation->model, 
@@ -155,15 +203,30 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation 
     printf ("model stopped\n");
   }
 
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
 }
 
-static void model_controls_step_many_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+static void model_controls_step_many_cb (GtkToolItem * tool_item, 
+					 PdpGuiObjects * objects) {
 
+  PdpSimulation * simulation = objects->simulation;
   printf ("model %s step many (not implemented)\n", simulation->model->name);
+
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
 }
 
 
-static void model_controls_run_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
+static void model_controls_run_cb (GtkToolItem * tool_item, 
+				   PdpGuiObjects * objects) {
+
+  PdpSimulation * simulation = objects->simulation;
 
   run_stroop_trial (simulation->model, 
 		    &(simulation->subjects->subj[simulation->current_subject]
@@ -177,12 +240,17 @@ static void model_controls_run_cb (GtkToolItem * tool_item, PdpSimulation *simul
   // exceed max trials
   // simulation->current_trial ++;
 
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
 }
 
 
 
 
-static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
+static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 
   GtkWidget *grid;
   GtkWidget *toolbar;
@@ -191,6 +259,8 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   GtkWidget *label1;
 
   GtkWidget *sub_notepage;
+
+  PdpSimulation *simulation = objects->simulation;
 
 
   int position = 0; // toolbar position
@@ -203,25 +273,25 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   // initialise
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PREVIOUS);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
-		    G_CALLBACK(model_controls_initialise_cb), (gpointer) simulation);
+		    G_CALLBACK(model_controls_initialise_cb), (gpointer) objects);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // step once
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
-		    G_CALLBACK(model_controls_step_once_cb), (gpointer) simulation);
+		    G_CALLBACK(model_controls_step_once_cb), (gpointer) objects);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // step many
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_FORWARD);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
-		    G_CALLBACK(model_controls_step_many_cb), (gpointer) simulation);
+		    G_CALLBACK(model_controls_step_many_cb), (gpointer) objects);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // run to end
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_NEXT);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
-		    G_CALLBACK(model_controls_run_cb), (gpointer) simulation);
+		    G_CALLBACK(model_controls_run_cb), (gpointer) objects);
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
@@ -265,11 +335,16 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   // Sub-notepage here: tabs for viewing network architecture and 
   // plotting single-trial activation
   sub_notepage = gtk_notebook_new();
+
+  // keep a pointer to the sub_notepage so we can issue redraw signals on it
+  objects->model_sub_notepage = sub_notepage;
+
+
   gtk_notebook_append_page(GTK_NOTEBOOK(sub_notepage),
-			   create_sub_notepage_model_plot_activation(simulation),
+			   create_sub_notepage_model_plot_activation(objects),
 			   gtk_label_new("Plot Network Activation"));
   gtk_notebook_append_page(GTK_NOTEBOOK(sub_notepage),
-			   create_sub_notepage_model_display_architecture(simulation),
+			   create_sub_notepage_model_display_architecture(objects),
 			   gtk_label_new("Display Network Architecture"));
 
 			   
@@ -368,15 +443,20 @@ static void main_quit (GtkWidget *window, PdpSimulation *simulation) {
 
 int main (int argc, char *argv[]) {
 
+  gtk_init (&argc, &argv);
 
   PdpSimulation * simulation = init_simulation();
 
+  PdpGuiObjects * objects = g_malloc (sizeof(PdpGuiObjects));
+  // init function, set everything to null?
+  objects->simulation = simulation;
+  objects->model_sub_notepage = NULL;
 
   GtkWidget *window;
   GtkWidget *grid;
   GtkWidget *notes;
 
-  gtk_init (&argc, &argv);
+
 
   // Create a window with a title, default size, and set border width
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -392,7 +472,7 @@ int main (int argc, char *argv[]) {
   notes = gtk_notebook_new();
 
   gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
-			   create_notepage_model_main(simulation), 
+			   create_notepage_model_main(objects), 
 			   gtk_label_new("Model"));
 
   // Create a full-window grid to contain toolbar and the notebook

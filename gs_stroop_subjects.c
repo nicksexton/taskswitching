@@ -276,7 +276,7 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
       
       stim_word = gsl_rng_uniform_int (random_generator, 3); 
       int incr = gsl_rng_uniform_int (random_generator, 2);
-      stim_colour = (stim_word + incr) % 3;
+      stim_colour = (stim_word + incr + 1) % 3;
       
       /*
       // TEST CODE

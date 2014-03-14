@@ -187,6 +187,30 @@ void pdp_layer_print_activation (const pdp_layer * some_layer) {
   }
 }
 
+
+double* pdp_layer_get_unit_activation_history (const pdp_layer * some_layer, int unit_index, int current_cycle) {
+
+// returns a pointer to a vector of unit activations for specified unit in the layer, 
+// up to current_cycle 
+
+  double *activations = malloc (current_cycle * sizeof(double));
+  const pdp_units *units_i = &(some_layer->units_initial);
+  int i;
+  
+  for (i = 0; i < current_cycle; i ++) {
+    if (units_i == NULL) {
+      return NULL;
+    }
+
+    activations[i] = units_i->activations[unit_index];
+    units_i = units_i->next;
+
+  }
+
+  return activations;
+}
+
+
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input) {
 
   /*  TODO could probably combine this function with an initializer,

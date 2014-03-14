@@ -55,6 +55,11 @@ void pdpgui_plot_vector (cairo_t *cr,
 			 PdpguiColourRgb *plot_colour
 			 );
 
-
+void pdpgui_plot_vector_dashed (cairo_t *cr, 
+				guint window_width, guint window_height,
+				PdpguiAxisDimensions * axis_dimensions,
+				int number_datapoints, double my_data[], 
+				PdpguiColourRgb *plot_colour
+				);
 
 #endif

@@ -164,6 +164,11 @@ void pdp_layer_print_current_output (const pdp_layer * some_layer);
 
 void pdp_layer_print_activation (const pdp_layer * some_layer);
 
+double* pdp_layer_get_unit_activation_history (const pdp_layer * some_layer, int unit_index, int current_cycle);
+// returns a pointer to a vector of unit activations for specified unit in the layer, 
+// up to current_cycle. need to remember to free the vector!
+// returns NULL if layer has less cycles of history than current_cycle
+
 pdp_weights_matrix * pdp_weights_create(int size_output, int size_input);
 
 void pdp_weights_set (struct pdp_weights_matrix * some_weights, 

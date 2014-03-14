@@ -19,4 +19,15 @@ typedef struct pdp_simulation {
 
 } PdpSimulation;
 
+
+
+// wrapper struct for simulation data and pointer to other objects on notepage
+// eg to issue redraw events
+typedef struct pdpgui_objects {
+
+  PdpSimulation * simulation;
+  GtkWidget * model_sub_notepage;
+
+} PdpGuiObjects;
+
 #endif
