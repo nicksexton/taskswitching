@@ -531,8 +531,8 @@ int update_associative_weights (pdp_model * gs_stroop_model) {
 bool run_model_step (pdp_model * gs_stroop_model, stroop_trial_data * this_trial, const gsl_rng * random_generator) {
 
 
-  if (stopping_condition(gs_stroop_model, this_trial) != true && 
-      gs_stroop_model->cycle < MAX_CYCLES)  {
+  if (stopping_condition(gs_stroop_model, this_trial) == true || 
+      gs_stroop_model->cycle > MAX_CYCLES)  {
     return false;
   }
   else {

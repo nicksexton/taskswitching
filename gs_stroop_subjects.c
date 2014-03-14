@@ -42,7 +42,7 @@ void subject_popn_free (subject_popn * some_subjects) {
 
 
 
-
+// function currently super inefficent. reimplement?
 stroop_trial_data stroop_trial_data_create (int id, 
 					    blocktype block_type, 
 					    trialtype trial_type, 
@@ -67,6 +67,8 @@ stroop_trial_data stroop_trial_data_create (int id,
   return a_data_container;
 } 
 		     
+
+
 
 
 /* subject constructor */ // TODO - incl subject parameters as argument

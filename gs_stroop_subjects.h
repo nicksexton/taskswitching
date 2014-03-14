@@ -90,6 +90,8 @@ stroop_trial_data stroop_trial_data_create (int id,
 					    blocktype block_type, 
 					    trialtype trial_type, 
 					    int stim_task, int stim_word, int stim_colour);
+// function currently super inefficient. passes struct by value. reimplement?
+
 
 struct subject * subject_create (int num_fixed_trials, 
 			  int num_mixed_runs, int num_mixed_trials_in_run);
