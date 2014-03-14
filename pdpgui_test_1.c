@@ -11,24 +11,88 @@
 #include "gs_stroop_subjects.h"
 #include "gs_stroop_global_params.h"
 
+#include "pdpgui_plot.h"
 #include "pdpgui.h"
 
 
+// temp!
+#include <math.h>
+
+void pdpgui_plot_network_activation (GtkWidget *widget, 
+				     cairo_t *cr, 
+				     PdpSimulation *simulation) {
+
+  // cairo_scale (cr, WINDOW_WIDTH, WINDOW_HEIGHT);
+  // set colour for background
+  // cairo_set_source_rgb (cr, 1, 1, 1);
+  // fill background colour
+  // cairo_paint (cr);
+
+  guint widget_width, widget_height;
+  widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
+  widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
+
+  printf ("%d x %d\n", widget_width, widget_height);
+
+  pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 0.0, 200.0, 0.0, 5.0);
+
+
+  PdpguiAxisDimensions axes = { 
+    .x_min = 0.0, 
+    .x_max = 200, 
+    .y_min = 0.0, 
+    .y_max = 5.0
+  };
+
+  PdpguiColourRgb plot_colour = { 
+    .r = 1.0, 
+    .g = 0.0, 
+    .b = 0.0 
+  };
+
+  // now construct an arbitrary vector;
+
+  double log_function[40];
+  int i;
+
+  printf ("log function: ");
+
+  for (i = 0; i < 40; i ++) {
+    log_function[i] = log (i + 1);
+    printf( "%4.2f ", log_function[i]);
+  }
+  printf ("\n");
+
+  pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 40, log_function, &plot_colour);
+  
+}
+
+
+
 static GtkWidget* 
-create_sub_notepage_model_plot_activation (const PdpSimulation * simulation) {
+create_sub_notepage_model_plot_activation (PdpSimulation * simulation) {
   // plots network activation for current trial
 
 
   GtkWidget *grid;
+  GtkWidget *drawing_area;
   GtkWidget *label;
 
   label = gtk_label_new("Network activation graph here");
-  gtk_widget_set_hexpand (label, TRUE);
-  gtk_widget_set_vexpand (label, TRUE);
+  //  gtk_widget_set_hexpand (label, TRUE);
+  //  gtk_widget_set_vexpand (label, TRUE);
+
+
+  drawing_area = gtk_drawing_area_new();
+  g_signal_connect (drawing_area, "draw", 
+		    G_CALLBACK(pdpgui_plot_network_activation), simulation);
+  gtk_widget_set_hexpand (drawing_area, TRUE);
+  gtk_widget_set_vexpand (drawing_area, TRUE);
+
 
   grid = gtk_grid_new();
   gtk_grid_attach (GTK_GRID(grid), label, 0, 0, 1, 1);
-
+  gtk_grid_attach (GTK_GRID(grid), drawing_area, 0, 1, 1, 1);
 
   gtk_widget_show_all(grid);
   return (grid);
@@ -36,7 +100,7 @@ create_sub_notepage_model_plot_activation (const PdpSimulation * simulation) {
 
 
 static GtkWidget* 
-create_sub_notepage_model_display_architecture (const PdpSimulation * simulation) {
+create_sub_notepage_model_display_architecture (PdpSimulation * simulation) {
 
   GtkWidget *grid;
   GtkWidget *label;
