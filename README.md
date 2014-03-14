@@ -36,3 +36,10 @@ output to console for now
   * model should store params in a generic format (g_hash_table?)
   * model currently initialises params inside model_controls_initialise_cb. hash table of params should be
     stored in pdp_model
+
+#### gui_1_graph branch ####
+
+* pdpgui_plot.c 
+functions for plotting applictation-specific graphs
+eg., plot of network activations
+plot of DVs for group of subjects
