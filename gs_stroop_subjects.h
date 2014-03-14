@@ -1,5 +1,6 @@
 #ifndef gs_stroop_subjects_h
 #define gs_stroop_subjects_h
+#include <stdbool.h>
 #include <gsl/gsl_rng.h>
 #include <glib.h>
 
@@ -86,11 +87,29 @@ typedef struct subject_popn {
 subject_popn * subject_popn_create (int number_of_subjects);
 void subject_popn_free (subject_popn * some_subjects);
 
+
+// function currently super inefficient. passes struct by value. reimplement?
 stroop_trial_data stroop_trial_data_create (int id, 
 					    blocktype block_type, 
 					    trialtype trial_type, 
 					    int stim_task, int stim_word, int stim_colour);
-// function currently super inefficient. passes struct by value. reimplement?
+
+
+// returns a pointer to the specified trial in a fixed block
+// need separate access function to get pointer to the trial in a mixed block
+// pointer to const - do not use this function to write to trial data structure
+const stroop_trial_data * fixed_block_trial_data_get (subject_popn * my_subjects, 
+						      int subject_id, 
+						      int trial_id);
+
+
+// makes a formatted string out of trial data (ie for display)
+
+bool stroop_trial_data_print_as_string (char * textbuf, int textbuf_length, const stroop_trial_data * trial_data);
+// copies textbuf_length characters, up to 100.
+
+
+
 
 
 struct subject * subject_create (int num_fixed_trials, 

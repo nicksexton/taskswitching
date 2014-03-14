@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <glib.h>
 
 #include <gsl/gsl_randist.h>
@@ -6,9 +7,6 @@
 
 // #include "simulated_subjects.h"
 #include "gs_stroop_subjects.h"
-
-
-
 
 
 
@@ -68,6 +66,58 @@ stroop_trial_data stroop_trial_data_create (int id,
 } 
 		     
 
+// returns a pointer to the specified trial in a fixed block
+// need separate access function to get pointer to the trial in a mixed block
+// pointer to const - do not use this function to write to trial data structure
+const stroop_trial_data * fixed_block_trial_data_get (subject_popn * my_subjects, 
+						      int subject_id, 
+						      int trial_id) {
+  stroop_trial_data * trial_data;
+  trial_data = &(my_subjects->subj[subject_id]->fixed_trials[trial_id]);
+  return trial_data;
+
+}
+
+bool stroop_trial_data_print_as_string (char * destination_string, int destination_length, const stroop_trial_data * trial_data) {
+
+  char trialtype[12];
+  char tasktype[13];
+
+  int word_inputs[3] = {0, 0, 0};
+  int colour_inputs[3] = {0, 0, 0};
+  int correct[3] = {0, 0, 0};
+  
+  char textbuf[100];
+
+  if (destination_length > 100) {
+    return false;
+  }
+
+  switch (trial_data->trial_type) {
+  case NEUTRAL: { strncpy (trialtype, "NEUTRAL", 12); break; }
+  case CONGRUENT: { strncpy (trialtype, "CONGRUENT", 12); break; }
+  case INCONGRUENT: { strncpy (trialtype, "INCONGRUENT", 12); break; }
+  }
+  switch (trial_data->stim_task) {
+  case WORDREADING: { strncpy (tasktype, "WORDREADING", 13); break; }
+  case COLOURNAMING: { strncpy (tasktype, "COLOURNAMING", 13); break; }
+  }
+
+  word_inputs[trial_data->stim_word] = 1;
+  colour_inputs[trial_data->stim_colour] = 1;
+  correct[trial_data->stim_correct_response % 3] = 1; 
+
+  snprintf (textbuf, 100, "Input:[%d, %d, %d], [%d, %d, %d], Correct: [%d, %d, %d]\t%s\t%s", 
+	    word_inputs[0], word_inputs[1], word_inputs[2], 
+	    colour_inputs[0], colour_inputs[1], colour_inputs[2], 
+	    correct[0], correct[1], correct[2],
+	    trialtype, tasktype);
+
+  strncpy (destination_string, textbuf, destination_length);
+
+  return true;
+
+}
 
 
 

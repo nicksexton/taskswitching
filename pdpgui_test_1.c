@@ -14,6 +14,8 @@
 #include "pdpgui.h"
 
 
+
+
 static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
   int n;
@@ -36,7 +38,7 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation
 
 static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
 
-  printf ("model %s step once\n", simulation->model->name);
+  // printf ("model %s step once\n", simulation->model->name);
   bool running = run_model_step (simulation->model, 
 				 &(simulation->subjects->subj[simulation->current_subject]
 				   ->fixed_trials[simulation->current_trial]), 
@@ -44,6 +46,7 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item, PdpSimulation 
 
   if (running) {
     // do something?
+    // print activations?
   }
 
   else {
@@ -137,7 +140,7 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   grid_headerbar = gtk_grid_new();
 
 
-  char textbuf[50];
+  char textbuf[100];
   sprintf (textbuf, "Subject: %d", simulation->current_subject);
   label1 = gtk_label_new (textbuf);
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 0, 0, 1, 1);
@@ -145,6 +148,16 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   sprintf (textbuf, "Trial: %d", simulation->current_trial);
   label1 = gtk_label_new (textbuf);
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 1, 0, 1, 1);
+
+  // display input pattern, trialtype, ...?
+  stroop_trial_data_print_as_string (textbuf, 100, 
+				     fixed_block_trial_data_get(simulation->subjects,
+								simulation->current_subject,
+								simulation->current_trial));
+  printf ("%s", textbuf);
+  label1 = gtk_label_new (textbuf);
+  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 2, 0, 1, 1);
+  
     
 
   // -------------- OTHER NOTEPAGE CONTENT ----------------
