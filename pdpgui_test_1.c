@@ -14,6 +14,44 @@
 #include "pdpgui.h"
 
 
+static GtkWidget* 
+create_sub_notepage_model_plot_activation (const PdpSimulation * simulation) {
+  // plots network activation for current trial
+
+
+  GtkWidget *grid;
+  GtkWidget *label;
+
+  label = gtk_label_new("Network activation graph here");
+  gtk_widget_set_hexpand (label, TRUE);
+  gtk_widget_set_vexpand (label, TRUE);
+
+  grid = gtk_grid_new();
+  gtk_grid_attach (GTK_GRID(grid), label, 0, 0, 1, 1);
+
+
+  gtk_widget_show_all(grid);
+  return (grid);
+}
+
+
+static GtkWidget* 
+create_sub_notepage_model_display_architecture (const PdpSimulation * simulation) {
+
+  GtkWidget *grid;
+  GtkWidget *label;
+
+  label = gtk_label_new("Network architecture diagram here");
+  gtk_widget_set_hexpand (label, TRUE);
+  gtk_widget_set_vexpand (label, TRUE);
+
+  grid = gtk_grid_new();
+  gtk_grid_attach (GTK_GRID(grid), label, 0, 0, 1, 1);
+
+
+  gtk_widget_show_all(grid);
+  return (grid);
+}
 
 
 static void model_controls_initialise_cb (GtkToolItem * tool_item, PdpSimulation *simulation) {
@@ -88,6 +126,9 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   GtkWidget *grid_headerbar;
   GtkWidget *label1;
 
+  GtkWidget *sub_notepage;
+
+
   int position = 0; // toolbar position
 
   // ------------- TOOLBAR ----------------
@@ -120,8 +161,6 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
-
-
   // code for close button on toolbar:
   // tool_item = gtk_separator_tool_item_new();
   // gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(tool_item), FALSE);
@@ -138,7 +177,6 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   // -------------- page header with current status -------
 
   grid_headerbar = gtk_grid_new();
-
 
   char textbuf[100];
   sprintf (textbuf, "Subject: %d", simulation->current_subject);
@@ -158,20 +196,20 @@ static GtkWidget* create_notepage_model_main(PdpSimulation * simulation) {
   label1 = gtk_label_new (textbuf);
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 2, 0, 1, 1);
   
-    
 
-  // -------------- OTHER NOTEPAGE CONTENT ----------------
+  // --------------- SUB-NOTEPAGE ------------------------    
+  // Sub-notepage here: tabs for viewing network architecture and 
+  // plotting single-trial activation
+  sub_notepage = gtk_notebook_new();
+  gtk_notebook_append_page(GTK_NOTEBOOK(sub_notepage),
+			   create_sub_notepage_model_plot_activation(simulation),
+			   gtk_label_new("Plot Network Activation"));
+  gtk_notebook_append_page(GTK_NOTEBOOK(sub_notepage),
+			   create_sub_notepage_model_display_architecture(simulation),
+			   gtk_label_new("Display Network Architecture"));
 
-  label1 = gtk_label_new("Copper is an essential trace nutrient to all high \
-plants and animals. In animals, including humans, it is found primarily in \
-the bloodstream, as a co-factor in various enzymes, and in copper-based pigments. \
-However, in sufficient amounts, copper can be poisonous and even fatal to organisms.");
-
-  gtk_label_set_line_wrap(GTK_LABEL(label1), TRUE);
-  gtk_widget_set_vexpand(label1, TRUE);
-
-
-
+			   
+  
 
   // -------------- SHOW WIDGETS --------------------
 
@@ -179,7 +217,8 @@ However, in sufficient amounts, copper can be poisonous and even fatal to organi
 
   gtk_grid_attach (GTK_GRID(grid), grid_headerbar, 0, 0, 1, 1);
   gtk_grid_attach (GTK_GRID(grid), toolbar, 0, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID(grid), label1, 0, 2, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), sub_notepage, 0, 2, 1, 1);
+
   gtk_widget_set_vexpand (GTK_WIDGET(grid), TRUE);
 
   gtk_widget_show_all(grid);
