@@ -157,6 +157,16 @@ create_sub_notepage_model_display_architecture (PdpGuiObjects * objects) {
 }
 
 
+static void model_change_trial_cb (GtkWidget * spin_button, 
+				   PdpGuiObjects * objects) {
+
+  int new_trial;
+  new_trial = gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin_button));
+  objects->simulation->current_trial = new_trial;
+  gtk_widget_queue_draw(objects->model_headerbar_subject_trial);
+
+}
+
 static void model_controls_initialise_cb (GtkToolItem * tool_item, 
 					  PdpGuiObjects * objects) {
 
@@ -270,8 +280,11 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   GtkWidget *grid;
   GtkWidget *toolbar;
   GtkToolItem *tool_item;
+
   GtkWidget *grid_headerbar;
   GtkWidget *label1;
+  GtkAdjustment *current_trial_adjustment;
+  GtkWidget *spin_button;
 
   GtkWidget *sub_notepage;
 
@@ -310,6 +323,7 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
+
   // code for close button on toolbar:
   // tool_item = gtk_separator_tool_item_new();
   // gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(tool_item), FALSE);
@@ -326,6 +340,7 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   // -------------- page header with current status -------
 
   grid_headerbar = gtk_grid_new();
+  objects->model_headerbar_subject_trial = grid_headerbar; // keep track of headerbar so we can redraw it
 
   char textbuf[100];
   sprintf (textbuf, "Subject: %d", simulation->current_subject);
@@ -341,9 +356,21 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 				     fixed_block_trial_data_get(simulation->subjects,
 								simulation->current_subject,
 								simulation->current_trial));
-  printf ("%s", textbuf);
+  // printf ("%s", textbuf);
   label1 = gtk_label_new (textbuf);
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 2, 0, 1, 1);
+
+  // spin button for controlling current trial  
+
+  current_trial_adjustment = gtk_adjustment_new (simulation->current_trial, 0, 
+						 simulation->subjects->
+						 subj[simulation->current_subject]->num_fixed_trials,
+						 1, 0, 0);
+  spin_button = gtk_spin_button_new (current_trial_adjustment, 1, 0);
+  g_signal_connect (G_OBJECT(spin_button), "value-changed", G_CALLBACK(model_change_trial_cb), (gpointer) objects);
+  gtk_grid_attach (GTK_GRID(grid_headerbar), spin_button, 3, 0, 1, 1);
+
+
   
 
   // --------------- SUB-NOTEPAGE ------------------------    
@@ -351,8 +378,9 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   // plotting single-trial activation
   sub_notepage = gtk_notebook_new();
 
-  // keep a pointer to the sub_notepage so we can issue redraw signals on it
+  // keep a pointer to widgets so we can issue redraw signals on it
   objects->model_sub_notepage = sub_notepage;
+
 
 
   gtk_notebook_append_page(GTK_NOTEBOOK(sub_notepage),
