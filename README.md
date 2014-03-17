@@ -37,9 +37,16 @@ output to console for now
   * model currently initialises params inside model_controls_initialise_cb. hash table of params should be
     stored in pdp_model
 
-#### gui_1_graph branch ####
 
 * pdpgui_plot.c 
 functions for plotting applictation-specific graphs
 eg., plot of network activations
 plot of DVs for group of subjects
+
+
+#### gui_import_direct branch ####
+trying to make parameter import simpler by using the treestore directly
+
+#### gui_import branch ####
+some functions (pdp_import etc) written to implement parameter import via a hash table.
+ 
