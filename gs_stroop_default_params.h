@@ -1,3 +1,7 @@
+// same as gs_stroop_global_params.h
+// except, gs_stroop_global_params should not now be used directly
+// default parameters (ie., in this file) should be imported via a GsStroopParameters object
+
 #ifndef gs_stroop_global_params_h
 #define gs_stroop_global_params_h
 

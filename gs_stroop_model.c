@@ -21,6 +21,32 @@
 #define ECHO
 
 
+// set default parameters in GsStroopParameters object (defined in gs_stroop.h)
+// used in the gui version of the model (pdpgui_test_1.c)
+// not currently used in the console version
+
+void gs_stroop_parameters_set_default (GsStroopParameters * params_object) {
+
+  params_object->response_threshold = RESPONSE_THRESHOLD;
+  params_object->step_size = STEP_SIZE;
+  params_object->squashing_param = SQUASHING_PARAM;
+  params_object->noise = NOISE;
+  params_object->bias_outputunit = OUTPUTUNIT_BIAS;
+  params_object->bias_taskdemand = INPUTUNIT_BIAS;
+  params_object->bias_none = BIAS_NONE;
+  params_object->stimulus_input_strength_word = STIMULUS_INPUT_STRENGTH_WORD;
+  params_object->stimulus_input_strength_colour = STIMULUS_INPUT_STRENGTH_COLOUR;
+  params_object->taskdemand_output_inhibitory_wt = TASKDEMAND_OUTPUT_INHIBITORY_WT;
+  params_object->taskdemand_output_excitatory_wt = TASKDEMAND_OUTPUT_EXCITATORY_WT;
+  params_object->topdown_control_strength_word = TOPDOWN_CONTROL_STRENGTH_WORD;
+  params_object->topdown_control_strength_colour = TOPDOWN_CONTROL_STRENGTH_COLOUR;
+  params_object->learning_rate = LEARNING_RATE;
+  params_object->max_cycles = MAX_CYCLES;
+
+  return;
+}
+
+
 
 void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r) {
   

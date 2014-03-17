@@ -380,7 +380,9 @@ PdpSimulation * init_simulation () {
 
   gs_stroop_model_build (simulation->model); // probably defer building the model in later versions
 
-  act_func_params * act_params = act_params = g_malloc (sizeof(act_func_params));
+  // Init activation function parameters
+  // act_func_params * act_params = act_params = g_malloc (sizeof(act_func_params));
+  act_func_params * act_params = g_malloc (sizeof(act_func_params));
 
   act_params->type = ACT_GS;
   act_params->params.gs.step_size = STEP_SIZE;
@@ -389,6 +391,11 @@ PdpSimulation * init_simulation () {
 
   simulation->model->activation_parameters = act_params;
 
+  
+  // init model parameters
+  simulation->model_params = g_malloc (sizeof(GsStroopParameters));
+
+  
 
   // initialise subjects
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
@@ -424,6 +431,7 @@ void free_simulation (PdpSimulation * simulation) {
 
   free (simulation->model->activation_parameters); 
   pdp_model_free (simulation->model);
+  g_free (simulation->model_params);
 
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  

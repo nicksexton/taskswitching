@@ -6,6 +6,26 @@
 #include "pdp_objects.h"
 #include "gs_stroop_subjects.h"
 
+typedef struct gs_stroop_parameters {
+
+  double response_threshold;
+  double step_size;
+  double squashing_param;
+  double noise;
+  double bias_outputunit;
+  double bias_taskdemand;
+  double bias_none;
+  double stimulus_input_strength_word;
+  double stimulus_input_strength_colour;
+  double taskdemand_output_inhibitory_wt;
+  double taskdemand_output_excitatory_wt;
+  double topdown_control_strength_word;
+  double topdown_control_strength_colour;
+  double learning_rate;
+  int max_cycles;
+
+} GsStroopParameters;
+
 
 
 void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r);

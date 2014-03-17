@@ -47,6 +47,13 @@ plot of DVs for group of subjects
 #### gui_import_direct branch ####
 trying to make parameter import simpler by using the treestore directly
 
+* GsStroopParameters object - model parameters
+defined within gs_stroop.h
+function for setting default parameters (ie., from gs_stroop_default_parameters.h) defined in gs_stroop_model.c
+used as a data member of PdpSimulation
+future development might require a number of params sets - need to include some linked list functionality?
+however - parameters are envisaged to be portable across alternative models of task switching
+
 #### gui_import branch ####
 some functions (pdp_import etc) written to implement parameter import via a hash table.
  

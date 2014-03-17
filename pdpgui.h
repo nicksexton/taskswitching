@@ -5,11 +5,11 @@
 typedef struct pdp_simulation {
 
   pdp_model *model; // head of a possible list of models
-
   gsl_rng * random_generator;
 
   // should make params and subject(s) generic
-  
+  GsStroopParameters *model_params;
+
 
   subject_popn *subjects;
 
