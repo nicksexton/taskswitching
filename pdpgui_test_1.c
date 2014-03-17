@@ -32,14 +32,14 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
 			 0.0, simulation->model->cycle * 1.1, 
-			 -1.0, 0.1);
+			 -1.0, 1.0);
 
 
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
     .x_max = simulation->model->cycle * 1.1, 
     .y_min = -1.0, 
-    .y_max = 0.1
+    .y_max = 1.0
   };
 
   PdpguiColourRgb plot_colour[3] = {{ 
@@ -392,16 +392,7 @@ PdpSimulation * init_simulation () {
   simulation->random_generator = random_generator_create();
   simulation->model = pdp_model_create (0, "gs_stroop");
 
-  gs_stroop_model_build (simulation->model, simulation->model_params); 
-  // probably defer building the model in later versions
-
-  // Init activation function parameters
-  // act_func_params * act_params = act_params = g_malloc (sizeof(act_func_params));
-
-
-
-  
-  // init model parameters and set defaults
+  // allocate memory for model parameters and set to default values
   simulation->model_params = g_malloc (sizeof(GsStroopParameters));
   gs_stroop_parameters_set_default (simulation->model_params);
 
@@ -412,6 +403,16 @@ PdpSimulation * init_simulation () {
   act_params->params.gs.act_min = simulation->model_params->activation_min;
 
   simulation->model->activation_parameters = act_params;
+
+  // now create the model
+  gs_stroop_model_build (simulation->model, simulation->model_params); 
+  // probably defer building the model in later versions
+
+
+
+
+  
+
 
   // initialise subjects
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
