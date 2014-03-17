@@ -8,6 +8,8 @@
 
 typedef struct gs_stroop_parameters {
 
+  double activation_max;
+  double activation_min;
   double response_threshold;
   double step_size;
   double squashing_param;
@@ -26,16 +28,15 @@ typedef struct gs_stroop_parameters {
 
 } GsStroopParameters;
 
-
+void gs_stroop_parameters_set_default (GsStroopParameters * params_object);
 
 void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r);
 
 stroop_response * make_stroop_response (int node, double activation);
 
+bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_trial, double response_thresholdo);
 
-bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_trial);
-
-int gs_stroop_model_build (pdp_model * gs_stroop_model);
+int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * model_params);
 
 int model_init_params (pdp_model * gs_stroop_model, gs_stroop_params * some_params);
 
@@ -43,13 +44,17 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
 // persist_taskdemand_activation sets proportion of TD activation to carry over to
 // next trial ie. .20 = 20% of final activation on previous trial
 
-int update_associative_weights (pdp_model * gs_stroop_model);
+int update_associative_weights (pdp_model * gs_stroop_model, double learning_rate);
   // NB running this function immediately after initing model SHOULD zero associative weights
 
-bool run_model_step (pdp_model * gs_stroop_model, stroop_trial_data * this_trial, const gsl_rng * random_generator);
+bool run_model_step (pdp_model * gs_stroop_model, 
+		     stroop_trial_data * this_trial, 
+		     const gsl_rng * random_generator, 
+		     double response_threshold);
 
 int run_stroop_trial (pdp_model * gs_stroop_model,
 		      stroop_trial_data * this_trial,
-		      const gsl_rng * random_generator);
+		      const gsl_rng * random_generator,
+		      double response_threshold);
 
 #endif

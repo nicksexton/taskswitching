@@ -27,12 +27,14 @@
 
 void gs_stroop_parameters_set_default (GsStroopParameters * params_object) {
 
+  params_object->activation_max = ACTIVATION_MAX;
+  params_object->activation_min = ACTIVATION_MIN;
   params_object->response_threshold = RESPONSE_THRESHOLD;
   params_object->step_size = STEP_SIZE;
   params_object->squashing_param = SQUASHING_PARAM;
   params_object->noise = NOISE;
   params_object->bias_outputunit = OUTPUTUNIT_BIAS;
-  params_object->bias_taskdemand = INPUTUNIT_BIAS;
+  params_object->bias_taskdemand = TASKDEMAND_BIAS;
   params_object->bias_none = BIAS_NONE;
   params_object->stimulus_input_strength_word = STIMULUS_INPUT_STRENGTH_WORD;
   params_object->stimulus_input_strength_colour = STIMULUS_INPUT_STRENGTH_COLOUR;
@@ -78,7 +80,7 @@ stroop_response * make_stroop_response (int node, double activation) {
 }
 
 
-bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_trial) {
+bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_trial, double response_threshold) {
 
   /* evaluates whether model should stop on this cycle and returns
      true/false. CURRENT CRITERION: most active output node is > next
@@ -162,7 +164,7 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
   switch (abs(biggest_act[0]->this_node - biggest_act[1]->this_node)) {
     case 3: { 
       // contingency where [0] and [1] correspond
-      if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[2]->activation) {
+      if (biggest_act[0]->activation - response_threshold > biggest_act[2]->activation) {
 
 	// RECORD RESPONSE
 	this_trial->response = biggest_act[0]->this_node;
@@ -179,7 +181,7 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
 
     default: { 
      // contingency where [0] and [2] do not correspond
-      if (biggest_act[0]->activation - RESPONSE_THRESHOLD > biggest_act[1]->activation) {
+      if (biggest_act[0]->activation - response_threshold > biggest_act[1]->activation) {
 
 	// RECORD RESPONSE
 	this_trial->response = biggest_act[0]->this_node;
@@ -198,16 +200,16 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
 // fully creates the Gilbert & Shallice model, weights, connections etc.
 // sets initial activations to 0 (init's model)
 
-int gs_stroop_model_build (pdp_model * gs_stroop_model) {
+int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * model_params) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
 
-  word_input = pdp_layer_create(ID_WORDIN, 3, BIAS_NONE);
-  word_output = pdp_layer_create(ID_WORDOUT, 3, OUTPUTUNIT_BIAS);
-  colour_input = pdp_layer_create(ID_COLOURIN, 3, BIAS_NONE);
-  colour_output = pdp_layer_create(ID_COLOUROUT, 3, OUTPUTUNIT_BIAS);
-  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, TASKDEMAND_BIAS);
-  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, BIAS_NONE);
+  word_input = pdp_layer_create(ID_WORDIN, 3, model_params->bias_none);
+  word_output = pdp_layer_create(ID_WORDOUT, 3, model_params->bias_outputunit);
+  colour_input = pdp_layer_create(ID_COLOURIN, 3, model_params->bias_none);
+  colour_output = pdp_layer_create(ID_COLOUROUT, 3, model_params->bias_outputunit);
+  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, model_params->bias_taskdemand);
+  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, model_params->bias_none);
 
   
   double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
@@ -234,16 +236,20 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
   /***************************** */
   pdp_weights_matrix *wts_wordin_wordout, *wts_colourin_colourout;
 
+  double stimulus_input_strength_word = model_params->stimulus_input_strength_word;
+
   double wts_wordin_wordout_matrix[3][3] = {
-    {STIMULUS_INPUT_STRENGTH_WORD, 0.0, 0.0},
-    {0.0, STIMULUS_INPUT_STRENGTH_WORD, 0.0},
-    {0.0, 0.0, STIMULUS_INPUT_STRENGTH_WORD}, 
+    {stimulus_input_strength_word, 0.0, 0.0},
+    {0.0, stimulus_input_strength_word, 0.0},
+    {0.0, 0.0, stimulus_input_strength_word}, 
   };
 
+  
+  double stimulus_input_strength_colour = model_params->stimulus_input_strength_colour;
   double wts_colourin_colourout_matrix[3][3] = {
-    {STIMULUS_INPUT_STRENGTH_COLOUR, 0.0, 0.0},
-    {0.0, STIMULUS_INPUT_STRENGTH_COLOUR, 0.0},
-    {0.0, 0.0, STIMULUS_INPUT_STRENGTH_COLOUR}, 
+    {stimulus_input_strength_colour, 0.0, 0.0},
+    {0.0, stimulus_input_strength_colour, 0.0},
+    {0.0, 0.0, stimulus_input_strength_colour}, 
   };
 
   wts_wordin_wordout = pdp_weights_create (3,3);
@@ -368,8 +374,8 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 
   pdp_weights_matrix *wts_topdown_taskdemand;
   double wts_topdown_taskdemand_matrix[2][2] = {
-    { TOPDOWN_CONTROL_STRENGTH_WORD,  0.0},
-    { 0.0, TOPDOWN_CONTROL_STRENGTH_COLOUR},
+    { model_params->topdown_control_strength_word,  0.0 },
+    { 0.0, model_params->topdown_control_strength_colour },
   };
 
   wts_topdown_taskdemand = pdp_weights_create (2,2);
@@ -416,6 +422,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model) {
 }
 
 
+// OLD (deprecated!) parameter setting!!!
 // sets model parameters (eg., weights) specific to gs_stroop_params defined in 
 // gs_stroop_subjects.c
 int model_init_params (pdp_model * gs_stroop_model, gs_stroop_params * my_params) {
@@ -508,7 +515,7 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
 
 }
 
-int update_associative_weights (pdp_model * gs_stroop_model) {
+int update_associative_weights (pdp_model * gs_stroop_model, double learning_rate) {
   // NB running this function immediately after initing model SHOULD zero associative weights
 
   int i, j;
@@ -535,11 +542,11 @@ int update_associative_weights (pdp_model * gs_stroop_model) {
     for (j = 0; j < 3; j ++) {// inner loop, input unit (j)
       wts_wordinput_taskdemand_matrix[i][j] = 
 	task_demand->units_latest->activations[i] *
-	word_input->units_latest->activations[j] * LEARNING_RATE;
+	word_input->units_latest->activations[j] * learning_rate;
 
       wts_colourinput_taskdemand_matrix[i][j] = 
 	task_demand->units_latest->activations[i] *
-	colour_input->units_latest->activations[j] * LEARNING_RATE;
+	colour_input->units_latest->activations[j] * learning_rate;
 
     }
   }
@@ -554,10 +561,13 @@ int update_associative_weights (pdp_model * gs_stroop_model) {
 }
 
 // returns true while model is still running (does not satisfy stopping condition), false otherwise
-bool run_model_step (pdp_model * gs_stroop_model, stroop_trial_data * this_trial, const gsl_rng * random_generator) {
+bool run_model_step (pdp_model * gs_stroop_model, 
+		     stroop_trial_data * this_trial, 
+		     const gsl_rng * random_generator, 
+		     double response_threshold) {
 
 
-  if (stopping_condition(gs_stroop_model, this_trial) == true || 
+  if (stopping_condition(gs_stroop_model, this_trial, response_threshold) == true || 
       gs_stroop_model->cycle > MAX_CYCLES)  {
     return false;
   }
@@ -603,15 +613,8 @@ bool run_model_step (pdp_model * gs_stroop_model, stroop_trial_data * this_trial
 /*****************************************************************/
 int run_stroop_trial (pdp_model * gs_stroop_model,  
 		      stroop_trial_data * this_trial,
-		      const gsl_rng * random_generator) {
-
-  // if (gs_stroop_model->model_data == NULL) {
-  //   printf ("run stroop trial error! model_data pointer is null\n");
-  //   return 0;
-  // }
-  // stroop_trial_data * subject_data = gs_stroop_model->model_data;
-
-
+		      const gsl_rng * random_generator,
+		      double response_threshold) {
 
 // init inputs
 
@@ -664,45 +667,11 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // <--------------------- RUN TRIAL ---------------------------->
 
-  //  while ((stopping_condition(gs_stroop_model, this_trial) != true && 
-  //	  gs_stroop_model->cycle < MAX_CYCLES))  {
-
-
-  while (run_model_step (gs_stroop_model, this_trial, random_generator));
-    /*
-    // recalculate activation 
-
-    pdp_model_cycle (gs_stroop_model);
-
-    // add noise to units 
-
+  // run_model_step returns true when stopping_condition evaluates to false
+  while (run_model_step (gs_stroop_model, this_trial, random_generator, response_threshold));
     
-    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer, 
-			NOISE, random_generator);
-    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer, 
-			NOISE, random_generator);
-    add_noise_to_units (pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer, 
-			NOISE, random_generator);
-    
-    
-
-#if defined ECHO
-
-    printf ("\ncyc:%d\t", gs_stroop_model->cycle);
-    pdp_layer_print_current_output (
-		    pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer);
-    pdp_layer_print_current_output (
-		    pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
-
-    
-#endif
-
-    */ 
-    
-  
-
   this_trial->response_time = gs_stroop_model->cycle;
-  // nb subject_data->response_time already set by stopping_condition
+
 
   return (1);
 

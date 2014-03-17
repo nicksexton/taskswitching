@@ -165,7 +165,9 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
 
   for (n = 0; n < NUMBER_OF_SUBJECTS; n ++) {
 
-    // initialise gs_stroop_params here for now
+
+    // parameter setting - DEPRECATED!!!!
+    // initialise gs_stroop_params to defaults
     model_init_params (simulation->model, 
 		     ((gs_stroop_params *)(simulation->subjects->subj[n]->params)));
   }
@@ -193,7 +195,8 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   bool running = run_model_step (simulation->model, 
 				 &(simulation->subjects->subj[simulation->current_subject]
 				   ->fixed_trials[simulation->current_trial]), 
-				 simulation->random_generator);
+				 simulation->random_generator, 
+				 simulation->model_params->response_threshold);
 
   if (running) {
     // do something?
@@ -215,7 +218,17 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
 					 PdpGuiObjects * objects) {
 
   PdpSimulation * simulation = objects->simulation;
-  printf ("model %s step many (not implemented)\n", simulation->model->name);
+
+  int i = 0;
+  bool model_running = true;
+  while (i < 10 && model_running) {
+    model_running = run_model_step (simulation->model, 
+				    &(simulation->subjects->subj[simulation->current_subject]
+				      ->fixed_trials[simulation->current_trial]), 
+				    simulation->random_generator, 
+				    simulation->model_params->response_threshold);
+    i ++;
+  }
 
 
   if (objects->model_sub_notepage != NULL) {
@@ -232,7 +245,8 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
   run_stroop_trial (simulation->model, 
 		    &(simulation->subjects->subj[simulation->current_subject]
 		      ->fixed_trials[simulation->current_trial]), 
-		    simulation->random_generator);
+		    simulation->random_generator,
+		    simulation->model_params->response_threshold);
 
 
   printf ("model %s run trial \n", simulation->model->name);
@@ -378,24 +392,26 @@ PdpSimulation * init_simulation () {
   simulation->random_generator = random_generator_create();
   simulation->model = pdp_model_create (0, "gs_stroop");
 
-  gs_stroop_model_build (simulation->model); // probably defer building the model in later versions
+  gs_stroop_model_build (simulation->model, simulation->model_params); 
+  // probably defer building the model in later versions
 
   // Init activation function parameters
   // act_func_params * act_params = act_params = g_malloc (sizeof(act_func_params));
-  act_func_params * act_params = g_malloc (sizeof(act_func_params));
 
+
+
+  
+  // init model parameters and set defaults
+  simulation->model_params = g_malloc (sizeof(GsStroopParameters));
+  gs_stroop_parameters_set_default (simulation->model_params);
+
+  act_func_params * act_params = g_malloc (sizeof(act_func_params));
   act_params->type = ACT_GS;
-  act_params->params.gs.step_size = STEP_SIZE;
-  act_params->params.gs.act_max = ACTIVATION_MAX;
-  act_params->params.gs.act_min = ACTIVATION_MIN;
+  act_params->params.gs.step_size = simulation->model_params->step_size;
+  act_params->params.gs.act_max = simulation->model_params->activation_max;
+  act_params->params.gs.act_min = simulation->model_params->activation_min;
 
   simulation->model->activation_parameters = act_params;
-
-  
-  // init model parameters
-  simulation->model_params = g_malloc (sizeof(GsStroopParameters));
-
-  
 
   // initialise subjects
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);

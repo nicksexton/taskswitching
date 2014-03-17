@@ -21,6 +21,9 @@ int main () {
   int n;
 
 
+  // init a parameters structure here;
+  GsStroopParameters * model_parameters = malloc (sizeof(GsStroopParameters));
+  gs_stroop_parameters_set_default (model_parameters);
 
 
   // <-------------------- SUBJECTS INIT -------------------->
@@ -77,13 +80,13 @@ int main () {
 
     act_func_params * activation_parameters = malloc (sizeof(act_func_params));
     activation_parameters->type = ACT_GS;
-    activation_parameters->params.gs.step_size = STEP_SIZE;
-    activation_parameters->params.gs.act_max = ACTIVATION_MAX;
-    activation_parameters->params.gs.act_min = ACTIVATION_MIN;
+    activation_parameters->params.gs.step_size = model_parameters->step_size;
+    activation_parameters->params.gs.act_max = model_parameters->activation_max;
+    activation_parameters->params.gs.act_min = model_parameters->activation_min;
     gs_stroop_model->activation_parameters = activation_parameters;
     
   // create the network & set weights
-    gs_stroop_model_build (gs_stroop_model); // also inits the model for 1st sim
+    gs_stroop_model_build (gs_stroop_model, model_parameters); // also inits the model for 1st sim
 
 
 
@@ -104,7 +107,7 @@ int main () {
       /* run stroop trial(s) */
       run_stroop_trial (gs_stroop_model, 
 			&(my_subjects->subj[n]->fixed_trials[trial]), 
-		      random_generator);
+			random_generator, model_parameters->response_threshold);
 
       /* update weights */
       // update_associative_weights (gs_stroop_model); // ?!? remove this line for fixed blocks??
@@ -119,19 +122,19 @@ int main () {
       // Note: need to run model_init immediately followed by update_associative_weights 
       // to zero associative weights for new subject, in mixed blocks trials 
       model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
-      update_associative_weights (gs_stroop_model);
+      update_associative_weights (gs_stroop_model, model_parameters->learning_rate);
       
       for (trial = 0; trial < my_subjects->subj[n]->num_mixed_trials_in_run; trial++) {
 
-	model_init_activation (gs_stroop_model, (1-SQUASHING_PARAM)); // zero activations 
+	model_init_activation (gs_stroop_model, (1-model_parameters->squashing_param)); // zero activations 
 	
 	/* run stroop trial(s) */
 	run_stroop_trial (gs_stroop_model, 
 			  &(my_subjects->subj[n]->mixed_trials[run][trial]), 
-			  random_generator);
+			  random_generator, model_parameters->response_threshold);
 	
 	/* update weights */
-	update_associative_weights (gs_stroop_model);
+	update_associative_weights (gs_stroop_model, model_parameters->learning_rate);
 	
       }
     }
@@ -155,6 +158,8 @@ int main () {
   gs_stroop_data_filedump (my_subjects);
 
   //   subject_free (subject_1); // temp
+
+  free (model_parameters);
   subject_popn_free (my_subjects);
   random_generator_free (random_generator);  
   
