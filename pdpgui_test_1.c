@@ -12,6 +12,7 @@
 #include "gs_stroop_global_params.h"
 
 #include "pdpgui_plot.h"
+#include "pdpgui_import.h"
 #include "pdpgui.h"
 
 // temp!
@@ -474,6 +475,11 @@ int main (int argc, char *argv[]) {
   gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
 			   create_notepage_model_main(objects), 
 			   gtk_label_new("Model"));
+  gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
+			   create_notepage_import(objects), 
+			   gtk_label_new("File Import"));
+
+
 
   // Create a full-window grid to contain toolbar and the notebook
   grid = gtk_grid_new();
