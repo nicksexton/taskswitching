@@ -428,13 +428,12 @@ void free_simulation (PdpSimulation * simulation) {
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
 
-
   g_free (simulation);
 
 }
 
-static void main_quit (GtkWidget *window, PdpSimulation *simulation) {
 
+static void main_quit (GtkWidget *window, PdpSimulation *simulation) {
   
   free_simulation (simulation);
   gtk_main_quit ();
