@@ -59,31 +59,28 @@ static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStr
 
 
 // read parameters from the tree store, apply to model parameters struct
-static void model_parameters_import_commit_cb (PdpGuiObjects * objects) {
+static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects) {
 
-  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  // GtkTreeIter iter; 
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  GtkTreeIter iter; 
 
-  GtkTreeIter iter_store;
+  // GtkTreeIter iter_store;
 
-  GtkTreeStore * store;
-  GtkTreeModel * model;
+  // GtkTreeStore * store;
+  // GtkTreeModel * model;
 
-  store = objects->config_file->tree_store;
-  printf ("objects address %p\n", objects);
-  printf ("config_file address %p\n", objects->config_file);
-  printf ("store address %p\n", store);
+  // store = objects->config_file->tree_store;
+  
+  // gtk_tree_store_append (store, &iter_store, NULL);
+  // gtk_tree_store_set (store, &iter_store, 
+  //		      "test parameter", "test value", -1);
 
-  gtk_tree_store_append (store, &iter_store, NULL);
-  gtk_tree_store_set (store, &iter_store, 
-		      "test parameter", "test value", -1);
-
-  model = GTK_TREE_MODEL(store);
+// model = GTK_TREE_MODEL(store);
 
   gboolean more;
 
-  more = gtk_tree_model_get_iter_first (model, iter);
-//   more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->config_file->tree_store), iter);
+// more = gtk_tree_model_get_iter_first (model, iter);
+  more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
 
   while (more) {
 
@@ -93,9 +90,9 @@ static void model_parameters_import_commit_cb (PdpGuiObjects * objects) {
 
    
     gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
-			iter, COL_PARAMETER_NAME, &param_name, -1);
+			&iter, COL_PARAMETER_NAME, &param_name, -1);
     gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
-			iter, COL_PARAMETER_VALUE, &param_value, -1);
+			&iter, COL_PARAMETER_VALUE, &param_value, -1);
     g_print ("assigning:\t%s: %s\n", param_name, param_value);
 
     model_parameter_import (param_name, param_value, objects->simulation->model_params);
@@ -103,7 +100,7 @@ static void model_parameters_import_commit_cb (PdpGuiObjects * objects) {
     g_free (param_name);
     g_free (param_value);
     
-    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->config_file->tree_store), iter);
+    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
   }  
 
 }
@@ -324,12 +321,7 @@ GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
   g_signal_connect (button_process_configfile, "clicked", 
 		    G_CALLBACK(load_from_file_cb), (gpointer)(objects->config_file));
 
-  printf ("init function\n");
-  printf ("objects address %p\n", objects);
-  printf ("config_file address %p\n", objects->config_file);
-  printf ("store address %p\n", objects->config_file->tree_store);
-
-
+  
   // TODO - make button only active when there are parameters to commit
   button_import_commit = gtk_button_new_with_label ("Import Commit");
   g_signal_connect (button_import_commit, "clicked", 
