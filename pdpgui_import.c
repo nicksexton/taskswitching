@@ -5,11 +5,17 @@
 
 #include <gtk/gtk.h>
 #include "lib_string_parse.h"
+#include "pdpgui.h"
 
 #define CONFIG_FILE gtk_config_file.conf
 
 
+// read parameters from the tree store, apply to model parameters struct
+static void model_parameters_import_commit_cb () {
 
+  
+
+}
 
 
 
@@ -35,7 +41,7 @@ gboolean treestore_remove_all (GtkTreeStore * tree_store) {
 
 
 // callback function to read file contents
-gboolean load_from_file (GtkWidget *widget, FileData *file_info) {
+gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
 
   file_info->fp = fopen(file_info->filename, "r");
   if (file_info->fp == NULL) {
@@ -74,7 +80,7 @@ void select_file (GtkComboBoxText *widget, FileData * config_file) {
 }
 
 
-
+/* now implemented in pdpgui_test_1 (main_quit)
 static void destroy_notepage_fileselect(GtkWidget *notepage_fs, FileData *config_file) {
 
   // g_free (config_file->filename_label); 
@@ -84,7 +90,7 @@ static void destroy_notepage_fileselect(GtkWidget *notepage_fs, FileData *config
   g_free (config_file);
   printf ("all memory associated with config_file freed\n");
 }
-
+*/
 
 FileData * init_config_file (GtkTreeStore * tree_store){
 
@@ -125,7 +131,7 @@ static void config_file_treeview_selection_changed_cb (GtkTreeSelection *selecti
 }
 
 
-static void setup_config_file_treeview (GtkTreeView * tree) {
+static void setup_model_params_treeview (GtkTreeView * tree) {
 
   GtkTreeViewColumn *column;
   GtkCellRenderer *renderer;
@@ -168,8 +174,33 @@ static void setup_config_file_treeview (GtkTreeView * tree) {
 }
 
 
+FileData * create_param_import_objects() {
 
-GtkWidget* create_notepage_import() {
+  GtkTreeStore *store;
+  //  GtkWidget *tree;
+
+  store = gtk_tree_store_new (N_COLUMNS,
+			      G_TYPE_STRING,
+			      G_TYPE_STRING);
+
+  // create a view
+  // tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
+
+  // view now holds a reference. Get rid of our own reference:
+  // g_object_unref (G_OBJECT (store));
+
+  // setup tree view
+  // setup_config_file_treeview (GTK_TREE_VIEW(tree));
+
+  //  FileData * config_file = init_config_file(GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree))));
+  FileData * config_file = init_config_file(store);
+
+  return config_file;
+  
+}
+
+
+GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
 
   GtkWidget *grid_main;
   GtkWidget *grid_controls;
@@ -177,6 +208,12 @@ GtkWidget* create_notepage_import() {
   GtkWidget *file_select;
   GtkWidget *button_process_configfile;
 
+  GtkWidget *tree;
+  tree = gtk_tree_view_new();
+  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->config_file->tree_store));
+  setup_model_params_treeview(GTK_TREE_VIEW(tree));
+
+  /*
   // create a treestore to store parsed data
   GtkTreeStore *store;
   GtkWidget *tree;
@@ -197,6 +234,10 @@ GtkWidget* create_notepage_import() {
   // setup config file data  
   FileData * config_file = init_config_file(GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree))));
 
+  */
+
+
+
 
   label1 = gtk_label_new("Select config file");
   gtk_label_set_line_wrap(GTK_LABEL(label1), TRUE);
@@ -208,19 +249,19 @@ GtkWidget* create_notepage_import() {
 				 "gtk_config_file_2.conf");
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
 				 "pdpgui_gs_params_default.conf");
-  g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(config_file) );
+  g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(objects->config_file) );
 
   // aesthetic: give this a standard icon
   button_process_configfile = gtk_button_new_with_label ("Load from file");
   g_signal_connect (button_process_configfile, "clicked", 
-		    G_CALLBACK(load_from_file), (gpointer)(config_file));
+		    G_CALLBACK(load_from_file_cb), (gpointer)(objects->config_file));
 
   grid_main = gtk_grid_new();
   grid_controls = gtk_grid_new();
 
   gtk_grid_attach (GTK_GRID(grid_controls), label1, 0, 0, 1, 1);
   gtk_grid_attach (GTK_GRID(grid_controls), file_select, 0, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID(grid_controls), config_file->filename_label, 0, 2, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid_controls), objects->config_file->filename_label, 0, 2, 1, 1);
   gtk_grid_attach (GTK_GRID(grid_controls), button_process_configfile, 0, 3, 1, 1);
   //  gtk_widget_set_vexpand (GTK_WIDGET(grid_controls), TRUE);
   
@@ -233,10 +274,11 @@ GtkWidget* create_notepage_import() {
 
   gtk_widget_show_all(grid_main);
 
+  /* destructor now handled in 
   g_signal_connect (G_OBJECT(grid_main), "destroy", 
 		    G_CALLBACK (destroy_notepage_fileselect), 
-		    (gpointer)config_file);
-
+		    ((gpointer)(objects->config_file)));
+  */
   return (grid_main);
   
 }

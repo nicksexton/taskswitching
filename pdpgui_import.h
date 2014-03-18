@@ -2,22 +2,8 @@
 #define pdpgui_import_h
 
 #include "lib_string_parse.h"
+#include "pdpgui.h"
 
-// no longer needed?
-/*
-typedef struct display_widgets {
-
-  GtkWidget *param1_name;
-  GtkWidget *param1_1;
-  GtkWidget *param1_2;
-
-  GtkWidget *param2_name;
-  GtkWidget *param2_1;
-  GtkWidget *param2_2;
-
-} DisplayWidgets;
-
-*/
 
 // utility function for clearing all entries from a treeview
 gboolean treestore_remove_all (GtkTreeStore * tree_store);
@@ -39,7 +25,8 @@ void config_file_treeview_selection_changed_cb (GtkTreeSelection *selection, gpo
 
 void setup_config_file_treeview (GtkTreeView * tree);
 
+FileData * create_param_import_objects();
 
-GtkWidget* create_notepage_import();
+GtkWidget* create_notepage_import(PdpGuiObjects * objects);
 
 #endif

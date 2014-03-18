@@ -527,9 +527,10 @@ void free_simulation (PdpSimulation * simulation) {
 }
 
 
-static void main_quit (GtkWidget *window, PdpSimulation *simulation) {
+static void main_quit (GtkWidget *window, PdpGuiObjects  *objects) {
   
-  free_simulation (simulation);
+  free_simulation (objects->simulation);
+  g_free (objects->config_file);
   gtk_main_quit ();
 
 }
@@ -546,11 +547,16 @@ int main (int argc, char *argv[]) {
   objects->simulation = simulation;
   objects->model_sub_notepage = NULL;
 
+  objects->config_file = create_param_import_objects();
+
+ 
+
+
+  // Draw the GUI
+
   GtkWidget *window;
   GtkWidget *grid;
   GtkWidget *notes;
-
-
 
   // Create a window with a title, default size, and set border width
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -558,7 +564,7 @@ int main (int argc, char *argv[]) {
   gtk_window_set_default_size(GTK_WINDOW(window), 800, 800);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width (GTK_CONTAINER(window), 10);
-  g_signal_connect (window, "destroy", G_CALLBACK(main_quit), (gpointer) simulation);
+  g_signal_connect (window, "destroy", G_CALLBACK(main_quit), (gpointer) objects);
 
 
   // ------------- NOTEPAD -----------------
