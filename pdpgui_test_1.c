@@ -16,7 +16,7 @@
 #include "pdpgui.h"
 
 // temp!
-#include <math.h>
+// #include <math.h>
 
 
 void pdpgui_plot_network_activation (GtkWidget *widget, 
@@ -32,14 +32,14 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
 			 0.0, simulation->model->cycle * 1.1, 
-			 -1.0, 1.0);
+			 -1.0, 0.1);
 
 
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
     .x_max = simulation->model->cycle * 1.1, 
     .y_min = -1.0, 
-    .y_max = 1.0
+    .y_max = 0.1
   };
 
   PdpguiColourRgb plot_colour[3] = {{ 
@@ -156,6 +156,25 @@ create_sub_notepage_model_display_architecture (PdpGuiObjects * objects) {
   return (grid);
 }
 
+static void model_headerbar_update_labels (PdpGuiObjects * objects) {
+
+  char textbuf[100];
+  sprintf (textbuf, "Subject: %d", objects->simulation->current_subject);
+  gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_subject), textbuf);
+ 
+
+  sprintf (textbuf, "Trial: %d", objects->simulation->current_trial);
+  gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial), textbuf);
+
+  // display input pattern, trialtype, ...?
+  stroop_trial_data_print_as_string (textbuf, 100, 
+				     fixed_block_trial_data_get(objects->simulation->subjects,
+								objects->simulation->current_subject,
+								objects->simulation->current_trial));
+
+  gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
+
+}
 
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
@@ -163,7 +182,17 @@ static void model_change_trial_cb (GtkWidget * spin_button,
   int new_trial;
   new_trial = gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin_button));
   objects->simulation->current_trial = new_trial;
-  gtk_widget_queue_draw(objects->model_headerbar_subject_trial);
+
+  stroop_trial_data * this_trial = &(objects->simulation->subjects->
+    subj[objects->simulation->current_subject]->
+				     fixed_trials[objects->simulation->current_trial]);
+
+  printf ("current trial: %d\t", objects->simulation->current_trial);
+  printf ("w: %d\tc: %d\ttask: %d\n", this_trial->stim_word, this_trial->stim_colour, this_trial->stim_task);
+
+
+  // now update text in headerbar widgets
+  model_headerbar_update_labels (objects);
 
 }
 
@@ -323,16 +352,6 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
-
-  // code for close button on toolbar:
-  // tool_item = gtk_separator_tool_item_new();
-  // gtk_separator_tool_item_set_draw(GTK_SEPARATOR_TOOL_ITEM(tool_item), FALSE);
-  // gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
-
-  //  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_CLOSE);
-  // connect application quit callback here
-  //  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
-
   // options for toolbar
   gtk_widget_set_hexpand (toolbar, TRUE);
   gtk_widget_set_vexpand (toolbar, FALSE);
@@ -340,16 +359,31 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   // -------------- page header with current status -------
 
   grid_headerbar = gtk_grid_new();
-  objects->model_headerbar_subject_trial = grid_headerbar; // keep track of headerbar so we can redraw it
+  gtk_grid_set_column_spacing (GTK_GRID(grid_headerbar), 10);
+
+  // spin button for controlling current trial  
+
+  current_trial_adjustment = gtk_adjustment_new (simulation->current_trial, 0, 
+						 (simulation->subjects->
+						 subj[simulation->current_subject]->num_fixed_trials)-1,
+						 1, 0, 0);
+  spin_button = gtk_spin_button_new (current_trial_adjustment, 1, 0);
+  g_signal_connect (G_OBJECT(spin_button), "value-changed", G_CALLBACK(model_change_trial_cb), (gpointer) objects);
+
+
+  gtk_grid_attach (GTK_GRID(grid_headerbar), spin_button, 0, 0, 1, 1);
+
 
   char textbuf[100];
   sprintf (textbuf, "Subject: %d", simulation->current_subject);
   label1 = gtk_label_new (textbuf);
-  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 0, 0, 1, 1);
+  objects->model_headerbar_label_subject = label1; // keep track of label so we can update it
+  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 1, 0, 1, 1);
 
   sprintf (textbuf, "Trial: %d", simulation->current_trial);
   label1 = gtk_label_new (textbuf);
-  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 1, 0, 1, 1);
+  objects->model_headerbar_label_trial = label1; // keep track of label so we can update it
+  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 2, 0, 1, 1);
 
   // display input pattern, trialtype, ...?
   stroop_trial_data_print_as_string (textbuf, 100, 
@@ -358,17 +392,9 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 								simulation->current_trial));
   // printf ("%s", textbuf);
   label1 = gtk_label_new (textbuf);
-  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 2, 0, 1, 1);
-
-  // spin button for controlling current trial  
-
-  current_trial_adjustment = gtk_adjustment_new (simulation->current_trial, 0, 
-						 simulation->subjects->
-						 subj[simulation->current_subject]->num_fixed_trials,
-						 1, 0, 0);
-  spin_button = gtk_spin_button_new (current_trial_adjustment, 1, 0);
-  g_signal_connect (G_OBJECT(spin_button), "value-changed", G_CALLBACK(model_change_trial_cb), (gpointer) objects);
-  gtk_grid_attach (GTK_GRID(grid_headerbar), spin_button, 3, 0, 1, 1);
+  gtk_widget_set_size_request (label1, 300, 30); // max size so spin button is always in same place
+  objects->model_headerbar_label_trial_data = label1; // keep track of label so we can update it
+  gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 3, 0, 1, 1);
 
 
   

@@ -27,7 +27,12 @@ typedef struct pdpgui_objects {
 
   PdpSimulation * simulation;
   GtkWidget * model_sub_notepage;
-  GtkWidget * model_headerbar_subject_trial;
+
+
+  GtkWidget * model_headerbar_label_subject;
+  GtkWidget * model_headerbar_label_trial;
+  GtkWidget * model_headerbar_label_trial_data;
+
 
 } PdpGuiObjects;
 
