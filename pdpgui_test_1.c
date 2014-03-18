@@ -178,13 +178,13 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
 }
 
-
+/*
 static void model_headerbar_redraw_cb(GtkWidget *headerbar, PdpGuiObjects * objects) {
 
   model_headerbar_update_labels (objects);
 
 }
-
+*/
 
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
@@ -409,11 +409,9 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   label1 = gtk_label_new (textbuf);
   gtk_widget_set_size_request (label1, 300, 30); // max size so spin button is always in same place
   objects->model_headerbar_label_trial_data = label1; // keep track of label so we can update it
-
-  g_signal_connect (G_OBJECT(grid_headerbar), "draw", G_CALLBACK(model_headerbar_redraw_cb), (gpointer) objects);
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 3, 0, 1, 1);
 
-
+  // g_signal_connect (G_OBJECT(grid_headerbar), "draw", G_CALLBACK(model_headerbar_redraw_cb), (gpointer) objects);
   
 
   // --------------- SUB-NOTEPAGE ------------------------    
