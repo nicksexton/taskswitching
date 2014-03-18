@@ -18,36 +18,68 @@ static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStr
     printf ("parameter %s now %4.2f\n", param_name, model_params->activation_max);
   }
   else if (!strcmp (param_name, "ACTIVATION_MIN")) {
+    model_params->activation_min = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->activation_min);
   }
   else if (!strcmp (param_name, "RESPONSE_THRESHOLD")) {
+    model_params->response_threshold = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->response_threshold);
   }
   else if (!strcmp (param_name, "STEP_SIZE")) {
+    model_params->step_size = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.4f\n", param_name, model_params->step_size);
   }
   else if (!strcmp (param_name, "SQUASHING_PARAM")) {
+    model_params->squashing_param = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->squashing_param);
   }
   else if (!strcmp (param_name, "NOISE")) {
+    model_params->noise = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->noise);
   }
   else if (!strcmp (param_name, "BIAS_OUTPUTUNIT")) {
+    model_params->bias_outputunit = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->bias_outputunit);
   }
   else if (!strcmp (param_name, "BIAS_TASKDEMAND")) {
+    model_params->bias_taskdemand = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->bias_taskdemand);
   }  
   else if (!strcmp (param_name, "BIAS_NONE")) {
+    model_params->bias_none = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->bias_none);
   }
   else if (!strcmp (param_name, "STIMULUS_INPUT_STRENGTH_WORD")) {
+    model_params->stimulus_input_strength_word = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->stimulus_input_strength_word);
   }
   else if (!strcmp (param_name, "STIMULUS_INPUT_STRENGTH_COLOUR")) {
+    model_params->stimulus_input_strength_colour = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->stimulus_input_strength_colour);
   }
   else if (!strcmp (param_name, "TASKDEMAND_OUTPUT_INHIBITORY_WT")) {
+    model_params->taskdemand_output_inhibitory_wt = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->taskdemand_output_inhibitory_wt);
   }
   else if (!strcmp (param_name, "TASKDEMAND_OUTPUT_EXCITATORY_WT")) {
+    model_params->taskdemand_output_excitatory_wt = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->taskdemand_output_excitatory_wt);
   }
   else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_WORD")) {
+    model_params->topdown_control_strength_word = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->topdown_control_strength_word);
   }
   else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_COLOUR")) {
+    model_params->topdown_control_strength_colour = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->topdown_control_strength_colour);
   }
   else if (!strcmp (param_name, "LEARNING_RATE")) {
+    model_params->learning_rate = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->learning_rate);
   }
   else if (!strcmp (param_name, "MAX_CYCLES")) {
+    model_params->max_cycles = (double) g_ascii_strtoll (param_value, NULL, 10);
+    printf ("parameter %s now %d\n", param_name, model_params->max_cycles);
   }
   else {
     printf ("warning! parameter %s not recognised\n", param_name);
@@ -61,25 +93,9 @@ static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStr
 // read parameters from the tree store, apply to model parameters struct
 static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects) {
 
-  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
   GtkTreeIter iter; 
-
-  // GtkTreeIter iter_store;
-
-  // GtkTreeStore * store;
-  // GtkTreeModel * model;
-
-  // store = objects->config_file->tree_store;
-  
-  // gtk_tree_store_append (store, &iter_store, NULL);
-  // gtk_tree_store_set (store, &iter_store, 
-  //		      "test parameter", "test value", -1);
-
-// model = GTK_TREE_MODEL(store);
-
   gboolean more;
 
-// more = gtk_tree_model_get_iter_first (model, iter);
   more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
 
   while (more) {
@@ -274,13 +290,6 @@ FileData * create_param_import_objects() {
 			      G_TYPE_STRING);
   
   config_file->tree_store = store;
-
-  printf ("create import objects\n");
-
-  printf ("config_file address %p\n", config_file);
-  printf ("store address %p\n", store);
-
-
 
   return config_file;
 }
