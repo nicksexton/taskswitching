@@ -9,11 +9,102 @@
 
 #define CONFIG_FILE gtk_config_file.conf
 
+static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStroopParameters *model_params) {
+
+  bool return_value = true; // returns true if import succeeds
+
+  if (!strcmp (param_name, "ACTIVATION_MAX")) { 
+    model_params->activation_max = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->activation_max);
+  }
+  else if (!strcmp (param_name, "ACTIVATION_MIN")) {
+  }
+  else if (!strcmp (param_name, "RESPONSE_THRESHOLD")) {
+  }
+  else if (!strcmp (param_name, "STEP_SIZE")) {
+  }
+  else if (!strcmp (param_name, "SQUASHING_PARAM")) {
+  }
+  else if (!strcmp (param_name, "NOISE")) {
+  }
+  else if (!strcmp (param_name, "BIAS_OUTPUTUNIT")) {
+  }
+  else if (!strcmp (param_name, "BIAS_TASKDEMAND")) {
+  }  
+  else if (!strcmp (param_name, "BIAS_NONE")) {
+  }
+  else if (!strcmp (param_name, "STIMULUS_INPUT_STRENGTH_WORD")) {
+  }
+  else if (!strcmp (param_name, "STIMULUS_INPUT_STRENGTH_COLOUR")) {
+  }
+  else if (!strcmp (param_name, "TASKDEMAND_OUTPUT_INHIBITORY_WT")) {
+  }
+  else if (!strcmp (param_name, "TASKDEMAND_OUTPUT_EXCITATORY_WT")) {
+  }
+  else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_WORD")) {
+  }
+  else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_COLOUR")) {
+  }
+  else if (!strcmp (param_name, "LEARNING_RATE")) {
+  }
+  else if (!strcmp (param_name, "MAX_CYCLES")) {
+  }
+  else {
+    printf ("warning! parameter %s not recognised\n", param_name);
+    return_value = false;
+  }
+
+  return return_value;
+}
+
 
 // read parameters from the tree store, apply to model parameters struct
-static void model_parameters_import_commit_cb () {
+static void model_parameters_import_commit_cb (PdpGuiObjects * objects) {
 
-  
+  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  // GtkTreeIter iter; 
+
+  GtkTreeIter iter_store;
+
+  GtkTreeStore * store;
+  GtkTreeModel * model;
+
+  store = objects->config_file->tree_store;
+  printf ("objects address %p\n", objects);
+  printf ("config_file address %p\n", objects->config_file);
+  printf ("store address %p\n", store);
+
+  gtk_tree_store_append (store, &iter_store, NULL);
+  gtk_tree_store_set (store, &iter_store, 
+		      "test parameter", "test value", -1);
+
+  model = GTK_TREE_MODEL(store);
+
+  gboolean more;
+
+  more = gtk_tree_model_get_iter_first (model, iter);
+//   more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->config_file->tree_store), iter);
+
+  while (more) {
+
+    // tree is not empty, process 
+    gchar *param_name;
+    gchar *param_value;
+
+   
+    gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
+			iter, COL_PARAMETER_NAME, &param_name, -1);
+    gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
+			iter, COL_PARAMETER_VALUE, &param_value, -1);
+    g_print ("assigning:\t%s: %s\n", param_name, param_value);
+
+    model_parameter_import (param_name, param_value, objects->simulation->model_params);
+
+    g_free (param_name);
+    g_free (param_value);
+    
+    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->config_file->tree_store), iter);
+  }  
 
 }
 
@@ -22,12 +113,13 @@ static void model_parameters_import_commit_cb () {
 // utility function for clearing all entries from a treeview
 gboolean treestore_remove_all (GtkTreeStore * tree_store) {
 
-  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  GtkTreeIter iter;
 
-  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_store), iter)) {
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_store), &iter)) {
     // tree is not empty, proceed to remove all items
 
-    while (gtk_tree_store_remove (tree_store, iter)) {
+    while (gtk_tree_store_remove (tree_store, &iter)) {
       // tree_store still contains rows
     }
     return TRUE;
@@ -80,18 +172,7 @@ void select_file (GtkComboBoxText *widget, FileData * config_file) {
 }
 
 
-/* now implemented in pdpgui_test_1 (main_quit)
-static void destroy_notepage_fileselect(GtkWidget *notepage_fs, FileData *config_file) {
-
-  // g_free (config_file->filename_label); 
-     // don't need to explicitly free this?
-  // config file should already be closed by any function that accesses it (eg load_from_file)
-  // g_free (config_file->data);
-  g_free (config_file);
-  printf ("all memory associated with config_file freed\n");
-}
-*/
-
+/*
 FileData * init_config_file (GtkTreeStore * tree_store){
 
   // first create memory for the file pointer
@@ -107,7 +188,7 @@ FileData * init_config_file (GtkTreeStore * tree_store){
 
   return config_file;
 }
-
+*/
 
 
 
@@ -176,28 +257,38 @@ static void setup_model_params_treeview (GtkTreeView * tree) {
 
 FileData * create_param_import_objects() {
 
+  FileData *config_file; // struct containing pointers to relevant file data
   GtkTreeStore *store;
   //  GtkWidget *tree;
+
+
+
+  // first create memory for the file pointer
+
+  config_file = g_malloc (sizeof(FileData)); 
+  config_file->fp = NULL;
+
+  char filename[FILENAME_MAX_LENGTH];
+  strcpy (filename, "no file selected");
+  config_file->filename_label = gtk_label_new(filename);
 
   store = gtk_tree_store_new (N_COLUMNS,
 			      G_TYPE_STRING,
 			      G_TYPE_STRING);
+  
+  config_file->tree_store = store;
 
-  // create a view
-  // tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
+  printf ("create import objects\n");
 
-  // view now holds a reference. Get rid of our own reference:
-  // g_object_unref (G_OBJECT (store));
+  printf ("config_file address %p\n", config_file);
+  printf ("store address %p\n", store);
 
-  // setup tree view
-  // setup_config_file_treeview (GTK_TREE_VIEW(tree));
 
-  //  FileData * config_file = init_config_file(GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree))));
-  FileData * config_file = init_config_file(store);
 
   return config_file;
-  
 }
+
+
 
 
 GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
@@ -207,35 +298,12 @@ GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
   GtkWidget *label1; // *label2;
   GtkWidget *file_select;
   GtkWidget *button_process_configfile;
+  GtkWidget *button_import_commit;
 
   GtkWidget *tree;
   tree = gtk_tree_view_new();
   gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->config_file->tree_store));
   setup_model_params_treeview(GTK_TREE_VIEW(tree));
-
-  /*
-  // create a treestore to store parsed data
-  GtkTreeStore *store;
-  GtkWidget *tree;
-
-  store = gtk_tree_store_new (N_COLUMNS,
-			      G_TYPE_STRING,
-			      G_TYPE_STRING);
-
-  // create a view
-  tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
-
-  // view now holds a reference. Get rid of our own reference:
-  g_object_unref (G_OBJECT (store));
-
-  // setup tree view
-  setup_config_file_treeview (GTK_TREE_VIEW(tree));
-  
-  // setup config file data  
-  FileData * config_file = init_config_file(GTK_TREE_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(tree))));
-
-  */
-
 
 
 
@@ -256,6 +324,18 @@ GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
   g_signal_connect (button_process_configfile, "clicked", 
 		    G_CALLBACK(load_from_file_cb), (gpointer)(objects->config_file));
 
+  printf ("init function\n");
+  printf ("objects address %p\n", objects);
+  printf ("config_file address %p\n", objects->config_file);
+  printf ("store address %p\n", objects->config_file->tree_store);
+
+
+  // TODO - make button only active when there are parameters to commit
+  button_import_commit = gtk_button_new_with_label ("Import Commit");
+  g_signal_connect (button_import_commit, "clicked", 
+		    G_CALLBACK(model_parameters_import_commit_cb), (gpointer)(objects));
+
+
   grid_main = gtk_grid_new();
   grid_controls = gtk_grid_new();
 
@@ -263,6 +343,9 @@ GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
   gtk_grid_attach (GTK_GRID(grid_controls), file_select, 0, 1, 1, 1);
   gtk_grid_attach (GTK_GRID(grid_controls), objects->config_file->filename_label, 0, 2, 1, 1);
   gtk_grid_attach (GTK_GRID(grid_controls), button_process_configfile, 0, 3, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid_controls), button_import_commit, 0, 4, 1, 1);
+
+
   //  gtk_widget_set_vexpand (GTK_WIDGET(grid_controls), TRUE);
   
   gtk_grid_attach (GTK_GRID(grid_main), grid_controls, 0, 0, 1, 1);
@@ -274,11 +357,7 @@ GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
 
   gtk_widget_show_all(grid_main);
 
-  /* destructor now handled in 
-  g_signal_connect (G_OBJECT(grid_main), "destroy", 
-		    G_CALLBACK (destroy_notepage_fileselect), 
-		    ((gpointer)(objects->config_file)));
-  */
+
   return (grid_main);
   
 }
