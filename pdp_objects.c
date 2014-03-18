@@ -480,6 +480,7 @@ pdp_model * pdp_model_create (int id, char *model_name) {
 
   this_model->next = NULL;
   this_model->prev = NULL;
+  this_model->activation_parameters = NULL;
 
   this_model->id = id;
   strncpy (this_model->name, model_name, MODEL_NAME_MAX_LENGTH);

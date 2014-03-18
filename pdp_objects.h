@@ -122,17 +122,17 @@ typedef struct pdp_model {
   pdp_model *prev;
 
   int cycle;
-  /* model parameters */
-  // parameters object (g_hash_table???)
+      /* model parameters */
+     // parameters object (g_hash_table???)
   act_func_params * activation_parameters;  
-    // enum indicating active activation function
+      // enum indicating active activation function
 
-  /* components */
+      /* components */
   pdp_model_component * components;
-  // pointers to access functions (ie. dump data) 
-  // stopping condition 
+      // pointers to access functions (ie. dump data) 
+       // stopping condition 
 
-  /* subject data ie. inputs and outputs */
+      /* subject data ie. inputs and outputs */
 
 
 } pdp_model;

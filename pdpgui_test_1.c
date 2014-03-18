@@ -14,6 +14,7 @@
 #include "pdpgui_plot.h"
 #include "pdpgui_import.h"
 #include "pdpgui.h"
+#include "pdpgui_test_1.h"
 
 // temp!
 // #include <math.h>
@@ -210,14 +211,13 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 static void model_controls_initialise_cb (GtkToolItem * tool_item, 
 					  PdpGuiObjects * objects) {
 
-  PdpSimulation * simulation = objects->simulation;
+  // PdpSimulation * simulation = objects->simulation;
 
 
   // int n;
 
   /*
   for (n = 0; n < NUMBER_OF_SUBJECTS; n ++) {
-
 
     // parameter setting - DEPRECATED!!!!
     // initialise gs_stroop_params to defaults
@@ -226,7 +226,12 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
   }
   */
 
-  model_init_activation (simulation->model, 0.0); // zero activations 
+  // de-init and re-build model to implement new parameters
+  deinit_model (objects->simulation->model);
+  init_model (objects->simulation->model, objects->simulation->model_params);
+
+
+  model_init_activation (objects->simulation->model, 0.0); // zero activations 
 
   // current trial and subject now controlled by spin buttons
   // simulation->current_subject = 0;
@@ -236,7 +241,7 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
 
-  printf ("model simulation %s initialised\n", simulation->model->name);
+  printf ("model simulation %s initialised\n", objects->simulation->model->name);
 
 }
 
@@ -449,10 +454,37 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 }
 
 
+static void init_model (pdp_model * this_model, GsStroopParameters *model_params) {
+  // just allocate memory for simulation and run constructors  
+
+  act_func_params * act_params = g_malloc (sizeof(act_func_params));
+  act_params->type = ACT_GS;
+  act_params->params.gs.step_size = model_params->step_size;
+  act_params->params.gs.act_max = model_params->activation_max;
+  act_params->params.gs.act_min = model_params->activation_min;
+  
+  this_model->activation_parameters = act_params;
+
+  // now create the model
+  gs_stroop_model_build (this_model, model_params); 
+  // probably defer building the model in later versions
+
+}
+
+static void deinit_model (pdp_model * this_model) {
+  // delete model components
+  // can be re-initialised with init_model
+
+  pdp_model_component_free (this_model->components);
+  this_model->components = NULL;
+  
+  g_free (this_model->activation_parameters);
+
+}
 
 
 
-PdpSimulation * init_simulation () {
+PdpSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
 
   PdpSimulation *simulation = g_malloc (sizeof(PdpSimulation));
@@ -465,22 +497,13 @@ PdpSimulation * init_simulation () {
   simulation->model_params = g_malloc (sizeof(GsStroopParameters));
   gs_stroop_parameters_set_default (simulation->model_params);
 
-  act_func_params * act_params = g_malloc (sizeof(act_func_params));
-  act_params->type = ACT_GS;
-  act_params->params.gs.step_size = simulation->model_params->step_size;
-  act_params->params.gs.act_max = simulation->model_params->activation_max;
-  act_params->params.gs.act_min = simulation->model_params->activation_min;
 
-  simulation->model->activation_parameters = act_params;
-
-  // now create the model
-  gs_stroop_model_build (simulation->model, simulation->model_params); 
+  // now build the model
+  // gs_stroop_model_build (simulation->model, simulation->model_params); 
   // probably defer building the model in later versions
 
+  init_model (simulation->model, simulation->model_params);
 
-
-
-  
 
 
   // initialise subjects
@@ -512,6 +535,8 @@ PdpSimulation * init_simulation () {
 }
 
 
+
+
 void free_simulation (PdpSimulation * simulation) {
   // free memory for simulation
 
@@ -540,16 +565,14 @@ int main (int argc, char *argv[]) {
 
   gtk_init (&argc, &argv);
 
-  PdpSimulation * simulation = init_simulation();
+  PdpSimulation * simulation = create_simulation();
 
   PdpGuiObjects * objects = g_malloc (sizeof(PdpGuiObjects));
   // init function, set everything to null?
   objects->simulation = simulation;
   objects->model_sub_notepage = NULL;
-
   objects->config_file = create_param_import_objects();
 
- 
 
 
   // Draw the GUI
