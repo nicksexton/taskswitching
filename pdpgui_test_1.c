@@ -156,6 +156,8 @@ create_sub_notepage_model_display_architecture (PdpGuiObjects * objects) {
   return (grid);
 }
 
+
+
 static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
   char textbuf[100];
@@ -175,6 +177,14 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
 
 }
+
+
+static void model_headerbar_redraw_cb(GtkWidget *headerbar, PdpGuiObjects * objects) {
+
+  model_headerbar_update_labels (objects);
+
+}
+
 
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
@@ -196,12 +206,16 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 
 }
 
+
 static void model_controls_initialise_cb (GtkToolItem * tool_item, 
 					  PdpGuiObjects * objects) {
 
   PdpSimulation * simulation = objects->simulation;
-  int n;
 
+
+  // int n;
+
+  /*
   for (n = 0; n < NUMBER_OF_SUBJECTS; n ++) {
 
 
@@ -210,12 +224,13 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
     model_init_params (simulation->model, 
 		     ((gs_stroop_params *)(simulation->subjects->subj[n]->params)));
   }
+  */
 
   model_init_activation (simulation->model, 0.0); // zero activations 
 
-  // init current trial and current subject
-  simulation->current_subject = 0;
-  simulation->current_trial = 0;
+  // current trial and subject now controlled by spin buttons
+  // simulation->current_subject = 0;
+  // simulation->current_trial = 0;
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
@@ -394,6 +409,8 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   label1 = gtk_label_new (textbuf);
   gtk_widget_set_size_request (label1, 300, 30); // max size so spin button is always in same place
   objects->model_headerbar_label_trial_data = label1; // keep track of label so we can update it
+
+  g_signal_connect (G_OBJECT(grid_headerbar), "draw", G_CALLBACK(model_headerbar_redraw_cb), (gpointer) objects);
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 3, 0, 1, 1);
 
 
