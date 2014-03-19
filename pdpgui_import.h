@@ -49,6 +49,18 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects);
 
 
 // <----------------- MODEL TASK IMPORT FUNCTIONS
+/*
+static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, stroop_trial_data* data);
+
+static void import_task_block_to_treestore (GtkTreeStore * store, 
+					    int num_trials, 
+					    stroop_trial_data * trial_array);
+
+static void setup_task_viewer_treeview (GtkTreeView * tree);
+
+*/
+
+FileData * create_task_import_objects();
 
 GtkWidget* create_notepage_import_trials (PdpGuiObjects *objects);
 

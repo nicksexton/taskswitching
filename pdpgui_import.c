@@ -349,6 +349,52 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 
 //<---------------------- MODEL TASK IMPORT FUNCTIONS ------------------------
 
+static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, stroop_trial_data* data) {
+
+  GtkTreeIter iter1;
+  gtk_tree_store_append (store, &iter1, NULL);
+
+  // defer string conversion, save everything as a string
+
+  gtk_tree_store_set (store, &iter1, COL_TASK_ID, data->trial_id, -1);
+
+  gtk_tree_store_set (store, &iter1, 
+		      COL_TASK_PATTERN_1, data->stim_word, -1);
+
+  // write a translator to convert from number into binary pattern
+
+  gtk_tree_store_set (store, &iter1, 
+		      COL_TASK_PATTERN_2, data->stim_colour, -1);
+
+  gtk_tree_store_set (store, &iter1, 
+		      COL_TASK_PATTERN_3, data->stim_task, -1);
+
+  /*
+enum {
+  COL_TASK_ID,
+  COL_TASK_PATTERN_1,
+  COL_TASK_PATTERN_2,
+  COL_TASK_PATTERN_3,
+  COL_TASK_PARAM_1,
+  COL_TASK_PARAM_2,
+  N_TASK_COLUMNS
+};
+  */
+}
+
+
+static void import_task_block_to_treestore (GtkTreeStore * store, 
+					    int num_trials, 
+					    stroop_trial_data * trial_array) {
+  int n;
+  for (n = 0; n < num_trials; n ++) {
+    
+    import_stroop_trial_data_to_treestore (store, &(trial_array[n]));
+
+  }
+
+}
+
 static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
   GtkTreeViewColumn *column;
@@ -361,12 +407,11 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
   // COlumns:
   // Trial ID
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
   column = gtk_tree_view_column_new_with_attributes ("Trial ID", renderer,
-						     "int", COL_TASK_ID,
+						     "text", COL_TASK_ID,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW(tree), column);
-
-
 
   // Input Patterns 
   renderer = gtk_cell_renderer_text_new ();
@@ -398,18 +443,49 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
 
-
 }
 
 
 
 
+FileData * create_task_import_objects() {
+
+  FileData *config_file; // struct containing pointers to relevant file data
+  GtkTreeStore *store;
+  //  GtkWidget *tree;
+
+  // first create memory for the file pointer
+
+  config_file = g_malloc (sizeof(FileData)); 
+  config_file->fp = NULL;
+
+  char filename[FILENAME_MAX_LENGTH];
+  strcpy (filename, "no file selected");
+  config_file->filename_label = gtk_label_new(filename);
+
+  // int cols for debug purposes
+  store = gtk_tree_store_new (N_TASK_COLUMNS,
+			      G_TYPE_INT,
+			      G_TYPE_INT, 
+			      G_TYPE_INT, 
+			      G_TYPE_INT, 
+			      G_TYPE_STRING, 
+			      G_TYPE_STRING);
+  
+  config_file->tree_store = store;
+
+  return config_file;
+}
+
 
 GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
   GtkWidget *grid_main;
-  grid_main = gtk_grid_new();
+  GtkWidget *scrollwindow;
 
+  grid_main = gtk_grid_new();
+  scrollwindow = gtk_scrolled_window_new(NULL, NULL);
+  gtk_widget_set_size_request (scrollwindow, 600, 600);
 
   GtkWidget *tree;
   tree = gtk_tree_view_new();
@@ -420,9 +496,29 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
 
   // tree view here
-  gtk_grid_attach (GTK_GRID(grid_main), tree, 0, 0, 1, 1);
-
+  gtk_container_add (GTK_CONTAINER(scrollwindow), tree);
+  gtk_grid_attach (GTK_GRID(grid_main), scrollwindow, 0, 0, 1, 1);
   gtk_widget_show_all(grid_main);
+
+
+  // import sample data:
+  /*
+  stroop_trial_data mock_data;
+  mock_data.trial_id = 999;
+  mock_data.stim_task = 0;
+  mock_data.stim_word = 2;
+  mock_data.stim_colour = 1;
+
+  import_stroop_trial_data_to_treestore (objects->task_config_file->tree_store, &mock_data);
+  */
+
+  subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
+
+
+  import_task_block_to_treestore (objects->task_config_file->tree_store,
+  				  this_subject->num_fixed_trials,
+  				  this_subject->fixed_trials);
+
 
 
   return (grid_main);

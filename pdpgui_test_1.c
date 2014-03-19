@@ -660,7 +660,7 @@ int main (int argc, char *argv[]) {
   objects->model_sub_notepage = NULL;
 
   objects->config_file = create_param_import_objects();
-  objects->task_config_file = create_param_import_objects();
+  objects->task_config_file = create_task_import_objects();
 
 
   // Draw the GUI
@@ -688,7 +688,11 @@ int main (int argc, char *argv[]) {
 
   gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
 			   create_notepage_import_model_params(objects), 
-			   gtk_label_new("File Import"));
+			   gtk_label_new("Parameter Import"));
+
+  gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
+			   create_notepage_import_trials(objects), 
+			   gtk_label_new("Task View/Import"));
 
 
 
