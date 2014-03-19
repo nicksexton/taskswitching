@@ -260,8 +260,6 @@ FileData * create_param_import_objects() {
   GtkTreeStore *store;
   //  GtkWidget *tree;
 
-
-
   // first create memory for the file pointer
 
   config_file = g_malloc (sizeof(FileData)); 
@@ -349,5 +347,84 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
   
 }
 
+//<---------------------- MODEL TASK IMPORT FUNCTIONS ------------------------
+
+static void setup_task_viewer_treeview (GtkTreeView * tree) {
+
+  GtkTreeViewColumn *column;
+  GtkCellRenderer *renderer;
+
+  // aesthetic properties:
+  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree), TRUE);
 
 
+  // COlumns:
+  // Trial ID
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Trial ID", renderer,
+						     "int", COL_TASK_ID,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW(tree), column);
+
+
+
+  // Input Patterns 
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Pattern 1", renderer, "text",
+						     COL_TASK_PATTERN_1,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
+						     COL_TASK_PATTERN_2,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
+						     COL_TASK_PATTERN_3,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+
+
+  // Trial parameters
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Parameter 1", renderer, "text",
+						     COL_TASK_PARAM_1,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
+						     COL_TASK_PARAM_2,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+
+
+}
+
+
+
+
+
+GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
+
+  GtkWidget *grid_main;
+  grid_main = gtk_grid_new();
+
+
+  GtkWidget *tree;
+  tree = gtk_tree_view_new();
+  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->task_config_file->tree_store));
+  setup_task_viewer_treeview(GTK_TREE_VIEW(tree));
+
+  // file import buttons here
+
+
+  // tree view here
+  gtk_grid_attach (GTK_GRID(grid_main), tree, 0, 0, 1, 1);
+
+  gtk_widget_show_all(grid_main);
+
+
+  return (grid_main);
+
+}

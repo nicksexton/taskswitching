@@ -42,6 +42,7 @@ typedef struct pdpgui_objects {
   // pointers to files & tree stores for parameter import
   // current implementation - single file treestore for all parameter imports
   FileData * config_file;
+  FileData * task_config_file;
 
 
   // pointers to label widgets - for updating dashboard information

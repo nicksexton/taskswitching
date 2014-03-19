@@ -10,12 +10,27 @@
 
 #include <stdbool.h>
 
+
 // tree model for storing parameter names/values
 enum {
   COL_PARAMETER_NAME,
   COL_PARAMETER_VALUE,
   N_COLUMNS
 };
+
+
+// tree model for task viewer/importer
+enum {
+  COL_TASK_ID,
+  COL_TASK_PATTERN_1,
+  COL_TASK_PATTERN_2,
+  COL_TASK_PATTERN_3,
+  COL_TASK_PARAM_1,
+  COL_TASK_PARAM_2,
+  N_TASK_COLUMNS
+};
+
+
 
 
 typedef struct file_data {

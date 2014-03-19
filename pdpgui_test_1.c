@@ -658,8 +658,9 @@ int main (int argc, char *argv[]) {
   // init function, set everything to null?
   objects->simulation = simulation;
   objects->model_sub_notepage = NULL;
-  objects->config_file = create_param_import_objects();
 
+  objects->config_file = create_param_import_objects();
+  objects->task_config_file = create_param_import_objects();
 
 
   // Draw the GUI

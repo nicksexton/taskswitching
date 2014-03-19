@@ -48,4 +48,10 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects);
 
 
 
+// <----------------- MODEL TASK IMPORT FUNCTIONS
+
+GtkWidget* create_notepage_import_trials (PdpGuiObjects *objects);
+
+
+
 #endif
