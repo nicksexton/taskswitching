@@ -33,14 +33,14 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
 			 0.0, simulation->model->cycle * 1.1, 
-			 -1.0, 0.1);
+			 -1.0, 0.5);
 
 
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
     .x_max = simulation->model->cycle * 1.1, 
     .y_min = -1.0, 
-    .y_max = 0.1
+    .y_max = 0.5
   };
 
   PdpguiColourRgb plot_colour[3] = {{ 
@@ -55,6 +55,16 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
       .r = 0.0, 
       .g = 0.0, 
       .b = 1.0 
+    }};
+
+  PdpguiColourRgb plot_td_mono[2] = {{ 
+      .r = 0.5, 
+      .g = 0.5, 
+      .b = 0.5 
+    }, {
+      .r = 0.5, 
+      .g = 0.5, 
+      .b = 0.5 
     }};
 
 
@@ -103,6 +113,30 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 
     free(units_activation);
   }
+
+
+  // <------------ NEXT PLOT TASKDEMAND UNITS  ------------------
+
+  current_layer = pdp_model_component_find (simulation->model, 
+							ID_TASKDEMAND)->layer; 
+
+  // word task demand unit
+  units_activation = 
+    pdp_layer_get_unit_activation_history (current_layer, 0, simulation->model->cycle);
+  
+    
+  pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+		      simulation->model->cycle, units_activation, 
+		      &(plot_td_mono[0]));
+
+    // colour task demand unit
+  units_activation = 
+    pdp_layer_get_unit_activation_history (current_layer, 1, simulation->model->cycle);
+  
+
+  pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
+			     simulation->model->cycle, units_activation, 
+			     &(plot_td_mono[1]));
 
   
 }
@@ -176,6 +210,9 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 								objects->simulation->current_trial));
 
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
+
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
+			     objects->simulation->current_trial);
 
 }
 
@@ -441,7 +478,7 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 						 1, 0, 0);
   spin_button = gtk_spin_button_new (current_trial_adjustment, 1, 0);
   g_signal_connect (G_OBJECT(spin_button), "value-changed", G_CALLBACK(model_change_trial_cb), (gpointer) objects);
-
+  objects->model_headerbar_spin_trial = spin_button;
 
   gtk_grid_attach (GTK_GRID(grid_headerbar), spin_button, 0, 0, 1, 1);
 
@@ -468,7 +505,7 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   objects->model_headerbar_label_trial_data = label1; // keep track of label so we can update it
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 3, 0, 1, 1);
 
-  // g_signal_connect (G_OBJECT(grid_headerbar), "draw", G_CALLBACK(model_headerbar_redraw_cb), (gpointer) objects);
+
   
 
   // --------------- SUB-NOTEPAGE ------------------------    

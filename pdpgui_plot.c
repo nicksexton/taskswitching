@@ -179,6 +179,7 @@ void pdpgui_plot_vector (cairo_t *cr,
   double y_scale = (axis_dimensions->y_max - axis_dimensions->y_min) / axis_length_y;
 
   // set line parameters
+  cairo_set_dash(cr, NULL, 0, 0); // dashed line off
   cairo_set_source_rgb (cr, plot_colour->r, plot_colour->g, plot_colour->b);
   cairo_set_line_width (cr, 2);
 

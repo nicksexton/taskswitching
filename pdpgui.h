@@ -33,8 +33,11 @@ typedef struct pdp_simulation {
 // eg to issue redraw events
 typedef struct pdpgui_objects {
 
+
+  // GUI objects that we want to refer to 
   PdpSimulation * simulation;
   GtkWidget * model_sub_notepage;
+
 
   // pointers to files & tree stores for parameter import
   // current implementation - single file treestore for all parameter imports
@@ -45,7 +48,7 @@ typedef struct pdpgui_objects {
   GtkWidget * model_headerbar_label_subject;
   GtkWidget * model_headerbar_label_trial;
   GtkWidget * model_headerbar_label_trial_data;
-
+  GtkWidget * model_headerbar_spin_trial;
 
 } PdpGuiObjects;
 
