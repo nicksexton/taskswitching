@@ -394,8 +394,6 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
     // nb for fixed blocks (as per G&S2002) squashing param should be set to 1
     model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
   }
-
-
 }
 
 
@@ -686,8 +684,9 @@ int main (int argc, char *argv[]) {
   gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
 			   create_notepage_model_main(objects), 
 			   gtk_label_new("Model"));
+
   gtk_notebook_append_page(GTK_NOTEBOOK(notes), 
-			   create_notepage_import(objects), 
+			   create_notepage_import_model_params(objects), 
 			   gtk_label_new("File Import"));
 
 

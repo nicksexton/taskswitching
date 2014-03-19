@@ -5,9 +5,77 @@
 
 #include <gtk/gtk.h>
 #include "lib_string_parse.h"
+#include "pdpgui_import.h"
 #include "pdpgui.h"
 
 #define CONFIG_FILE gtk_config_file.conf
+
+
+
+
+// utility function for clearing all entries from a treeview
+gboolean treestore_remove_all (GtkTreeStore * tree_store) {
+
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  GtkTreeIter iter;
+
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_store), &iter)) {
+    // tree is not empty, proceed to remove all items
+
+    while (gtk_tree_store_remove (tree_store, &iter)) {
+      // tree_store still contains rows
+    }
+    return TRUE;
+  }
+  else {
+    // tree is already empty,
+    return FALSE;
+  }
+}
+
+
+
+// callback function to read file contents
+gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
+
+  file_info->fp = fopen(file_info->filename, "r");
+  if (file_info->fp == NULL) {
+    printf ("error! gtk_config_file.conf does not exist\n");
+    return FALSE;
+  }
+  else {
+    printf ("success! config file opened.\n");
+
+    treestore_remove_all (file_info->tree_store);
+    pdp_file_parse_to_treestore (file_info);
+
+    fclose(file_info->fp);
+    printf ("success! config file closed.\n");
+  }
+
+  return TRUE;
+}
+
+
+void select_file (GtkComboBoxText *widget, FileData * config_file) {
+
+  GtkComboBoxText *combo_box = widget;
+  // char *tmp[FILENAME_MAX_LENGTH];
+
+  gchar *filename = gtk_combo_box_text_get_active_text (combo_box);
+
+    // just print filename for now
+
+  g_print ("file %s selected", filename);
+  strcpy (config_file->filename, filename);
+  gtk_label_set_text(GTK_LABEL(config_file->filename_label), filename);
+
+  g_free (filename);
+
+}
+
+// <------------------------------- MODEL PARAMETER IMPORT FUNCTIONS -----------------------
+
 
 static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStroopParameters *model_params) {
 
@@ -123,88 +191,6 @@ static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects
 
 
 
-// utility function for clearing all entries from a treeview
-gboolean treestore_remove_all (GtkTreeStore * tree_store) {
-
-  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  GtkTreeIter iter;
-
-  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_store), &iter)) {
-    // tree is not empty, proceed to remove all items
-
-    while (gtk_tree_store_remove (tree_store, &iter)) {
-      // tree_store still contains rows
-    }
-    return TRUE;
-  }
-  else {
-    // tree is already empty,
-    return FALSE;
-  }
-}
-
-
-
-// callback function to read file contents
-gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
-
-  file_info->fp = fopen(file_info->filename, "r");
-  if (file_info->fp == NULL) {
-    printf ("error! gtk_config_file.conf does not exist\n");
-    return FALSE;
-  }
-  else {
-    printf ("success! config file opened.\n");
-
-    treestore_remove_all (file_info->tree_store);
-    pdp_file_parse_to_treestore (file_info);
-
-    fclose(file_info->fp);
-    printf ("success! config file closed.\n");
-  }
-
-  return TRUE;
-}
-
-
-void select_file (GtkComboBoxText *widget, FileData * config_file) {
-
-  GtkComboBoxText *combo_box = widget;
-  // char *tmp[FILENAME_MAX_LENGTH];
-
-  gchar *filename = gtk_combo_box_text_get_active_text (combo_box);
-
-    // just print filename for now
-
-  g_print ("file %s selected", filename);
-  strcpy (config_file->filename, filename);
-  gtk_label_set_text(GTK_LABEL(config_file->filename_label), filename);
-
-  g_free (filename);
-
-}
-
-
-/*
-FileData * init_config_file (GtkTreeStore * tree_store){
-
-  // first create memory for the file pointer
-  FileData *config_file; // struct containing pointers to relevant file data
-  config_file = g_malloc (sizeof(FileData)); 
-  config_file->fp = NULL;
-
-  char filename[FILENAME_MAX_LENGTH];
-  strcpy (filename, "no file selected");
-  config_file->filename_label = gtk_label_new(filename);
-  
-  config_file->tree_store = tree_store;
-
-  return config_file;
-}
-*/
-
-
-
 // selection handling
 // prototype for selection handler callback
 static void config_file_treeview_selection_changed_cb (GtkTreeSelection *selection, gpointer data) {
@@ -297,7 +283,7 @@ FileData * create_param_import_objects() {
 
 
 
-GtkWidget* create_notepage_import(PdpGuiObjects * objects) {
+GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 
   GtkWidget *grid_main;
   GtkWidget *grid_controls;
