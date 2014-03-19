@@ -469,6 +469,33 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
   gs_stroop_model->cycle = 0;
 
 
+  double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
+  double initial_activation_colourin[3] = {0.0, 0.0, 0.0};
+  double initial_activation_wordout[3] = {0.0, 0.0, 0.0};
+  double initial_activation_colourout[3] = {0.0, 0.0, 0.0};
+  double initial_activation_topdown_control[2] = {0.0, 0.0};
+  double initial_activation_taskdemand[2];
+
+
+  word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
+  colour_input = pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer;
+  word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
+  colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
+  taskdemand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
+  topdown_control = pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer;
+
+
+  // calculate new task demand activations
+  // debug
+  printf ("new task demand activation:\t");
+  for (i = 0; i < taskdemand->size; i ++) {
+
+    initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] * 
+                                       persist_taskdemand_activation;
+    printf ("%4.3f\t", initial_activation_taskdemand[i]);
+  } 
+  printf ("\n");
+
 
   // clear & free history
 
@@ -479,36 +506,6 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
     comp_i->layer->units_initial.next = NULL;
   }
 
-
-
-  // Zero activations
-
-  word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
-  colour_input = pdp_model_component_find (gs_stroop_model, ID_COLOURIN)->layer;
-  word_output = pdp_model_component_find (gs_stroop_model, ID_WORDOUT)->layer;
-  colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
-  taskdemand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
-  topdown_control = pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer;
-
-  double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
-  double initial_activation_colourin[3] = {0.0, 0.0, 0.0};
-  double initial_activation_wordout[3] = {0.0, 0.0, 0.0};
-  double initial_activation_colourout[3] = {0.0, 0.0, 0.0};
-  double initial_activation_topdown_control[2] = {0.0, 0.0};
-  double initial_activation_taskdemand[2];
-
-
-  // should this be done before freeing history?
-
-  // debug
-  printf ("new task demand activation:\t");
-  for (i = 0; i < taskdemand->size; i ++) {
-
-    initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] * 
-                                       persist_taskdemand_activation;
-    printf ("%d\t", initial_activation_taskdemand[i]);
-  } 
-  printf ("\n");
 
 
   /* set initial activation */
