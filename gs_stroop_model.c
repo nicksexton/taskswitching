@@ -497,11 +497,19 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
   double initial_activation_topdown_control[2] = {0.0, 0.0};
   double initial_activation_taskdemand[2];
 
+
+  // should this be done before freeing history?
+
+  // debug
+  printf ("new task demand activation:\t");
   for (i = 0; i < taskdemand->size; i ++) {
+
     initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] * 
                                        persist_taskdemand_activation;
+    printf ("%d\t", initial_activation_taskdemand[i]);
   } 
-  
+  printf ("\n");
+
 
   /* set initial activation */
   pdp_layer_set_activation(word_input, 3, initial_activation_wordin);

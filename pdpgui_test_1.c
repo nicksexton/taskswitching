@@ -321,6 +321,46 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 
 }
 
+static void model_controls_continue_cb (GtkToolItem * tool_item, 
+					PdpGuiObjects * objects) {
+
+  PdpSimulation * simulation = objects->simulation;
+
+  // first run trial to end
+  run_stroop_trial (simulation->model, 
+		    &(simulation->subjects->subj[simulation->current_subject]
+		      ->fixed_trials[simulation->current_trial]), 
+		    simulation->random_generator,
+		    simulation->model_params->response_threshold);
+
+
+  printf ("model %s run trial \n", simulation->model->name);
+
+  // draw activations for last trial:
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+
+  // check this is not last trial of a block
+  if (simulation->current_trial + 1 > simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
+    printf ("last trial on block!\n");
+    return;
+  }
+  else {
+
+    // set new trial
+    simulation->current_trial ++;
+    model_headerbar_update_labels(objects);
+
+    // squash activation values
+    // nb for fixed blocks (as per G&S2002) squashing param should be set to 1
+    model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
+  }
+
+
+}
+
 
 
 
@@ -348,27 +388,39 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
 
   // initialise
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PREVIOUS);
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_REFRESH);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
 		    G_CALLBACK(model_controls_initialise_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Reinitialise model from parameters");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // step once
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
 		    G_CALLBACK(model_controls_step_once_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Process single model iteration");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // step many
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_FORWARD);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
 		    G_CALLBACK(model_controls_step_many_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Process multiple model iterations");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // run to end
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_NEXT);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
 		    G_CALLBACK(model_controls_run_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Run model trial to end");
+  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+
+  // run to end, continue
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_OK);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(model_controls_continue_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
+			      "Run to end, continue to next trial (carry over residual activation)");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
