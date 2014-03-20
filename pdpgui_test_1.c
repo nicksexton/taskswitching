@@ -318,26 +318,32 @@ static void model_change_trial_cb (GtkWidget * spin_button,
   gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
 			  iter,
 			  objects->simulation->current_trial_path );
-  /*
-  g_free (objects->simulation->current_trial_data);
-  objects->simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
-  gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
-			  iter,
-			  objects->simulation->current_trial_path );
-
-  // make_stroop_trial_data wants an uninitialized stroop_trial_data buffer
-  make_stroop_trial_data_from_task_store (objects->simulation->task_store, 
-					  iter, 
-					  objects->simulation->current_trial_data);
-
-  */
 
   model_change_trial (objects->simulation, objects->simulation->task_store, iter);
 
   // now update text in headerbar widgets
   model_headerbar_update_labels (objects);
 
+}
+
+static gboolean model_change_trial_first (PdpSimulation *simulation, 
+					  GtkTreeStore *store) {
+
+  GtkTreeIter first_block;
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(simulation->task_store), &first_block)) {
+    // move to child node (also check this succeeds)
+    if (gtk_tree_model_iter_children (GTK_TREE_MODEL(simulation->task_store), 
+				      simulation->current_trial_iter, 
+				      &first_block)) {
+      // iter now positioned for first trial, set trial buffer
+      model_change_trial (simulation, simulation->task_store, simulation->current_trial_iter);
+      //      simulation->current_trial_iter = first_trial; // this line might not work
+      return true;
+    }
+    else return false;
+  }
+  else return false;
 }
 
 
@@ -382,11 +388,17 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   PdpSimulation * simulation = objects->simulation;
 
   // printf ("model %s step once\n", simulation->model->name);
+
+  // check current_trial_data is init'd
+  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first (simulation, simulation->task_store); 
+  }
+
   bool running = run_model_step (simulation->model, 
-				 &(simulation->subjects->subj[simulation->current_subject]
-				   ->fixed_trials[simulation->current_trial]), 
+				 simulation->current_trial_data, 
 				 simulation->random_generator, 
 				 simulation->model_params->response_threshold);
+  
 
   if (running) {
     // do something?
@@ -409,14 +421,25 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
 
   PdpSimulation * simulation = objects->simulation;
 
+  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first (simulation, simulation->task_store); 
+  }
+
   int i = 0;
   bool model_running = true;
   while (i < 10 && model_running) {
+    /*
     model_running = run_model_step (simulation->model, 
 				    &(simulation->subjects->subj[simulation->current_subject]
 				      ->fixed_trials[simulation->current_trial]), 
 				    simulation->random_generator, 
 				    simulation->model_params->response_threshold);
+    */
+    model_running = run_model_step (simulation->model, 
+				    simulation->current_trial_data, 
+				    simulation->random_generator, 
+				    simulation->model_params->response_threshold);
+
     i ++;
   }
 
@@ -432,12 +455,21 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 
   PdpSimulation * simulation = objects->simulation;
 
+  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first (simulation, simulation->task_store); 
+  }
+
+  /*
   run_stroop_trial (simulation->model, 
 		    &(simulation->subjects->subj[simulation->current_subject]
 		      ->fixed_trials[simulation->current_trial]), 
 		    simulation->random_generator,
 		    simulation->model_params->response_threshold);
-
+  */
+  run_stroop_trial (simulation->model, 
+		    simulation->current_trial_data, 
+		    simulation->random_generator,
+		    simulation->model_params->response_threshold);
 
   printf ("model %s run trial \n", simulation->model->name);
 
@@ -457,13 +489,23 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
   PdpSimulation * simulation = objects->simulation;
 
+  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first (simulation, simulation->task_store); 
+  }
+
   // first run trial to end
+  /*
   run_stroop_trial (simulation->model, 
 		    &(simulation->subjects->subj[simulation->current_subject]
 		      ->fixed_trials[simulation->current_trial]), 
 		    simulation->random_generator,
 		    simulation->model_params->response_threshold);
+  */
 
+  run_stroop_trial (simulation->model, 
+		    simulation->current_trial_data, 
+		    simulation->random_generator,
+		    simulation->model_params->response_threshold);
 
   printf ("model %s run trial \n", simulation->model->name);
 
@@ -730,7 +772,6 @@ PdpSimulation * create_simulation () {
 					       G_TYPE_STRING);
 
   simulation->current_trial_data = NULL;
-
 
   return simulation;
 }
