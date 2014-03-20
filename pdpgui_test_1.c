@@ -44,7 +44,6 @@ int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *tr
   }
   */
 
-
   
   // handle case where patterns are expressed as vectors
 
@@ -253,7 +252,9 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_subject), textbuf);
  
 
-  sprintf (textbuf, "Trial: %d", objects->simulation->current_trial);
+  // sprintf (textbuf, "Trial: %d", objects->simulation->current_trial);
+  sprintf (textbuf, "Trial: %s", gtk_tree_path_to_string (objects->simulation->current_trial_path));
+
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial), textbuf);
 
   // display input pattern, trialtype, ...?
@@ -264,14 +265,15 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
 
-  gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
-			     objects->simulation->current_trial);
+  
+  //gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
+  //			     objects->simulation->current_trial);
 
 }
 
 
-static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreeIter *new_trial) {
 
+static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreeIter *new_trial) {
 
   // make stroop trial data
 
@@ -289,7 +291,7 @@ static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, 
 }
 
 
-
+// handle callback from change trial spin_button 
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
 
@@ -479,7 +481,13 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   else {
 
     // set new trial
-    simulation->current_trial ++;
+    simulation->current_trial ++; // DEPRECATED
+
+    gtk_tree_model_iter_next(GTK_TREE_MODEL(simulation->task_store), simulation->current_trial_iter); 
+    model_change_trial (simulation, 
+			simulation->task_store, 
+			simulation->current_trial_iter);
+
     model_headerbar_update_labels(objects);
 
     // squash activation values
