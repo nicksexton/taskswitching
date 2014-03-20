@@ -514,7 +514,7 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
   grid_main = gtk_grid_new();
   scrollwindow = gtk_scrolled_window_new(NULL, NULL);
-  gtk_widget_set_size_request (scrollwindow, 600, 600);
+  gtk_widget_set_size_request (scrollwindow, TASK_VIEW_WIDTH, TASK_VIEW_HEIGHT);
 
   GtkWidget *tree;
   tree = gtk_tree_view_new();
@@ -549,7 +549,9 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 				      this_subject->num_fixed_trials,
 				      this_subject->fixed_trials);
 
-
+  // TEMP CODE: set path to first trial of first block
+  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
+  objects->simulation->current_trial_path = current_trial_path;
 
   return (grid_main);
 

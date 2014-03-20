@@ -20,6 +20,59 @@
 // #include <math.h>
 
 
+// takes an iter pointing to relevant row of task store, 
+// returns a pointer to UNINITIALIZED stroop_trial_data,
+int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *trial, stroop_trial_data * data) {
+
+  /*
+  // free data buffer if it is not already free (null)
+  if (data != NULL) {
+    printf ("error, current trial buffer not set to null, new current trial not set");
+    return 1;
+  }
+
+  else if (trial == NULL) {
+    printf ("error, current trial iter is null, new current trial not set");
+    return 1;
+  }
+
+  if (store == NULL) {
+    printf ("error, task store is null, new current trial not set");
+    return 1;
+  }
+  */
+
+
+  
+  // handle case where patterns are expressed as vectors
+
+
+
+
+  // handle case where patterns are expressed as ints
+  gtk_tree_model_get (GTK_TREE_MODEL(store), trial, 
+		      COL_TASK_ID, &(data->trial_id),
+		      COL_TASK_PATTERN_1, &(data->stim_word),
+		      COL_TASK_PATTERN_2, &(data->stim_colour),
+		      COL_TASK_PATTERN_3, &(data->stim_task),
+		      -1);
+
+  // stim_task is word naming if =0, colour otherwise 
+  (data->stim_task == 0) ? 
+    (data->stim_correct_response = data->stim_word) : 
+    (data->stim_correct_response = data->stim_colour);
+
+
+  if (data->stim_word == -1 || data->stim_colour == -1) { data->trial_type = NEUTRAL; }
+  else if (data->stim_word == data->stim_colour ) { data->trial_type = CONGRUENT; }
+  else data->trial_type = INCONGRUENT;
+
+  return 0;
+}
+
+
+
+
 void pdpgui_plot_network_activation (GtkWidget *widget, 
 				     cairo_t *cr, 
 				     PdpSimulation *simulation) {
@@ -228,15 +281,38 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 				   PdpGuiObjects * objects) {
 
   int new_trial;
+  int current_trial_block;
   new_trial = gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin_button));
-  objects->simulation->current_trial = new_trial;
+  objects->simulation->current_trial = new_trial; // OLD code
 
-  stroop_trial_data * this_trial = &(objects->simulation->subjects->
-    subj[objects->simulation->current_subject]->
-				     fixed_trials[objects->simulation->current_trial]);
+  current_trial_block = gtk_tree_path_get_indices(objects->simulation->current_trial_path)[0];
+  printf ("old current trial path: %s\n", gtk_tree_path_to_string (objects->simulation->current_trial_path));
 
-  printf ("current trial: %d\t", objects->simulation->current_trial);
-  printf ("w: %d\tc: %d\ttask: %d\n", this_trial->stim_word, this_trial->stim_colour, this_trial->stim_task);
+  // free old path
+  gtk_tree_path_free (objects->simulation->current_trial_path);
+
+  // update path;
+  objects->simulation->current_trial_path = gtk_tree_path_new_from_indices (current_trial_block, new_trial, -1);
+  printf ("new current trial path: %s\n", gtk_tree_path_to_string (objects->simulation->current_trial_path));
+
+
+  // set the current_trial_data buffer according to the iterator
+  // free old buffer and malloc a new one
+  g_free (objects->simulation->current_trial_data);
+  objects->simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
+
+
+  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
+			  iter,
+			  objects->simulation->current_trial_path );
+
+  // make_stroop_trial_data wants an uninitialized stroop_trial_data buffer
+  make_stroop_trial_data_from_task_store (objects->simulation->task_store, 
+					  iter, 
+					  objects->simulation->current_trial_data);
+
 
 
   // now update text in headerbar widgets
@@ -249,8 +325,6 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
 					  PdpGuiObjects * objects) {
 
   // PdpSimulation * simulation = objects->simulation;
-
-
   // int n;
 
   /*
@@ -629,6 +703,7 @@ PdpSimulation * create_simulation () {
 					       G_TYPE_STRING, 
 					       G_TYPE_STRING);
 
+  simulation->current_trial_data = NULL;
 
 
   return simulation;
@@ -647,7 +722,8 @@ void free_simulation (PdpSimulation * simulation) {
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
 
-  g_free (simulation->task_store);
+  //  g_free (simulation->task_store);
+  g_free (simulation->current_trial_data);
   g_free (simulation);
 
 }
@@ -688,7 +764,7 @@ int main (int argc, char *argv[]) {
   // Create a window with a title, default size, and set border width
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW(window), "GUI: notebook");
-  gtk_window_set_default_size(GTK_WINDOW(window), 800, 800);
+  gtk_window_set_default_size(GTK_WINDOW(window), MAIN_WINDOW_WIDTH_DEFAULT, MAIN_WINDOW_HEIGHT_DEFAULT);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width (GTK_CONTAINER(window), 10);
   g_signal_connect (window, "destroy", G_CALLBACK(main_quit), (gpointer) objects);

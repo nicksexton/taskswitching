@@ -9,6 +9,12 @@
 #include "gs_stroop_subjects.h"
 #include "gs_stroop.h"
 
+// dimensions of main gui widgets
+#define MAIN_WINDOW_WIDTH_DEFAULT 800
+#define MAIN_WINDOW_HEIGHT_DEFAULT 800
+#define TASK_VIEW_WIDTH 750
+#define TASK_VIEW_HEIGHT 750
+
 
 typedef struct pdp_simulation {
 
@@ -30,7 +36,10 @@ typedef struct pdp_simulation {
   // In new version, move toward using the task_store as a repository for trial info
   // subjects becomes a repo for data only (and can maybe be stored in text file?)
   GtkTreeStore * task_store;
-  GtkTreeIter * iter_current_trial;
+  GtkTreePath * current_trial_path;
+  GtkTreeIter * current_trial_iter;
+
+  stroop_trial_data * current_trial_data; 
 
 
 } PdpSimulation;

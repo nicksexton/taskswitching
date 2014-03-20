@@ -2,6 +2,11 @@
 #define pdp_test_1_h
 
 
+// takes an iter pointing to relevant row of task store, 
+// returns a pointer to stroop_trial_data, need to free data once it is done
+int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *trial, stroop_trial_data * data);
+
+
 void pdpgui_plot_network_activation (GtkWidget *widget, 
 				     cairo_t *cr, 
 				     PdpSimulation *simulation);
