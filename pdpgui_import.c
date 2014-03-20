@@ -473,7 +473,9 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
 
 
-
+/*
+// Temporarily commented - using task_store as PdpGuiObjects member to store all tasks (library)
+// use FileData to handle a treestore buffer for import only
 FileData * create_task_import_objects() {
 
   FileData *config_file; // struct containing pointers to relevant file data
@@ -503,7 +505,7 @@ FileData * create_task_import_objects() {
 
   return config_file;
 }
-
+*/
 
 GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
@@ -516,7 +518,7 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
   GtkWidget *tree;
   tree = gtk_tree_view_new();
-  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->task_config_file->tree_store));
+  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->simulation->task_store));
   setup_task_viewer_treeview(GTK_TREE_VIEW(tree));
 
   // file import buttons here
@@ -542,7 +544,7 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
   subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
 
 
-  import_task_block_new_to_treestore (objects->task_config_file->tree_store,
+  import_task_block_new_to_treestore (objects->simulation->task_store,
 				      "random stroop",
 				      this_subject->num_fixed_trials,
 				      this_subject->fixed_trials);

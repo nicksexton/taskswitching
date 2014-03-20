@@ -25,6 +25,14 @@ typedef struct pdp_simulation {
   int current_subject;
   int current_trial;
 
+
+  // task store
+  // In new version, move toward using the task_store as a repository for trial info
+  // subjects becomes a repo for data only (and can maybe be stored in text file?)
+  GtkTreeStore * task_store;
+  GtkTreeIter * iter_current_trial;
+
+
 } PdpSimulation;
 
 
@@ -43,6 +51,7 @@ typedef struct pdpgui_objects {
   // current implementation - single file treestore for all parameter imports
   FileData * config_file;
   FileData * task_config_file;
+
 
 
   // pointers to label widgets - for updating dashboard information

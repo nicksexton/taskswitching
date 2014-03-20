@@ -618,6 +618,19 @@ PdpSimulation * create_simulation () {
   simulation->current_trial = 0;
 
 
+  // set up the task store
+
+  simulation->task_store = gtk_tree_store_new (N_TASK_COLUMNS,
+					       G_TYPE_STRING,
+					       G_TYPE_INT,
+					       G_TYPE_INT, 
+					       G_TYPE_INT, 
+					       G_TYPE_INT, 
+					       G_TYPE_STRING, 
+					       G_TYPE_STRING);
+
+
+
   return simulation;
 }
 
@@ -634,6 +647,7 @@ void free_simulation (PdpSimulation * simulation) {
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
 
+  g_free (simulation->task_store);
   g_free (simulation);
 
 }
@@ -660,7 +674,9 @@ int main (int argc, char *argv[]) {
   objects->model_sub_notepage = NULL;
 
   objects->config_file = create_param_import_objects();
-  objects->task_config_file = create_task_import_objects();
+  //  objects->task_config_file = create_task_import_objects();
+
+
 
 
   // Draw the GUI
