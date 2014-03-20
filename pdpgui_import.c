@@ -349,25 +349,22 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 
 //<---------------------- MODEL TASK IMPORT FUNCTIONS ------------------------
 
-static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, stroop_trial_data* data) {
+static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, 
+						   GtkTreeIter *iter, 
+						   stroop_trial_data* data) {
 
-  GtkTreeIter iter1;
-  gtk_tree_store_append (store, &iter1, NULL);
+  //  GtkTreeIter iter1;
+  //  gtk_tree_store_append (store, &iter1, NULL);
 
   // defer string conversion, save everything as a string
 
-  gtk_tree_store_set (store, &iter1, COL_TASK_ID, data->trial_id, -1);
-
-  gtk_tree_store_set (store, &iter1, 
-		      COL_TASK_PATTERN_1, data->stim_word, -1);
-
   // write a translator to convert from number into binary pattern
-
-  gtk_tree_store_set (store, &iter1, 
-		      COL_TASK_PATTERN_2, data->stim_colour, -1);
-
-  gtk_tree_store_set (store, &iter1, 
-		      COL_TASK_PATTERN_3, data->stim_task, -1);
+  gtk_tree_store_set (store, iter, 
+		      COL_TASK_ID, data->trial_id, 
+		      COL_TASK_PATTERN_1, data->stim_word, 
+		      COL_TASK_PATTERN_2, data->stim_colour,
+		      COL_TASK_PATTERN_3, data->stim_task, 
+		      -1);
 
   /*
 enum {
@@ -383,13 +380,28 @@ enum {
 }
 
 
-static void import_task_block_to_treestore (GtkTreeStore * store, 
-					    int num_trials, 
-					    stroop_trial_data * trial_array) {
+static void import_task_block_new_to_treestore (GtkTreeStore * store, 
+						gchar *name,
+						int num_trials, 
+						stroop_trial_data * trial_array) {
+
+    GtkTreeIter iter1;
+    GtkTreeIter *iter2 = g_malloc(sizeof(GtkTreeIter));
+
+    // set block name as parent
+    // top level iterator
+    gtk_tree_store_append (store, &iter1, NULL);
+    gtk_tree_store_set (store, &iter1, COL_BLOCK_NAME, name, -1);
+
+
+  // set trials as children
+
+
   int n;
   for (n = 0; n < num_trials; n ++) {
-    
-    import_stroop_trial_data_to_treestore (store, &(trial_array[n]));
+
+    gtk_tree_store_append (store, iter2, &iter1);    
+    import_stroop_trial_data_to_treestore (store, iter2, &(trial_array[n]));
 
   }
 
@@ -405,6 +417,14 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
 
   // COlumns:
+  // Block name
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Block", renderer,
+						     "text", COL_BLOCK_NAME,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW(tree), column);
+
   // Trial ID
   renderer = gtk_cell_renderer_text_new ();
   g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
@@ -412,6 +432,7 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 						     "text", COL_TASK_ID,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW(tree), column);
+
 
   // Input Patterns 
   renderer = gtk_cell_renderer_text_new ();
@@ -470,6 +491,7 @@ FileData * create_task_import_objects() {
 
   // int cols for debug purposes
   store = gtk_tree_store_new (N_TASK_COLUMNS,
+			      G_TYPE_STRING,
 			      G_TYPE_INT,
 			      G_TYPE_INT, 
 			      G_TYPE_INT, 
@@ -520,9 +542,10 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
   subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
 
 
-  import_task_block_to_treestore (objects->task_config_file->tree_store,
-  				  this_subject->num_fixed_trials,
-  				  this_subject->fixed_trials);
+  import_task_block_new_to_treestore (objects->task_config_file->tree_store,
+				      "random stroop",
+				      this_subject->num_fixed_trials,
+				      this_subject->fixed_trials);
 
 
 

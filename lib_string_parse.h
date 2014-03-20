@@ -21,6 +21,7 @@ enum {
 
 // tree model for task viewer/importer
 enum {
+  COL_BLOCK_NAME,
   COL_TASK_ID,
   COL_TASK_PATTERN_1,
   COL_TASK_PATTERN_2,
