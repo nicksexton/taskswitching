@@ -47,7 +47,6 @@ int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *tr
   
   // handle case where patterns are expressed as vectors
 
-
   // handle case where patterns are expressed as ints
   gtk_tree_model_get (GTK_TREE_MODEL(store), trial, 
 		      COL_TASK_ID, &(data->trial_id),
@@ -135,14 +134,19 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
     units_activation = 
       pdp_layer_get_unit_activation_history (current_layer, unit, simulation->model->cycle);
   
-    
-    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+    if (units_activation == NULL) {
+      free(units_activation);
+      break;
+    }
+    else {
+      pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
 			simulation->model->cycle, units_activation, &(plot_colour[unit]));
 
-    // want more sophisticated rendering algorithm using buffering, 
-    // this will probably cause flicker
+      // want more sophisticated rendering algorithm using buffering, 
+      // this will probably cause flicker
 
-    free(units_activation);
+      free(units_activation);
+    }
   }
 
 
@@ -155,15 +159,20 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
     units_activation = 
       pdp_layer_get_unit_activation_history (current_layer, unit, simulation->model->cycle);
   
-    
-    pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
+    if (units_activation == NULL) {
+      free(units_activation);
+      break;
+    }
+    else {
+      pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
 			       simulation->model->cycle, units_activation, 
 			       &(plot_colour[unit]));
 
-    // want more sophisticated rendering algorithm using buffering, 
-    // this will probably cause flicker
+      // want more sophisticated rendering algorithm using buffering, 
+      // this will probably cause flicker
 
-    free(units_activation);
+      free(units_activation);
+    }
   }
 
 
@@ -176,20 +185,27 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
   units_activation = 
     pdp_layer_get_unit_activation_history (current_layer, 0, simulation->model->cycle);
   
-    
-  pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+  if (units_activation == NULL) {
+    free(units_activation);
+  }
+  else {
+    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
 		      simulation->model->cycle, units_activation, 
 		      &(plot_td_mono[0]));
-
+  }
     // colour task demand unit
   units_activation = 
     pdp_layer_get_unit_activation_history (current_layer, 1, simulation->model->cycle);
   
-
-  pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
-			     simulation->model->cycle, units_activation, 
-			     &(plot_td_mono[1]));
-
+    if (units_activation == NULL) {
+      free(units_activation);
+    }
+    else {
+      pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
+				 simulation->model->cycle, units_activation, 
+				 &(plot_td_mono[1]));
+      free(units_activation);
+    }
   
 }
 
