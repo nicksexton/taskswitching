@@ -415,16 +415,19 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
   // Input Patterns 
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
   column = gtk_tree_view_column_new_with_attributes ("Pattern 1", renderer, "text",
 						     COL_TASK_PATTERN_1,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
   column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
 						     COL_TASK_PATTERN_2,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
   column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
 						     COL_TASK_PATTERN_3,
 						     NULL);
@@ -433,11 +436,13 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
   // Trial parameters
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
   column = gtk_tree_view_column_new_with_attributes ("Parameter 1", renderer, "text",
 						     COL_TASK_PARAM_1,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
   column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
 						     COL_TASK_PARAM_2,
 						     NULL);
