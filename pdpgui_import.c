@@ -552,6 +552,11 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
   // TEMP CODE: set path to first trial of first block
   GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
   objects->simulation->current_trial_path = current_trial_path;
+  
+  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  gtk_tree_model_get_iter (GTK_TREE_MODEL(objects->simulation->task_store), iter, current_trial_path);
+  objects->simulation->current_trial_iter = iter;
+
 
   return (grid_main);
 

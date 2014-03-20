@@ -266,8 +266,8 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
 
   
-  //gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
-  //			     objects->simulation->current_trial);
+  gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
+  			     objects->simulation->current_trial);
 
 }
 
