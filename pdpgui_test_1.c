@@ -20,6 +20,8 @@
 // #include <math.h>
 
 
+
+
 // takes an iter pointing to relevant row of task store, 
 // returns a pointer to UNINITIALIZED stroop_trial_data,
 int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *trial, stroop_trial_data * data) {
@@ -45,8 +47,6 @@ int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *tr
 
   
   // handle case where patterns are expressed as vectors
-
-
 
 
   // handle case where patterns are expressed as ints
@@ -242,8 +242,8 @@ create_sub_notepage_model_display_architecture (PdpGuiObjects * objects) {
 
   gtk_widget_show_all(grid);
   return (grid);
-}
 
+}
 
 
 static void model_headerbar_update_labels (PdpGuiObjects * objects) {
@@ -269,13 +269,26 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
 }
 
-/*
-static void model_headerbar_redraw_cb(GtkWidget *headerbar, PdpGuiObjects * objects) {
 
-  model_headerbar_update_labels (objects);
+static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreeIter *new_trial) {
+
+
+  // make stroop trial data
+
+  g_free (simulation->current_trial_data);
+  simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
+
+  make_stroop_trial_data_from_task_store (simulation->task_store, 
+					  new_trial, 
+					  simulation->current_trial_data);
+
+  // update the path
+  gtk_tree_path_free (simulation->current_trial_path);
+  simulation->current_trial_path = gtk_tree_model_get_path (GTK_TREE_MODEL(store), new_trial);
 
 }
-*/
+
+
 
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
@@ -298,11 +311,14 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 
   // set the current_trial_data buffer according to the iterator
   // free old buffer and malloc a new one
+  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
+			  iter,
+			  objects->simulation->current_trial_path );
+  /*
   g_free (objects->simulation->current_trial_data);
   objects->simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
-
-
-  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
 
   gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
 			  iter,
@@ -313,7 +329,9 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 					  iter, 
 					  objects->simulation->current_trial_data);
 
+  */
 
+  model_change_trial (objects->simulation, objects->simulation->task_store, iter);
 
   // now update text in headerbar widgets
   model_headerbar_update_labels (objects);
