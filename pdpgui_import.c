@@ -415,7 +415,6 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
   // aesthetic properties:
   gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree), TRUE);
 
-
   // COlumns:
   // Block name
   renderer = gtk_cell_renderer_text_new ();
@@ -443,7 +442,7 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   renderer = gtk_cell_renderer_text_new ();
   g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
-  column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
+  column = gtk_tree_view_column_new_with_attributes ("Pattern 2", renderer, "text",
 						     COL_TASK_PATTERN_2,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
@@ -464,7 +463,7 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
   renderer = gtk_cell_renderer_text_new ();
   g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
-  column = gtk_tree_view_column_new_with_attributes ("Pattern 3", renderer, "text",
+  column = gtk_tree_view_column_new_with_attributes ("Parameter 2", renderer, "text",
 						     COL_TASK_PARAM_2,
 						     NULL);
   gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);

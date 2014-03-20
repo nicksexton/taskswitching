@@ -83,13 +83,13 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
   printf ("%d x %d\n", widget_width, widget_height);
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
-			 0.0, simulation->model->cycle * 1.1, 
+			 0.0, simulation->model->cycle * 1.0, 
 			 -1.0, 0.5);
 
 
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
-    .x_max = simulation->model->cycle * 1.1, 
+    .x_max = simulation->model->cycle * 1.0, 
     .y_min = -1.0, 
     .y_max = 0.5
   };
