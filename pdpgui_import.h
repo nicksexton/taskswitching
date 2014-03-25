@@ -62,7 +62,10 @@ static void setup_task_viewer_treeview (GtkTreeView * tree);
 
 FileData * create_task_import_objects();
 
+GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects);
+
 GtkWidget* create_notepage_import_trials (PdpGuiObjects *objects);
+
 
 
 

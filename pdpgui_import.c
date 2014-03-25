@@ -16,8 +16,8 @@
 // utility function for clearing all entries from a treeview
 gboolean treestore_remove_all (GtkTreeStore * tree_store) {
 
-  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  GtkTreeIter iter;
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter)); 
+ GtkTreeIter iter;
 
   if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_store), &iter)) {
     // tree is not empty, proceed to remove all items
@@ -472,9 +472,8 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
 
 
-/*
-// Temporarily commented - using task_store as PdpGuiObjects member to store all tasks (library)
-// use FileData to handle a treestore buffer for import only
+
+// use task_store as PdpGuiObjects member as a buffer for importing tasks (task blocks)
 FileData * create_task_import_objects() {
 
   FileData *config_file; // struct containing pointers to relevant file data
@@ -504,9 +503,9 @@ FileData * create_task_import_objects() {
 
   return config_file;
 }
-*/
 
-GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
+
+GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
 
   GtkWidget *grid_main;
   GtkWidget *scrollwindow;
@@ -556,6 +555,74 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
   gtk_tree_model_get_iter (GTK_TREE_MODEL(objects->simulation->task_store), iter, current_trial_path);
   objects->simulation->current_trial_iter = iter;
 
+
+  return (grid_main);
+
+}
+
+
+GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
+
+  GtkWidget *grid_main;
+  GtkWidget *scrollwindow;
+
+  GtkWidget *label1; 
+  GtkWidget *file_select;
+  GtkWidget *button_process_configfile;
+  GtkWidget *button_import_commit;
+
+ 
+  label1 = gtk_label_new("Select config file for task import");
+  gtk_label_set_line_wrap(GTK_LABEL(label1), TRUE);
+  
+  file_select = gtk_combo_box_text_new();
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
+				 "gtk_config_file_1.conf");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
+				 "gtk_config_file_2.conf");
+  g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(objects->task_config_file) );
+
+  // aesthetic: give this a standard icon
+  button_process_configfile = gtk_button_new_with_label ("Load from file");
+  g_signal_connect (button_process_configfile, "clicked", 
+		    G_CALLBACK(load_from_file_cb), (gpointer)(objects->task_config_file));
+
+  
+  // TODO - make button only active when there are parameters to commit
+  button_import_commit = gtk_button_new_with_label ("Import Commit");
+
+
+  // todo - callback function to import task blocks 
+  /*
+  g_signal_connect (button_import_commit, "clicked", 
+		    G_CALLBACK(model_parameters_import_commit_cb), (gpointer)(objects));
+  */
+
+
+
+
+  GtkWidget *tree;
+  tree = gtk_tree_view_new();
+  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->task_config_file->tree_store));
+  setup_task_viewer_treeview(GTK_TREE_VIEW(tree)); // same task viewer as task view page
+
+  grid_main = gtk_grid_new();
+
+  // file import buttons here
+  gtk_grid_attach (GTK_GRID(grid_main), label1, 0, 0, 2, 1);
+  gtk_grid_attach (GTK_GRID(grid_main), file_select, 0, 1, 2, 1);
+  gtk_grid_attach (GTK_GRID(grid_main), objects->task_config_file->filename_label, 0, 2, 2, 1);
+  gtk_grid_attach (GTK_GRID(grid_main), button_process_configfile, 0, 3, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid_main), button_import_commit, 1, 3, 1, 1);
+
+
+  // tree view here
+  scrollwindow = gtk_scrolled_window_new(NULL, NULL);
+  gtk_widget_set_size_request (scrollwindow, TASK_VIEW_WIDTH, TASK_VIEW_HEIGHT);
+  gtk_container_add (GTK_CONTAINER(scrollwindow), tree);
+
+  gtk_grid_attach (GTK_GRID(grid_main), scrollwindow, 0, 5, 2, 1);
+  gtk_widget_show_all(grid_main);
 
   return (grid_main);
 
