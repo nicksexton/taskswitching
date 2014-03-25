@@ -19,6 +19,7 @@
 // stores first two fields on line (param name and param value) into treestore
 // despite max_fields, only reads first two fields (param name and param value)
 // perhaps tidy this
+// NB used by parameter import (format- key: value)
 void pdp_file_segmented_line_to_treestore (int max_fields, 
 					   int field_size, 
 					   char extracted_fields[max_fields][field_size],
@@ -36,6 +37,34 @@ void pdp_file_segmented_line_to_treestore (int max_fields,
 		      COL_PARAMETER_VALUE, extracted_fields[1], -1);
 
 }
+
+
+// imports a long line (ie., more than 2 fields) 
+// really unsafe - likely to segfault ie. if max_fields is greater than number of fields in treestore
+// need a better system for terminating imported line
+void pdp_file_segmented_line_to_treestore_long (int max_fields, 
+						int field_size, 
+						char extracted_fields[max_fields][field_size],
+						GtkTreeStore * store ) {
+
+
+
+  GtkTreeIter iter1;
+
+  gtk_tree_store_append (store, &iter1, NULL);
+
+  int n;
+  for (n = 0; n < max_fields; n ++) {
+
+    // defer string conversion, save everything as a string
+    gtk_tree_store_set (store, &iter1, 
+			n, extracted_fields[n], -1);
+
+  }
+
+}
+
+
 
 
 

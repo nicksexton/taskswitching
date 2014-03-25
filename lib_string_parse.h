@@ -91,6 +91,16 @@ void pdp_file_segmented_line_to_treestore (int max_fields,
   // separately by a translator module which reads from the treestore
 
 
+
+void pdp_file_segmented_line_to_treestore_entire (int max_fields, 
+						  int field_size, 
+						  char extracted_fields[max_fields][field_size],
+						  GtkTreeStore * store );
+// really unsafe - likely to segfault ie. if max_fields is greater than number of fields in treestore
+// need a better system for terminating imported line
+
+
+
 /*
 bool pdp_file_parse_segmented_line (int max_fields, 
 				    int field_size, 

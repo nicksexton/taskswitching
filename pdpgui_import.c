@@ -57,6 +57,8 @@ gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
 }
 
 
+
+
 void select_file (GtkComboBoxText *widget, FileData * config_file) {
 
   GtkComboBoxText *combo_box = widget;
