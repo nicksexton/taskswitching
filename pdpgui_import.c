@@ -388,8 +388,8 @@ static void import_stroop_trial_data_to_treestore (GtkTreeStore * store,
 		      COL_TASK_ID, data->trial_id, 
 		      COL_TASK_PATTERN_1, data->stim_word, 
 		      COL_TASK_PATTERN_2, data->stim_colour,
-		      COL_TASK_PATTERN_3, data->stim_task, 
-		      -1);
+		      COL_TASK_PATTERN_3, data->stim_task,
+      		      -1);
 
   /*
 enum {
@@ -514,13 +514,13 @@ FileData * create_task_import_objects() {
   strcpy (filename, "no file selected");
   config_file->filename_label = gtk_label_new(filename);
 
-  // int cols for debug purposes
+  // Need to do string to int conversion when transferring out of buffer to task store
   store = gtk_tree_store_new (N_TASK_COLUMNS,
 			      G_TYPE_STRING,
-			      G_TYPE_INT,
-			      G_TYPE_INT, 
-			      G_TYPE_INT, 
-			      G_TYPE_INT, 
+			      G_TYPE_STRING,
+			      G_TYPE_STRING, 
+			      G_TYPE_STRING, 
+			      G_TYPE_STRING, 
 			      G_TYPE_STRING, 
 			      G_TYPE_STRING);
   
