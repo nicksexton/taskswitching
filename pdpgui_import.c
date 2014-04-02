@@ -36,6 +36,7 @@ gboolean treestore_remove_all (GtkTreeStore * tree_store) {
 
 
 // callback function to read file contents
+// uses short format (ie key - value pairs)
 gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
 
   file_info->fp = fopen(file_info->filename, "r");
@@ -57,6 +58,28 @@ gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
 }
 
 
+// similar to load_from_file_cb but imports long format data (ie multiple columns)
+gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info) {
+
+  file_info->fp = fopen(file_info->filename, "r");
+  if (file_info->fp == NULL) {
+    printf ("error! gtk_config_file.conf does not exist\n");
+    return FALSE;
+  }
+  else {
+    printf ("success! config file opened.\n");
+
+    // currently removes all from treestore before import, want to fix this ultimately
+    treestore_remove_all (file_info->tree_store); 
+
+    pdp_file_parse_to_treestore_long (file_info);
+
+    fclose(file_info->fp);
+    printf ("success! config file closed.\n");
+  }
+
+  return TRUE;
+}
 
 
 void select_file (GtkComboBoxText *widget, FileData * config_file) {
@@ -563,6 +586,46 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
 }
 
 
+
+// read tasks from the tree store, add to task store
+// key function for task import!
+static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects) {
+
+  // OLD CODE
+  /*
+  GtkTreeIter iter; 
+  gboolean more;
+
+  more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
+
+  while (more) {
+
+    // tree is not empty, process 
+    gchar *param_name;
+    gchar *param_value;
+
+   
+    gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
+			&iter, COL_PARAMETER_NAME, &param_name, -1);
+    gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
+			&iter, COL_PARAMETER_VALUE, &param_value, -1);
+    g_print ("assigning:\t%s: %s\n", param_name, param_value);
+
+    // model_parameter_import (param_name, param_value, objects->simulation->model_params);
+
+    g_free (param_name);
+    g_free (param_value);
+    
+    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
+  }  
+  */
+
+
+}
+
+
+
+
 GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
   GtkWidget *grid_main;
@@ -582,12 +645,16 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 				 "gtk_config_file_1.conf");
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
 				 "gtk_config_file_2.conf");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
+				 "task_import_test.conf");
+
+
   g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(objects->task_config_file) );
 
   // aesthetic: give this a standard icon
   button_process_configfile = gtk_button_new_with_label ("Load from file");
   g_signal_connect (button_process_configfile, "clicked", 
-		    G_CALLBACK(load_from_file_cb), (gpointer)(objects->task_config_file));
+		    G_CALLBACK(load_from_file_long_cb), (gpointer)(objects->task_config_file));
 
   
   // TODO - make button only active when there are parameters to commit

@@ -208,3 +208,58 @@ int pdp_file_parse_to_treestore (FileData *file_info) {
   return 0;
 }
 
+
+
+// similar to pdp_file_parse_to_treestore but handles long format lines
+int pdp_file_parse_to_treestore_long (FileData *file_info) {
+
+
+
+  char fields [MAX_FIELDS][FIELD_SIZE];
+  int line_counter = 0;
+  int fields_extracted;
+  bool more_lines = true;
+
+  while (more_lines) {
+    line_counter ++;
+    fields_extracted = pdp_file_segment_new_line (file_info->fp, 
+						  MAX_FIELDS, 
+						  FIELD_SIZE, 
+						  fields);
+
+    switch (fields_extracted) {
+    case -2: {
+      printf ("File read error, exiting!\n");
+      exit(EXIT_FAILURE);
+    }
+  
+    case -1: {
+      printf ("End of file reached, no more lines to get\n");
+      more_lines = false;
+      break;
+    }
+
+    default: {
+      printf ("processing line %d\t", line_counter);
+      // process the data
+      if (fields_extracted > 0) { // was any data extracted?
+	// if so, process the data
+
+	pdp_file_segmented_line_to_treestore_long (MAX_FIELDS, 
+						   FIELD_SIZE, 
+						   fields,
+						   file_info->tree_store );
+
+	printf ("imported - %s:\t%s\n", fields[0], fields[1]);
+
+      }
+      else {
+	printf ("blank line or comment, ignoring\n");
+      }
+    }
+    }
+
+  }
+
+  return 0;
+}

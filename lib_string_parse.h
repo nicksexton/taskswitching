@@ -92,6 +92,15 @@ void pdp_file_segmented_line_to_treestore (int max_fields,
 
 
 
+// imports a long line (ie., more than 2 fields) 
+// really unsafe - likely to segfault ie. if max_fields is greater than number of fields in treestore
+// need a better system for terminating imported line
+void pdp_file_segmented_line_to_treestore_long (int max_fields, 
+						int field_size, 
+						char extracted_fields[max_fields][field_size],
+						GtkTreeStore * store );
+
+
 void pdp_file_segmented_line_to_treestore_entire (int max_fields, 
 						  int field_size, 
 						  char extracted_fields[max_fields][field_size],
@@ -134,6 +143,9 @@ int parse_file (FILE *config_file, GenericParameterSet *my_params);
   // example code to test string_parse functions 
   // change GenericParameterSet type to a program-specific struct containing parameters
   */
+
+// similar to pdp_file_parse_to_treestore but handles long format lines
+int pdp_file_parse_to_treestore_long (FileData *file_info);
 
 
 #endif
