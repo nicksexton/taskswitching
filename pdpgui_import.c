@@ -374,6 +374,19 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 
 //<---------------------- MODEL TASK IMPORT FUNCTIONS ------------------------
 
+
+void model_reset_trial_markers (PdpSimulation *simulation) {
+
+  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
+  simulation->current_trial_path = current_trial_path;
+  
+  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), iter, current_trial_path);
+  simulation->current_trial_iter = iter;
+
+}
+
+
 static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, 
 						   GtkTreeIter *iter, 
 						   stroop_trial_data* data) {
@@ -553,7 +566,6 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
   gtk_widget_show_all(grid_main);
 
 
-  // import sample data:
   /*
   stroop_trial_data mock_data;
   mock_data.trial_id = 999;
@@ -564,26 +576,26 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
   import_stroop_trial_data_to_treestore (objects->task_config_file->tree_store, &mock_data);
   */
 
-  subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
 
+
+  /*
+  subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
 
   import_task_block_new_to_treestore (objects->simulation->task_store,
 				      "random stroop",
 				      this_subject->num_fixed_trials,
 				      this_subject->fixed_trials);
+  */
+
 
   // TEMP CODE: set path to first trial of first block
-  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
-  objects->simulation->current_trial_path = current_trial_path;
-  
-  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  gtk_tree_model_get_iter (GTK_TREE_MODEL(objects->simulation->task_store), iter, current_trial_path);
-  objects->simulation->current_trial_iter = iter;
 
+  model_reset_trial_markers (objects->simulation);
 
   return (grid_main);
 
 }
+
 
 
 
@@ -592,33 +604,51 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
 static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects) {
 
   // OLD CODE
-  /*
-  GtkTreeIter iter; 
+  
+  GtkTreeIter iter_import; 
+  GtkTreeIter iter_import_append;
   gboolean more;
 
-  more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
+
+  // get iterator at top of the import store 
+  more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import);
+
+
 
   while (more) {
 
-    // tree is not empty, process 
-    gchar *param_name;
-    gchar *param_value;
+    // create stroop trial data object
+    stroop_trial_data imported_trial;
+    gchar *import_trial_id;
+    gchar *import_stim_task;
+    gchar *import_stim_word;
+    gchar *import_stim_colour;
 
-   
-    gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
-			&iter, COL_PARAMETER_NAME, &param_name, -1);
-    gtk_tree_model_get (GTK_TREE_MODEL(objects->config_file->tree_store), 
-			&iter, COL_PARAMETER_VALUE, &param_value, -1);
-    g_print ("assigning:\t%s: %s\n", param_name, param_value);
 
-    // model_parameter_import (param_name, param_value, objects->simulation->model_params);
+    gtk_tree_model_get (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import, 
+			COL_TASK_ID, &import_trial_id, 
+			COL_TASK_PATTERN_1, &import_stim_word, 
+			COL_TASK_PATTERN_2, &import_stim_colour,
+			COL_TASK_PATTERN_3, &import_stim_task, 
+			-1);
 
-    g_free (param_name);
-    g_free (param_value);
+    // need to set defaults here to prevent seg fault if data not imported??
+    // or, are defaults set in task_config_file when importing from text file...?
+    imported_trial.trial_id = atoi (import_trial_id);
+    imported_trial.stim_task = atoi (import_stim_task);
+    imported_trial.stim_word = atoi (import_stim_word);
+    imported_trial.stim_colour = atoi (import_stim_colour);
+
+
+    gtk_tree_store_append (objects->simulation->task_store, &iter_import_append, NULL);
+    import_stroop_trial_data_to_treestore(objects->simulation->task_store, &iter_import_append, &imported_trial);
     
-    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
+    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import);
+
+    g_free (import_trial_id);
+
   }  
-  */
+  model_reset_trial_markers (objects->simulation);
 
 
 }
@@ -662,10 +692,10 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 
 
   // todo - callback function to import task blocks 
-  /*
+  
   g_signal_connect (button_import_commit, "clicked", 
-		    G_CALLBACK(model_parameters_import_commit_cb), (gpointer)(objects));
-  */
+		    G_CALLBACK(model_task_import_commit_cb), (gpointer)(objects));
+  
 
 
 

@@ -13,7 +13,7 @@
 #define MAIN_WINDOW_WIDTH_DEFAULT 800
 #define MAIN_WINDOW_HEIGHT_DEFAULT 800
 #define TASK_VIEW_WIDTH 750
-#define TASK_VIEW_HEIGHT 750
+#define TASK_VIEW_HEIGHT 500
 
 
 typedef struct pdp_simulation {

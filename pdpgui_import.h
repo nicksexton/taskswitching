@@ -49,6 +49,10 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects);
 
 
 // <----------------- MODEL TASK IMPORT FUNCTIONS
+
+void model_reset_trial_markers (PdpSimulation *simulation);
+// resets the current trial iter and path to 0:0
+
 /*
 static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, stroop_trial_data* data);
 

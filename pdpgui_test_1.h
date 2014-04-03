@@ -20,6 +20,7 @@ create_sub_notepage_model_display_architecture (PdpGuiObjects * objects);
 
 static void model_headerbar_update_labels (PdpGuiObjects * objects);
 
+
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects);
 

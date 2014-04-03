@@ -22,6 +22,9 @@
 
 
 
+
+
+
 // takes an iter pointing to relevant row of task store, 
 // returns a pointer to UNINITIALIZED stroop_trial_data,
 int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *trial, stroop_trial_data * data) {
@@ -286,7 +289,6 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   			     objects->simulation->current_trial);
 
 }
-
 
 
 static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreeIter *new_trial) {
