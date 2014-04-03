@@ -272,8 +272,6 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
 
 
-
-
   trial = gtk_tree_path_to_string (objects->simulation->current_trial_path); 
 
   printf ("updating headerbar with current trial path: %s\n", trial);
@@ -359,36 +357,22 @@ static void model_change_trial_cb (GtkWidget * spin_button,
   gchar *old_path_str;
   gchar *new_path_str;
 
-  // new_path = g_malloc(sizeof(GtkTreePath));
 
   old_path_str = gtk_tree_path_to_string (objects->simulation->current_trial_path);
   printf ("old current trial path: %s\n", old_path_str);
 
   new_trial = gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin_button));
-  // objects->simulation->current_trial = new_trial; // OLD code
-
   current_trial_block = gtk_tree_path_get_indices(objects->simulation->current_trial_path)[0];
-  //  printf ("old current trial path: %s\n", gtk_tree_path_to_string (objects->simulation->current_trial_path));
+
 
   // free old path
-  gtk_tree_path_free (objects->simulation->current_trial_path);
+  //  gtk_tree_path_free (objects->simulation->current_trial_path);
 
   // update path;
   new_path = gtk_tree_path_new_from_indices (current_trial_block, new_trial, -1);
   new_path_str = gtk_tree_path_to_string (new_path);
   printf ("new current trial path: %s\n", new_path_str);
 
-
-  // set the current_trial_data buffer according to the iterator
-  // free old buffer and malloc a new one
-
-  /*
-  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-
-  gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
-			  iter,
-			  objects->simulation->current_trial_path );
-  */
 
   model_change_trial (objects->simulation, objects->simulation->task_store, new_path);
 
