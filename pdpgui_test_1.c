@@ -291,7 +291,7 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 }
 
 
-static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreeIter *new_trial) {
+static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial) {
 
   // make stroop trial data
 
