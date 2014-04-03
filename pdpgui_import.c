@@ -377,14 +377,19 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 
 void model_reset_trial_markers (PdpSimulation *simulation) {
 
-  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
-  simulation->current_trial_path = current_trial_path;
+  printf ("in model_reset_trial_markers");
+
+  gtk_tree_path_free(simulation->current_trial_path);
+  simulation->current_trial_path = gtk_tree_path_new_first();
+
+  //  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
+
   // causes memory leak??
 
   
-  GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), iter, current_trial_path);
-  simulation->current_trial_iter = iter;
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  // gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), iter, current_trial_path);
+  // simulation->current_trial_iter = iter;
 
 }
 
@@ -580,14 +585,14 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
 
 
 
-  /*
+  
   subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
 
   import_task_block_new_to_treestore (objects->simulation->task_store,
 				      "random stroop",
 				      this_subject->num_fixed_trials,
 				      this_subject->fixed_trials);
-  */
+  
 
 
   // TEMP CODE: set path to first trial of first block

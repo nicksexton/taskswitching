@@ -267,12 +267,23 @@ create_sub_notepage_model_display_architecture (PdpGuiObjects * objects) {
 static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
   char textbuf[100];
+
+  gchar* trial;
+
+
+
+
+
+  trial = gtk_tree_path_to_string (objects->simulation->current_trial_path); 
+
+  printf ("updating headerbar with current trial path: %s\n", trial);
+
   sprintf (textbuf, "Subject: %d", objects->simulation->current_subject);
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_subject), textbuf);
  
 
   // sprintf (textbuf, "Trial: %d", objects->simulation->current_trial);
-  sprintf (textbuf, "Trial: %s", gtk_tree_path_to_string (objects->simulation->current_trial_path));
+  sprintf (textbuf, "Trial: %s", trial);
 
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial), textbuf);
 
@@ -288,10 +299,18 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
   			     objects->simulation->current_trial);
 
+  g_free(trial);
+
 }
 
 
-static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial) {
+static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
+
+  // get iter to new path
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, new_trial_path);
+
 
   // make stroop trial data
 
@@ -299,12 +318,32 @@ static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, 
   simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
   make_stroop_trial_data_from_task_store (simulation->task_store, 
-					  new_trial, 
+					  iter, 
 					  simulation->current_trial_data);
 
   // update the path
   gtk_tree_path_free (simulation->current_trial_path);
-  simulation->current_trial_path = gtk_tree_model_get_path (GTK_TREE_MODEL(store), new_trial);
+  simulation->current_trial_path = new_trial_path;
+
+}
+
+static void model_change_trial_next (PdpSimulation *simulation) {
+
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, 
+			  simulation->current_trial_path);
+
+  gtk_tree_model_iter_next (GTK_TREE_MODEL(simulation->task_store), iter);
+
+  
+  gtk_tree_path_free(simulation->current_trial_path);
+
+  simulation->current_trial_path = gtk_tree_model_get_path (GTK_TREE_MODEL(simulation->task_store)
+								     , iter);
+  printf ("new current trial path: %s\n", gtk_tree_path_to_string (simulation->current_trial_path));
+  
+  
 
 }
 
@@ -313,49 +352,71 @@ static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, 
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
 
+
   int new_trial;
   int current_trial_block;
+  GtkTreePath *new_path;
+  gchar *old_path_str;
+  gchar *new_path_str;
+
+  // new_path = g_malloc(sizeof(GtkTreePath));
+
+  old_path_str = gtk_tree_path_to_string (objects->simulation->current_trial_path);
+  printf ("old current trial path: %s\n", old_path_str);
+
   new_trial = gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin_button));
-  objects->simulation->current_trial = new_trial; // OLD code
+  // objects->simulation->current_trial = new_trial; // OLD code
 
   current_trial_block = gtk_tree_path_get_indices(objects->simulation->current_trial_path)[0];
-  printf ("old current trial path: %s\n", gtk_tree_path_to_string (objects->simulation->current_trial_path));
+  //  printf ("old current trial path: %s\n", gtk_tree_path_to_string (objects->simulation->current_trial_path));
 
   // free old path
   gtk_tree_path_free (objects->simulation->current_trial_path);
 
   // update path;
-  objects->simulation->current_trial_path = gtk_tree_path_new_from_indices (current_trial_block, new_trial, -1);
-  printf ("new current trial path: %s\n", gtk_tree_path_to_string (objects->simulation->current_trial_path));
+  new_path = gtk_tree_path_new_from_indices (current_trial_block, new_trial, -1);
+  new_path_str = gtk_tree_path_to_string (new_path);
+  printf ("new current trial path: %s\n", new_path_str);
 
 
   // set the current_trial_data buffer according to the iterator
   // free old buffer and malloc a new one
+
+  /*
   GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
 
   gtk_tree_model_get_iter(GTK_TREE_MODEL(objects->simulation->task_store), 
 			  iter,
 			  objects->simulation->current_trial_path );
+  */
 
+  model_change_trial (objects->simulation, objects->simulation->task_store, new_path);
 
-  model_change_trial (objects->simulation, objects->simulation->task_store, iter);
+  printf ("in change_trial_cb, current_trial_path pointer value is %p\n",
+	  objects->simulation->current_trial_path);
 
   // now update text in headerbar widgets
   model_headerbar_update_labels (objects);
+  // gtk_tree_path_free(new_path); 
+      // causing seg faults? don't want to free this as it is now stored in current_trial_path
+  g_free(old_path_str);
+  g_free(new_path_str);
 
 }
+
 
 static gboolean model_change_trial_first (PdpSimulation *simulation, 
 					  GtkTreeStore *store) {
 
-  GtkTreeIter first_block;
+  GtkTreeIter first_block, first_trial;
   if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(simulation->task_store), &first_block)) {
     // move to child node (also check this succeeds)
     if (gtk_tree_model_iter_children (GTK_TREE_MODEL(simulation->task_store), 
-				      simulation->current_trial_iter, 
+				      &first_trial, 
 				      &first_block)) {
       // iter now positioned for first trial, set trial buffer
-      model_change_trial (simulation, simulation->task_store, simulation->current_trial_iter);
+      model_change_trial (simulation, simulation->task_store, 
+			  gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), &first_trial));
       //      simulation->current_trial_iter = first_trial; // this line might not work
       return true;
     }
@@ -446,13 +507,7 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
   int i = 0;
   bool model_running = true;
   while (i < 10 && model_running) {
-    /*
-    model_running = run_model_step (simulation->model, 
-				    &(simulation->subjects->subj[simulation->current_subject]
-				      ->fixed_trials[simulation->current_trial]), 
-				    simulation->random_generator, 
-				    simulation->model_params->response_threshold);
-    */
+
     model_running = run_model_step (simulation->model, 
 				    simulation->current_trial_data, 
 				    simulation->random_generator, 
@@ -502,6 +557,7 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 
 }
 
+
 static void model_controls_continue_cb (GtkToolItem * tool_item, 
 					PdpGuiObjects * objects) {
 
@@ -541,12 +597,17 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   else {
 
     // set new trial
+
+    /*
     simulation->current_trial ++; // DEPRECATED
 
     gtk_tree_model_iter_next(GTK_TREE_MODEL(simulation->task_store), simulation->current_trial_iter); 
     model_change_trial (simulation, 
 			simulation->task_store, 
 			simulation->current_trial_iter);
+
+    */
+    model_change_trial_next(objects->simulation);
 
     model_headerbar_update_labels(objects);
 
@@ -790,6 +851,7 @@ PdpSimulation * create_simulation () {
 					       G_TYPE_STRING);
 
   simulation->current_trial_data = NULL;
+  simulation->current_trial_path = gtk_tree_path_new_first();
 
   return simulation;
 }
@@ -809,6 +871,7 @@ void free_simulation (PdpSimulation * simulation) {
 
   //  g_free (simulation->task_store);
   g_free (simulation->current_trial_data);
+  gtk_tree_path_free(simulation->current_trial_path);
   g_free (simulation);
 
 }
