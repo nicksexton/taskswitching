@@ -42,7 +42,8 @@ void pdp_file_segmented_line_to_treestore (int max_fields,
 // imports a long line (ie., more than 2 fields) 
 // really unsafe - likely to segfault ie. if max_fields is greater than number of fields in treestore
 // need a better system for terminating imported line
-void pdp_file_segmented_line_to_treestore_long (int max_fields, 
+void pdp_file_segmented_line_to_treestore_long (int max_fields,
+						int n_fields, // number of fields to extract
 						int field_size, 
 						char extracted_fields[max_fields][field_size],
 						GtkTreeStore * store ) {
@@ -54,14 +55,13 @@ void pdp_file_segmented_line_to_treestore_long (int max_fields,
   gtk_tree_store_append (store, &iter1, NULL);
 
   int n;
-  for (n = 0; n < max_fields; n ++) {
+  for (n = 0; n < n_fields; n ++) {
 
     // defer string conversion, save everything as a string
     gtk_tree_store_set (store, &iter1, 
 			n, extracted_fields[n], -1);
 
   }
-
 }
 
 
@@ -245,7 +245,8 @@ int pdp_file_parse_to_treestore_long (FileData *file_info) {
       if (fields_extracted > 0) { // was any data extracted?
 	// if so, process the data
 
-	pdp_file_segmented_line_to_treestore_long (MAX_FIELDS, 
+	pdp_file_segmented_line_to_treestore_long (MAX_FIELDS,
+						   fields_extracted,
 						   FIELD_SIZE, 
 						   fields,
 						   file_info->tree_store );
