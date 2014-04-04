@@ -375,23 +375,6 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 //<---------------------- MODEL TASK IMPORT FUNCTIONS ------------------------
 
 
-void model_reset_trial_markers (PdpSimulation *simulation) {
-
-  printf ("in model_reset_trial_markers");
-
-  gtk_tree_path_free(simulation->current_trial_path);
-  simulation->current_trial_path = gtk_tree_path_new_first();
-
-  //  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
-
-  // causes memory leak??
-
-  
-  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  // gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), iter, current_trial_path);
-  // simulation->current_trial_iter = iter;
-
-}
 
 
 static void import_stroop_trial_data_to_treestore (GtkTreeStore * store, 
@@ -422,6 +405,29 @@ enum {
   N_TASK_COLUMNS
 };
   */
+}
+
+
+void model_reset_trial_markers (PdpSimulation *simulation) {
+
+  gchar *path;
+
+  gtk_tree_path_free(simulation->current_trial_path);
+  simulation->current_trial_path = gtk_tree_path_new_first();
+
+  path = gtk_tree_path_to_string (simulation->current_trial_path);
+
+  printf ("in model_reset_trial_markers, current path is: %s\n", path);
+
+  g_free (path);
+
+  //  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
+  // causes memory leak??
+
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
+  // gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), iter, current_trial_path);
+  // simulation->current_trial_iter = iter;
+
 }
 
 
@@ -585,14 +591,14 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
 
 
 
-  
+  /*  
   subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
 
   import_task_block_new_to_treestore (objects->simulation->task_store,
 				      "random stroop",
 				      this_subject->num_fixed_trials,
 				      this_subject->fixed_trials);
-  
+  */
 
 
   // TEMP CODE: set path to first trial of first block

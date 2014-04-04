@@ -25,6 +25,9 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects);
 gint model_current_trial_get (PdpSimulation *simulation);
 
 
+
+
+
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects);
 

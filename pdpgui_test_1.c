@@ -328,26 +328,39 @@ gint model_current_trial_get (PdpSimulation *simulation) {
 }
 
 
-static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
+
+
+
+static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
 
   // get iter to new path
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
 
-  gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, new_trial_path);
+
+  if (gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, new_trial_path)) {
 
 
-  // make stroop trial data
+    // make stroop trial data
 
-  g_free (simulation->current_trial_data);
-  simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
+    g_free (simulation->current_trial_data);
+    simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
-  make_stroop_trial_data_from_task_store (simulation->task_store, 
-					  iter, 
-					  simulation->current_trial_data);
+    make_stroop_trial_data_from_task_store (simulation->task_store, 
+					    iter, 
+					    simulation->current_trial_data);
 
-  // update the path
-  gtk_tree_path_free (simulation->current_trial_path);
-  simulation->current_trial_path = new_trial_path;
+    // update the path
+    gtk_tree_path_free (simulation->current_trial_path);
+    simulation->current_trial_path = new_trial_path;
+    
+    return TRUE;
+  }
+
+  else {
+    g_free (iter);
+    printf ("error! model_change_trial failed to acquire valid iter from current_trial_path, returning FALSE\n");
+    return FALSE;
+  }
 
 }
 
@@ -389,7 +402,7 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 
 
   old_path_str = gtk_tree_path_to_string (objects->simulation->current_trial_path);
-  printf ("old current trial path: %s\n", old_path_str);
+  printf ("in model_change_trial_cb, old path: %s\t", old_path_str);
 
   new_trial = gtk_spin_button_get_value (GTK_SPIN_BUTTON(spin_button));
   current_trial_block = gtk_tree_path_get_indices(objects->simulation->current_trial_path)[0];
@@ -399,16 +412,23 @@ static void model_change_trial_cb (GtkWidget * spin_button,
   // update path;
   new_path = gtk_tree_path_new_from_indices (current_trial_block, new_trial, -1);
   new_path_str = gtk_tree_path_to_string (new_path);
-  printf ("new current trial path: %s\n", new_path_str);
+  printf ("new path: %s\n", new_path_str);
 
 
-  model_change_trial (objects->simulation, objects->simulation->task_store, new_path);
+  if (model_change_trial (objects->simulation, objects->simulation->task_store, new_path)) {
 
-  printf ("in change_trial_cb, current_trial_path pointer value is %p\n",
-	  objects->simulation->current_trial_path);
+    printf ("model_change_trial_cb acquired iter\n",
+	    objects->simulation->current_trial_path);
 
-  // now update text in headerbar widgets
-  model_headerbar_update_labels (objects);
+    // now update text in headerbar widgets
+    model_headerbar_update_labels (objects);
+
+  }
+
+  else {
+    printf ("model_change_trial_cb failed to acquire iter, aborting\n");
+  }
+
 
   g_free(old_path_str);
   g_free(new_path_str);
