@@ -286,18 +286,44 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial), textbuf);
 
   // display input pattern, trialtype, ...?
+  /*
   stroop_trial_data_print_as_string (textbuf, 100, 
 				     fixed_block_trial_data_get(objects->simulation->subjects,
 								objects->simulation->current_subject,
 								objects->simulation->current_trial));
+  */
+  stroop_trial_data_print_as_string (textbuf, 100, 
+				     objects->simulation->current_trial_data); // might cause seg faults
 
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
 
   
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
-  			     objects->simulation->current_trial);
+  			     model_current_trial_get(objects->simulation));
 
   g_free(trial);
+
+}
+
+gint model_current_trial_get (PdpSimulation *simulation) {
+  
+  gint depth = -1;
+  gint *current_trial;
+
+  current_trial = gtk_tree_path_get_indices_with_depth (simulation->current_trial_path, &depth);
+
+  printf ("model_current_trial_get, returning depth %d", depth);
+
+  if (depth > -1) {
+    printf ("trial %d\n", current_trial[depth-1]);
+    return current_trial[depth-1];
+  }
+
+
+  else {
+    printf ("\n");
+    return -99;
+  }
 
 }
 
@@ -325,24 +351,28 @@ static void model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, 
 
 }
 
+
 static void model_change_trial_next (PdpSimulation *simulation) {
 
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
 
+  // check next trial exists:
   gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, 
 			  simulation->current_trial_path);
 
-  gtk_tree_model_iter_next (GTK_TREE_MODEL(simulation->task_store), iter);
-
+  if (gtk_tree_model_iter_next (GTK_TREE_MODEL(simulation->task_store), iter)) {
   
-  gtk_tree_path_free(simulation->current_trial_path);
+    // gtk_tree_path_free(simulation->current_trial_path);
+    // simulation->current_trial_path = gtk_tree_model_get_path (GTK_TREE_MODEL(simulation->task_store)
+    //								     , iter);
+  
+    // advance the trial path
+    gtk_tree_path_next(simulation->current_trial_path);
+  }
 
-  simulation->current_trial_path = gtk_tree_model_get_path (GTK_TREE_MODEL(simulation->task_store)
-								     , iter);
+
   printf ("new current trial path: %s\n", gtk_tree_path_to_string (simulation->current_trial_path));
   
-  
-
 }
 
 
@@ -365,8 +395,6 @@ static void model_change_trial_cb (GtkWidget * spin_button,
   current_trial_block = gtk_tree_path_get_indices(objects->simulation->current_trial_path)[0];
 
 
-  // free old path
-  //  gtk_tree_path_free (objects->simulation->current_trial_path);
 
   // update path;
   new_path = gtk_tree_path_new_from_indices (current_trial_block, new_trial, -1);
@@ -381,8 +409,7 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 
   // now update text in headerbar widgets
   model_headerbar_update_labels (objects);
-  // gtk_tree_path_free(new_path); 
-      // causing seg faults? don't want to free this as it is now stored in current_trial_path
+
   g_free(old_path_str);
   g_free(new_path_str);
 
