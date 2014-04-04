@@ -12,28 +12,6 @@
 
 
 
-/** Utility function,
- * Set itr_last to last item of parent if parent has any rows.
- * If parent is NULL, set itr_last to last root row.
- * Returns TRUE if itr_last could be set, otherwise FALSE.
- */
-gboolean tree_model_get_iter_last( GtkTreeModel *model,
-				   GtkTreeIter *itr_last,
-				   GtkTreeIter *parent )
-{
-  gboolean success;
-  gint n;
-
-  if ( n = gtk_tree_model_iter_n_children( model, parent ) ) {
-    success = gtk_tree_model_iter_nth_child( model, itr_last, parent, n - 1 );
-  }
-  else {
-    itr_last = NULL;
-    success = FALSE;
-  }
-  return success;
-}
-
 
 // utility function for clearing all entries from a treeview
 gboolean treestore_remove_all (GtkTreeStore * tree_store) {
@@ -648,37 +626,48 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
   GtkTreeIter iter_import_append;
 
   gboolean more;
-
+  gchar *block_id_prev;
+  gchar *block_id_next;
 
   // get iterator at top of the import store 
   more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import);
 
-  /*
-  // insert new parent 
-  if (!tree_model_get_iter_last (GTK_TREE_MODEL(objects->simulation->task_store), &iter_parent, NULL)) {
 
-    // could not acquire iter, could be because tree is empty?
-    gtk_tree_store_append (objects->simulation->task_store, &iter_parent, NULL);
 
-      printf ("model_task_import_commit_cb could not set iter in task_store, aborting\n");
-      return;
-    }
-  }
-  */
+  // get block ID for first trial in import store
+  gtk_tree_model_get (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import,
+		      COL_BLOCK_NAME, &block_id_prev,
+		      -1);
+    
+  // get parent as a new top level iterator in task store
   gtk_tree_store_append (objects->simulation->task_store, &iter_parent, NULL);
 
- 
   gtk_tree_store_set (objects->simulation->task_store, 
 		      &iter_parent,
-		      COL_BLOCK_NAME, "test", 
+		      COL_BLOCK_NAME, block_id_prev, 
 		      -1);
   
 
   while (more) {
 
     // insert new parent if BLOCK_ID changes
+    gtk_tree_model_get (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import,
+			COL_BLOCK_NAME, &block_id_next,
+			-1);
 
+    if (strcmp (block_id_prev, block_id_next)) {
+      // add a new top-level iterator (block)
+      gtk_tree_store_append (objects->simulation->task_store, &iter_parent, NULL);
 
+      gtk_tree_store_set (objects->simulation->task_store, 
+			  &iter_parent,
+			  COL_BLOCK_NAME, block_id_next, 
+			  -1);
+
+    }
+
+    g_free (block_id_prev);
+    block_id_prev = block_id_next;
 
     // create stroop trial data object
     stroop_trial_data imported_trial;
