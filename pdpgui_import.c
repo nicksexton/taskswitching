@@ -12,6 +12,28 @@
 
 
 
+/** Utility function,
+ * Set itr_last to last item of parent if parent has any rows.
+ * If parent is NULL, set itr_last to last root row.
+ * Returns TRUE if itr_last could be set, otherwise FALSE.
+ */
+gboolean tree_model_get_iter_last( GtkTreeModel *model,
+				   GtkTreeIter *itr_last,
+				   GtkTreeIter *parent )
+{
+  gboolean success;
+  gint n;
+
+  if ( n = gtk_tree_model_iter_n_children( model, parent ) ) {
+    success = gtk_tree_model_iter_nth_child( model, itr_last, parent, n - 1 );
+  }
+  else {
+    itr_last = NULL;
+    success = FALSE;
+  }
+  return success;
+}
+
 
 // utility function for clearing all entries from a treeview
 gboolean treestore_remove_all (GtkTreeStore * tree_store) {
@@ -431,6 +453,7 @@ void model_reset_trial_markers (PdpSimulation *simulation) {
 }
 
 
+// temp code - for translating task blocks (ie an array of stroop_trial_data objects) to treestore
 static void import_task_block_new_to_treestore (GtkTreeStore * store, 
 						gchar *name,
 						int num_trials, 
@@ -457,6 +480,8 @@ static void import_task_block_new_to_treestore (GtkTreeStore * store,
   }
 
 }
+
+
 
 static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
@@ -619,16 +644,41 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
   // OLD CODE
   
   GtkTreeIter iter_import; 
+  GtkTreeIter iter_parent;
   GtkTreeIter iter_import_append;
+
   gboolean more;
 
 
   // get iterator at top of the import store 
   more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import);
 
+  /*
+  // insert new parent 
+  if (!tree_model_get_iter_last (GTK_TREE_MODEL(objects->simulation->task_store), &iter_parent, NULL)) {
 
+    // could not acquire iter, could be because tree is empty?
+    gtk_tree_store_append (objects->simulation->task_store, &iter_parent, NULL);
+
+      printf ("model_task_import_commit_cb could not set iter in task_store, aborting\n");
+      return;
+    }
+  }
+  */
+  gtk_tree_store_append (objects->simulation->task_store, &iter_parent, NULL);
+
+ 
+  gtk_tree_store_set (objects->simulation->task_store, 
+		      &iter_parent,
+		      COL_BLOCK_NAME, "test", 
+		      -1);
+  
 
   while (more) {
+
+    // insert new parent if BLOCK_ID changes
+
+
 
     // create stroop trial data object
     stroop_trial_data imported_trial;
@@ -653,7 +703,8 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
     imported_trial.stim_colour = atoi (import_stim_colour);
 
 
-    gtk_tree_store_append (objects->simulation->task_store, &iter_import_append, NULL);
+    gtk_tree_store_append (objects->simulation->task_store, &iter_import_append, &iter_parent);
+
     import_stroop_trial_data_to_treestore(objects->simulation->task_store, &iter_import_append, &imported_trial);
     
     more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import);

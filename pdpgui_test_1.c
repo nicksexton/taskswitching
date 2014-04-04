@@ -341,7 +341,6 @@ static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *sto
 
 
     // make stroop trial data
-
     g_free (simulation->current_trial_data);
     simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
@@ -365,6 +364,7 @@ static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *sto
 }
 
 
+// nb function as-is does not update current_data, just sets the path
 static void model_change_trial_next (PdpSimulation *simulation) {
 
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
