@@ -650,18 +650,42 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   }
 }
 
-static void model_controls_run_block_cb (GtkToolItem * tool_item,
-					 PdpGuiObjects * objects) {
-
-  PdpSimulation * simulation = objects->simulation;
+void model_run_block (PdpSimulation *simulation) {
 
   if (simulation->current_trial_data == NULL) {
     model_change_trial_first (simulation, simulation->task_store); 
   }
 
+  do {
+    
+    run_stroop_trial (simulation->model, 
+		      simulation->current_trial_data, 
+		      simulation->random_generator,
+		      simulation->model_params->response_threshold);
 
+    // set new trial
+    model_change_trial_next(simulation);
 
+    // squash activation values
+    model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
 
+  } while (!model_current_trial_is_last (simulation));
+
+}
+
+static void model_controls_run_block_cb (GtkToolItem * tool_item,
+					 PdpGuiObjects * objects) {
+
+  // PdpSimulation * simulation = objects->simulation;
+
+  model_run_block (objects->simulation);
+  
+  model_headerbar_update_labels(objects);
+
+  /*
+  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first (simulation, simulation->task_store); 
+  }
 
   do {
     
@@ -684,7 +708,7 @@ static void model_controls_run_block_cb (GtkToolItem * tool_item,
     model_headerbar_update_labels(objects);
 
   } while (!model_current_trial_is_last (simulation));
-
+  */
 
 }
 
