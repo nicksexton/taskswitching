@@ -381,12 +381,7 @@ static void import_stroop_trial_data_to_treestore (GtkTreeStore * store,
 						   GtkTreeIter *iter, 
 						   stroop_trial_data* data) {
 
-  //  GtkTreeIter iter1;
-  //  gtk_tree_store_append (store, &iter1, NULL);
 
-  // defer string conversion, save everything as a string
-
-  // write a translator to convert from number into binary pattern
   gtk_tree_store_set (store, iter, 
 		      COL_TASK_ID, data->trial_id, 
 		      COL_TASK_PATTERN_1, data->stim_word, 
@@ -394,17 +389,7 @@ static void import_stroop_trial_data_to_treestore (GtkTreeStore * store,
 		      COL_TASK_PATTERN_3, data->stim_task,
       		      -1);
 
-  /*
-enum {
-  COL_TASK_ID,
-  COL_TASK_PATTERN_1,
-  COL_TASK_PATTERN_2,
-  COL_TASK_PATTERN_3,
-  COL_TASK_PARAM_1,
-  COL_TASK_PARAM_2,
-  N_TASK_COLUMNS
-};
-  */
+  
 }
 
 
@@ -703,6 +688,8 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
   }  
   model_reset_trial_markers (objects->simulation);
 
+  g_free (block_id_next);
+  // block_id_prev already freed
 
 }
 
