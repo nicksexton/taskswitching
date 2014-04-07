@@ -24,7 +24,6 @@
 
 
 
-
 // takes an iter pointing to relevant row of task store, 
 // returns a pointer to UNINITIALIZED stroop_trial_data,
 int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *trial, stroop_trial_data * data) {
@@ -270,40 +269,31 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
   gchar* trial;
 
-
-
   trial = gtk_tree_path_to_string (objects->simulation->current_trial_path); 
 
-  printf ("updating headerbar with current trial path: %s\n", trial);
+  // printf ("updating headerbar with current trial path: %s\n", trial);
 
+  // update subject label
   sprintf (textbuf, "Subject: %d", objects->simulation->current_subject);
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_subject), textbuf);
  
-
-  // sprintf (textbuf, "Trial: %d", objects->simulation->current_trial);
+  // update trial label
   sprintf (textbuf, "Trial: %s", trial);
-
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial), textbuf);
 
-  // display input pattern, trialtype, ...?
-  /*
+  // update trial data label
   stroop_trial_data_print_as_string (textbuf, 100, 
-				     fixed_block_trial_data_get(objects->simulation->subjects,
-								objects->simulation->current_subject,
-								objects->simulation->current_trial));
-  */
-  stroop_trial_data_print_as_string (textbuf, 100, 
-				     objects->simulation->current_trial_data); // might cause seg faults
-
+				     objects->simulation->current_trial_data); 
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial_data), textbuf);
 
-  
+  // update spin button
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
   			     model_current_trial_get(objects->simulation));
 
   g_free(trial);
 
 }
+
 
 gint model_current_trial_get (PdpSimulation *simulation) {
   
@@ -327,7 +317,45 @@ gint model_current_trial_get (PdpSimulation *simulation) {
 
 }
 
+// returns false if there are no trials
+gboolean model_current_trial_is_last (PdpSimulation *simulation) {
 
+  // get number of children of current parent
+  GtkTreeIter *current_trial = g_malloc (sizeof(GtkTreeIter));
+  GtkTreeIter *parent = g_malloc (sizeof(GtkTreeIter));
+  int num_trials;
+  int this_trial;
+
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), 
+			      current_trial, 
+			      simulation->current_trial_path)){
+    printf ("error in model_current_trial_is_last, there appear to be no trials loaded \n"); 
+    return false;
+  }
+  else {
+    if (!gtk_tree_model_iter_parent (GTK_TREE_MODEL(simulation->task_store),
+				     parent,
+				     current_trial)) {
+      printf ("error in model_current_trial_is_last, " 
+	      "there current_trial appears to be top level (ie block header\n");
+      return false;
+    }
+    else {
+      num_trials = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store),
+						   parent);
+      this_trial = model_current_trial_get (simulation);
+      if (this_trial < (num_trials - 1)) {
+	printf ("trial %d of %d, continuing\n", this_trial, num_trials);
+	return false;
+      }
+      else {
+	printf ("current trial is last one\n");
+	return true;
+      }
+
+    }
+  }
+}
 
 
 
@@ -417,8 +445,8 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 
   if (model_change_trial (objects->simulation, objects->simulation->task_store, new_path)) {
 
-    printf ("model_change_trial_cb acquired iter\n",
-	    objects->simulation->current_trial_path);
+    printf ("model_change_trial_cb acquired iter\n");
+    //	    objects->simulation->current_trial_path); // ?? what is this intended to do?
 
     // now update text in headerbar widgets
     model_headerbar_update_labels (objects);
@@ -563,23 +591,12 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
     model_change_trial_first (simulation, simulation->task_store); 
   }
 
-  /*
-  run_stroop_trial (simulation->model, 
-		    &(simulation->subjects->subj[simulation->current_subject]
-		      ->fixed_trials[simulation->current_trial]), 
-		    simulation->random_generator,
-		    simulation->model_params->response_threshold);
-  */
   run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
 		    simulation->model_params->response_threshold);
 
   printf ("model %s run trial \n", simulation->model->name);
-
-  // current version only runs a single trial; uncomment this when checks are in place that current_trial does not
-  // exceed max trials
-  // simulation->current_trial ++;
 
 
   if (objects->model_sub_notepage != NULL) {
@@ -598,15 +615,6 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
     model_change_trial_first (simulation, simulation->task_store); 
   }
 
-  // first run trial to end
-  /*
-  run_stroop_trial (simulation->model, 
-		    &(simulation->subjects->subj[simulation->current_subject]
-		      ->fixed_trials[simulation->current_trial]), 
-		    simulation->random_generator,
-		    simulation->model_params->response_threshold);
-  */
-
   run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
@@ -621,7 +629,11 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
 
   // check this is not last trial of a block
-  if (simulation->current_trial + 1 > simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
+  // OLD - NEEDS FIXING URGENTLY
+
+  //  if (simulation->current_trial + 1 > simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
+
+  if (model_current_trial_is_last (simulation)) {
     printf ("last trial on block!\n");
     return;
   }
@@ -629,25 +641,54 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
     // set new trial
 
-    /*
-    simulation->current_trial ++; // DEPRECATED
-
-    gtk_tree_model_iter_next(GTK_TREE_MODEL(simulation->task_store), simulation->current_trial_iter); 
-    model_change_trial (simulation, 
-			simulation->task_store, 
-			simulation->current_trial_iter);
-
-    */
     model_change_trial_next(objects->simulation);
-
     model_headerbar_update_labels(objects);
 
     // squash activation values
-    // nb for fixed blocks (as per G&S2002) squashing param should be set to 1
     model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
   }
 }
 
+static void model_controls_run_block_cb (GtkToolItem * tool_item,
+					 PdpGuiObjects * objects) {
+
+  PdpSimulation * simulation = objects->simulation;
+
+  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first (simulation, simulation->task_store); 
+  }
+
+  run_stroop_trial (simulation->model, 
+		    simulation->current_trial_data, 
+		    simulation->random_generator,
+		    simulation->model_params->response_threshold);
+
+  /*
+  // draw activations for last trial:
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+  */
+
+
+  // check this is not last trial of a block
+  if (simulation->current_trial + 1 > simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
+    printf ("last trial on block!\n");
+    return;
+  }
+  else {
+
+    // set new trial
+    model_change_trial_next(objects->simulation);
+
+    // squash activation values
+    model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
+
+    model_headerbar_update_labels(objects);
+
+  }
+
+}
 
 
 
@@ -708,6 +749,14 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 		    G_CALLBACK(model_controls_continue_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
 			      "Run to end, continue to next trial (carry over residual activation)");
+  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+
+  // button here for run block
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
+  //  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  //		    G_CALLBACK(model_controls_run_block_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
+			      "Run whole block");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 
