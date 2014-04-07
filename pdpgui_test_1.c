@@ -337,7 +337,7 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation) {
 				     parent,
 				     current_trial)) {
       printf ("error in model_current_trial_is_last, " 
-	      "there current_trial appears to be top level (ie block header\n");
+	      "current_trial appears to be top level (ie block header\n");
       return false;
     }
     else {
@@ -357,6 +357,32 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation) {
   }
 }
 
+gboolean model_current_block_is_last (PdpSimulation *simulation) {
+
+  int num_blocks;
+  gint * trial_path;
+  // get number of top level nodes
+  num_blocks = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store), NULL); 
+  
+  if (num_blocks == 0) {
+    printf ("no blocks, is the task store empty?");
+    return true;
+  }
+  else {
+
+   trial_path = gtk_tree_path_get_indices (simulation->current_trial_path);
+   if (trial_path == NULL) {
+     return true;
+   }
+   
+   else if (trial_path[0] == num_blocks) {
+     printf ("last block!\n");
+     return true;
+   }
+   else return false;
+
+  }
+}
 
 
 static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
@@ -410,7 +436,6 @@ static void model_change_trial_next (PdpSimulation *simulation) {
     // advance the trial path
     gtk_tree_path_next(simulation->current_trial_path);
   }
-
 
   printf ("new current trial path: %s\n", gtk_tree_path_to_string (simulation->current_trial_path));
   
@@ -477,6 +502,12 @@ static gboolean model_change_trial_first (PdpSimulation *simulation,
       model_change_trial (simulation, simulation->task_store, 
 			  gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), &first_trial));
       //      simulation->current_trial_iter = first_trial; // this line might not work
+
+      gtk_tree_path_free (simulation->current_trial_path);
+      simulation->current_trial_path = 
+                      gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), 
+					      &first_trial);
+      
       return true;
     }
     else return false;
@@ -485,28 +516,33 @@ static gboolean model_change_trial_first (PdpSimulation *simulation,
 }
 
 
+
+void model_initialise (PdpSimulation *simulation) {
+
+  // de-init and re-build model to implement new parameters
+  deinit_model (simulation->model);
+  init_model (simulation->model, simulation->model_params);
+  model_init_activation (simulation->model, 0.0); // zero activations 
+
+  printf ("model simulation %s initialised\n", simulation->model->name);
+
+}
+
+
 static void model_controls_initialise_cb (GtkToolItem * tool_item, 
 					  PdpGuiObjects * objects) {
 
-  // PdpSimulation * simulation = objects->simulation;
-  // int n;
 
   /*
-  for (n = 0; n < NUMBER_OF_SUBJECTS; n ++) {
-
-    // parameter setting - DEPRECATED!!!!
-    // initialise gs_stroop_params to defaults
-    model_init_params (simulation->model, 
-		     ((gs_stroop_params *)(simulation->subjects->subj[n]->params)));
-  }
-  */
-
   // de-init and re-build model to implement new parameters
   deinit_model (objects->simulation->model);
   init_model (objects->simulation->model, objects->simulation->model_params);
 
 
   model_init_activation (objects->simulation->model, 0.0); // zero activations 
+  */
+
+  model_initialise (objects->simulation);
 
   // current trial and subject now controlled by spin buttons
   // simulation->current_subject = 0;
@@ -516,7 +552,7 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
 
-  printf ("model simulation %s initialised\n", objects->simulation->model->name);
+
 
 }
 
@@ -598,7 +634,6 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 
   printf ("model %s run trial \n", simulation->model->name);
 
-
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
@@ -628,12 +663,6 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   }
 
 
-  // check this is not last trial of a block
-  // OLD - NEEDS FIXING URGENTLY
-
-  //  if (simulation->current_trial + 1 > 
-  //      simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
-
   if (model_current_trial_is_last (simulation)) {
     printf ("last trial on block!\n");
     return;
@@ -650,6 +679,7 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   }
 }
 
+
 void model_run_block (PdpSimulation *simulation) {
 
   if (simulation->current_trial_data == NULL) {
@@ -664,55 +694,76 @@ void model_run_block (PdpSimulation *simulation) {
 		      simulation->model_params->response_threshold);
 
     // set new trial
-    model_change_trial_next(simulation);
+    model_change_trial_next(simulation); // just sets the path!
+    // model_change_trial (simulation, 
+    //			simulation->task_store,
+    //			simulation->current_trial_path);
 
     // squash activation values
     model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
 
-  } while (!model_current_trial_is_last (simulation));
-
+  } while (model_current_trial_is_last (simulation) == false);
 }
+
 
 static void model_controls_run_block_cb (GtkToolItem * tool_item,
 					 PdpGuiObjects * objects) {
 
   // PdpSimulation * simulation = objects->simulation;
 
-  model_run_block (objects->simulation);
-  
+  model_run_block (objects->simulation);  
   model_headerbar_update_labels(objects);
-
-  /*
-  if (simulation->current_trial_data == NULL) {
-    model_change_trial_first (simulation, simulation->task_store); 
-  }
-
-  do {
-    
-    run_stroop_trial (simulation->model, 
-		      simulation->current_trial_data, 
-		      simulation->random_generator,
-		      simulation->model_params->response_threshold);
-
-    // temp - draw activations
-    if (objects->model_sub_notepage != NULL) {
-      gtk_widget_queue_draw(objects->model_sub_notepage);
-    }
-
-    // set new trial
-    model_change_trial_next(objects->simulation);
-
-    // squash activation values
-    model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
-
-    model_headerbar_update_labels(objects);
-
-  } while (!model_current_trial_is_last (simulation));
-  */
 
 }
 
 
+void model_run_all_blocks (PdpSimulation * simulation ) {
+
+  gint current_block = 0;
+  
+    // change to block 0, trial 0
+    
+    model_change_trial_first (simulation, simulation->task_store);
+  
+
+    // for each block
+    do {
+
+      // init model (zero activations)
+      model_initialise (simulation);
+
+      // run block
+      model_run_block (simulation);
+
+      //  gtk_tree_model_iter_next (GTK_TREE_MODEL(simulation->task_store), 
+      //			&first_trial);
+
+      current_block ++;
+      printf ("in model_run_all_blocks: done with block %d", current_block);
+      gtk_tree_path_free (simulation->current_trial_path);
+      simulation->current_trial_path = gtk_tree_path_new_from_indices(current_block, 0, -1);
+      // likely to segfault if there are blocks but no trials loaded (can this happen?)
+    } while (model_current_block_is_last(simulation) == false);
+
+    model_change_trial_first (simulation, simulation->task_store);
+}
+
+
+static void model_controls_run_all_blocks_cb (GtkToolItem * tool_item,
+					      PdpGuiObjects * objects) {
+
+  model_run_all_blocks (objects->simulation);
+
+  
+  model_headerbar_update_labels(objects);
+
+  // draw activations for last trial:
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+  
+
+}
 
 static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 
@@ -774,11 +825,19 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // button here for run block
-  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GO_FORWARD);
   g_signal_connect (G_OBJECT(tool_item), "clicked", 
   		    G_CALLBACK(model_controls_run_block_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
-			      "Run whole block");
+			      "Run block from current trial");
+  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
+
+  // button here for run all blocks
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_run_all_blocks_cb), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
+			      "Run all blocks from start");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
 

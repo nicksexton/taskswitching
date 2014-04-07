@@ -406,12 +406,6 @@ void model_reset_trial_markers (PdpSimulation *simulation) {
 
   g_free (path);
 
-  //  GtkTreePath * current_trial_path = gtk_tree_path_new_from_string ("0:0");
-  // causes memory leak??
-
-  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter));
-  // gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), iter, current_trial_path);
-  // simulation->current_trial_iter = iter;
 
 }
 
