@@ -302,16 +302,16 @@ gint model_current_trial_get (PdpSimulation *simulation) {
 
   current_trial = gtk_tree_path_get_indices_with_depth (simulation->current_trial_path, &depth);
 
-  printf ("model_current_trial_get, returning depth %d", depth);
+  // printf ("model_current_trial_get, returning depth %d", depth);
 
   if (depth > -1) {
-    printf ("trial %d\n", current_trial[depth-1]);
+    // printf ("trial %d\n", current_trial[depth-1]);
     return current_trial[depth-1];
   }
 
 
   else {
-    printf ("\n");
+    // printf ("\n");
     return -99;
   }
 
@@ -631,7 +631,8 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   // check this is not last trial of a block
   // OLD - NEEDS FIXING URGENTLY
 
-  //  if (simulation->current_trial + 1 > simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
+  //  if (simulation->current_trial + 1 > 
+  //      simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
 
   if (model_current_trial_is_last (simulation)) {
     printf ("last trial on block!\n");
@@ -658,25 +659,21 @@ static void model_controls_run_block_cb (GtkToolItem * tool_item,
     model_change_trial_first (simulation, simulation->task_store); 
   }
 
-  run_stroop_trial (simulation->model, 
-		    simulation->current_trial_data, 
-		    simulation->random_generator,
-		    simulation->model_params->response_threshold);
-
-  /*
-  // draw activations for last trial:
-  if (objects->model_sub_notepage != NULL) {
-    gtk_widget_queue_draw(objects->model_sub_notepage);
-  }
-  */
 
 
-  // check this is not last trial of a block
-  if (simulation->current_trial + 1 > simulation->subjects->subj[simulation->current_subject]->num_fixed_trials) {
-    printf ("last trial on block!\n");
-    return;
-  }
-  else {
+
+
+  do {
+    
+    run_stroop_trial (simulation->model, 
+		      simulation->current_trial_data, 
+		      simulation->random_generator,
+		      simulation->model_params->response_threshold);
+
+    // temp - draw activations
+    if (objects->model_sub_notepage != NULL) {
+      gtk_widget_queue_draw(objects->model_sub_notepage);
+    }
 
     // set new trial
     model_change_trial_next(objects->simulation);
@@ -686,7 +683,8 @@ static void model_controls_run_block_cb (GtkToolItem * tool_item,
 
     model_headerbar_update_labels(objects);
 
-  }
+  } while (!model_current_trial_is_last (simulation));
+
 
 }
 
@@ -753,8 +751,8 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 
   // button here for run block
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
-  //  g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_run_block_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_run_block_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
 			      "Run whole block");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
