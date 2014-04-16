@@ -774,28 +774,32 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
 void model_run_block (PdpSimulation *simulation) {
 
-  //  if (simulation->current_trial_data == NULL) {
+  bool block_finished = false;
+
+  // run block from start
     model_change_trial_first_of_block (simulation, simulation->task_store); 
-    //}
 
-  do {
+    while (block_finished == false) {
     
-    run_stroop_trial (simulation->model, 
-		      simulation->current_trial_data, 
-		      simulation->random_generator,
-		      simulation->model_params->response_threshold);
+      run_stroop_trial (simulation->model, 
+			simulation->current_trial_data, 
+			simulation->random_generator,
+			simulation->model_params->response_threshold);
 
-    // log output
-    pdpgui_print_current_trial_data (simulation);
+      // log output
+      pdpgui_print_current_trial_data (simulation);
 
-    // set new trial
-    model_change_trial_next(simulation);
+      // check for last trial of block BEFORE we change trial and loop again,
+      // as we want last trial to be executed on final loop
+      block_finished = model_current_trial_is_last (simulation);
 
+      // set new trial
+      model_change_trial_next(simulation);
 
-    // squash activation values
-    model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
+      // squash activation values
+      model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
 
-  } while (model_current_trial_is_last (simulation) == false);
+    } 
 }
 
 
