@@ -1,6 +1,10 @@
 
 // typedef enum {ALL_TRIALS, CORRECT_TRIALS, INCORRECT_TRIALS} analyse_trials_flag;
 
+// outputs trial data to a logfile
+// nb does not print newline so additional data can be written to the row
+int gs_stroop_print_trial_data (FILE * fp, stroop_trial_data * trial_data);
+
 // static int gs_stroop_record_means (struct subject_aggregate_data * my_data_means,
 					 // struct subject_aggregate_data * my_data_sd,
 					 //int totals_matrix[2][3], 

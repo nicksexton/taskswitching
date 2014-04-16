@@ -1,4 +1,5 @@
 #define NUMBER_OF_SUBJECTS 1
+// DATAFILE currently defined in gs_stroop_global_params.h
 
 // inits a model with basic controls to run it
 #include <stdbool.h>
@@ -10,6 +11,7 @@
 #include "random_generator_functions.h" // for gaussian noise
 #include "gs_stroop_subjects.h"
 #include "gs_stroop_global_params.h"
+#include "gs_stroop_analyse.h"
 
 #include "pdpgui_plot.h"
 #include "pdpgui_import.h"
@@ -20,7 +22,27 @@
 // #include <math.h>
 
 
+int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
+  FILE *fp;
 
+  // first check response is not -666 (init value)
+
+  if (simulation->current_trial_data->response == -666) {
+    printf ("error! pdpgui_print_current_trial_data but current_trial_data not run (-666)\n");
+    return (1);
+  }
+  else {
+    // open file pointer here on new line at end of file (append)
+    fp = fopen (DATAFILE, "a");
+
+    // fprintf (fp, "\t"); // block ID
+    gs_stroop_print_trial_data (fp, simulation->current_trial_data);
+    fprintf (fp, "\n");
+    fclose(fp);
+    return 0;
+    
+  }
+}
 
 
 
@@ -66,6 +88,10 @@ int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *tr
   if (data->stim_word == -1 || data->stim_colour == -1) { data->trial_type = NEUTRAL; }
   else if (data->stim_word == data->stim_colour ) { data->trial_type = CONGRUENT; }
   else data->trial_type = INCONGRUENT;
+
+  // set responses to init values
+  data->response = -666;
+  data->response_time = -666;
 
   return 0;
 }
@@ -435,6 +461,15 @@ static void model_change_trial_next (PdpSimulation *simulation) {
   
     // advance the trial path
     gtk_tree_path_next(simulation->current_trial_path);
+
+    // make stroop trial data
+    g_free (simulation->current_trial_data);
+    simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
+
+    make_stroop_trial_data_from_task_store (simulation->task_store, 
+					    iter, 
+					    simulation->current_trial_data);
+
   }
 
   printf ("new current trial path: %s\n", gtk_tree_path_to_string (simulation->current_trial_path));
@@ -633,6 +668,7 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 		    simulation->model_params->response_threshold);
 
   printf ("model %s run trial \n", simulation->model->name);
+  pdpgui_print_current_trial_data (simulation);
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
@@ -656,6 +692,7 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 		    simulation->model_params->response_threshold);
 
   printf ("model %s run trial \n", simulation->model->name);
+  // do not need to pdpgui_print_current_trial_data as this is done by model_controls_run_cb
 
   // draw activations for last trial:
   if (objects->model_sub_notepage != NULL) {
@@ -693,11 +730,17 @@ void model_run_block (PdpSimulation *simulation) {
 		      simulation->random_generator,
 		      simulation->model_params->response_threshold);
 
+    // log output
+    pdpgui_print_current_trial_data (simulation);
+
     // set new trial
     model_change_trial_next(simulation); // just sets the path!
     // model_change_trial (simulation, 
     //			simulation->task_store,
     //			simulation->current_trial_path);
+
+    // load simulation->current_trial_data!
+
 
     // squash activation values
     model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));

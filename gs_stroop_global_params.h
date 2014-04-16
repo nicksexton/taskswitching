@@ -52,7 +52,8 @@
 #define PPN_WORDREADING 50 
 #define PPN_COLOURNAMING 50
 
-#define DATAFILE "gs_stroop_data.txt"
+// #define DATAFILE "gs_stroop_data.txt"
+#define DATAFILE "pdpgui_test_1_data.txt"
 
 
 // #define ECHO // echo console output

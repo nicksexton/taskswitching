@@ -6,6 +6,26 @@
 #include "gs_stroop_subjects.h"
 #include "gs_stroop_analyse.h"
 
+// nb does not print newline so additional data can be written to the row
+int gs_stroop_print_trial_data (FILE * fp, stroop_trial_data * trial_data) {
+  
+  if (fp == NULL) {
+    printf ("error, gs_stroop_print_trial_data could not open fp, appears to be null");
+    return 1;
+  }
+  else {
+    fprintf (fp, "%d\t", trial_data->trial_id);
+    fprintf (fp, "%d\t", trial_data->trial_type);
+    fprintf (fp, "%d\t", trial_data->stim_task);
+    fprintf (fp, "%d\t", trial_data->stim_word);
+    fprintf (fp, "%d\t", trial_data->stim_colour);
+    fprintf (fp, "%d\t", trial_data->stim_correct_response);
+    fprintf (fp, "%d\t", trial_data->response);
+    fprintf (fp, "%d\t", trial_data->response_time);
+
+    return 0;
+  }
+}
 
 // takes [2][3] matrices
 static int gs_stroop_record_means (struct subject_aggregate_data * my_data_means,
