@@ -6,6 +6,8 @@
 #include "pdp_objects.h"
 #include "gs_stroop_subjects.h"
 
+typedef enum {OFF, NEXT_TRIAL, BLOCK, FOREVER} hebbian_learning_persistence;
+
 typedef struct gs_stroop_parameters {
 
   double activation_max;
@@ -24,6 +26,7 @@ typedef struct gs_stroop_parameters {
   double topdown_control_strength_word;
   double topdown_control_strength_colour;
   double learning_rate;
+  hebbian_learning_persistence hebb_persist;
   int max_cycles;
 
 } GsStroopParameters;

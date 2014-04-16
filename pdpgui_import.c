@@ -174,6 +174,10 @@ static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStr
     model_params->max_cycles = (double) g_ascii_strtoll (param_value, NULL, 10);
     printf ("parameter %s now %d\n", param_name, model_params->max_cycles);
   }
+  else if (!strcmp (param_name, "HEBBIAN_LEARNING_PERSISTENCE")) {
+    model_params->hebb_persist = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %d\n", param_name, model_params->hebb_persist);    
+  }
   else {
     printf ("warning! parameter %s not recognised\n", param_name);
     return_value = false;
