@@ -24,6 +24,7 @@
 
 int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
   FILE *fp;
+  char *path;
 
   // first check response is not -666 (init value)
 
@@ -36,6 +37,12 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
     fp = fopen (DATAFILE, "a");
 
     // fprintf (fp, "\t"); // block ID
+    // print path
+    path = gtk_tree_path_to_string(simulation->current_trial_path);
+    fprintf (fp, "%s\t", path);
+    g_free (path);
+    
+    // print data
     gs_stroop_print_trial_data (fp, simulation->current_trial_data);
     fprintf (fp, "\n");
     fclose(fp);
@@ -370,8 +377,9 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation) {
       num_trials = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store),
 						   parent);
       this_trial = model_current_trial_get (simulation);
-      if (this_trial < (num_trials - 1)) {
-	printf ("trial %d of %d, continuing\n", this_trial, num_trials);
+      // if (this_trial < (num_trials - 1)) {
+      if ((this_trial + 1) < num_trials) {
+	printf ("%dth trial of %d, continuing\n", (this_trial + 1), num_trials);
 	return false;
       }
       else {
@@ -550,6 +558,53 @@ static gboolean model_change_trial_first (PdpSimulation *simulation,
   else return false;
 }
 
+static gboolean model_change_trial_first_of_block (PdpSimulation *simulation, 
+						   GtkTreeStore *store) {
+
+  GtkTreeIter trial, block;
+
+  if (!gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), &trial, simulation->current_trial_path)) {
+    printf ("error! model_change_trial_first_of_block could not acquire iter from current_trial_path\n");
+    return false;
+  }
+  else {
+
+    if (!gtk_tree_model_iter_parent(GTK_TREE_MODEL(simulation->task_store), &block, &trial)) {
+      printf ("error! model_change_trial_first_of_block could not acquire parent iter, "
+	      "is current_trial_path at top level?\n");
+      return false;
+    }
+    else {
+
+      if (!gtk_tree_model_iter_children(GTK_TREE_MODEL(simulation->task_store), &trial, &block)) {
+	printf ("error! model_change_trial_first_of_block could not acquire child iter of parent, "
+		"really weird?\n");
+	return false;
+      }
+
+      else {
+       
+      // iter now positioned for first trial, set trial buffer
+      model_change_trial (simulation, simulation->task_store, 
+			  gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), &trial));
+      //      simulation->current_trial_iter = first_trial; // this line might not work
+
+      gtk_tree_path_free (simulation->current_trial_path);
+      simulation->current_trial_path = 
+                      gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), 
+					      &trial);
+
+	return true;
+
+      }
+
+      
+    }
+
+  }
+
+}
+
 
 
 void model_initialise (PdpSimulation *simulation) {
@@ -719,9 +774,9 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
 void model_run_block (PdpSimulation *simulation) {
 
-  if (simulation->current_trial_data == NULL) {
-    model_change_trial_first (simulation, simulation->task_store); 
-  }
+  //  if (simulation->current_trial_data == NULL) {
+    model_change_trial_first_of_block (simulation, simulation->task_store); 
+    //}
 
   do {
     
@@ -734,12 +789,7 @@ void model_run_block (PdpSimulation *simulation) {
     pdpgui_print_current_trial_data (simulation);
 
     // set new trial
-    model_change_trial_next(simulation); // just sets the path!
-    // model_change_trial (simulation, 
-    //			simulation->task_store,
-    //			simulation->current_trial_path);
-
-    // load simulation->current_trial_data!
+    model_change_trial_next(simulation);
 
 
     // squash activation values
