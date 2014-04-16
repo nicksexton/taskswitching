@@ -520,10 +520,18 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
 
 }
 
-int update_associative_weights (pdp_model * gs_stroop_model, double learning_rate) {
+
+int update_associative_weights (pdp_model * gs_stroop_model, 
+				double learning_rate, 
+				hebbian_learning_persistence persist) {
+  // default hebbian persistence (1, NEXT_TRIAL) - weights persist for next trial only
   // NB running this function immediately after initing model SHOULD zero associative weights
 
   int i, j;
+
+  if (persist == OFF) {
+    return 0;
+  }
 
   pdp_layer *word_input, *colour_input, *task_demand;
   word_input = pdp_model_component_find (gs_stroop_model, ID_WORDIN)->layer;
@@ -541,13 +549,13 @@ int update_associative_weights (pdp_model * gs_stroop_model, double learning_rat
     {0.0, 0.0, 0.0},
   };
   
-
  
   for (i = 0; i < 2; i ++) { // outer loop, output unit (i)
     for (j = 0; j < 3; j ++) {// inner loop, input unit (j)
       wts_wordinput_taskdemand_matrix[i][j] = 
 	task_demand->units_latest->activations[i] *
 	word_input->units_latest->activations[j] * learning_rate;
+
 
       wts_colourinput_taskdemand_matrix[i][j] = 
 	task_demand->units_latest->activations[i] *
@@ -556,14 +564,26 @@ int update_associative_weights (pdp_model * gs_stroop_model, double learning_rat
     }
   }
 
-  pdp_weights_set (pdp_input_find (task_demand, ID_WORDIN)->input_weights, 
-		   2, 3, wts_wordinput_taskdemand_matrix);
-  pdp_weights_set (pdp_input_find (task_demand, ID_COLOURIN)->input_weights, 
-		   2, 3, wts_colourinput_taskdemand_matrix);
+
+  if (persist == BLOCK || persist == FOREVER) {
+    // increment existing weights
+    pdp_weights_increment (pdp_input_find (task_demand, ID_WORDIN)->input_weights, 
+			   2, 3, wts_wordinput_taskdemand_matrix);
+    pdp_weights_increment (pdp_input_find (task_demand, ID_COLOURIN)->input_weights, 
+			   2, 3, wts_colourinput_taskdemand_matrix);
+
+  }
+
+  else if (persist == NEXT_TRIAL) {
+    pdp_weights_set (pdp_input_find (task_demand, ID_WORDIN)->input_weights, 
+		     2, 3, wts_wordinput_taskdemand_matrix);
+    pdp_weights_set (pdp_input_find (task_demand, ID_COLOURIN)->input_weights, 
+		     2, 3, wts_colourinput_taskdemand_matrix);
+  }
 
   return 0;
-
 }
+
 
 // returns true while model is still running (does not satisfy stopping condition), false otherwise
 bool run_model_step (pdp_model * gs_stroop_model, 

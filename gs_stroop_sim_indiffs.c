@@ -122,7 +122,9 @@ int main () {
       // Note: need to run model_init immediately followed by update_associative_weights 
       // to zero associative weights for new subject, in mixed blocks trials 
       model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
-      update_associative_weights (gs_stroop_model, model_parameters->learning_rate);
+      update_associative_weights (gs_stroop_model, 
+				  model_parameters->learning_rate, 
+				  model_parameters->hebb_persist);
       
       for (trial = 0; trial < my_subjects->subj[n]->num_mixed_trials_in_run; trial++) {
 
@@ -134,7 +136,9 @@ int main () {
 			  random_generator, model_parameters->response_threshold);
 	
 	/* update weights */
-	update_associative_weights (gs_stroop_model, model_parameters->learning_rate);
+	update_associative_weights (gs_stroop_model, 
+				    model_parameters->learning_rate, 
+				    model_parameters->hebb_persist);
 	
       }
     }

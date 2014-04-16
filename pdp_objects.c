@@ -249,6 +249,21 @@ void pdp_weights_set (pdp_weights_matrix * some_weights,
   return;
 }
 
+void pdp_weights_increment (pdp_weights_matrix * some_weights, 
+			    int size_output, int size_input, double init_array[size_output][size_input]) {
+  int out, in;
+
+  for (out = 0; out < some_weights->size_output; out++) {
+    for (in = 0; in < some_weights->size_input; in++) {
+      some_weights->weights[out][in] += init_array[out][in];
+    }
+  }
+
+  return;
+}
+
+
+
 
 /* <-------------- ALTERNATE VERSION ---------------> */
 /*  

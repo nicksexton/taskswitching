@@ -47,7 +47,9 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
 // persist_taskdemand_activation sets proportion of TD activation to carry over to
 // next trial ie. .20 = 20% of final activation on previous trial
 
-int update_associative_weights (pdp_model * gs_stroop_model, double learning_rate);
+int update_associative_weights (pdp_model * gs_stroop_model, 
+				double learning_rate, 
+				hebbian_learning_persistence persist);
   // NB running this function immediately after initing model SHOULD zero associative weights
 
 bool run_model_step (pdp_model * gs_stroop_model, 

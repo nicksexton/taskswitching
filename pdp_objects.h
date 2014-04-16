@@ -174,6 +174,9 @@ pdp_weights_matrix * pdp_weights_create(int size_output, int size_input);
 void pdp_weights_set (struct pdp_weights_matrix * some_weights, 
 			 int size_output, int size_input, double init_array[size_output][size_input]);
 
+void pdp_weights_increment (struct pdp_weights_matrix * some_weights, 
+			    int size_output, int size_input, double init_array[size_output][size_input]);
+
 /* <-------------- Alternate version --------------------->
 void pdp_weights_set_v1 (pdp_weights_matrix * some_weights, 
 		      int size_output, int size_input, double * init_array);
