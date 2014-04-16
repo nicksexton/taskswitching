@@ -18,7 +18,8 @@
 #include "gs_stroop.h"
 #include "gs_stroop_global_params.h"
 
-#define ECHO
+// #define ECHO
+#define ECHO_WEIGHTS
 
 
 // set default parameters in GsStroopParameters object (defined in gs_stroop.h)
@@ -526,6 +527,7 @@ int update_associative_weights (pdp_model * gs_stroop_model,
 				hebbian_learning_persistence persist) {
   // default hebbian persistence (1, NEXT_TRIAL) - weights persist for next trial only
   // NB running this function immediately after initing model SHOULD zero associative weights
+  // (only if persist is set to NEXT_TRIAL)
 
   int i, j;
 
@@ -585,6 +587,7 @@ int update_associative_weights (pdp_model * gs_stroop_model,
 }
 
 
+
 // returns true while model is still running (does not satisfy stopping condition), false otherwise
 bool run_model_step (pdp_model * gs_stroop_model, 
 		     stroop_trial_data * this_trial, 
@@ -620,8 +623,22 @@ bool run_model_step (pdp_model * gs_stroop_model,
   pdp_layer_print_current_output (
 				  pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer);
 
-    
 #endif
+
+
+#if defined ECHO_WEIGHTS
+
+  printf ("\ncyc:%d\t", gs_stroop_model->cycle);
+  pdp_weights_print (pdp_input_find (pdp_model_component_find (gs_stroop_model, 
+							       ID_TASKDEMAND)
+				     ->layer, ID_WORDIN)->input_weights); 
+  printf ("\t||\t");
+  pdp_weights_print (pdp_input_find (pdp_model_component_find (gs_stroop_model, 
+							       ID_TASKDEMAND)
+				     ->layer, ID_COLOURIN)->input_weights); 
+
+#endif
+
 
     return true;
   }
@@ -639,7 +656,9 @@ bool run_model_step (pdp_model * gs_stroop_model,
 int run_stroop_trial (pdp_model * gs_stroop_model,  
 		      stroop_trial_data * this_trial,
 		      const gsl_rng * random_generator,
-		      double response_threshold) {
+		      double response_threshold,
+		      hebbian_learning_persistence persist,
+		      double learning_rate) {
 
 // init inputs
 
@@ -694,7 +713,11 @@ int run_stroop_trial (pdp_model * gs_stroop_model,
 
   // run_model_step returns true when stopping_condition evaluates to false
   while (run_model_step (gs_stroop_model, this_trial, random_generator, response_threshold));
-    
+  
+  update_associative_weights(gs_stroop_model,
+			     learning_rate,
+			     persist);
+
   this_trial->response_time = gs_stroop_model->cycle;
 
 

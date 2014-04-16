@@ -57,9 +57,12 @@ bool run_model_step (pdp_model * gs_stroop_model,
 		     const gsl_rng * random_generator, 
 		     double response_threshold);
 
-int run_stroop_trial (pdp_model * gs_stroop_model,
+int run_stroop_trial (pdp_model * gs_stroop_model,  
 		      stroop_trial_data * this_trial,
 		      const gsl_rng * random_generator,
-		      double response_threshold);
+		      double response_threshold,
+		      hebbian_learning_persistence persist,
+		      double learning_rate);
+
 
 #endif

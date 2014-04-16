@@ -670,6 +670,10 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   }
 
   else {
+
+    update_associative_weights(simulation->model,
+			       simulation->model_params->learning_rate,
+			       simulation->model_params->hebb_persist);
     printf ("model stopped\n");
   }
 
@@ -701,11 +705,20 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
     i ++;
   }
 
+  // update weights if model has stopped
+  if (model_running == false) {
+    update_associative_weights(simulation->model,
+			       simulation->model_params->learning_rate,
+			       simulation->model_params->hebb_persist);
+    printf ("model stopped\n");
+  }
+
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
 }
+
 
 
 static void model_controls_run_cb (GtkToolItem * tool_item, 
@@ -720,7 +733,10 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
   run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
-		    simulation->model_params->response_threshold);
+		    simulation->model_params->response_threshold,
+		    simulation->model_params->hebb_persist,
+		    simulation->model_params->learning_rate);
+  
 
   printf ("model %s run trial \n", simulation->model->name);
   pdpgui_print_current_trial_data (simulation);
@@ -744,7 +760,9 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
-		    simulation->model_params->response_threshold);
+		    simulation->model_params->response_threshold,
+		    simulation->model_params->hebb_persist,
+		    simulation->model_params->learning_rate);
 
   printf ("model %s run trial \n", simulation->model->name);
   // do not need to pdpgui_print_current_trial_data as this is done by model_controls_run_cb
@@ -780,11 +798,14 @@ void model_run_block (PdpSimulation *simulation) {
     model_change_trial_first_of_block (simulation, simulation->task_store); 
 
     while (block_finished == false) {
-    
+
       run_stroop_trial (simulation->model, 
-			simulation->current_trial_data, 
-			simulation->random_generator,
-			simulation->model_params->response_threshold);
+		    simulation->current_trial_data, 
+		    simulation->random_generator,
+		    simulation->model_params->response_threshold,
+		    simulation->model_params->hebb_persist,
+		    simulation->model_params->learning_rate);
+
 
       // log output
       pdpgui_print_current_trial_data (simulation);

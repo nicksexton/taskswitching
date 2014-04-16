@@ -302,9 +302,9 @@ void pdp_weights_print (struct pdp_weights_matrix * some_weights) {
     for (in = 0; in < some_weights->size_input; in++) {
       printf ("%4.2f\t", some_weights->weights[out][in]);
     }
-    printf ("|\n");
+    printf (" | ");
   }
-  printf ("\n");
+  // printf ("\n");
   return;
 }
 

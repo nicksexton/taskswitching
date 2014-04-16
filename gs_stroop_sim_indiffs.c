@@ -107,7 +107,9 @@ int main () {
       /* run stroop trial(s) */
       run_stroop_trial (gs_stroop_model, 
 			&(my_subjects->subj[n]->fixed_trials[trial]), 
-			random_generator, model_parameters->response_threshold);
+			random_generator, model_parameters->response_threshold,
+			model_parameters->hebb_persist,
+			model_parameters->learning_rate);
 
       /* update weights */
       // update_associative_weights (gs_stroop_model); // ?!? remove this line for fixed blocks??
@@ -133,13 +135,15 @@ int main () {
 	/* run stroop trial(s) */
 	run_stroop_trial (gs_stroop_model, 
 			  &(my_subjects->subj[n]->mixed_trials[run][trial]), 
-			  random_generator, model_parameters->response_threshold);
+			  random_generator, model_parameters->response_threshold,
+			  model_parameters->hebb_persist,
+			  model_parameters->learning_rate);
 	
-	/* update weights */
+	/* associative weights now updated in run_stroop_trial
 	update_associative_weights (gs_stroop_model, 
 				    model_parameters->learning_rate, 
 				    model_parameters->hebb_persist);
-	
+	*/
       }
     }
 
