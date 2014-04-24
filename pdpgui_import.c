@@ -658,6 +658,8 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
     gchar *import_stim_task;
     gchar *import_stim_word;
     gchar *import_stim_colour;
+    gchar *task_param_1;
+    gchar *task_param_2;
 
 
     gtk_tree_model_get (GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import, 
@@ -665,6 +667,8 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
 			COL_TASK_PATTERN_1, &import_stim_word, 
 			COL_TASK_PATTERN_2, &import_stim_colour,
 			COL_TASK_PATTERN_3, &import_stim_task, 
+			COL_TASK_PARAM_1, &task_param_1, 
+			COL_TASK_PARAM_2, &task_param_2, 
 			-1);
 
     // need to set defaults here to prevent seg fault if data not imported??
@@ -678,6 +682,14 @@ static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * obj
     gtk_tree_store_append (objects->simulation->task_store, &iter_import_append, &iter_parent);
 
     import_stroop_trial_data_to_treestore(objects->simulation->task_store, &iter_import_append, &imported_trial);
+
+    // set trial parameters
+    gtk_tree_store_set (objects->simulation->task_store, 
+			&iter_import_append,
+			COL_TASK_PARAM_1, task_param_1,
+			COL_TASK_PARAM_2, task_param_2,
+			-1);
+
     
     more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->task_config_file->tree_store), &iter_import);
 

@@ -1,8 +1,10 @@
 #define NUMBER_OF_SUBJECTS 1
+#define TRIAL_PARAM_FIELD_SIZE 20
 // DATAFILE currently defined in gs_stroop_global_params.h
 
 // inits a model with basic controls to run it
 #include <stdbool.h>
+#include <string.h>
 #include <gtk/gtk.h>
 #include "gs_stroop.h"
 #include "pdp_objects.h"
@@ -51,29 +53,75 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
   }
 }
 
+// cf. model_parameter_import in pdpgui_import.c
+bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params) {
 
+  printf ("debug: now in model_task_parameter_import\n");
+  bool return_value = true;
+  
+
+  if (!strncmp (param, "HebP=", 5)) { // Hebbian learning persistence
+    if (strlen (param) < 6) {
+      printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
+    }
+    else {
+      model_params->hebb_persist = (double) g_ascii_strtod (&param[5], NULL);
+      printf ("trial parameter %s now %d\n", param, model_params->hebb_persist);
+    }
+  }
+
+  // other parameter imports go here
+
+  else {
+    printf ("warning! trial parameter %s not recognised\n", param);
+    return_value = false;
+  }
+
+  return return_value;
+
+
+}
+
+int model_set_trial_params_from_task_store (GtkTreeStore *store, 
+					    GtkTreeIter *trial, 
+					    GsStroopParameters *model_params){
+
+  //  gchar* task_param_1 = g_malloc (TRIAL_PARAM_FIELD_SIZE);
+  //  gchar* task_param_2 = g_malloc (TRIAL_PARAM_FIELD_SIZE);
+
+  gchar* task_param_1 = NULL;
+  gchar* task_param_2 = NULL;
+
+  gtk_tree_model_get (GTK_TREE_MODEL(store), trial, 
+		      COL_TASK_PARAM_1, &task_param_1,
+		      COL_TASK_PARAM_2, &task_param_2,
+		      -1);
+
+  // set trial parameters!
+
+  // code here: if task param 1 or 2 is non-empty,
+  if (task_param_1 != NULL) {
+    // set trial parameters
+    model_task_parameter_import (task_param_1, model_params);
+  }
+
+  if (task_param_2 != NULL) {
+    // set trial parameters
+    model_task_parameter_import (task_param_2, model_params);
+  }
+
+
+
+  //  g_free (task_param_1);
+  //  g_free (task_param_2);
+
+  return 0;
+
+}
 
 // takes an iter pointing to relevant row of task store, 
 // returns a pointer to UNINITIALIZED stroop_trial_data,
 int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *trial, stroop_trial_data * data) {
-
-  /*
-  // free data buffer if it is not already free (null)
-  if (data != NULL) {
-    printf ("error, current trial buffer not set to null, new current trial not set");
-    return 1;
-  }
-
-  else if (trial == NULL) {
-    printf ("error, current trial iter is null, new current trial not set");
-    return 1;
-  }
-
-  if (store == NULL) {
-    printf ("error, task store is null, new current trial not set");
-    return 1;
-  }
-  */
 
   
   // handle case where patterns are expressed as vectors
@@ -99,6 +147,9 @@ int make_stroop_trial_data_from_task_store (GtkTreeStore *store, GtkTreeIter *tr
   // set responses to init values
   data->response = -666;
   data->response_time = -666;
+
+
+
 
   return 0;
 }
@@ -436,6 +487,13 @@ static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *sto
 					    iter, 
 					    simulation->current_trial_data);
 
+    // set trial parameters
+    printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
+    model_set_trial_params_from_task_store (simulation->task_store,
+						iter,
+						simulation->model_params);
+
+
     // update the path
     gtk_tree_path_free (simulation->current_trial_path);
     simulation->current_trial_path = new_trial_path;
@@ -474,9 +532,18 @@ static void model_change_trial_next (PdpSimulation *simulation) {
     g_free (simulation->current_trial_data);
     simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
+    // code here: set trial parameters
+
     make_stroop_trial_data_from_task_store (simulation->task_store, 
 					    iter, 
 					    simulation->current_trial_data);
+
+    // set trial parameters
+    printf ("debug: model_change_trial_next calling model_set_trial_params_from_task_store\n");
+    model_set_trial_params_from_task_store (simulation->task_store,
+					    iter,
+					    simulation->model_params);
+
 
   }
 
