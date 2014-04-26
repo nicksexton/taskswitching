@@ -56,7 +56,7 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
 // cf. model_parameter_import in pdpgui_import.c
 bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params) {
 
-  printf ("debug: now in model_task_parameter_import\n");
+  // printf ("debug: now in model_task_parameter_import\n");
   bool return_value = true;
   
 
@@ -430,11 +430,11 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation) {
       this_trial = model_current_trial_get (simulation);
       // if (this_trial < (num_trials - 1)) {
       if ((this_trial + 1) < num_trials) {
-	printf ("%dth trial of %d, continuing\n", (this_trial + 1), num_trials);
+	// printf ("%dth trial of %d, continuing\n", (this_trial + 1), num_trials);
 	return false;
       }
       else {
-	printf ("current trial is last one\n");
+	// printf ("current trial is last one\n");
 	return true;
       }
 
@@ -488,7 +488,7 @@ static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *sto
 					    simulation->current_trial_data);
 
     // set trial parameters
-    printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
+    // printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
     model_set_trial_params_from_task_store (simulation->task_store,
 						iter,
 						simulation->model_params);
@@ -539,7 +539,7 @@ static void model_change_trial_next (PdpSimulation *simulation) {
 					    simulation->current_trial_data);
 
     // set trial parameters
-    printf ("debug: model_change_trial_next calling model_set_trial_params_from_task_store\n");
+    // printf ("debug: model_change_trial_next calling model_set_trial_params_from_task_store\n");
     model_set_trial_params_from_task_store (simulation->task_store,
 					    iter,
 					    simulation->model_params);
@@ -924,7 +924,7 @@ void model_run_all_blocks (PdpSimulation * simulation ) {
       //			&first_trial);
 
       current_block ++;
-      printf ("in model_run_all_blocks: done with block %d", current_block);
+      printf ("in model_run_all_blocks: done with block %d\n", current_block);
       gtk_tree_path_free (simulation->current_trial_path);
       simulation->current_trial_path = gtk_tree_path_new_from_indices(current_block, 0, -1);
       // likely to segfault if there are blocks but no trials loaded (can this happen?)
