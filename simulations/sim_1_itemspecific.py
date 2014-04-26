@@ -6,7 +6,7 @@
 
 
 num_blocks = 100 # number of times to run each sequence type
-
+trialid = 0
 
 def write_trial (block_id, trial_id, wordin, colourin, task, param1, param2):
     f = open ("sim_1_trials.conf", "a") # opens file for appending
@@ -39,27 +39,32 @@ def write_trial (block_id, trial_id, wordin, colourin, task, param1, param2):
 for block in range(0, num_blocks):
     block_name = 'ABCD_' + str(block) 
 
-    write_trial (block_name, 0, 0, 1, 1, "HebP=1", "") 
-    write_trial (block_name, 1, 1, 2, 1, "HebP=1", "") 
-    write_trial (block_name, 2, 2, 0, 0, "HebP=1", "") 
-    write_trial (block_name, 3, 0, 1, 0, "HebP=1", "") 
+    write_trial (block_name, trialid+0, 0, 1, 1, "HebP=1", "") 
+    write_trial (block_name, trialid+1, 1, 2, 1, "HebP=1", "") 
+    write_trial (block_name, trialid+2, 2, 0, 0, "HebP=1", "") 
+    write_trial (block_name, trialid+3, 0, 1, 0, "HebP=1", "") 
+    
+    trialid += 4
 
 
 # next, write ABBC trials (tasks CCWW)
 for block in range(0, num_blocks):
     block_name = 'ABBC_' + str(block)
 
-    write_trial (block_name, 0, 0, 1, 1, "HebP=2", "") 
-    write_trial (block_name, 1, 1, 2, 1, "HebP=2", "") 
-    write_trial (block_name, 2, 1, 2, 0, "HebP=2", "") 
-    write_trial (block_name, 3, 2, 0, 0, "HebP=2", "") 
+    write_trial (block_name, trialid+0, 0, 1, 1, "HebP=2", "") 
+    write_trial (block_name, trialid+1, 1, 2, 1, "HebP=2", "") 
+    write_trial (block_name, trialid+2, 1, 2, 0, "HebP=2", "") 
+    write_trial (block_name, trialid+3, 2, 0, 0, "HebP=2", "") 
 
+    trialid += 4
 
 # next, write ABCB trials
 for block in range(0, num_blocks):
     block_name = 'ABCB_' + str(block)
 
-    write_trial (block_name, 0, 0, 1, 1, "HebP=2", "") 
-    write_trial (block_name, 1, 1, 2, 1, "HebP=2", "") 
-    write_trial (block_name, 2, 2, 0, 0, "HebP=2", "") 
-    write_trial (block_name, 3, 1, 2, 0, "HebP=2", "") 
+    write_trial (block_name, trialid+0, 0, 1, 1, "HebP=2", "") 
+    write_trial (block_name, trialid+1, 1, 2, 1, "HebP=2", "") 
+    write_trial (block_name, trialid+2, 2, 0, 0, "HebP=2", "") 
+    write_trial (block_name, trialid+3, 1, 2, 0, "HebP=2", "") 
+
+    trialid += 4

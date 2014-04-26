@@ -38,8 +38,33 @@ data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 
 # trim unwanted columns
-data = subset(data.raw, select = c("PATH.block", "PATH.trial", "stim_task", "stim_word", "stim_colour", "correct", "response", "RT"))
+data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "stim_task", "stim_word", "stim_colour", "correct", "response", "RT"))
 
 # column for sequence types (100 x ABCD, 100 x ABBC, 100 x ABCB)
-sequence <- gl(3, 400, labels = c("ABCD", "ABBC", "ABCB"))
+# NB issue #19 - occasionally data not written to log file, hence only 399 trials logged per sequence (?!)
+sequence <- gl(3, 399, labels = c("ABCD", "ABBC", "ABCB"))
 data <- cbind (sequence, data)
+
+
+# create data frame for plotting graph (Gilbert & Shallice 2002, page 20)
+
+data.unprimed.switch = subset (data, sequence == 'ABCD' & PATH.trial == 2)
+data.unprimed.repeat = subset (data, sequence == 'ABCD' & PATH.trial == 3)
+data.primed.switch = subset (data, sequence == 'ABBC' & PATH.trial == 2)
+data.primed.repeat = subset (data, sequence == 'ABCB' & PATH.trial == 3)
+
+data.plot <- rbind (data.unprimed.switch, data.unprimed.repeat, data.primed.switch, data.primed.repeat)
+
+# create the factor levels
+fac.priming <- gl(2, 200, labels=c("unprimed", "primed"))
+fac.switch <- gl(2, 100, labels=c("switch", "repeat"))
+data.plot <- cbind (fac.priming, fac.switch, data.plot)
+
+# --------------------------- GRAPH ----------------------
+# now plot basic line graph showing interaction
+linegraph <- ggplot (data.plot, aes(x=fac.switch, y=RT, group=fac.priming, colour=fac.priming))
+linegraph +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
+  labs (x = "Task Transition", y = "RT", group = "Priming")
