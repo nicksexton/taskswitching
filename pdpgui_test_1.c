@@ -27,6 +27,7 @@
 int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
   FILE *fp;
   char *path;
+  char *blockid;
 
   // first check response is not -666 (init value)
 
@@ -38,7 +39,6 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
     // open file pointer here on new line at end of file (append)
     fp = fopen (DATAFILE, "a");
 
-    // fprintf (fp, "\t"); // block ID
     // print path
     path = gtk_tree_path_to_string(simulation->current_trial_path);
     fprintf (fp, "%s\t", path);
