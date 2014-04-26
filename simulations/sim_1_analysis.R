@@ -27,6 +27,9 @@ library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
 
+imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_1")
+
+
 # nb see gs_stroop_print_trial_data in gs_stroop_analyse.c for output colunms
 labels = c("trialpath", "trialid", "trialtype", "stim_task", "stim_word", "stim_colour",
            "correct", "response", "RT", "blank")
@@ -68,3 +71,6 @@ linegraph +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Task Transition", y = "RT", group = "Priming")
+
+imageFile <- file.path(simulation.imageDirectory, "simulation1.3 means RNG.png") 
+ggsave(imageFile)
