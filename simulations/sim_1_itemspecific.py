@@ -57,7 +57,7 @@ for block in range(0, num_blocks):
 
 # next, write ABCB trials
 for block in range(0, num_blocks):
-    block_name = 'ABBC_' + str(block)
+    block_name = 'ABCB_' + str(block)
 
     write_trial (block_name, 0, 0, 1, 1, "HebP=2", "") 
     write_trial (block_name, 1, 1, 2, 1, "HebP=2", "") 

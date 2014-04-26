@@ -39,3 +39,7 @@ data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", name
 
 # trim unwanted columns
 data = subset(data.raw, select = c("PATH.block", "PATH.trial", "stim_task", "stim_word", "stim_colour", "correct", "response", "RT"))
+
+# column for sequence types (100 x ABCD, 100 x ABBC, 100 x ABCB)
+sequence <- gl(3, 400, labels = c("ABCD", "ABBC", "ABCB"))
+data <- cbind (sequence, data)
