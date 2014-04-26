@@ -722,11 +722,9 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
   
   file_select = gtk_combo_box_text_new();
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
-				 "gtk_config_file_1.conf");
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
-				 "gtk_config_file_2.conf");
-  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
 				 "task_import_test.conf");
+  gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
+				 "simulations/sim_1_trials.conf");
 
 
   g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(objects->task_config_file) );
