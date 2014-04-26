@@ -19,7 +19,7 @@
 #include "gs_stroop_global_params.h"
 
 // #define ECHO
-#define ECHO_WEIGHTS
+// #define ECHO_WEIGHTS
 
 
 // set default parameters in GsStroopParameters object (defined in gs_stroop.h)
