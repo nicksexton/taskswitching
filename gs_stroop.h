@@ -27,6 +27,7 @@ typedef struct gs_stroop_parameters {
   double topdown_control_strength_colour;
   double learning_rate;
   hebbian_learning_persistence hebb_persist;
+  double rsi_scale_param;
   int max_cycles;
 
 } GsStroopParameters;

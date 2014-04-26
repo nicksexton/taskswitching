@@ -46,6 +46,7 @@ void gs_stroop_parameters_set_default (GsStroopParameters * params_object) {
   params_object->learning_rate = LEARNING_RATE;
   params_object->max_cycles = MAX_CYCLES;
 
+
   return;
 }
 

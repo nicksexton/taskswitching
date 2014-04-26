@@ -178,6 +178,13 @@ static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStr
     model_params->hebb_persist = (double) g_ascii_strtod (param_value, NULL);
     printf ("parameter %s now %d\n", param_name, model_params->hebb_persist);    
   }
+  else if (!strcmp (param_name, "RSI_SCALE_PARAM")) {
+    model_params->rsi_scale_param = (double) g_ascii_strtod (param_value, NULL);
+    printf ("parameter %s now %4.2f\n", param_name, model_params->rsi_scale_param);    
+  }
+
+
+
   else {
     printf ("warning! parameter %s not recognised\n", param_name);
     return_value = false;

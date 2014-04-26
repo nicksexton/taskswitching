@@ -21,13 +21,13 @@
 #include "pdpgui_test_1.h"
 
 // temp!
-// #include <math.h>
+#include <math.h>
 
 
 int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
   FILE *fp;
   char *path;
-  char *blockid;
+
 
   // first check response is not -666 (init value)
 
@@ -69,6 +69,18 @@ bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params
       printf ("trial parameter %s now %d\n", param, model_params->hebb_persist);
     }
   }
+
+  if (!strncmp (param, "RSIs=", 5)) { // RSI scaling parameter
+    if (strlen (param) < 6) {
+      printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
+    }
+    else {
+      model_params->rsi_scale_param = (double) g_ascii_strtod (&param[5], NULL);
+      printf ("trial parameter %s now %4.2f\n", param, model_params->rsi_scale_param);
+    }
+  }
+
+
 
   // other parameter imports go here
 
@@ -852,7 +864,16 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
     model_headerbar_update_labels(objects);
 
     // squash activation values
-    model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
+   // model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
+
+    model_init_activation (simulation->model, 
+			   pow(1-simulation->model_params->squashing_param, 
+			       simulation->model_params->rsi_scale_param));
+
+    printf ("scaling TD activation by %4.2f\n", 
+	    pow(1-simulation->model_params->squashing_param, 
+		simulation->model_params->rsi_scale_param));
+
   }
 }
 
@@ -885,8 +906,16 @@ void model_run_block (PdpSimulation *simulation) {
       model_change_trial_next(simulation);
 
       // squash activation values
-      model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
+      // model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
 
+      model_init_activation (simulation->model, 
+			     pow(1-simulation->model_params->squashing_param, 
+				 simulation->model_params->rsi_scale_param));
+
+      printf ("scaling TD activation by %4.2f\n", 
+	      pow(1-simulation->model_params->squashing_param, 
+		  simulation->model_params->rsi_scale_param));
+    
     } 
 }
 
