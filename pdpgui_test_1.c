@@ -860,7 +860,7 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
     // set new trial
 
-    model_change_trial_next(objects->simulation);
+    model_change_trial_next(objects->simulation); // new parameters set here
     model_headerbar_update_labels(objects);
 
     // squash activation values
@@ -903,7 +903,7 @@ void model_run_block (PdpSimulation *simulation) {
       block_finished = model_current_trial_is_last (simulation);
 
       // set new trial
-      model_change_trial_next(simulation);
+      model_change_trial_next(simulation); // sets task parameters here
 
       // squash activation values
       // model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
