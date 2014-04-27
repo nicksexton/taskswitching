@@ -111,7 +111,7 @@ for block in range(0, num_blocks):
                          "HebP=2", "RSIs=" + str(level[1])) 
 
             for trial in range(0, 4):
-                write_lookup ("ABCD", trialid+trial, task[2], level[2], trial)
+                write_lookup ("ABBC", trialid+trial, task[2], level[2], trial)
 
             trialid += 4
 
@@ -135,6 +135,6 @@ for block in range(0, num_blocks):
                          "HebP=2", "RSIs=" + str(level[1])) 
 
             for trial in range(0, 4):
-                write_lookup ("ABCD", trialid+trial, task[2], level[2], trial)
+                write_lookup ("ABCB", trialid+trial, task[2], level[2], trial)
 
             trialid += 4
