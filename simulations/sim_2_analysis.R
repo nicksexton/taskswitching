@@ -65,27 +65,30 @@ data <- merge(data.lookuptable, data)
 # --------------------------- DATA TO PLOT ---------------
 # ---- Define appropriate contrasts and apply factor levels
 
-data.unprimed.switch = subset (data, Sequence == 'ABCD' & PATH.trial == 2)
-fac.priming <- gl(1, nrow(data.unprimed.switch), labels="unprimed")
-fac.taskTrans<- gl(1, nrow(data.unprimed.switch), labels="switch")
-data.unprimed.switch <- cbind (data.unprimed.switch, fac.priming, fac.taskTrans)
+# only looking at repeat trials for now
+
+#data.unprimed.switch = subset (data, Sequence == 'ABCD' & PATH.trial == 2)
+#fac.priming <- gl(1, nrow(data.unprimed.switch), labels="unprimed")
+#fac.taskTrans<- gl(1, nrow(data.unprimed.switch), labels="switch")
+#data.unprimed.switch <- cbind (data.unprimed.switch, fac.priming, fac.taskTrans)
 
 data.unprimed.repeat = subset (data, Sequence == 'ABCD' & PATH.trial == 3)
 fac.priming <- gl(1, nrow(data.unprimed.repeat), labels="unprimed")
 fac.taskTrans<- gl(1, nrow(data.unprimed.repeat), labels="repeat")
 data.unprimed.repeat <- cbind (data.unprimed.repeat, fac.priming, fac.taskTrans)
 
-data.primed.switch = subset (data, Sequence == 'ABBC' & PATH.trial == 2)
-fac.priming <- gl(1, nrow(data.primed.switch), labels="primed")
-fac.taskTrans<- gl(1, nrow(data.primed.switch), labels="switch")
-data.primed.switch <- cbind (data.primed.switch, fac.priming, fac.taskTrans)
+#data.primed.switch = subset (data, Sequence == 'ABBC' & PATH.trial == 2)
+#fac.priming <- gl(1, nrow(data.primed.switch), labels="primed")
+#fac.taskTrans<- gl(1, nrow(data.primed.switch), labels="switch")
+#data.primed.switch <- cbind (data.primed.switch, fac.priming, fac.taskTrans)
 
 data.primed.repeat = subset (data, Sequence == 'ABCB' & PATH.trial == 3)
-fac.priming <- gl(1, nrow(data.primed.switch), labels="primed")
-fac.taskTrans<- gl(1, nrow(data.primed.switch), labels="repeat")
+fac.priming <- gl(1, nrow(data.primed.repeat), labels="primed")
+fac.taskTrans<- gl(1, nrow(data.primed.repeat), labels="repeat")
 data.primed.repeat <- cbind (data.primed.repeat, fac.priming, fac.taskTrans)
 
-data.plot <- rbind (data.unprimed.switch, data.unprimed.repeat, data.primed.switch, data.primed.repeat)
+#data.plot <- rbind (data.unprimed.switch, data.unprimed.repeat, data.primed.switch, data.primed.repeat)
+data.plot <- rbind (data.unprimed.repeat, data.primed.repeat)
 
 
 
@@ -93,11 +96,24 @@ data.plot <- rbind (data.unprimed.switch, data.unprimed.repeat, data.primed.swit
 # now plot basic line graph showing interaction
 linegraph <- ggplot (data.plot, aes(x=fac.taskTrans, y=RT, group=fac.priming, colour=fac.priming))
 linegraph +
-  facet_grid (RSI_lvl~ SwitchDirection) +
+  facet_grid (RSI_lvl ~ SwitchDirection) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Task Transition", y = "RT", group = "Priming")
 
-imageFile <- file.path(simulation.imageDirectory, "simulation1.3 means RNG.png") 
-ggsave(imageFile)
+#imageFile <- file.path(simulation.imageDirectory, "simulation1.3 means RNG.png") 
+#ggsave(imageFile)
+
+
+# now plot basic line graph showing interaction
+linegraph <- ggplot (data.plot, aes(x=RSI_lvl, y=RT, group=fac.priming, colour=fac.priming))
+linegraph +
+  facet_grid (fac.taskTrans ~ SwitchDirection) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
+  labs (x = "Task Transition", y = "RT", group = "Priming")
+
+#imageFile <- file.path(simulation.imageDirectory, "simulation1.3 means RNG.png") 
+#ggsave(imageFile)
