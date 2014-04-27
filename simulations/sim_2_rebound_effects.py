@@ -58,7 +58,7 @@ def write_trial (block_id, trial_id, wordin, colourin, task, param1, param2):
 
 def write_lookup (sequence, trial_id, task_level_name, rsi_level_name, position):
     f = open ("sim_2_lookup.txt", "a")
-    f.write (str(trialid) + "\t")
+    f.write (str(trial_id) + "\t")
     f.write (sequence + "\t")
     f.write (task_level_name + "\t")
     f.write (rsi_level_name + "\t")
@@ -68,7 +68,6 @@ def write_lookup (sequence, trial_id, task_level_name, rsi_level_name, position)
 
 
 # first write ABCD trials (tasks CCWW) - baseline
-
 
 for block in range(0, num_blocks):
     for task in task_levels:
@@ -89,11 +88,11 @@ for block in range(0, num_blocks):
 
             for trial in range(0, 4):
                 write_lookup ("ABCD", trialid+trial, task[2], level[2], trial)
-        
+
             trialid += 4
 
 
-# next, write ABBC trials (tasks CCWW)
+# second, write ABBC trials (tasks CCWW)
 for block in range(0, num_blocks):
     for task in task_levels:
         for level in rsi_levels:
@@ -116,7 +115,8 @@ for block in range(0, num_blocks):
 
             trialid += 4
 
-# next, write ABCB trials
+
+# third, write ABCB trials
 for block in range(0, num_blocks):
     for task in task_levels:
         for level in rsi_levels:
