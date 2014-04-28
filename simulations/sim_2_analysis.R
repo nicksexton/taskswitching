@@ -125,17 +125,17 @@ data.plot <- subset (data.plot,
 
 # --------------------------- GRAPH ----------------------
 # now plot basic line graph showing interaction
-linegraph <- ggplot (data.plot, aes(x=fac.taskTrans, y=RT, group=fac.priming, colour=fac.priming))
-linegraph +
-  facet_grid (RSI_lvl ~ SwitchDirection) +
-  stat_summary(fun.y = mean, geom = "point") +
-  stat_summary(fun.y = mean, geom = "line") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
-  labs (x = "Task Transition", y = "RT", group = "Priming") +
-  ggtitle("Simulation 2: Restart effects in the Gilbert & Shallice model")
+#linegraph <- ggplot (data.plot, aes(x=fac.taskTrans, y=RT, group=fac.priming, colour=fac.priming))
+#linegraph +
+#  facet_grid (RSI_lvl ~ SwitchDirection) +
+#  stat_summary(fun.y = mean, geom = "point") +
+#  stat_summary(fun.y = mean, geom = "line") +
+#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
+#  labs (x = "Task Transition", y = "RT", group = "Priming") +
+#  ggtitle("Simulation 2: Restart effects in the Gilbert & Shallice model")
 
-imageFile <- file.path(imageDirectory, "sim_2_linegraph_1.png") 
-ggsave(imageFile)
+#imageFile <- file.path(imageDirectory, "sim_2_linegraph_1.png") 
+#ggsave(imageFile)
 
 
 # now plot basic line graph showing interaction
@@ -148,5 +148,5 @@ linegraph +
   labs (x = "Task Transition", y = "RT", group = "Priming") +
   ggtitle("Simulation 2:\nRestart effects in the Gilbert & Shallice model\nrestarts only")
 
-imageFile <- file.path(simulation.imageDirectory, "sim_2_linegraph_2.png") 
+imageFile <- file.path(imageDirectory, "sim_2.0_filtered.png") 
 ggsave(imageFile)
