@@ -25,10 +25,15 @@ rsi_levels = [
     [1.0, 1.5, "long_restart"]
     ] 
 
+
 task_levels = [
     [1, 0, "C-W"], # CN -> WR 
-    [0, 1, "W-C"]  # WR -> CN
+#    [0, 1, "W-C"]  # WR -> CN - for simulation 2.0
+    [1, 1, "C-C"]  # WR -> CN - for simulation 2.1
+
     ] 
+
+
 
 
 def write_trial (block_id, trial_id, wordin, colourin, task, param1, param2):
