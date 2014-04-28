@@ -91,6 +91,37 @@ data.primed.repeat <- cbind (data.primed.repeat, fac.priming, fac.taskTrans)
 data.plot <- rbind (data.unprimed.repeat, data.primed.repeat)
 
 
+# --------------------------- Filter the data
+
+# correct trials only
+data.plot <- subset (data.plot, response %% 3 == correct)
+
+
+# exclude outliers (RTs +/- 3 SDs)
+descriptives <- by(data.plot$RT, data.plot$SwitchDirection, stat.desc, basic = FALSE, norm = TRUE)
+
+                                        # exclude C-W trials w/ RT < mean + 3 SDs 
+data.plot <- subset (data.plot,
+        !((SwitchDirection == "C-W" ) & RT > descriptives$"C-W"[2] + 3 * descriptives$"C-W"[6]))
+
+                                        # exclude C-W trials w/ RT < mean + 3 SDs 
+data.plot <- subset (data.plot,
+        !((SwitchDirection == "C-W" ) & RT < descriptives$"C-W"[2] - 3 * descriptives$"C-W"[6]))
+
+                                        # exclude C-W trials w/ RT < mean + 3 SDs 
+data.plot <- subset (data.plot,
+        !((SwitchDirection == "W-C" ) & RT > descriptives$"W-C"[2] + 3 * descriptives$"W-C"[6]))
+
+                                        # exclude C-W trials w/ RT < mean + 3 SDs 
+data.plot <- subset (data.plot,
+        !((SwitchDirection == "W-C" ) & RT < descriptives$"W-C"[2] - 3 * descriptives$"W-C"[6]))
+           
+
+
+
+
+
+
 
 # --------------------------- GRAPH ----------------------
 # now plot basic line graph showing interaction
@@ -100,20 +131,22 @@ linegraph +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
-  labs (x = "Task Transition", y = "RT", group = "Priming")
+  labs (x = "Task Transition", y = "RT", group = "Priming") +
+  ggtitle("Simulation 2: Restart effects in the Gilbert & Shallice model")
 
-#imageFile <- file.path(simulation.imageDirectory, "simulation1.3 means RNG.png") 
-#ggsave(imageFile)
+imageFile <- file.path(imageDirectory, "sim_2_linegraph_1.png") 
+ggsave(imageFile)
 
 
 # now plot basic line graph showing interaction
 linegraph <- ggplot (data.plot, aes(x=RSI_lvl, y=RT, group=fac.priming, colour=fac.priming))
 linegraph +
-  facet_grid (fac.taskTrans ~ SwitchDirection) +
+  facet_grid (. ~ SwitchDirection) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
-  labs (x = "Task Transition", y = "RT", group = "Priming")
+  labs (x = "Task Transition", y = "RT", group = "Priming") +
+  ggtitle("Simulation 2:\nRestart effects in the Gilbert & Shallice model\nrestarts only")
 
-#imageFile <- file.path(simulation.imageDirectory, "simulation1.3 means RNG.png") 
-#ggsave(imageFile)
+imageFile <- file.path(simulation.imageDirectory, "sim_2_linegraph_2.png") 
+ggsave(imageFile)
