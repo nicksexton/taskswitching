@@ -168,3 +168,42 @@ stat.desc (subset(data.plot, SwitchDirection=="C-W" & fac.priming=="primed" & RS
 stat.desc (subset(data.plot, SwitchDirection=="C-W" & fac.priming=="unprimed" & RSI_lvl =="all_short")$RT)
 stat.desc (subset(data.plot, SwitchDirection=="C-W" & fac.priming=="unprimed" & RSI_lvl =="long_restart")$RT)
 
+calc_restart_cost <- function(data) data$long[1] - data$short[1]
+
+
+rt.colournaming.primed <- list (
+                            short = stat.desc (subset(data.plot, SwitchDirection=="C-C" &
+                              fac.priming=="primed" & RSI_lvl =="all_short")$RT)[c(9,13)],
+                            long = stat.desc (subset(data.plot, SwitchDirection=="C-C" &
+                              fac.priming=="primed" & RSI_lvl =="long_restart")$RT)[c(9,13)] )
+
+
+rt.colournaming.unprimed <- list (
+                            short = stat.desc (subset(data.plot, SwitchDirection=="C-C" &
+                              fac.priming=="unprimed" & RSI_lvl =="all_short")$RT)[c(9,13)],
+                            long = stat.desc (subset(data.plot, SwitchDirection=="C-C" &
+                              fac.priming=="unprimed" & RSI_lvl =="long_restart")$RT)[c(9,13)] )
+
+rt.wordreading.primed <- list (
+                            short = stat.desc (subset(data.plot, SwitchDirection=="C-W" &
+                              fac.priming=="primed" & RSI_lvl =="all_short")$RT)[c(9,13)],
+                            long = stat.desc (subset(data.plot, SwitchDirection=="C-W" &
+                              fac.priming=="primed" & RSI_lvl =="long_restart")$RT)[c(9,13)] )
+
+rt.wordreading.unprimed <- list (
+                            short = stat.desc (subset(data.plot, SwitchDirection=="C-W" &
+                              fac.priming=="unprimed" & RSI_lvl =="all_short")$RT)[c(9,13)],
+                            long = stat.desc (subset(data.plot, SwitchDirection=="C-W" &
+                              fac.priming=="unprimed" & RSI_lvl =="long_restart")$RT)[c(9,13)] )
+
+rt.colournaming.primed
+calc_restart_cost (rt.colournaming.primed)
+
+rt.wordreading.primed
+calc_restart_cost (rt.wordreading.primed)
+
+rt.colournaming.unprimed
+calc_restart_cost (rt.colournaming.unprimed)
+
+rt.wordreading.unprimed
+calc_restart_cost (rt.wordreading.unprimed)
