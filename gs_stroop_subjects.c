@@ -14,7 +14,6 @@ subject_popn * subject_popn_create (int number_of_subjects) {
 
   subject_popn * some_subjects; // array of pointers to subjects
   some_subjects = malloc (sizeof(subject_popn));
-  // some_subjects->subjects = g_array_sized_new (FALSE, FALSE, sizeof(subject), number_of_subjects);
 
   some_subjects->subj = malloc (number_of_subjects * sizeof(subject *));  
   some_subjects->number_of_subjects = number_of_subjects;
@@ -26,7 +25,6 @@ subject_popn * subject_popn_create (int number_of_subjects) {
 
 void subject_popn_free (subject_popn * some_subjects) {
 
-  // g_array_free (some_subjects->subjects, TRUE);
 
   int i;
   for (i = 0; i < some_subjects->number_of_subjects; i++) {
@@ -45,7 +43,7 @@ stroop_trial_data stroop_trial_data_create (int id,
 					    blocktype block_type, 
 					    trialtype trial_type, 
 					    int stim_task, int stim_word, int stim_colour) {
-  // stroop_trial_data * a_data_container = malloc (sizeof (stroop_trial_data));
+
   stroop_trial_data a_data_container;
   a_data_container.trial_id = id;
   a_data_container.block_type = block_type;
@@ -142,11 +140,6 @@ subject * subject_create (int num_fixed_trials,
     new_subject->mixed_trials[i] = malloc(num_mixed_trials_in_run * sizeof(stroop_trial_data));
   }
 
-
-  // TODO - code to create params object here 
-  // ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_inhibitory = -2.5; // TEMP CODE!!!
-  // ((gs_stroop_params*)(new_subject->params))->taskdemand_weights_excitatory = 2.5;
-
   return new_subject;
 
 }
@@ -205,7 +198,6 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
   int ppn_total = ppn_N + ppn_C + ppn_I; // explicit cast for double division
   int task_ppn_total = ppn_WR + ppn_CN;
   
-  // stroop_trial_data * some_data;
 
   num_N = num_trials * ppn_N / ppn_total; 
   num_C = num_trials * ppn_C / ppn_total; 
@@ -246,17 +238,6 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
 	stim_colour = gsl_rng_uniform_int (random_generator, 3);
       } 
       
-      /*
-      // TEST CODE
-      if (task_order[i] == 0) {
-	stim_word = 0;
-	stim_colour = -1;
-      }
-      else {
-	stim_word = -1;
-	stim_colour = 0;
-      }
-      */
       break;
 
     case CONGRUENT:
@@ -264,12 +245,6 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
       stim_word = gsl_rng_uniform_int (random_generator, 3); 
       stim_colour = stim_word;
       
-      // TEST CODE
-      /*
-      stim_word = 0;
-      stim_colour = 0;
-      */
-
       break;
     
     case INCONGRUENT: 
@@ -278,11 +253,6 @@ int subject_init_trialblock_fixed (const gsl_rng * random_generator,
       int incr = gsl_rng_uniform_int (random_generator, 2);
       stim_colour = (stim_word + incr + 1) % 3;
       
-      /*
-      // TEST CODE
-      stim_word = 0;
-      stim_colour = 1;
-      */
       break;
     
     }  

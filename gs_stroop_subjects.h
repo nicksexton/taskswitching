@@ -75,7 +75,6 @@ typedef struct subject {
 
 typedef struct subject_popn {
 
-  //  GArray * subjects;
   subject ** subj; // pointer to array of pointers to subjects
   int number_of_subjects;
 
