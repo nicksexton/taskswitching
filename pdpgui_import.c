@@ -272,29 +272,6 @@ static void setup_model_params_treeview (GtkTreeView * tree) {
 }
 
 
-FileData * create_param_import_objects() {
-
-  FileData *config_file; // struct containing pointers to relevant file data
-  GtkTreeStore *store;
-  //  GtkWidget *tree;
-
-  // first create memory for the file pointer
-
-  config_file = g_malloc (sizeof(FileData)); 
-  config_file->fp = NULL;
-
-  char filename[FILENAME_MAX_LENGTH];
-  strcpy (filename, "no file selected");
-  config_file->filename_label = gtk_label_new(filename);
-
-  store = gtk_tree_store_new (N_COLUMNS,
-			      G_TYPE_STRING,
-			      G_TYPE_STRING);
-  
-  config_file->tree_store = store;
-
-  return config_file;
-}
 
 
 

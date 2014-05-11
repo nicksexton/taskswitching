@@ -49,6 +49,11 @@ typedef struct file_data {
 // utility function for clearing all entries from a treeview
 gboolean treestore_remove_all (GtkTreeStore * tree_store);
 
+// <----------------- Functions for opening config files
+// create a FileData object containing file pointer, filename, associated treestore, etc.
+// non-gui, model general
+FileData * create_param_import_objects();
+
 
 // <----------------- File parse and import functions
 

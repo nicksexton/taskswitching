@@ -49,9 +49,6 @@ static void setup_model_params_treeview (GtkTreeView * tree);
 
 
 
-// create a FileData object containing file pointer, filename, associated treestore, etc.
-// non-gui, model general
-FileData * create_param_import_objects();
 
 // create the import model params notepage
 // gui, specialised to interface of a specific model. should be in gs_stroop_gui.
