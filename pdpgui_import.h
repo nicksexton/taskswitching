@@ -21,12 +21,10 @@ void select_file_cb (GtkComboBoxText *widget, FileData * config_file);
 // <------------------ MODEL PARAMETER IMPORT FUNCTIONS
 
 
-
 // callback which reads parameters from treestore and calls the translator function (model_parameter_import)
 // gui, model specific. move to gs_stroop_gui or similar. 
 // Wraps gs_stroop_parameters_import_commit
 // static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects);
-
 
 
 /*

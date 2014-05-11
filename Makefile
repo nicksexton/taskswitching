@@ -9,7 +9,7 @@ OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o pdp_import.o ra
 GUI_OBJECTS = pdpgui_plot.o pdpgui_import.o lib_cairox.o 
 
 BINARIES = gs_stroop_sim_indiffs
-GUI_BINARIES = pdpgui_test_1
+GUI_BINARIES = gs_stroop_gui
 
 all: $(BINARIES) $(GUI_BINARIES)
 gui: $(GUI_BINARIES)
@@ -46,10 +46,10 @@ random_generator_functions.o:
 
 # gui
 
-pdpgui_test_1: pdpgui_test_1.o $(OBJECTS) $(GUI_OBJECTS) 
-	$(CC) -o $@ $(CFLAGS) pdpgui_test_1.o $(OBJECTS) $(GUI_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
-pdpgui_test_1.o:
-	$(CC) -c pdpgui_test_1.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
+gs_stroop_gui: gs_stroop_gui.o $(OBJECTS) $(GUI_OBJECTS) 
+	$(CC) -o $@ $(CFLAGS) gs_stroop_gui.o $(OBJECTS) $(GUI_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
+gs_stroop_gui.o:
+	$(CC) -c gs_stroop_gui.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 
 
