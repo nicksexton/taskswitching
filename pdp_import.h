@@ -44,37 +44,14 @@ typedef struct file_data {
 } FileData;
 
 
+// <----------------- GENERAL UTILITY FUNCTIONS
 
-/*
-typedef struct generic_parameter {
-  int id;
-  char name[FIELD_SIZE];
-  int data_int_1, data_int_2, data_int_3;
-  double data_double_1, data_double_2, data_double_3;
-  char data_text_1[FIELD_SIZE], data_text_2[FIELD_SIZE];
-} GenericParameter;
-*/
-
-/*
-typedef struct generic_parameter_set {
-
-  GenericParameter parameter_1;
-  GenericParameter parameter_2;
-  GenericParameter parameter_3;
-  GenericParameter parameter_4;
-  GenericParameter parameter_5;
-
-} GenericParameterSet;
-*/
-
-// void init_generic_parameter (GenericParameter * param);
-
-// void init_generic_parameter_set (GenericParameterSet *param_set);
-
-// void print_generic_parameter (GenericParameter * param);
+// utility function for clearing all entries from a treeview
+gboolean treestore_remove_all (GtkTreeStore * tree_store);
 
 
-// void print_generic_parameter_set (GenericParameterSet * param);
+// <----------------- File parse and import functions
+
 
 
 

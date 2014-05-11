@@ -9,9 +9,6 @@
 
 // <----------------- GENERAL UTILITY FUNCTIONS
 
-// utility function for clearing all entries from a treeview
-gboolean treestore_remove_all (GtkTreeStore * tree_store);
-
 // callback function to read file contents
 gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info);
 

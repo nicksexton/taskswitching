@@ -1,6 +1,6 @@
 /* pdp_import */
-/* library of model-generic functions for importing data to pdp models */
-/* functions for importing task data and parameterisation data */
+/* library of model-generic functions for importing text file data to pdp models */
+/* functions for parsing and importing task data and parameterisation data */
 /* needs to be specialised to import data in a model-specific format */
 /* Model import uses gtk treestore to store task and parameter data */
 /* These functions are usable in both gui and non-gui versions of the model */
@@ -20,6 +20,26 @@
 #include "pdp_import.h"
 
 
+
+// utility function for clearing all entries from a treeview
+gboolean treestore_remove_all (GtkTreeStore * tree_store) {
+
+  // GtkTreeIter * iter = g_malloc (sizeof(GtkTreeIter)); 
+ GtkTreeIter iter;
+
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_store), &iter)) {
+    // tree is not empty, proceed to remove all items
+
+    while (gtk_tree_store_remove (tree_store, &iter)) {
+      // tree_store still contains rows
+    }
+    return TRUE;
+  }
+  else {
+    // tree is already empty,
+    return FALSE;
+  }
+}
 
 
 
@@ -72,9 +92,6 @@ void pdp_file_segmented_line_to_treestore_long (int max_fields,
 
   }
 }
-
-
-
 
 
 
