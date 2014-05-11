@@ -71,4 +71,51 @@ typedef struct pdpgui_objects {
 
 } PdpGuiObjects;
 
+
+// <------------------------ IMPORT FUNCTIONS (transferred from old pdpgui_import)
+// callback which reads parameters from treestore and calls the translator function (model_parameter_import)
+// gui, model specific. move to gs_stroop_gui or similar. 
+// Wraps gs_stroop_parameters_import_commit
+// static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects);
+
+/*
+// just proof of concept for now
+// gui, model specific. not sure what this function actually does??
+static void config_file_treeview_selection_changed_cb (GtkTreeSelection *selection, gpointer data);
+
+
+// specifies how the treeview will look  (renderers etc)
+// gui, model specific.
+static void setup_model_params_treeview (GtkTreeView * tree);
+
+*/
+
+
+// create the import model params notepage
+// gui, specialised to interface of a specific model. should be in gs_stroop_gui.
+GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects);
+
+
+// gui, model general. move to pdpgui?
+void model_reset_trial_markers (PdpSimulation *simulation);
+
+
+// gui, model specific
+// static void setup_task_viewer_treeview (GtkTreeView * tree);
+
+
+// gui, model specific
+GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects);
+
+
+// non-gui, model specific. wraps gs_stroop_model_task_import_commit
+// static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects);
+
+
+
+// gui, model specific
+GtkWidget* create_notepage_import_trials (PdpGuiObjects *objects);
+
+
+
 #endif
