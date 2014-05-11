@@ -1,6 +1,6 @@
 // definitions for structs used to communicate between callback functions
-#ifndef pdpgui_h
-#define pdpgui_h
+#ifndef gs_stroop_gui_h
+#define gs_stroop_gui_h
 
 #include <gtk/gtk.h>
 #include <gsl/gsl_randist.h>

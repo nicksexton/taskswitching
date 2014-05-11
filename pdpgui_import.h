@@ -2,7 +2,7 @@
 #define pdpgui_import_h
 
 #include "pdp_import.h"
-#include "pdpgui.h"
+#include "gs_stroop_gui.h" // TEMPORARY!!
 
 
 // <----------------- GENERAL UTILITY FUNCTIONS

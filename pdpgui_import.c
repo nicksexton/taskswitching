@@ -9,7 +9,7 @@
 #include <gtk/gtk.h>
 #include "pdp_import.h"
 #include "pdpgui_import.h"
-#include "pdpgui.h"
+#include "gs_stroop_gui.h"
 #include "gs_stroop_import.h"
 
 

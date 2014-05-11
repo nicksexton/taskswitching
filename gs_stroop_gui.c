@@ -16,10 +16,11 @@
 #include "gs_stroop_analyse.h"
 #include "gs_stroop_import.h"
 
+
 #include "pdpgui_plot.h"
 #include "pdpgui_import.h"
-#include "pdpgui.h"
 #include "pdpgui_test_1.h"
+#include "gs_stroop_gui.h"
 
 // temp!
 #include <math.h>
