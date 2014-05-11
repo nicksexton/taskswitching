@@ -149,6 +149,112 @@ void import_stroop_trial_data_to_treestore (GtkTreeStore * store,
 }
 
 
+void gs_stroop_model_task_import_commit (FileData *task_config_file, 
+					 GtkTreeStore *task_store) {
+
+
+  // OLD CODE
+  
+  GtkTreeIter iter_import; 
+  GtkTreeIter iter_parent;
+  GtkTreeIter iter_import_append;
+
+  gboolean more;
+  gchar *block_id_prev;
+  gchar *block_id_next;
+
+  // get iterator at top of the import store 
+  more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(task_config_file->tree_store), &iter_import);
+
+
+
+  // get block ID for first trial in import store
+  gtk_tree_model_get (GTK_TREE_MODEL(task_config_file->tree_store), &iter_import,
+		      COL_BLOCK_NAME, &block_id_prev,
+		      -1);
+    
+  // get parent as a new top level iterator in task store
+  gtk_tree_store_append (task_store, &iter_parent, NULL);
+
+  gtk_tree_store_set (task_store, 
+		      &iter_parent,
+		      COL_BLOCK_NAME, block_id_prev, 
+		      -1);
+  
+
+  while (more) {
+
+    // insert new parent if BLOCK_ID changes
+    gtk_tree_model_get (GTK_TREE_MODEL(task_config_file->tree_store), &iter_import,
+			COL_BLOCK_NAME, &block_id_next,
+			-1);
+
+    if (strcmp (block_id_prev, block_id_next)) {
+      // add a new top-level iterator (block)
+      gtk_tree_store_append (task_store, &iter_parent, NULL);
+
+      gtk_tree_store_set (task_store, 
+			  &iter_parent,
+			  COL_BLOCK_NAME, block_id_next, 
+			  -1);
+
+    }
+
+    g_free (block_id_prev);
+    block_id_prev = block_id_next;
+
+    // create stroop trial data object
+    stroop_trial_data imported_trial;
+    gchar *import_trial_id;
+    gchar *import_stim_task;
+    gchar *import_stim_word;
+    gchar *import_stim_colour;
+    gchar *task_param_1;
+    gchar *task_param_2;
+
+
+    gtk_tree_model_get (GTK_TREE_MODEL(task_config_file->tree_store), &iter_import, 
+			COL_TASK_ID, &import_trial_id, 
+			COL_TASK_PATTERN_1, &import_stim_word, 
+			COL_TASK_PATTERN_2, &import_stim_colour,
+			COL_TASK_PATTERN_3, &import_stim_task, 
+			COL_TASK_PARAM_1, &task_param_1, 
+			COL_TASK_PARAM_2, &task_param_2, 
+			-1);
+
+    // need to set defaults here to prevent seg fault if data not imported??
+    // or, are defaults set in task_config_file when importing from text file...?
+    imported_trial.trial_id = atoi (import_trial_id);
+    imported_trial.stim_task = atoi (import_stim_task);
+    imported_trial.stim_word = atoi (import_stim_word);
+    imported_trial.stim_colour = atoi (import_stim_colour);
+
+
+    gtk_tree_store_append (task_store, &iter_import_append, &iter_parent);
+
+    import_stroop_trial_data_to_treestore(task_store, &iter_import_append, &imported_trial);
+
+    // set trial parameters
+    gtk_tree_store_set (task_store, 
+			&iter_import_append,
+			COL_TASK_PARAM_1, task_param_1,
+			COL_TASK_PARAM_2, task_param_2,
+			-1);
+
+    
+    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(task_config_file->tree_store), &iter_import);
+
+    g_free (import_trial_id);
+
+  }  
+  // model_reset_trial_markers (objects->simulation);
+
+  g_free (block_id_next);
+  // block_id_prev already freed
+
+}
+
+
 // use task_store as PdpGuiObjects member as a buffer for importing tasks (task blocks)
 FileData * create_task_import_objects() {
 

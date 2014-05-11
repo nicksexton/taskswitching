@@ -77,8 +77,6 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects);
 // non-gui, model specific. wraps gs_stroop_model_task_import_commit
 // static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects);
 
-void gs_stroop_model_task_import_commit (FileData *task_config_file, 
-					 GtkTreeStore *task_store);
 
 
 // gui, model specific
