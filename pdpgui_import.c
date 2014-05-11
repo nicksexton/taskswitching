@@ -65,6 +65,7 @@ gboolean pdp_load_from_file_short (FileData *file_info) {
 // similar to load_from_file_cb but imports long format data (ie multiple columns)
 gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info) {
 
+  /*
   file_info->fp = fopen(file_info->filename, "r");
   if (file_info->fp == NULL) {
     printf ("error! gtk_config_file.conf does not exist\n");
@@ -83,6 +84,33 @@ gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info) {
   }
 
   return TRUE;
+  */
+  return (pdp_load_from_file_long (file_info));
+
+}
+
+gboolean pdp_load_from_file_long (FileData *file_info) {
+
+
+  file_info->fp = fopen(file_info->filename, "r");
+  if (file_info->fp == NULL) {
+    printf ("error! %s does not exist\n", file_info->filename);
+    return FALSE;
+  }
+  else {
+    printf ("success! config file %s opened.\n", file_info->filename);
+
+    // currently removes all from treestore before import, want to fix this ultimately
+    treestore_remove_all (file_info->tree_store); 
+
+    pdp_file_parse_to_treestore_long (file_info);
+
+    fclose(file_info->fp);
+    printf ("success! config file %s closed.\n", file_info->filename);
+  }
+
+  return TRUE;
+
 }
 
 

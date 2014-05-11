@@ -14,13 +14,15 @@
 gboolean load_from_file_short_cb (GtkWidget *widget, FileData *file_info);
 
 // non-gui model-general function which parses a file into a treestore. 
-// wrapped by load_from_file_cb 
+// wrapped by load_from_file_short_cb 
 gboolean pdp_load_from_file_short (FileData *file_info);
 
 // gui, model general. re-write as wrapper function around a non-gui version?
 gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info);
 
-
+// non-gui model-general function which parses a file into a treestore. 
+// wrapped by load_from_file_long_cb 
+gboolean pdp_load_from_file_long (FileData *file_info);
 
 // gui, model general. leave in pdpgui_import
 void select_file (GtkComboBoxText *widget, FileData * config_file);
