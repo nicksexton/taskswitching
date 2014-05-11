@@ -1,14 +1,23 @@
-/* TODO:
+/* pdp_import */
+/* library of model-generic functions for importing data to pdp models */
+/* functions for importing task data and parameterisation data */
+/* needs to be specialised to import data in a model-specific format */
+/* Model import uses gtk treestore to store task and parameter data */
+/* These functions are usable in both gui and non-gui versions of the model */
+/* See pdpgui_import for functions which adapt these to a gui format */
+
+
+
+/* (old) TODO:
    fix parsing to use sscanf or similar to assign numeric variables 
    fix parsing so that space or comma can also be used as a delimiter */
 
 #include <gtk/gtk.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "lib_string_parse.h"
+#include "pdp_import.h"
 
 
 

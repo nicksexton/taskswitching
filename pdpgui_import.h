@@ -1,7 +1,7 @@
 #ifndef pdpgui_import_h
 #define pdpgui_import_h
 
-#include "lib_string_parse.h"
+#include "pdp_import.h"
 #include "pdpgui.h"
 
 

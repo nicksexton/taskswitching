@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include <gtk/gtk.h>
-#include "lib_string_parse.h"
+#include "pdp_import.h"
 #include "pdpgui_import.h"
 #include "pdpgui.h"
 
@@ -572,26 +572,6 @@ GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects) {
   gtk_widget_show_all(grid_main);
 
 
-  /*
-  stroop_trial_data mock_data;
-  mock_data.trial_id = 999;
-  mock_data.stim_task = 0;
-  mock_data.stim_word = 2;
-  mock_data.stim_colour = 1;
-
-  import_stroop_trial_data_to_treestore (objects->task_config_file->tree_store, &mock_data);
-  */
-
-
-
-  /*  
-  subject * this_subject = objects->simulation->subjects->subj[objects->simulation->current_subject];
-
-  import_task_block_new_to_treestore (objects->simulation->task_store,
-				      "random stroop",
-				      this_subject->num_fixed_trials,
-				      this_subject->fixed_trials);
-  */
 
 
   // TEMP CODE: set path to first trial of first block
