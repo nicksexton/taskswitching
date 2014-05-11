@@ -5,23 +5,17 @@
 #include "pdpgui.h"
 
 
-
-
 // <----------------- GENERAL UTILITY FUNCTIONS
 
 // callback function to read file contents
 // gui, model general. wraps pdp_load_from_file_short in pdp_import
 gboolean load_from_file_short_cb (GtkWidget *widget, FileData *file_info);
 
-
 // gui, model general. wraps pdp_load_from_file_long in pdp_import
 gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info);
 
-
-
 // gui, model general. leave in pdpgui_import
 void select_file_cb (GtkComboBoxText *widget, FileData * config_file);
-
 
 
 // <------------------ MODEL PARAMETER IMPORT FUNCTIONS
@@ -68,7 +62,7 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects);
 //						stroop_trial_data * trial_array);
 
 
-// gui, model general
+// gui, model general. move to pdpgui?
 void model_reset_trial_markers (PdpSimulation *simulation);
 
 
@@ -76,14 +70,15 @@ void model_reset_trial_markers (PdpSimulation *simulation);
 // static void setup_task_viewer_treeview (GtkTreeView * tree);
 
 
-
-
 // gui, model specific
 GtkWidget* create_notepage_view_trials(PdpGuiObjects * objects);
 
 
-// non-gui, model specific. re-write as wrapper function.
+// non-gui, model specific. wraps gs_stroop_model_task_import_commit
 // static void model_task_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects);
+
+void gs_stroop_model_task_import_commit (FileData *task_config_file, 
+					 GtkTreeStore *task_store);
 
 
 // gui, model specific
