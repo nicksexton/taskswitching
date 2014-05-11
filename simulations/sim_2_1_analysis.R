@@ -150,7 +150,7 @@ linegraph +
   ggtitle("Simulation 2.1:\nRestart effects in the Gilbert & Shallice model\nrestarts only")
 
 #imageFile <- file.path(imageDirectory, "sim_2.0_filtered.png")
-imageFile <- file.path(imageDirectory, "sim_2.1_filtered.png") 
+imageFile <- file.path(imageDirectory, "sim_2.1.png") 
 ggsave(imageFile)
 
 
