@@ -14,13 +14,11 @@
 #define CONFIG_FILE gtk_config_file.conf
 
 
-
-
-
 // callback function to read file contents
 // uses short format (ie key - value pairs)
-gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
+gboolean load_from_file_short_cb (GtkWidget *widget, FileData *file_info) {
 
+  /*
   file_info->fp = fopen(file_info->filename, "r");
   if (file_info->fp == NULL) {
     printf ("error! gtk_config_file.conf does not exist\n");
@@ -34,6 +32,30 @@ gboolean load_from_file_cb (GtkWidget *widget, FileData *file_info) {
 
     fclose(file_info->fp);
     printf ("success! config file closed.\n");
+  }
+
+  return TRUE;
+  */
+  return (pdp_load_from_file_short (file_info));
+
+}
+
+// load short lines from file to a treestore
+gboolean pdp_load_from_file_short (FileData *file_info) {
+
+  file_info->fp = fopen(file_info->filename, "r");
+  if (file_info->fp == NULL) {
+    printf ("error! %s does not exist\n", file_info->filename);
+    return FALSE;
+  }
+  else {
+    printf ("success! config file %s opened.\n", file_info->filename);
+
+    treestore_remove_all (file_info->tree_store);
+    pdp_file_parse_to_treestore (file_info);
+
+    fclose(file_info->fp);
+    printf ("success! config file %s closed.\n", file_info->filename);
   }
 
   return TRUE;
@@ -307,7 +329,7 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
   // aesthetic: give this a standard icon
   button_process_configfile = gtk_button_new_with_label ("Load from file");
   g_signal_connect (button_process_configfile, "clicked", 
-		    G_CALLBACK(load_from_file_cb), (gpointer)(objects->config_file));
+		    G_CALLBACK(load_from_file_short_cb), (gpointer)(objects->config_file));
 
   
   // TODO - make button only active when there are parameters to commit
