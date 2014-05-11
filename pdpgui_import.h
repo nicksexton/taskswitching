@@ -20,7 +20,7 @@ gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info);
 
 
 // gui, model general. leave in pdpgui_import
-void select_file (GtkComboBoxText *widget, FileData * config_file);
+void select_file_cb (GtkComboBoxText *widget, FileData * config_file);
 
 
 
@@ -33,9 +33,15 @@ void select_file (GtkComboBoxText *widget, FileData * config_file);
 static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStroopParameters *model_params);
 
 // callback which reads parameters from treestore and calls the translator function (model_parameter_import)
-// gui, model general. re-write as wrapper function around non-gui version.
+// gui, model specific. re-write as wrapper function around non-gui version which goes in
+// gs_stroop_import or similar
 static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects);
+*/
 
+// non-gui, model-specific function
+void gs_stroop_parameters_import_commit (FileData *config_file, PdpSimulation *simulation);
+
+/*
 // just proof of concept for now
 // gui, model general. not sure what this function actually does??
 static void config_file_treeview_selection_changed_cb (GtkTreeSelection *selection, gpointer data);

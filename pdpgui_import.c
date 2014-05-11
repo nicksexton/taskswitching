@@ -18,69 +18,22 @@
 // uses short format (ie key - value pairs)
 gboolean load_from_file_short_cb (GtkWidget *widget, FileData *file_info) {
 
-  /*
-  file_info->fp = fopen(file_info->filename, "r");
-  if (file_info->fp == NULL) {
-    printf ("error! gtk_config_file.conf does not exist\n");
-    return FALSE;
-  }
-  else {
-    printf ("success! config file opened.\n");
-
-    treestore_remove_all (file_info->tree_store);
-    pdp_file_parse_to_treestore (file_info);
-
-    fclose(file_info->fp);
-    printf ("success! config file closed.\n");
-  }
-
-  return TRUE;
-  */
   return (pdp_load_from_file_short (file_info));
-
 }
-
-
 
 
 // similar to load_from_file_cb but imports long format data (ie multiple columns)
 gboolean load_from_file_long_cb (GtkWidget *widget, FileData *file_info) {
 
-  /*
-  file_info->fp = fopen(file_info->filename, "r");
-  if (file_info->fp == NULL) {
-    printf ("error! gtk_config_file.conf does not exist\n");
-    return FALSE;
-  }
-  else {
-    printf ("success! config file opened.\n");
-
-    // currently removes all from treestore before import, want to fix this ultimately
-    treestore_remove_all (file_info->tree_store); 
-
-    pdp_file_parse_to_treestore_long (file_info);
-
-    fclose(file_info->fp);
-    printf ("success! config file closed.\n");
-  }
-
-  return TRUE;
-  */
   return (pdp_load_from_file_long (file_info));
-
 }
 
 
-
-
-void select_file (GtkComboBoxText *widget, FileData * config_file) {
+void select_file_cb (GtkComboBoxText *widget, FileData * config_file) {
 
   GtkComboBoxText *combo_box = widget;
-  // char *tmp[FILENAME_MAX_LENGTH];
 
   gchar *filename = gtk_combo_box_text_get_active_text (combo_box);
-
-    // just print filename for now
 
   g_print ("file %s selected", filename);
   strcpy (config_file->filename, filename);
@@ -187,7 +140,7 @@ static bool model_parameter_import (gchar* param_name, gchar* param_value, GsStr
 
 // read parameters from the tree store, apply to model parameters struct
 static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects) {
-
+  /*
   GtkTreeIter iter; 
   gboolean more;
 
@@ -213,10 +166,40 @@ static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects
     
     more = gtk_tree_model_iter_next(GTK_TREE_MODEL(objects->config_file->tree_store), &iter);
   }  
+*/
+  gs_stroop_parameters_import_commit (objects->config_file, objects->simulation);
 
 }
 
+void gs_stroop_parameters_import_commit (FileData *config_file, PdpSimulation *simulation) {
 
+  GtkTreeIter iter; 
+  gboolean more;
+
+  more = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(config_file->tree_store), &iter);
+
+  while (more) {
+
+    // tree is not empty, process 
+    gchar *param_name;
+    gchar *param_value;
+
+   
+    gtk_tree_model_get (GTK_TREE_MODEL(config_file->tree_store), 
+			&iter, COL_PARAMETER_NAME, &param_name, -1);
+    gtk_tree_model_get (GTK_TREE_MODEL(config_file->tree_store), 
+			&iter, COL_PARAMETER_VALUE, &param_value, -1);
+    g_print ("assigning:\t%s: %s\n", param_name, param_value);
+
+    model_parameter_import (param_name, param_value, simulation->model_params);
+
+    g_free (param_name);
+    g_free (param_value);
+    
+    more = gtk_tree_model_iter_next(GTK_TREE_MODEL(config_file->tree_store), &iter);
+  }  
+
+}
 
 // selection handling
 // prototype for selection handler callback
@@ -311,7 +294,7 @@ GtkWidget* create_notepage_import_model_params(PdpGuiObjects * objects) {
 				 "gtk_config_file_2.conf");
   gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(file_select), 
 				 "pdpgui_gs_params_default.conf");
-  g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(objects->config_file) );
+  g_signal_connect (file_select, "changed", G_CALLBACK(select_file_cb), (gpointer)(objects->config_file) );
 
   // aesthetic: give this a standard icon
   button_process_configfile = gtk_button_new_with_label ("Load from file");
@@ -682,7 +665,7 @@ GtkWidget* create_notepage_import_trials(PdpGuiObjects * objects) {
 				 "simulations/sim_2_trials.conf");
 
 
-  g_signal_connect (file_select, "changed", G_CALLBACK(select_file), (gpointer)(objects->task_config_file) );
+  g_signal_connect (file_select, "changed", G_CALLBACK(select_file_cb), (gpointer)(objects->task_config_file) );
 
   // aesthetic: give this a standard icon
   button_process_configfile = gtk_button_new_with_label ("Load from file");
