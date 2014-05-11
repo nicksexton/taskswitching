@@ -1,3 +1,6 @@
+/*  Model-general functions associated with the gui. */ 
+/*  Possibly merge into general pdpgui library if it ends up small? */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,8 +12,6 @@
 #include "pdpgui.h"
 
 #define CONFIG_FILE gtk_config_file.conf
-
-
 
 
 
@@ -398,7 +399,6 @@ void model_reset_trial_markers (PdpSimulation *simulation) {
 
   g_free (path);
 
-
 }
 
 
@@ -503,7 +503,6 @@ FileData * create_task_import_objects() {
 
   FileData *config_file; // struct containing pointers to relevant file data
   GtkTreeStore *store;
-  //  GtkWidget *tree;
 
   // first create memory for the file pointer
 
