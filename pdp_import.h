@@ -55,6 +55,14 @@ gboolean treestore_remove_all (GtkTreeStore * tree_store);
 FileData * create_param_import_objects();
 
 
+// non-gui model-general function which parses a file into a treestore. 
+// wrapped by load_from_file_short_cb 
+gboolean pdp_load_from_file_short (FileData *file_info);
+
+// non-gui model-general function which parses a file into a treestore. 
+// wrapped by load_from_file_long_cb 
+gboolean pdp_load_from_file_long (FileData *file_info);
+
 // <----------------- File parse and import functions
 
 

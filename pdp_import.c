@@ -67,7 +67,52 @@ FileData * create_param_import_objects() {
   return config_file;
 }
 
+// load short lines from file to a treestore
+gboolean pdp_load_from_file_short (FileData *file_info) {
 
+  file_info->fp = fopen(file_info->filename, "r");
+  if (file_info->fp == NULL) {
+    printf ("error! %s does not exist\n", file_info->filename);
+    return FALSE;
+  }
+  else {
+    printf ("success! config file %s opened.\n", file_info->filename);
+
+    treestore_remove_all (file_info->tree_store);
+    pdp_file_parse_to_treestore (file_info);
+
+    fclose(file_info->fp);
+    printf ("success! config file %s closed.\n", file_info->filename);
+  }
+
+  return TRUE;
+}
+
+gboolean pdp_load_from_file_long (FileData *file_info) {
+
+
+  file_info->fp = fopen(file_info->filename, "r");
+  if (file_info->fp == NULL) {
+    printf ("error! %s does not exist\n", file_info->filename);
+    return FALSE;
+  }
+  else {
+    printf ("success! config file %s opened.\n", file_info->filename);
+
+    // currently removes all from treestore before import, want to fix this ultimately
+    treestore_remove_all (file_info->tree_store); 
+
+    pdp_file_parse_to_treestore_long (file_info);
+
+    fclose(file_info->fp);
+    printf ("success! config file %s closed.\n", file_info->filename);
+  }
+
+  return TRUE;
+
+}
+
+// <------------------ File parse and import functions
 
 // GTK function - uses a treestore
 // replacement for pdp_file_parse_segmented_line
