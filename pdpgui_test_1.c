@@ -14,6 +14,7 @@
 #include "gs_stroop_subjects.h"
 #include "gs_stroop_global_params.h"
 #include "gs_stroop_analyse.h"
+#include "gs_stroop_import.h"
 
 #include "pdpgui_plot.h"
 #include "pdpgui_import.h"

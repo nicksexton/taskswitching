@@ -5,8 +5,8 @@ CC=gcc
 CFLAGS= -fopenmp `pkg-config --cflags gtk+-3.0` -Wall -g
 LIBS = `pkg-config --libs gtk+-3.0` -lm
 
-OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o
-GUI_OBJECTS = pdpgui_plot.o pdpgui_import.o lib_cairox.o pdp_import.o
+OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o pdp_import.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o gs_stroop_import.o 
+GUI_OBJECTS = pdpgui_plot.o pdpgui_import.o lib_cairox.o 
 
 BINARIES = gs_stroop_sim_indiffs
 GUI_BINARIES = pdpgui_test_1
