@@ -96,6 +96,9 @@ data.plot <- rbind (data.unprimed.repeat, data.primed.repeat)
 # correct trials only
 data.plot <- subset (data.plot, response %% 3 == correct)
 
+# 18-06-14 : remove long_switch trials as not relevant to this analysis
+data1 <- subset (data, RSI_lvl != long_switch)
+
 
 # exclude outliers (RTs +/- 3 SDs)
 descriptives <- by(data.plot$RT, data.plot$SwitchDirection, stat.desc, basic = FALSE, norm = TRUE)
@@ -141,7 +144,7 @@ data.plot <- subset (data.plot,
 # now plot basic line graph showing interaction
 linegraph <- ggplot (data.plot, aes(x=RSI_lvl, y=RT, group=fac.priming, colour=fac.priming))
 linegraph +
-  facet_grid (. ~ SwitchDirection) +
+#  facet_grid (. ~ SwitchDirection) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
