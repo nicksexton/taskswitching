@@ -434,8 +434,6 @@ bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params
     }
   }
 
-
-
   // other parameter imports go here
 
   else {
@@ -444,16 +442,12 @@ bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params
   }
 
   return return_value;
-
-
 }
+
 
 int model_set_trial_params_from_task_store (GtkTreeStore *store, 
 					    GtkTreeIter *trial, 
 					    GsStroopParameters *model_params){
-
-  //  gchar* task_param_1 = g_malloc (TRIAL_PARAM_FIELD_SIZE);
-  //  gchar* task_param_2 = g_malloc (TRIAL_PARAM_FIELD_SIZE);
 
   gchar* task_param_1 = NULL;
   gchar* task_param_2 = NULL;
@@ -476,14 +470,9 @@ int model_set_trial_params_from_task_store (GtkTreeStore *store,
     model_task_parameter_import (task_param_2, model_params);
   }
 
-
-
-  //  g_free (task_param_1);
-  //  g_free (task_param_2);
-
   return 0;
-
 }
+
 
 // takes an iter pointing to relevant row of task store, 
 // returns a pointer to UNINITIALIZED stroop_trial_data,
@@ -803,10 +792,10 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation) {
 	// printf ("current trial is last one\n");
 	return true;
       }
-
     }
   }
 }
+
 
 gboolean model_current_block_is_last (PdpSimulation *simulation) {
 
@@ -836,7 +825,7 @@ gboolean model_current_block_is_last (PdpSimulation *simulation) {
 }
 
 
-static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
+gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
 
   // get iter to new path
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
@@ -856,8 +845,8 @@ static gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *sto
     // set trial parameters
     // printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
     model_set_trial_params_from_task_store (simulation->task_store,
-						iter,
-						simulation->model_params);
+					    iter,
+					    simulation->model_params);
 
 
     // update the path
@@ -965,7 +954,7 @@ static void model_change_trial_cb (GtkWidget * spin_button,
 }
 
 
-static gboolean model_change_trial_first (PdpSimulation *simulation, 
+gboolean model_change_trial_first (PdpSimulation *simulation, 
 					  GtkTreeStore *store) {
 
   GtkTreeIter first_block, first_trial;
@@ -991,8 +980,9 @@ static gboolean model_change_trial_first (PdpSimulation *simulation,
   else return false;
 }
 
-static gboolean model_change_trial_first_of_block (PdpSimulation *simulation, 
-						   GtkTreeStore *store) {
+
+gboolean model_change_trial_first_of_block (PdpSimulation *simulation, 
+					    GtkTreeStore *store) {
 
   GtkTreeIter trial, block;
 
@@ -1055,29 +1045,13 @@ void model_initialise (PdpSimulation *simulation) {
 static void model_controls_initialise_cb (GtkToolItem * tool_item, 
 					  PdpGuiObjects * objects) {
 
-
-  /*
-  // de-init and re-build model to implement new parameters
-  deinit_model (objects->simulation->model);
-  init_model (objects->simulation->model, objects->simulation->model_params);
-
-
-  model_init_activation (objects->simulation->model, 0.0); // zero activations 
-  */
-
   model_initialise (objects->simulation);
-
-  // current trial and subject now controlled by spin buttons
-  // simulation->current_subject = 0;
-  // simulation->current_trial = 0;
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
-
-
-
 }
+
 
 static void model_controls_step_once_cb (GtkToolItem * tool_item, 
 					 PdpGuiObjects * objects) {
@@ -1289,8 +1263,7 @@ void model_run_all_blocks (PdpSimulation * simulation ) {
 
   gint current_block = 0;
   
-    // change to block 0, trial 0
-    
+    // change to block 0, trial 0    
     model_change_trial_first (simulation, simulation->task_store);
   
 
@@ -1303,8 +1276,6 @@ void model_run_all_blocks (PdpSimulation * simulation ) {
       // run block
       model_run_block (simulation);
 
-      //  gtk_tree_model_iter_next (GTK_TREE_MODEL(simulation->task_store), 
-      //			&first_trial);
 
       current_block ++;
       printf ("in model_run_all_blocks: done with block %d\n", current_block);
@@ -1320,9 +1291,7 @@ void model_run_all_blocks (PdpSimulation * simulation ) {
 static void model_controls_run_all_blocks_cb (GtkToolItem * tool_item,
 					      PdpGuiObjects * objects) {
 
-  model_run_all_blocks (objects->simulation);
-
-  
+  model_run_all_blocks (objects->simulation);  
   model_headerbar_update_labels(objects);
 
   // draw activations for last trial:
@@ -1491,7 +1460,7 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 }
 
 
-static void init_model (pdp_model * this_model, GsStroopParameters *model_params) {
+void init_model (pdp_model * this_model, GsStroopParameters *model_params) {
   // just allocate memory for simulation and run constructors  
 
   act_func_params * act_params = g_malloc (sizeof(act_func_params));
@@ -1504,11 +1473,10 @@ static void init_model (pdp_model * this_model, GsStroopParameters *model_params
 
   // now create the model
   gs_stroop_model_build (this_model, model_params); 
-  // probably defer building the model in later versions
 
 }
 
-static void deinit_model (pdp_model * this_model) {
+void deinit_model (pdp_model * this_model) {
   // delete model components
   // can be re-initialised with init_model
 
@@ -1534,21 +1502,17 @@ PdpSimulation * create_simulation () {
   simulation->model_params = g_malloc (sizeof(GsStroopParameters));
   gs_stroop_parameters_set_default (simulation->model_params);
 
-
   // now build the model
-  // gs_stroop_model_build (simulation->model, simulation->model_params); 
-  // probably defer building the model in later versions
-
   init_model (simulation->model, simulation->model_params);
-
-
 
   // initialise subjects
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
 
   for (n = 0; n < simulation->subjects->number_of_subjects; n++) {
 
-    simulation->subjects->subj[n] = subject_create (NUM_TRIALS, NUM_TRIALS, MIXED_BLOCK_RUN_LENGTH);
+    simulation->subjects->subj[n] = subject_create (NUM_TRIALS, 
+						    NUM_TRIALS, 
+						    MIXED_BLOCK_RUN_LENGTH);
 
     // parameterise subject
     subject_params_vary (simulation->subjects->subj[n], 
