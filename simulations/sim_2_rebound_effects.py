@@ -17,7 +17,7 @@
 # ABCB   vs AB-CB   vs ABC-B   # primed nonswitch
 
 
-num_blocks = 100 # number of times to run each sequence type
+num_blocks = 10000 # number of times to run each sequence type
 trialid = 0
 rsi_levels = [
     [1.0, 1.0, "all_short"], 
@@ -37,7 +37,7 @@ task_levels = [
 
 
 def write_trial (block_id, trial_id, wordin, colourin, task, param1, param2):
-    f = open ("sim_2_trials.conf", "a") # opens file for appending
+    f = open ("sim_2_3_trials.conf", "a") # opens file for appending
     f.write (block_id)
     f.write ("\t")
 
@@ -62,7 +62,7 @@ def write_trial (block_id, trial_id, wordin, colourin, task, param1, param2):
     f.close()
 
 def write_lookup (sequence, trial_id, task_level_name, rsi_level_name, position):
-    f = open ("sim_2_lookup.txt", "a")
+    f = open ("sim_2_3_lookup.txt", "a")
     f.write (str(trial_id) + "\t")
     f.write (sequence + "\t")
     f.write (task_level_name + "\t")
