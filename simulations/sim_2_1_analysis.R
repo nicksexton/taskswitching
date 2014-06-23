@@ -39,6 +39,10 @@ library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
 
+library(car) # for Levene's test
+library(lsr) # for Eta Squared
+
+
 imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_2")
 
 
@@ -89,6 +93,10 @@ data.primed.repeat <- cbind (data.primed.repeat, fac.priming, fac.taskTrans)
 
 #data.plot <- rbind (data.unprimed.switch, data.unprimed.repeat, data.primed.switch, data.primed.repeat)
 data.plot <- rbind (data.unprimed.repeat, data.primed.repeat)
+
+# 18-06-14 : remove long_switch trials as not relevant to this analysis
+data.plot <- subset (data.plot, RSI_lvl != "long_switch")
+
 
 
 # --------------------------- Filter the data
@@ -207,3 +215,18 @@ calc_restart_cost (rt.colournaming.unprimed)
 
 rt.wordreading.unprimed
 calc_restart_cost (rt.wordreading.unprimed)
+
+# ------------------------- STATISTICAL ANALYSIS --------------
+
+# check this ANOVA is coded correctly!
+
+model <- aov(RT ~ SwitchDirection +
+             RSI_lvl + fac.priming +
+             SwitchDirection:RSI_lvl +
+             SwitchDirection:fac.priming +
+             RSI_lvl:fac.priming +
+             SwitchDirection:RSI_lvl:fac.priming, data = data.plot)
+
+anova(model)
+
+
