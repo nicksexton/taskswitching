@@ -50,7 +50,12 @@ imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "sim
 labels.data = c("trialpath", "trialid", "trialtype", "stim_task", "stim_word", "stim_colour",
            "correct", "response", "RT", "RSI")
 
-data.raw <- read.delim("sim_2_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+# note 2_3_data.txt has parameter settings: learning rate 1.5, WR control strength 4.5
+# note 2_3_1_data.txt has parameter settings: learning rate 1.5, WR control strength 8.0
+# data.raw <- read.delim("sim_2_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_2_3_1_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data) 
+
+
 
 # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
