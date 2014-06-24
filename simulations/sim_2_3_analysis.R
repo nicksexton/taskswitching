@@ -50,7 +50,7 @@ imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "sim
 labels.data = c("trialpath", "trialid", "trialtype", "stim_task", "stim_word", "stim_colour",
            "correct", "response", "RT", "RSI")
 
-data.raw <- read.delim("sim_2_1_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_2_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -130,7 +130,6 @@ data.plot <- subset (data.plot,
 
 
 
-
 # --------------------------- GRAPH ----------------------
 # now plot basic line graph showing interaction
 #linegraph <- ggplot (data.plot, aes(x=fac.taskTrans, y=RT, group=fac.priming, colour=fac.priming))
@@ -155,10 +154,10 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Task Transition", y = "RT", group = "Priming") +
 #  ggtitle("Simulation 2:\nRestart effects in the Gilbert & Shallice model\nrestarts only")
-  ggtitle("Simulation 2.1:\nRestart effects in the Gilbert & Shallice model\nrestarts only")
+  ggtitle("Simulation 2.3:\nRestart effects in the Gilbert & Shallice model\nrestarts only, N=1000, \nlearning rate = 1.5, word reading control strength = 4.5") 
 
 #imageFile <- file.path(imageDirectory, "sim_2.0_filtered.png")
-imageFile <- file.path(imageDirectory, "sim_2.1.png") 
+imageFile <- file.path(imageDirectory, "sim_2.3.png") 
 ggsave(imageFile)
 
 
@@ -206,13 +205,10 @@ rt.wordreading.unprimed <- list (
 
 rt.colournaming.primed
 calc_restart_cost (rt.colournaming.primed)
-
 rt.wordreading.primed
 calc_restart_cost (rt.wordreading.primed)
-
 rt.colournaming.unprimed
 calc_restart_cost (rt.colournaming.unprimed)
-
 rt.wordreading.unprimed
 calc_restart_cost (rt.wordreading.unprimed)
 
@@ -220,13 +216,25 @@ calc_restart_cost (rt.wordreading.unprimed)
 
 # check this ANOVA is coded correctly!
 
-model <- aov(RT ~ SwitchDirection +
+model.all <- aov(RT ~ SwitchDirection +
              RSI_lvl + fac.priming +
              SwitchDirection:RSI_lvl +
              SwitchDirection:fac.priming +
              RSI_lvl:fac.priming +
              SwitchDirection:RSI_lvl:fac.priming, data = data.plot)
 
-anova(model)
+anova(model.all)
 
 
+
+# filter data for 2-way ANOVAs
+
+data.CC <- subset (data.plot, SwitchDirection == "C-C")
+data.CW <- subset (data.plot, SwitchDirection == "C-W")
+
+
+model.CC <- aov(RT ~ RSI_lvl + fac.priming + RSI_lvl:fac.priming, data = data.CC)
+anova(model.CC)
+
+model.CW <- aov(RT ~ RSI_lvl + fac.priming + RSI_lvl:fac.priming, data = data.CW)
+anova(model.CW)
