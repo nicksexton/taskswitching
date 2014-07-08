@@ -2,3 +2,5 @@ TAGS
 *~
 *.o
 data*/*
+gs_stroop_gui
+gs_stroop_sim_indiffs

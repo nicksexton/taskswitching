@@ -5,7 +5,7 @@ CC=gcc
 CFLAGS= -fopenmp `pkg-config --cflags gtk+-3.0` -Wall -g
 LIBS = `pkg-config --libs gtk+-3.0` -lm
 
-OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o pdp_import.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o gs_stroop_import.o 
+OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o pdp_procedure.o pdp_import.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o gs_stroop_import.o 
 GUI_OBJECTS = pdpgui_plot.o pdpgui_import.o lib_cairox.o 
 
 BINARIES = gs_stroop_sim_indiffs
@@ -37,8 +37,10 @@ gs_stroop_analyse.o:
 # pdp_objects: pdp_objects.o 
 
 pdp_objects.o: pdp_activation_funcs.o
-	$(CC) -c pdp_objects.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
+	$(CC) -c pdp_activation_funcs.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
+pdp_procedure.o: pdp_objects.o
+	$(CC) -c pdp_procedure.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 random_generator_functions.o: 
 	$(CC) -c random_generator_functions.c $(CFLAGS) -lgsl -lgslcblas -lm 

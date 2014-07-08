@@ -6,6 +6,7 @@
 #include <gsl/gsl_randist.h>
 
 #include "pdp_objects.h"
+#include "pdp_procedure.h"
 #include "gs_stroop_subjects.h"
 #include "gs_stroop.h"
 
@@ -15,34 +16,6 @@
 #define TASK_VIEW_WIDTH 750
 #define TASK_VIEW_HEIGHT 500
 
-
-typedef struct pdp_simulation {
-
-  pdp_model *model; // head of a possible list of models
-  gsl_rng * random_generator;
-
-  // should make params and subject(s) generic
-  GsStroopParameters *model_params;
-
-
-  subject_popn *subjects;
-
-  // current state of the simulation
-  int current_subject;
-  int current_trial;
-
-
-  // task store
-  // In new version, move toward using the task_store as a repository for trial info
-  // subjects becomes a repo for data only (and can maybe be stored in text file?)
-  GtkTreeStore * task_store;
-  GtkTreePath * current_trial_path;
-  GtkTreeIter * current_trial_iter;
-
-  stroop_trial_data * current_trial_data; 
-
-
-} PdpSimulation;
 
 
 
@@ -158,12 +131,16 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 // static void 
 // model_headerbar_update_labels (PdpGuiObjects * objects);
 
+/* // Moved to pdp_procedure.h
 
 // non-gui, model-general, needs modification
 gint model_current_trial_get (PdpSimulation *simulation);
 
 // non-gui, model-general, needs modification
 gboolean model_current_trial_is_last (PdpSimulation *simulation);
+*/
+
+
 
 // non-gui, model-general, needs modification
 gboolean model_current_block_is_last (PdpSimulation *simulation);
@@ -173,10 +150,9 @@ gboolean model_change_trial (PdpSimulation *simulation,
 			     GtkTreeStore *store, 
 			     GtkTreePath *new_trial_path);
 
-
 // nb function as-is does not update current_data, just sets the path
 // non-gui, model-general, needs modification
-static void model_change_trial_next (PdpSimulation *simulation);
+void model_change_trial_next (PdpSimulation *simulation);
 
 // gui, model-general. leave here
 // static void model_change_trial_cb (GtkWidget * spin_button, 
@@ -238,13 +214,7 @@ void init_model (pdp_model * this_model, GsStroopParameters *model_params);
 // non-gui, model specific
 void deinit_model (pdp_model * this_model);
 
-// allocates memory for simulation, inits subject population, runs constructors
-// non-gui, model specific
-PdpSimulation * create_simulation ();
 
-// frees memory for simulation
-// non-gui, model specific
-void free_simulation (PdpSimulation * simulation);
 
 // gui, model-specific
 // static void main_quit (GtkWidget *window, PdpGuiObjects  *objects);

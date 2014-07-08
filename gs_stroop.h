@@ -2,6 +2,7 @@
 #define gs_stroop_h
 
 #include <stdbool.h>
+#include <gtk/gtk.h>
 #include <gsl/gsl_rng.h>
 #include "pdp_objects.h"
 #include "gs_stroop_subjects.h"
@@ -34,13 +35,15 @@ typedef struct gs_stroop_parameters {
 
 void gs_stroop_parameters_set_default (GsStroopParameters * params_object);
 
+void gs_stroop_parameters_htable_set_default (GHashTable * params_table);
+
 void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r);
 
 stroop_response * make_stroop_response (int node, double activation);
 
 bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_trial, double response_thresholdo);
 
-int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * model_params);
+int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_params);
 
 int model_init_params (pdp_model * gs_stroop_model, gs_stroop_params * some_params);
 

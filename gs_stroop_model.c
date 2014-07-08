@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <gtk/gtk.h>
 #include <gsl/gsl_randist.h>
 #include "pdp_objects.h"
 #include "random_generator_functions.h" // for gaussian noise
@@ -50,6 +51,80 @@ void gs_stroop_parameters_set_default (GsStroopParameters * params_object) {
   return;
 }
 
+void gs_stroop_parameters_htable_set_default (GHashTable * params_table) {
+
+  double * activation_max = g_malloc(sizeof(double));
+  *activation_max = ACTIVATION_MAX;
+  g_hash_table_insert (params_table, "activation_max", activation_max);
+
+  double * activation_min = g_malloc(sizeof(double));
+  *activation_min = ACTIVATION_MIN;
+  g_hash_table_insert (params_table, "activation_min", activation_min);
+
+  double * response_threshold = g_malloc(sizeof(double));
+  *response_threshold = RESPONSE_THRESHOLD;
+  g_hash_table_insert (params_table, "response_threshold", response_threshold);
+
+  double * step_size = g_malloc(sizeof(double));
+  *step_size = STEP_SIZE;
+  g_hash_table_insert (params_table, "step_size", step_size);
+
+  double * squashing_param = g_malloc(sizeof(double));
+  *squashing_param = SQUASHING_PARAM;
+  g_hash_table_insert (params_table, "squashing_param", squashing_param);
+
+  double * noise = g_malloc(sizeof(double));
+  *noise = NOISE;
+  g_hash_table_insert (params_table, "noise", noise);
+
+  double * bias_outputunit = g_malloc(sizeof(double));
+  *bias_outputunit = OUTPUTUNIT_BIAS;
+  g_hash_table_insert (params_table, "bias_outputunit", bias_outputunit);
+
+  double * bias_taskdemand = g_malloc(sizeof(double));
+  *bias_taskdemand = TASKDEMAND_BIAS;
+  g_hash_table_insert (params_table, "bias_taskdemand", bias_taskdemand);
+
+  double * bias_none = g_malloc(sizeof(double));
+  *bias_none = BIAS_NONE;
+  g_hash_table_insert (params_table, "bias_none", bias_none);
+
+  double *stimulus_input_strength_word  = g_malloc(sizeof(double));
+  *stimulus_input_strength_word = STIMULUS_INPUT_STRENGTH_WORD;
+  g_hash_table_insert (params_table, "stimulus_input_strength_word", stimulus_input_strength_word);
+
+  double *stimulus_input_strength_colour  = g_malloc(sizeof(double));
+  *stimulus_input_strength_colour = STIMULUS_INPUT_STRENGTH_COLOUR;
+  g_hash_table_insert (params_table, "stimulus_input_strength_colour", stimulus_input_strength_colour);
+
+  double *taskdemand_output_inhibitory_wt  = g_malloc(sizeof(double));
+  *taskdemand_output_inhibitory_wt = TASKDEMAND_OUTPUT_INHIBITORY_WT;
+  g_hash_table_insert (params_table, "taskdemand_output_inhibitory_wt", taskdemand_output_inhibitory_wt);
+
+  double *taskdemand_output_excitatory_wt  = g_malloc(sizeof(double));
+  *taskdemand_output_excitatory_wt = TASKDEMAND_OUTPUT_EXCITATORY_WT;
+  g_hash_table_insert (params_table, "taskdemand_output_excitatory_wt", taskdemand_output_excitatory_wt);
+
+  double *topdown_control_strength_word  = g_malloc(sizeof(double));
+  *topdown_control_strength_word = TOPDOWN_CONTROL_STRENGTH_WORD;
+  g_hash_table_insert (params_table, "topdown_control_strength_word", topdown_control_strength_word);
+
+  double *topdown_control_strength_colour  = g_malloc(sizeof(double));
+  *topdown_control_strength_colour = TOPDOWN_CONTROL_STRENGTH_COLOUR;
+  g_hash_table_insert (params_table, "topdown_control_strength_colour", topdown_control_strength_colour);
+
+  double *learning_rate  = g_malloc(sizeof(double));
+  *learning_rate = LEARNING_RATE;
+  g_hash_table_insert (params_table, "learning_rate", learning_rate);
+
+  double *max_cycles  = g_malloc(sizeof(double));
+  *max_cycles = MAX_CYCLES;
+  g_hash_table_insert (params_table, "max_cycles", max_cycles);
+
+
+
+  return;
+}
 
 
 void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r) {
@@ -202,16 +277,16 @@ bool stopping_condition (const pdp_model * gs_stroop, stroop_trial_data * this_t
 // fully creates the Gilbert & Shallice model, weights, connections etc.
 // sets initial activations to 0 (init's model)
 
-int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * model_params) {
+int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_params) {
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
 
-  word_input = pdp_layer_create(ID_WORDIN, 3, model_params->bias_none);
-  word_output = pdp_layer_create(ID_WORDOUT, 3, model_params->bias_outputunit);
-  colour_input = pdp_layer_create(ID_COLOURIN, 3, model_params->bias_none);
-  colour_output = pdp_layer_create(ID_COLOUROUT, 3, model_params->bias_outputunit);
-  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, model_params->bias_taskdemand);
-  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, model_params->bias_none);
+  word_input = pdp_layer_create(ID_WORDIN, 3, g_hash_table_lookup(model_params, "bias_none"));
+  word_output = pdp_layer_create(ID_WORDOUT, 3, g_hash_table_lookup(model_params, "bias_outputunit"));
+  colour_input = pdp_layer_create(ID_COLOURIN, 3, g_hash_table_lookup(model_params, "bias_none"));
+  colour_output = pdp_layer_create(ID_COLOUROUT, 3, g_hash_table_lookup(model_params, "bias_outputunit")); 
+  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, g_hash_table_lookup(model_params, "bias_taskdemand"));
+  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, g_hash_table_lookup(model_params, "bias_none"));
 
   
   double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
@@ -238,7 +313,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * mod
   /***************************** */
   pdp_weights_matrix *wts_wordin_wordout, *wts_colourin_colourout;
 
-  double stimulus_input_strength_word = model_params->stimulus_input_strength_word;
+  double stimulus_input_strength_word = g_hash_table_lookup(model_params, "stimulus_input_strength_word");
 
   double wts_wordin_wordout_matrix[3][3] = {
     {stimulus_input_strength_word, 0.0, 0.0},
@@ -247,7 +322,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * mod
   };
 
   
-  double stimulus_input_strength_colour = model_params->stimulus_input_strength_colour;
+  double stimulus_input_strength_colour = g_hash_table_lookup(model_params, "stimulus_input_strength_colour");
   double wts_colourin_colourout_matrix[3][3] = {
     {stimulus_input_strength_colour, 0.0, 0.0},
     {0.0, stimulus_input_strength_colour, 0.0},
@@ -374,10 +449,13 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GsStroopParameters * mod
   /*  | Top down control -> taskdemand units |  */
   /*  +--------------------------------------+  */
 
+  topdown_control_strength_word = g_hash_table_lookup(model_params, "topdown_control_strength_word");
+  topdown_control_strength_colour = g_hash_table_lookup(model_params, "topdown_control_strength_colour");
+
   pdp_weights_matrix *wts_topdown_taskdemand;
   double wts_topdown_taskdemand_matrix[2][2] = {
-    { model_params->topdown_control_strength_word,  0.0 },
-    { 0.0, model_params->topdown_control_strength_colour },
+    { topdown_control_strength_word,  0.0 },
+    { 0.0, topdown_control_strength_colour },
   };
 
   wts_topdown_taskdemand = pdp_weights_create (2,2);

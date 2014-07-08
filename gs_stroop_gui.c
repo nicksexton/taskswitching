@@ -19,7 +19,7 @@
 
 #include "pdpgui_plot.h"
 #include "pdpgui_import.h"
-#include "pdpgui_test_1.h"
+// #include "pdpgui_test_1.h"
 #include "gs_stroop_gui.h"
 
 // temp!
@@ -733,7 +733,7 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
 }
 
-
+/* // Moved to pdp_procedure
 gint model_current_trial_get (PdpSimulation *simulation) {
   
   gint depth = -1;
@@ -753,48 +753,10 @@ gint model_current_trial_get (PdpSimulation *simulation) {
     // printf ("\n");
     return -99;
   }
-
 }
+*/
 
-// returns false if there are no trials
-gboolean model_current_trial_is_last (PdpSimulation *simulation) {
 
-  // get number of children of current parent
-  GtkTreeIter *current_trial = g_malloc (sizeof(GtkTreeIter));
-  GtkTreeIter *parent = g_malloc (sizeof(GtkTreeIter));
-  int num_trials;
-  int this_trial;
-
-  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), 
-			      current_trial, 
-			      simulation->current_trial_path)){
-    printf ("error in model_current_trial_is_last, there appear to be no trials loaded \n"); 
-    return false;
-  }
-  else {
-    if (!gtk_tree_model_iter_parent (GTK_TREE_MODEL(simulation->task_store),
-				     parent,
-				     current_trial)) {
-      printf ("error in model_current_trial_is_last, " 
-	      "current_trial appears to be top level (ie block header\n");
-      return false;
-    }
-    else {
-      num_trials = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store),
-						   parent);
-      this_trial = model_current_trial_get (simulation);
-      // if (this_trial < (num_trials - 1)) {
-      if ((this_trial + 1) < num_trials) {
-	// printf ("%dth trial of %d, continuing\n", (this_trial + 1), num_trials);
-	return false;
-      }
-      else {
-	// printf ("current trial is last one\n");
-	return true;
-      }
-    }
-  }
-}
 
 
 gboolean model_current_block_is_last (PdpSimulation *simulation) {
@@ -866,7 +828,7 @@ gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, Gtk
 
 
 // nb function as-is does not update current_data, just sets the path
-static void model_change_trial_next (PdpSimulation *simulation) {
+void model_change_trial_next (PdpSimulation *simulation) {
 
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
 
@@ -1019,13 +981,9 @@ gboolean model_change_trial_first_of_block (PdpSimulation *simulation,
 
 	return true;
 
-      }
-
-      
+      }      
     }
-
   }
-
 }
 
 
@@ -1487,7 +1445,7 @@ void deinit_model (pdp_model * this_model) {
 
 }
 
-
+/*
 
 PdpSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
@@ -1569,9 +1527,11 @@ void free_simulation (PdpSimulation * simulation) {
 
 }
 
+*/
 
 static void main_quit (GtkWidget *window, PdpGuiObjects  *objects) {
-  
+
+  pdp_model_free (simulation->model);  
   free_simulation (objects->simulation);
   g_free (objects->config_file);
   gtk_main_quit ();
@@ -1584,6 +1544,13 @@ int main (int argc, char *argv[]) {
   gtk_init (&argc, &argv);
 
   PdpSimulation * simulation = create_simulation();
+  simulation->model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
+
+  simulation->model = pdp_model_create (0, "gs_stroop");
+
+  // now build the model
+  init_model (simulation->model, simulation->model_params);
+
 
   PdpGuiObjects * objects = g_malloc (sizeof(PdpGuiObjects));
   // init function, set everything to null?

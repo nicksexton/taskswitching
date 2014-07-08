@@ -22,8 +22,11 @@ int main () {
 
 
   // init a parameters structure here;
-  GsStroopParameters * model_parameters = malloc (sizeof(GsStroopParameters));
-  gs_stroop_parameters_set_default (model_parameters);
+  // GsStroopParameters * model_parameters = malloc (sizeof(GsStroopParameters));
+  GHashTable * model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
+
+  //  gs_stroop_parameters_set_default (model_parameters);
+  gs_stroop_parameters_htable_set_default (model_params_htable);
 
 
   // <-------------------- SUBJECTS INIT -------------------->
@@ -79,14 +82,20 @@ int main () {
 
 
     act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+
+    // TEST CODE 
+    //    double step_size;
+    //    step_size = *(double *)g_hash_table_lookup(model_params_htable, "step_size");
+
     activation_parameters->type = ACT_GS;
-    activation_parameters->params.gs.step_size = model_parameters->step_size;
-    activation_parameters->params.gs.act_max = model_parameters->activation_max;
-    activation_parameters->params.gs.act_min = model_parameters->activation_min;
+    activation_parameters->params.gs.step_size = *(double *)g_hash_table_lookup(model_params_htable, "step_size");
+    activation_parameters->params.gs.act_max = *(double *)g_hash_table_lookup(model_params_htable, "activation_max");
+    activation_parameters->params.gs.act_min = *(double *)g_hash_table_lookup(model_params_htable, "activation_min");
     gs_stroop_model->activation_parameters = activation_parameters;
     
   // create the network & set weights
-    gs_stroop_model_build (gs_stroop_model, model_parameters); // also inits the model for 1st sim
+    //    gs_stroop_model_build (gs_stroop_model, model_parameters); // also inits the model for 1st sim
+    gs_stroop_model_build (gs_stroop_model, model_params_htable); // also inits the model for 1st sim
 
 
 
@@ -168,6 +177,7 @@ int main () {
   //   subject_free (subject_1); // temp
 
   free (model_parameters);
+  g_hash_table_destroy (model_params_htable);
   subject_popn_free (my_subjects);
   random_generator_free (random_generator);  
   
