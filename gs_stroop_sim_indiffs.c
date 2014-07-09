@@ -82,6 +82,11 @@ int main () {
 
 
     act_func_params * activation_parameters = malloc (sizeof(act_func_params));
+    double response_threshold = *(double *)g_hash_table_lookup(model_params_htable, "response_threshold");
+    double learning_rate = *(double *)g_hash_table_lookup(model_params_htable, "learning_rate");
+    double squashing_param = *(double *)g_hash_table_lookup(model_params_htable, "squashing_param");
+    hebbian_learning_persistence hebb_persist = 0;
+
 
     // TEST CODE 
     //    double step_size;
@@ -92,6 +97,8 @@ int main () {
     activation_parameters->params.gs.act_max = *(double *)g_hash_table_lookup(model_params_htable, "activation_max");
     activation_parameters->params.gs.act_min = *(double *)g_hash_table_lookup(model_params_htable, "activation_min");
     gs_stroop_model->activation_parameters = activation_parameters;
+
+
     
   // create the network & set weights
     //    gs_stroop_model_build (gs_stroop_model, model_parameters); // also inits the model for 1st sim
@@ -116,9 +123,10 @@ int main () {
       /* run stroop trial(s) */
       run_stroop_trial (gs_stroop_model, 
 			&(my_subjects->subj[n]->fixed_trials[trial]), 
-			random_generator, model_parameters->response_threshold,
-			model_parameters->hebb_persist,
-			model_parameters->learning_rate);
+			// random_generator, model_parameters->response_threshold,
+			random_generator, response_threshold,
+			hebb_persist,
+			learning_rate);
 
       /* update weights */
       // update_associative_weights (gs_stroop_model); // ?!? remove this line for fixed blocks??
@@ -134,19 +142,20 @@ int main () {
       // to zero associative weights for new subject, in mixed blocks trials 
       model_init_activation (gs_stroop_model, 0.0); // zero activations (zero persisting taskd. act.)
       update_associative_weights (gs_stroop_model, 
-				  model_parameters->learning_rate, 
-				  model_parameters->hebb_persist);
+				  learning_rate, 
+				  hebb_persist);
       
       for (trial = 0; trial < my_subjects->subj[n]->num_mixed_trials_in_run; trial++) {
 
-	model_init_activation (gs_stroop_model, (1-model_parameters->squashing_param)); // zero activations 
+	model_init_activation (gs_stroop_model, (1-squashing_param)); // zero activations 
 	
 	/* run stroop trial(s) */
 	run_stroop_trial (gs_stroop_model, 
 			  &(my_subjects->subj[n]->mixed_trials[run][trial]), 
-			  random_generator, model_parameters->response_threshold,
-			  model_parameters->hebb_persist,
-			  model_parameters->learning_rate);
+			  // random_generator, model_parameters->response_threshold,
+			  random_generator, response_threshold, // NEW
+			  hebb_persist,
+			  learning_rate);
 	
 	/* associative weights now updated in run_stroop_trial
 	update_associative_weights (gs_stroop_model, 
@@ -176,7 +185,7 @@ int main () {
 
   //   subject_free (subject_1); // temp
 
-  free (model_parameters);
+  // free (model_parameters);
   g_hash_table_destroy (model_params_htable);
   subject_popn_free (my_subjects);
   random_generator_free (random_generator);  

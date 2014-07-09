@@ -144,7 +144,7 @@ void free_simulation (PdpSimulation * simulation) {
   free (simulation->model->activation_parameters); 
   //  pdp_model_free (simulation->model);
   g_free (simulation->model_params); // OLD, deprecated
-  g_hash_table_destroy(simulation->model_params_htable);
+  g_hash_table_destroy(simulation->model_params_htable); // NEW 
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
 

@@ -117,7 +117,7 @@ void gs_stroop_parameters_htable_set_default (GHashTable * params_table) {
   *learning_rate = LEARNING_RATE;
   g_hash_table_insert (params_table, "learning_rate", learning_rate);
 
-  double *max_cycles  = g_malloc(sizeof(double));
+  int *max_cycles  = g_malloc(sizeof(int));
   *max_cycles = MAX_CYCLES;
   g_hash_table_insert (params_table, "max_cycles", max_cycles);
 
