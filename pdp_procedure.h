@@ -13,7 +13,8 @@
 
 // <---------------------------- TEMPORARY -------------------------
 #include "gs_stroop_subjects.h"
-
+#define NUMBER_OF_SUBJECTS 1
+#include "gs_stroop_global_params.h"
 // -----------------------------------------------------------------
 
 typedef struct pdp_simulation {

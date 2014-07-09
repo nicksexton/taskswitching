@@ -1009,7 +1009,9 @@ void model_initialise (PdpSimulation *simulation) {
 static void model_controls_initialise_cb (GtkToolItem * tool_item, 
 					  PdpGuiObjects * objects) {
 
+  init_model (objects->simulation->model, objects->simulation->model_params_htable);
   model_initialise (objects->simulation);
+
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
@@ -1258,6 +1260,7 @@ static void model_controls_run_block_cb (GtkToolItem * tool_item,
 void model_run_all_blocks (PdpSimulation * simulation ) {
 
   gint current_block = 0;
+  init_model (simulation->model, simulation->model_params_htable);
   
     // change to block 0, trial 0    
     model_change_trial_first (simulation, simulation->task_store);
@@ -1582,9 +1585,9 @@ int main (int argc, char *argv[]) {
   gtk_init (&argc, &argv);
 
   PdpSimulation * simulation = create_simulation();
-  simulation->model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
 
   simulation->model = pdp_model_create (0, "gs_stroop");
+  gs_stroop_parameters_htable_set_default (simulation->model_params_htable);
 
   // now build the model
   init_model (simulation->model, simulation->model_params_htable);

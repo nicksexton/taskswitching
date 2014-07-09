@@ -79,7 +79,9 @@ PdpSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
 
   PdpSimulation *simulation = g_malloc (sizeof(PdpSimulation));
-  // int n;
+
+
+
 
   simulation->random_generator = random_generator_create();
   // simulation->model = pdp_model_create (0, "gs_stroop");
@@ -89,14 +91,15 @@ PdpSimulation * create_simulation () {
   // simulation->model_params = g_malloc (sizeof(GsStroopParameters)); // OLD, deprecated
   // gs_stroop_parameters_set_default (simulation->model_params); // OLD, deprecated
   // nb new parameter setting now done in main() of gs_stroop_gui
+  simulation->model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
 
-
-  /*
+  /* -------------------------------------- TEMPORARY ------------------------------------- */
   // initialise subjects
+  int n; 
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
-
+ 
   for (n = 0; n < simulation->subjects->number_of_subjects; n++) {
-
+  
     simulation->subjects->subj[n] = subject_create (NUM_TRIALS, 
 						    NUM_TRIALS, 
 						    MIXED_BLOCK_RUN_LENGTH);
@@ -115,7 +118,8 @@ PdpSimulation * create_simulation () {
     // subject_init_trialblock_mixed (my_subjects->subj[n]);
     
   }
-  */
+
+  // ---------------------------------------------------------------------------------------------
 
   simulation->current_subject = 0;
   simulation->current_trial = 0;
