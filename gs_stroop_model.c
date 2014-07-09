@@ -281,12 +281,18 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
 
   pdp_layer *word_input, *word_output, *colour_input, *colour_output, *taskdemand, *topdown_control;
 
-  word_input = pdp_layer_create(ID_WORDIN, 3, g_hash_table_lookup(model_params, "bias_none"));
-  word_output = pdp_layer_create(ID_WORDOUT, 3, g_hash_table_lookup(model_params, "bias_outputunit"));
-  colour_input = pdp_layer_create(ID_COLOURIN, 3, g_hash_table_lookup(model_params, "bias_none"));
-  colour_output = pdp_layer_create(ID_COLOUROUT, 3, g_hash_table_lookup(model_params, "bias_outputunit")); 
-  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, g_hash_table_lookup(model_params, "bias_taskdemand"));
-  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, g_hash_table_lookup(model_params, "bias_none"));
+  word_input = pdp_layer_create(ID_WORDIN, 3, 
+				*(double *)g_hash_table_lookup(model_params, "bias_none"));
+  word_output = pdp_layer_create(ID_WORDOUT, 3, 
+				 *(double *)g_hash_table_lookup(model_params, "bias_outputunit"));
+  colour_input = pdp_layer_create(ID_COLOURIN, 3, 
+				  *(double *)g_hash_table_lookup(model_params, "bias_none"));
+  colour_output = pdp_layer_create(ID_COLOUROUT, 3, 
+				   *(double *)g_hash_table_lookup(model_params, "bias_outputunit")); 
+  taskdemand = pdp_layer_create(ID_TASKDEMAND, 2, 
+				*(double *)g_hash_table_lookup(model_params, "bias_taskdemand"));
+  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 2, 
+				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
 
   
   double initial_activation_wordin[3] = {0.0, 0.0, 0.0};
@@ -295,7 +301,11 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
   double initial_activation_colourout[3] = {0.0, 0.0, 0.0};
   double initial_activation_taskdemand[2] = {0.0, 0.0};
   double initial_activation_topdown_control[2] = {0.0, 0.0};
-  
+
+  double topdown_control_strength_word = *(double *)g_hash_table_lookup(model_params, 
+									"topdown_control_strength_word");
+  double topdown_control_strength_colour = *(double *)g_hash_table_lookup(model_params, 
+									  "topdown_control_strength_colour");  
 
 
   /* set initial activation */
@@ -313,7 +323,8 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
   /***************************** */
   pdp_weights_matrix *wts_wordin_wordout, *wts_colourin_colourout;
 
-  double stimulus_input_strength_word = g_hash_table_lookup(model_params, "stimulus_input_strength_word");
+  double stimulus_input_strength_word = *(double *)g_hash_table_lookup(model_params, 
+								       "stimulus_input_strength_word");
 
   double wts_wordin_wordout_matrix[3][3] = {
     {stimulus_input_strength_word, 0.0, 0.0},
@@ -322,7 +333,8 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
   };
 
   
-  double stimulus_input_strength_colour = g_hash_table_lookup(model_params, "stimulus_input_strength_colour");
+  double stimulus_input_strength_colour = *(double *)g_hash_table_lookup(model_params, 
+									 "stimulus_input_strength_colour");
   double wts_colourin_colourout_matrix[3][3] = {
     {stimulus_input_strength_colour, 0.0, 0.0},
     {0.0, stimulus_input_strength_colour, 0.0},
@@ -449,8 +461,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
   /*  | Top down control -> taskdemand units |  */
   /*  +--------------------------------------+  */
 
-  topdown_control_strength_word = g_hash_table_lookup(model_params, "topdown_control_strength_word");
-  topdown_control_strength_colour = g_hash_table_lookup(model_params, "topdown_control_strength_colour");
+
 
   pdp_weights_matrix *wts_topdown_taskdemand;
   double wts_topdown_taskdemand_matrix[2][2] = {

@@ -2,7 +2,8 @@
 #define gs_stroop_subjects_h
 #include <stdbool.h>
 #include <gsl/gsl_rng.h>
-#include <glib.h>
+#include <gtk/gtk.h>
+// #include <glib.h>
 
 typedef enum {NONE, FIXED, MIXED} blocktype;
 typedef enum {NEUTRAL = 0, CONGRUENT = 1, INCONGRUENT = 2} trialtype;
