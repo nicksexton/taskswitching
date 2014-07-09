@@ -11,13 +11,18 @@
 #include "pdp_objects.h"
 
 
+// <---------------------------- TEMPORARY -------------------------
+#include "gs_stroop_subjects.h"
+
+// -----------------------------------------------------------------
+
 typedef struct pdp_simulation {
 
   pdp_model *model; // head of a possible list of models
   gsl_rng * random_generator;
 
   // should make params and subject(s) generic
-  GsStroopParameters *model_params; // defined in gs_stroop.h. OLD, deprecated
+  // GsStroopParameters *model_params; // defined in gs_stroop.h. OLD, deprecated
 
   GHashTable *model_params_htable; // NEW way to store global params
 

@@ -5,8 +5,10 @@
 #include <stdbool.h>
 #include <string.h>
 #include <gtk/gtk.h>
+#include <gsl/gsl_randist.h>
+#include "random_generator_functions.h"
 #include "pdp_objects.h"
-
+#include "pdp_import.h"
 #include "pdp_procedure.h"
 
 
@@ -77,15 +79,15 @@ PdpSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
 
   PdpSimulation *simulation = g_malloc (sizeof(PdpSimulation));
-  int n;
+  // int n;
 
   simulation->random_generator = random_generator_create();
   // simulation->model = pdp_model_create (0, "gs_stroop");
 
   // allocate memory for model parameters and set to default values
   // NB do this with g_hash_table
-  simulation->model_params = g_malloc (sizeof(GsStroopParameters)); // OLD, deprecated
-  gs_stroop_parameters_set_default (simulation->model_params); // OLD, deprecated
+  // simulation->model_params = g_malloc (sizeof(GsStroopParameters)); // OLD, deprecated
+  // gs_stroop_parameters_set_default (simulation->model_params); // OLD, deprecated
   // nb new parameter setting now done in main() of gs_stroop_gui
 
 
@@ -111,8 +113,9 @@ PdpSimulation * create_simulation () {
 
     // don't do mixed trials yet in this simulation				 
     // subject_init_trialblock_mixed (my_subjects->subj[n]);
-    */
+    
   }
+  */
 
   simulation->current_subject = 0;
   simulation->current_trial = 0;
@@ -143,7 +146,7 @@ void free_simulation (PdpSimulation * simulation) {
 
   free (simulation->model->activation_parameters); 
   //  pdp_model_free (simulation->model);
-  g_free (simulation->model_params); // OLD, deprecated
+  // g_free (simulation->model_params); // OLD, deprecated
   g_hash_table_destroy(simulation->model_params_htable); // NEW 
   subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  

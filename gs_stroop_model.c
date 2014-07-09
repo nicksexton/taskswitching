@@ -122,7 +122,6 @@ void gs_stroop_parameters_htable_set_default (GHashTable * params_table) {
   g_hash_table_insert (params_table, "max_cycles", max_cycles);
 
 
-
   return;
 }
 
@@ -507,7 +506,7 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
   pdp_model_component_push(gs_stroop_model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
 
   //debug
-  printf ("gs_stroop model created!\n");
+  // printf ("gs_stroop model created!\n");
 
   return 0;
 }
@@ -578,6 +577,7 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
 
   // calculate new task demand activations
   // debug
+  /*
   printf ("new task demand activation:\t");
   for (i = 0; i < taskdemand->size; i ++) {
 
@@ -586,7 +586,7 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
     printf ("%4.3f\t", initial_activation_taskdemand[i]);
   } 
   printf ("\n");
-
+  */
 
   // clear & free history
 

@@ -37,7 +37,7 @@ gs_stroop_analyse.o:
 # pdp_objects: pdp_objects.o 
 
 pdp_objects.o: pdp_activation_funcs.o
-	$(CC) -c pdp_activation_funcs.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
+	$(CC) -c pdp_objects.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 pdp_procedure.o: pdp_objects.o
 	$(CC) -c pdp_procedure.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
