@@ -32,7 +32,7 @@
 static void model_parameters_import_commit_cb (GtkWidget * button, PdpGuiObjects * objects) {
 
   gs_stroop_parameters_import_commit (objects->config_file, 
-				      objects->simulation->model_params);
+				      objects->simulation->model_params_htable);
 
 }
 
@@ -408,7 +408,7 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
 }
 
 // cf. model_parameter_import in pdpgui_import.c
-bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params) {
+bool model_task_parameter_import (gchar* param, GHashTable *model_params_ht) {
 
   // printf ("debug: now in model_task_parameter_import\n");
   bool return_value = true;
@@ -419,8 +419,11 @@ bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params
       printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
     }
     else {
-      model_params->hebb_persist = (double) g_ascii_strtod (&param[5], NULL);
-      printf ("trial parameter %s now %d\n", param, model_params->hebb_persist);
+      gint *hebb_persist  = g_malloc(sizeof(int));
+      *hebb_persist = (int) g_ascii_strtoll (&param[5], NULL, 10);
+      g_hash_table_insert (model_params_ht, "hebb_persist", hebb_persist);
+      printf ("trial parameter %s now %d\n", param, 
+	      *(int *)g_hash_table_lookup(model_params_ht, "hebb_persist"));
     }
   }
 
@@ -429,8 +432,11 @@ bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params
       printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
     }
     else {
-      model_params->rsi_scale_param = (double) g_ascii_strtod (&param[5], NULL);
-      printf ("trial parameter %s now %4.2f\n", param, model_params->rsi_scale_param);
+      gdouble *rsi_scale_param  = g_malloc(sizeof(double));
+      *rsi_scale_param = (double) g_ascii_strtod (&param[5], NULL);
+      g_hash_table_insert (model_params_ht, "rsi_scale_param", rsi_scale_param);
+      printf ("trial parameter %s now %4.2f\n", param, 
+	      *(double *)g_hash_table_lookup(model_params_ht, "rsi_scale_param"));    
     }
   }
 
@@ -447,7 +453,7 @@ bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params
 
 int model_set_trial_params_from_task_store (GtkTreeStore *store, 
 					    GtkTreeIter *trial, 
-					    GsStroopParameters *model_params){
+					    GHashTable *model_params_ht){
 
   gchar* task_param_1 = NULL;
   gchar* task_param_2 = NULL;
@@ -462,12 +468,12 @@ int model_set_trial_params_from_task_store (GtkTreeStore *store,
   // code here: if task param 1 or 2 is non-empty,
   if (task_param_1 != NULL) {
     // set trial parameters
-    model_task_parameter_import (task_param_1, model_params);
+    model_task_parameter_import (task_param_1, model_params_ht);
   }
 
   if (task_param_2 != NULL) {
     // set trial parameters
-    model_task_parameter_import (task_param_2, model_params);
+    model_task_parameter_import (task_param_2, model_params_ht);
   }
 
   return 0;
@@ -808,7 +814,7 @@ gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, Gtk
     // printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
     model_set_trial_params_from_task_store (simulation->task_store,
 					    iter,
-					    simulation->model_params);
+					    simulation->model_params_htable);
 
 
     // update the path
@@ -859,7 +865,7 @@ void model_change_trial_next (PdpSimulation *simulation) {
     // printf ("debug: model_change_trial_next calling model_set_trial_params_from_task_store\n");
     model_set_trial_params_from_task_store (simulation->task_store,
 					    iter,
-					    simulation->model_params);
+					    simulation->model_params_htable);
 
 
   }
@@ -992,7 +998,7 @@ void model_initialise (PdpSimulation *simulation) {
 
   // de-init and re-build model to implement new parameters
   deinit_model (simulation->model);
-  init_model (simulation->model, simulation->model_params);
+  init_model (simulation->model, simulation->model_params_htable);
   model_init_activation (simulation->model, 0.0); // zero activations 
 
   printf ("model simulation %s initialised\n", simulation->model->name);
@@ -1015,6 +1021,12 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
 					 PdpGuiObjects * objects) {
 
   PdpSimulation * simulation = objects->simulation;
+  double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  double learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  // double squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+  hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+									  "hebb_persist");
+
 
   // printf ("model %s step once\n", simulation->model->name);
 
@@ -1026,7 +1038,7 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   bool running = run_model_step (simulation->model, 
 				 simulation->current_trial_data, 
 				 simulation->random_generator, 
-				 simulation->model_params->response_threshold);
+				 response_threshold);
   
 
   if (running) {
@@ -1037,8 +1049,8 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   else {
 
     update_associative_weights(simulation->model,
-			       simulation->model_params->learning_rate,
-			       simulation->model_params->hebb_persist);
+			       learning_rate,
+			       hebb_persist);
     printf ("model stopped\n");
   }
 
@@ -1054,6 +1066,12 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
 
   PdpSimulation * simulation = objects->simulation;
 
+  double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  double learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  //  double squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+  hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+									  "hebb_persist");
+
   if (simulation->current_trial_data == NULL) {
     model_change_trial_first (simulation, simulation->task_store); 
   }
@@ -1065,7 +1083,7 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
     model_running = run_model_step (simulation->model, 
 				    simulation->current_trial_data, 
 				    simulation->random_generator, 
-				    simulation->model_params->response_threshold);
+				    response_threshold);
 
     i ++;
   }
@@ -1073,8 +1091,8 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
   // update weights if model has stopped
   if (model_running == false) {
     update_associative_weights(simulation->model,
-			       simulation->model_params->learning_rate,
-			       simulation->model_params->hebb_persist);
+			       learning_rate,
+			       hebb_persist);
     printf ("model stopped\n");
   }
 
@@ -1091,6 +1109,12 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 
   PdpSimulation * simulation = objects->simulation;
 
+  double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  double learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  //  double squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+  hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+									  "hebb_persist");
+
   if (simulation->current_trial_data == NULL) {
     model_change_trial_first (simulation, simulation->task_store); 
   }
@@ -1098,9 +1122,9 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
   run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
-		    simulation->model_params->response_threshold,
-		    simulation->model_params->hebb_persist,
-		    simulation->model_params->learning_rate);
+		    response_threshold,
+		    hebb_persist,
+		    learning_rate);
   
 
   printf ("model %s run trial \n", simulation->model->name);
@@ -1118,6 +1142,13 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
   PdpSimulation * simulation = objects->simulation;
 
+  double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  double learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  double squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+  hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+									  "hebb_persist");
+  double rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "rsi_scale_param");
+
   if (simulation->current_trial_data == NULL) {
     model_change_trial_first (simulation, simulation->task_store); 
   }
@@ -1125,9 +1156,9 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
-		    simulation->model_params->response_threshold,
-		    simulation->model_params->hebb_persist,
-		    simulation->model_params->learning_rate);
+		    response_threshold,
+		    hebb_persist,
+		    learning_rate);
 
   printf ("model %s run trial \n", simulation->model->name);
   // do not need to pdpgui_print_current_trial_data as this is done by model_controls_run_cb
@@ -1153,18 +1184,25 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
    // model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
 
     model_init_activation (simulation->model, 
-			   pow(1-simulation->model_params->squashing_param, 
-			       simulation->model_params->rsi_scale_param));
+			   pow(1-squashing_param, 
+			       rsi_scale_param));
 
     printf ("scaling TD activation by %4.2f\n", 
-	    pow(1-simulation->model_params->squashing_param, 
-		simulation->model_params->rsi_scale_param));
+	    pow(1-squashing_param, 
+		rsi_scale_param));
 
   }
 }
 
 
 void model_run_block (PdpSimulation *simulation) {
+
+  double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  double learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  double squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+  hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+									  "hebb_persist");
+  double rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "rsi_scale_param");
 
   bool block_finished = false;
 
@@ -1176,9 +1214,9 @@ void model_run_block (PdpSimulation *simulation) {
       run_stroop_trial (simulation->model, 
 		    simulation->current_trial_data, 
 		    simulation->random_generator,
-		    simulation->model_params->response_threshold,
-		    simulation->model_params->hebb_persist,
-		    simulation->model_params->learning_rate);
+		    response_threshold,
+		    hebb_persist,
+		    learning_rate);
 
 
       // log output
@@ -1195,12 +1233,12 @@ void model_run_block (PdpSimulation *simulation) {
       // model_init_activation (simulation->model, 1-(simulation->model_params->squashing_param));
 
       model_init_activation (simulation->model, 
-			     pow(1-simulation->model_params->squashing_param, 
-				 simulation->model_params->rsi_scale_param));
+			     pow(1-squashing_param, 
+				 rsi_scale_param));
 
       printf ("scaling TD activation by %4.2f\n", 
-	      pow(1-simulation->model_params->squashing_param, 
-		  simulation->model_params->rsi_scale_param));
+	      pow(1-squashing_param, 
+		  rsi_scale_param));
     
     } 
 }
@@ -1418,19 +1456,19 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 }
 
 
-void init_model (pdp_model * this_model, GsStroopParameters *model_params) {
+void init_model (pdp_model * this_model, GHashTable *model_params_htable) {
   // just allocate memory for simulation and run constructors  
 
-  act_func_params * act_params = g_malloc (sizeof(act_func_params));
-  act_params->type = ACT_GS;
-  act_params->params.gs.step_size = model_params->step_size;
-  act_params->params.gs.act_max = model_params->activation_max;
-  act_params->params.gs.act_min = model_params->activation_min;
+  act_func_params * activation_parameters = g_malloc (sizeof(act_func_params));
+  activation_parameters->type = ACT_GS;
+  activation_parameters->params.gs.step_size = *(double *)g_hash_table_lookup(model_params_htable, "step_size");
+  activation_parameters->params.gs.act_max = *(double *)g_hash_table_lookup(model_params_htable, "activation_max");
+  activation_parameters->params.gs.act_min = *(double *)g_hash_table_lookup(model_params_htable, "activation_min");
   
-  this_model->activation_parameters = act_params;
+  this_model->activation_parameters = activation_parameters;
 
   // now create the model
-  gs_stroop_model_build (this_model, model_params); 
+  gs_stroop_model_build (this_model, model_params_htable); 
 
 }
 
@@ -1531,7 +1569,7 @@ void free_simulation (PdpSimulation * simulation) {
 
 static void main_quit (GtkWidget *window, PdpGuiObjects  *objects) {
 
-  pdp_model_free (simulation->model);  
+  pdp_model_free (objects->simulation->model);  
   free_simulation (objects->simulation);
   g_free (objects->config_file);
   gtk_main_quit ();
@@ -1549,7 +1587,7 @@ int main (int argc, char *argv[]) {
   simulation->model = pdp_model_create (0, "gs_stroop");
 
   // now build the model
-  init_model (simulation->model, simulation->model_params);
+  init_model (simulation->model, simulation->model_params_htable);
 
 
   PdpGuiObjects * objects = g_malloc (sizeof(PdpGuiObjects));

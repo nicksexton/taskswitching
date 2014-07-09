@@ -7,7 +7,7 @@ bool model_parameter_import (gchar* param_name, gchar* param_value, GsStroopPara
 
 // non-gui, model-specific function. move to gs_stroop_import
 void gs_stroop_parameters_import_commit (FileData *config_file, 
-					 GsStroopParameters *model_params);
+					 GHashTable *model_params);
 
 // non-gui, model specific.  Imports to a buffer
 void import_stroop_trial_data_to_treestore (GtkTreeStore * store, 

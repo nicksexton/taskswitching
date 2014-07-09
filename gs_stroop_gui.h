@@ -100,13 +100,13 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation);
 
 // sets model parameters for current trial based on trial params in task_store
 // non-gui, model-specific
-bool model_task_parameter_import (gchar* param, GsStroopParameters *model_params);
+bool model_task_parameter_import (gchar* param, GHashTable *model_params);
 
 // sets parameters for current trial
 // non-gui, model-specific
 int model_set_trial_params_from_task_store (GtkTreeStore *store, 
 					    GtkTreeIter *trial, 
-					    GsStroopParameters *model_params);
+					    GHashTable *model_params);
 
 // non-gui, model-specific
 int make_stroop_trial_data_from_task_store (GtkTreeStore *store, 
@@ -209,7 +209,7 @@ void model_run_all_blocks (PdpSimulation * simulation );
 
 // allocates memory for simulation, parameters etc  and runs constructors
 // non-gui, model specific
-void init_model (pdp_model * this_model, GsStroopParameters *model_params);
+void init_model (pdp_model * this_model, GHashTable *model_params);
 
 // non-gui, model specific
 void deinit_model (pdp_model * this_model);
