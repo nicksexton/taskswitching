@@ -739,58 +739,6 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
 
 }
 
-/* // Moved to pdp_procedure
-gint model_current_trial_get (PdpSimulation *simulation) {
-  
-  gint depth = -1;
-  gint *current_trial;
-
-  current_trial = gtk_tree_path_get_indices_with_depth (simulation->current_trial_path, &depth);
-
-  // printf ("model_current_trial_get, returning depth %d", depth);
-
-  if (depth > -1) {
-    // printf ("trial %d\n", current_trial[depth-1]);
-    return current_trial[depth-1];
-  }
-
-
-  else {
-    // printf ("\n");
-    return -99;
-  }
-}
-*/
-
-
-/* Moved to pdp_procedure.c
-gboolean model_current_block_is_last (PdpSimulation *simulation) {
-
-  int num_blocks;
-  gint * trial_path;
-  // get number of top level nodes
-  num_blocks = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store), NULL); 
-  
-  if (num_blocks == 0) {
-    printf ("no blocks, is the task store empty?");
-    return true;
-  }
-  else {
-
-   trial_path = gtk_tree_path_get_indices (simulation->current_trial_path);
-   if (trial_path == NULL) {
-     return true;
-   }
-   
-   else if (trial_path[0] == num_blocks) {
-     printf ("last block!\n");
-     return true;
-   }
-   else return false;
-
-  }
-}
-*/
 
 
 gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {

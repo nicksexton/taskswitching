@@ -131,16 +131,6 @@ void pdpgui_plot_network_activation (GtkWidget *widget,
 // static void 
 // model_headerbar_update_labels (PdpGuiObjects * objects);
 
-/* // Moved to pdp_procedure.h
-
-// non-gui, model-general, needs modification
-gint model_current_trial_get (PdpSimulation *simulation);
-
-// non-gui, model-general, needs modification
-gboolean model_current_trial_is_last (PdpSimulation *simulation);
-*/
-
-
 
 // non-gui, model-general, needs modification
 // gboolean model_current_block_is_last (PdpSimulation *simulation);
@@ -151,18 +141,18 @@ gboolean model_change_trial (PdpSimulation *simulation,
 			     GtkTreePath *new_trial_path);
 
 // nb function as-is does not update current_data, just sets the path
-// non-gui, model-general, needs modification
+// non-gui, model-specific
 void model_change_trial_next (PdpSimulation *simulation);
 
 // gui, model-general. leave here
 // static void model_change_trial_cb (GtkWidget * spin_button, 
 //				   PdpGuiObjects * objects);
 
-// non-gui, model-general
+// non-gui, model-specific
 gboolean model_change_trial_first (PdpSimulation *simulation, 
 				   GtkTreeStore *store);
 
-// non-gui, model-general
+// non-gui, model-specific
 gboolean model_change_trial_first_of_block (PdpSimulation *simulation, 
 					    GtkTreeStore *store);
 
