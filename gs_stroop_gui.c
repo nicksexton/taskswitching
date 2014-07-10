@@ -385,7 +385,7 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
 
   // first check response is not -666 (init value)
 
-  if (simulation->current_trial_data->response == -666) {
+  if (((stroop_trial_data *)(simulation->current_trial_data))->response == -666) {
     printf ("error! pdpgui_print_current_trial_data but current_trial_data not run (-666)\n");
     return (1);
   }
@@ -399,7 +399,7 @@ int pdpgui_print_current_trial_data (PdpSimulation * simulation) {
     g_free (path);
     
     // print data
-    gs_stroop_print_trial_data (fp, simulation->current_trial_data);
+    gs_stroop_print_trial_data (fp, (stroop_trial_data *)(simulation->current_trial_data));
     fprintf (fp, "\n");
     fclose(fp);
     return 0;
@@ -754,12 +754,12 @@ gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, Gtk
 
 
     // make stroop trial data
-    g_free (simulation->current_trial_data);
+    g_free ((stroop_trial_data *)(simulation->current_trial_data));
     simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
     make_stroop_trial_data_from_task_store (simulation->task_store, 
 					    iter, 
-					    simulation->current_trial_data);
+					    (stroop_trial_data *)(simulation->current_trial_data));
 
     // set trial parameters
     // printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
@@ -803,14 +803,14 @@ void model_change_trial_next (PdpSimulation *simulation) {
     gtk_tree_path_next(simulation->current_trial_path);
 
     // make stroop trial data
-    g_free (simulation->current_trial_data);
+    g_free ((stroop_trial_data *)(simulation->current_trial_data));
     simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
 
     // code here: set trial parameters
 
     make_stroop_trial_data_from_task_store (simulation->task_store, 
 					    iter, 
-					    simulation->current_trial_data);
+					    (stroop_trial_data *)(simulation->current_trial_data));
 
     // set trial parameters
     // printf ("debug: model_change_trial_next calling model_set_trial_params_from_task_store\n");
@@ -984,12 +984,12 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   // printf ("model %s step once\n", simulation->model->name);
 
   // check current_trial_data is init'd
-  if (simulation->current_trial_data == NULL) {
+  if ((stroop_trial_data *)(simulation->current_trial_data) == NULL) {
     model_change_trial_first (simulation, simulation->task_store); 
   }
 
   bool running = run_model_step (simulation->model, 
-				 simulation->current_trial_data, 
+				 (stroop_trial_data *)(simulation->current_trial_data), 
 				 simulation->random_generator, 
 				 response_threshold);
   
@@ -1025,7 +1025,7 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
   hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
 									  "hebb_persist");
 
-  if (simulation->current_trial_data == NULL) {
+  if ((stroop_trial_data *)(simulation->current_trial_data) == NULL) {
     model_change_trial_first (simulation, simulation->task_store); 
   }
 
@@ -1034,7 +1034,7 @@ static void model_controls_step_many_cb (GtkToolItem * tool_item,
   while (i < 10 && model_running) {
 
     model_running = run_model_step (simulation->model, 
-				    simulation->current_trial_data, 
+				    (stroop_trial_data *)(simulation->current_trial_data), 
 				    simulation->random_generator, 
 				    response_threshold);
 
@@ -1073,7 +1073,7 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
   }
 
   run_stroop_trial (simulation->model, 
-		    simulation->current_trial_data, 
+		    (stroop_trial_data *)(simulation->current_trial_data), 
 		    simulation->random_generator,
 		    response_threshold,
 		    hebb_persist,
@@ -1107,7 +1107,7 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   }
 
   run_stroop_trial (simulation->model, 
-		    simulation->current_trial_data, 
+		    (stroop_trial_data *)(simulation->current_trial_data), 
 		    simulation->random_generator,
 		    response_threshold,
 		    hebb_persist,
@@ -1165,11 +1165,11 @@ void model_run_block (PdpSimulation *simulation) {
     while (block_finished == false) {
 
       run_stroop_trial (simulation->model, 
-		    simulation->current_trial_data, 
-		    simulation->random_generator,
-		    response_threshold,
-		    hebb_persist,
-		    learning_rate);
+			(stroop_trial_data *)(simulation->current_trial_data), 
+			simulation->random_generator,
+			response_threshold,
+			hebb_persist,
+			learning_rate);
 
 
       // log output

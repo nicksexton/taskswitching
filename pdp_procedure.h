@@ -12,9 +12,9 @@
 
 
 // <---------------------------- TEMPORARY -------------------------
-#include "gs_stroop_subjects.h"
-#define NUMBER_OF_SUBJECTS 1
-#include "gs_stroop_global_params.h"
+// #include "gs_stroop_subjects.h"
+// #define NUMBER_OF_SUBJECTS 1
+// #include "gs_stroop_global_params.h"
 // -----------------------------------------------------------------
 
 typedef struct pdp_simulation {
@@ -31,7 +31,7 @@ typedef struct pdp_simulation {
   int current_subject;
   int current_trial;
 
-  subject_popn *subjects; // defined in gs_stroop_subjects.h
+  //  subject_popn *subjects; // defined in gs_stroop_subjects.h
 
 
   // task store
@@ -41,7 +41,7 @@ typedef struct pdp_simulation {
   GtkTreePath * current_trial_path;
   GtkTreeIter * current_trial_iter;
 
-  stroop_trial_data * current_trial_data;  // defined in gs_stroop_subjects
+  void * current_trial_data;  // should be cast into whatever model-specific data type
 
 
 

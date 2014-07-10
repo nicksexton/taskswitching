@@ -113,43 +113,9 @@ PdpSimulation * create_simulation () {
 
 
   simulation->random_generator = random_generator_create();
-  // simulation->model = pdp_model_create (0, "gs_stroop");
 
   // allocate memory for model parameters and set to default values
-  // NB do this with g_hash_table
-  // simulation->model_params = g_malloc (sizeof(GsStroopParameters)); // OLD, deprecated
-  // gs_stroop_parameters_set_default (simulation->model_params); // OLD, deprecated
-  // nb new parameter setting now done in main() of gs_stroop_gui
   simulation->model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
-
-  /* -------------------------------------- TEMPORARY ------------------------------------- */
-  /*
-  // initialise subjects
-  int n; 
-  simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
- 
-  for (n = 0; n < simulation->subjects->number_of_subjects; n++) {
-  
-    simulation->subjects->subj[n] = subject_create (NUM_TRIALS, 
-						    NUM_TRIALS, 
-						    MIXED_BLOCK_RUN_LENGTH);
-
-    // parameterise subject
-    subject_params_vary (simulation->subjects->subj[n], 
-			 TASKDEMAND_OUTPUT_INHIBITORY_WT,
-			 TASKDEMAND_OUTPUT_EXCITATORY_WT);
-
-    // create subject data
-    subject_init_trialblock_fixed (simulation->random_generator, simulation->subjects->subj[n], 
-				 PPN_NEUTRAL, PPN_CONGRUENT, PPN_INCONGRUENT,
-				 PPN_WORDREADING, PPN_COLOURNAMING);
-
-    // don't do mixed trials yet in this simulation				 
-    // subject_init_trialblock_mixed (my_subjects->subj[n]);
-    
-  }
-  */
-  // ---------------------------------------------------------------------------------------------
 
   simulation->current_subject = 0;
   simulation->current_trial = 0;
@@ -179,13 +145,10 @@ void free_simulation (PdpSimulation * simulation) {
   // free memory for simulation
 
   free (simulation->model->activation_parameters); 
-  //  pdp_model_free (simulation->model);
-  // g_free (simulation->model_params); // OLD, deprecated
   g_hash_table_destroy(simulation->model_params_htable); // NEW 
-  subject_popn_free (simulation->subjects);
+  //  subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
 
-  //  g_free (simulation->task_store);
   g_free (simulation->current_trial_data);
   gtk_tree_path_free(simulation->current_trial_path);
   g_free (simulation);
