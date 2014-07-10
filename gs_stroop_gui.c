@@ -726,6 +726,7 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   sprintf (textbuf, "Trial: %s", trial);
   gtk_label_set_text (GTK_LABEL(objects->model_headerbar_label_trial), textbuf);
 
+  /*
   // update trial data label
   stroop_trial_data_print_as_string (textbuf, 100, 
 				     objects->simulation->current_trial_data); 
@@ -734,6 +735,8 @@ static void model_headerbar_update_labels (PdpGuiObjects * objects) {
   // update spin button
   gtk_spin_button_set_value (GTK_SPIN_BUTTON(objects->model_headerbar_spin_trial), 
   			     model_current_trial_get(objects->simulation));
+
+  */
 
   g_free(trial);
 
@@ -1334,8 +1337,10 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   grid_headerbar = gtk_grid_new();
   gtk_grid_set_column_spacing (GTK_GRID(grid_headerbar), 10);
 
-  // spin button for controlling current trial  
 
+
+  // spin button for controlling current trial  
+  /* // NB commented out to remove dependency on simulation->subjects?
   current_trial_adjustment = gtk_adjustment_new (simulation->current_trial, 0, 
 						 (simulation->subjects->
 						 subj[simulation->current_subject]->num_fixed_trials)-1,
@@ -1345,6 +1350,8 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   objects->model_headerbar_spin_trial = spin_button;
 
   gtk_grid_attach (GTK_GRID(grid_headerbar), spin_button, 0, 0, 1, 1);
+  */
+
 
 
   char textbuf[100];
@@ -1358,6 +1365,8 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   objects->model_headerbar_label_trial = label1; // keep track of label so we can update it
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 2, 0, 1, 1);
 
+
+  /*
   // display input pattern, trialtype, ...?
   stroop_trial_data_print_as_string (textbuf, 100, 
 				     fixed_block_trial_data_get(simulation->subjects,
@@ -1368,7 +1377,7 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
   gtk_widget_set_size_request (label1, 300, 30); // max size so spin button is always in same place
   objects->model_headerbar_label_trial_data = label1; // keep track of label so we can update it
   gtk_grid_attach (GTK_GRID(grid_headerbar), label1, 3, 0, 1, 1);
-
+  */
 
   
 

@@ -73,8 +73,8 @@ const stroop_trial_data * fixed_block_trial_data_get (subject_popn * my_subjects
   stroop_trial_data * trial_data;
   trial_data = &(my_subjects->subj[subject_id]->fixed_trials[trial_id]);
   return trial_data;
-
 }
+
 
 bool stroop_trial_data_print_as_string (char * destination_string, int destination_length, const stroop_trial_data * trial_data) {
 

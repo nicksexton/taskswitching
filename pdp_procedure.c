@@ -123,6 +123,7 @@ PdpSimulation * create_simulation () {
   simulation->model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
 
   /* -------------------------------------- TEMPORARY ------------------------------------- */
+  /*
   // initialise subjects
   int n; 
   simulation->subjects = subject_popn_create (NUMBER_OF_SUBJECTS);
@@ -147,7 +148,7 @@ PdpSimulation * create_simulation () {
     // subject_init_trialblock_mixed (my_subjects->subj[n]);
     
   }
-
+  */
   // ---------------------------------------------------------------------------------------------
 
   simulation->current_subject = 0;
