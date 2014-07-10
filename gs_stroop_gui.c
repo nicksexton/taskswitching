@@ -827,6 +827,7 @@ void model_change_trial_next (PdpSimulation *simulation) {
 
 
 // handle callback from change trial spin_button 
+/*
 static void model_change_trial_cb (GtkWidget * spin_button, 
 				   PdpGuiObjects * objects) {
 
@@ -871,6 +872,7 @@ static void model_change_trial_cb (GtkWidget * spin_button,
   g_free(new_path_str);
 
 }
+*/
 
 
 gboolean model_change_trial_first (PdpSimulation *simulation, 
@@ -1260,8 +1262,8 @@ static GtkWidget* create_notepage_model_main(PdpGuiObjects * objects) {
 
   GtkWidget *grid_headerbar;
   GtkWidget *label1;
-  GtkAdjustment *current_trial_adjustment;
-  GtkWidget *spin_button;
+  // GtkAdjustment *current_trial_adjustment;
+  // GtkWidget *spin_button;
 
   GtkWidget *sub_notepage;
 

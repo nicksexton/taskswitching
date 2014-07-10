@@ -22,17 +22,11 @@ typedef struct pdp_simulation {
   pdp_model *model; // head of a possible list of models
   gsl_rng * random_generator;
 
-  // should make params and subject(s) generic
-  // GsStroopParameters *model_params; // defined in gs_stroop.h. OLD, deprecated
-
   GHashTable *model_params_htable; // NEW way to store global params
 
   // current state of the simulation
   int current_subject;
   int current_trial;
-
-  //  subject_popn *subjects; // defined in gs_stroop_subjects.h
-
 
   // task store
   // In new version, move toward using the task_store as a repository for trial info
@@ -42,8 +36,6 @@ typedef struct pdp_simulation {
   GtkTreeIter * current_trial_iter;
 
   void * current_trial_data;  // should be cast into whatever model-specific data type
-
-
 
 } PdpSimulation;
 
