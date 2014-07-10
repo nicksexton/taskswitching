@@ -143,7 +143,7 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation);
 
 
 // non-gui, model-general, needs modification
-gboolean model_current_block_is_last (PdpSimulation *simulation);
+// gboolean model_current_block_is_last (PdpSimulation *simulation);
 
 // non-gui, model-general, needs modification
 gboolean model_change_trial (PdpSimulation *simulation, 

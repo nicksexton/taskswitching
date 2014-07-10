@@ -763,8 +763,7 @@ gint model_current_trial_get (PdpSimulation *simulation) {
 */
 
 
-
-
+/* Moved to pdp_procedure.c
 gboolean model_current_block_is_last (PdpSimulation *simulation) {
 
   int num_blocks;
@@ -791,6 +790,7 @@ gboolean model_current_block_is_last (PdpSimulation *simulation) {
 
   }
 }
+*/
 
 
 gboolean model_change_trial (PdpSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {

@@ -52,7 +52,15 @@ typedef struct pdp_simulation {
 gint model_current_trial_get (PdpSimulation *simulation);
 
 // non-gui, model-general, needs modification
+gboolean model_current_block_is_last (PdpSimulation *simulation);
+
+// non-gui, model-general, needs modification
 gboolean model_current_trial_is_last (PdpSimulation *simulation);
+
+
+
+
+
 
 // allocates memory for simulation, inits subject population, runs constructors
 // non-gui, model specific
