@@ -86,7 +86,7 @@ gs_stroop_default_params - deprecated, now set using the import functions
 
 ============================== 3-task switching models ==================================
 3task_procedure - build the simulation, define tasks, trial data, etc.
-3task_model_gs - gilbert & shalllice GRAIN model adapted to 3 tasks
+3task_model_gs - gilbert & shalllice GRAIN model adapted to 3 tasks (ie. lateral inhibition only)
 3task_gui - gui for implementing all 3-task switching models
 
 
