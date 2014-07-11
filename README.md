@@ -57,3 +57,36 @@ however - parameters are envisaged to be portable across alternative models of t
 #### gui_import branch ####
 some functions (pdp_import etc) written to implement parameter import via a hash table.
  
+
+
+
+###### UPDATE 10-07-14 ######
+Adapting model to 3 task switching. Uses generic code from previous (gilbert & shallice) model.
+
+
+=============================== Generic code ===========================
+lib_cairox - cairo functions
+lib_string - string read/write functions
+pdp_objects - generic, pdp functions
+pdp_activation_funcs.c - generic, pdp functions
+pdp_procedure - generic, functions for building simulations
+pdp_import - generic, for importing data (ie, parameters, tasks)
+pdpgui_import.c - generic, for importing 
+
+
+=============================== Gilbert & Shallice model ===============================
+gs_stroop_subjects - functions specific to the model (data types for trials, etc)
+gs_stroop_sim_indiffs - simulation (0)
+gs_stroop_model - cognitive model
+gs_stroop_gui - gui for running simulations using the gs_stroop model.
+gs_stroop_import - importing data (ie parameters, tasks) into the model
+gs_stroop_analyse - (deprecated, only used in simulation 0)
+gs_stroop_default_params - deprecated, now set using the import functions
+
+
+============================== 3-task switching models ==================================
+3task_procedure - build the simulation, define tasks, trial data, etc.
+3task_model_gs - gilbert & shalllice GRAIN model adapted to 3 tasks
+3task_gui - gui for implementing all 3-task switching models
+
+
