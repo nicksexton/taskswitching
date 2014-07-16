@@ -53,7 +53,7 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation);
 
 
 
-
+/*
 // allocates memory for simulation, inits subject population, runs constructors
 // non-gui, model specific
 PdpSimulation * create_simulation ();
@@ -61,6 +61,6 @@ PdpSimulation * create_simulation ();
 // frees memory for simulation
 // non-gui, model specific
 void free_simulation (PdpSimulation * simulation);
-
+*/
 
 #endif

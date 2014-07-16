@@ -1,5 +1,5 @@
-#ifndef pdp_import_h
-#define pdp_import_h
+#ifndef triple_task_import_h
+#define triple_task_import_h
 
 
 #define MAX_FIELDS 10
@@ -12,7 +12,6 @@
 #include <stdbool.h>
 #include <gtk/gtk.h>
 
-/*
 // tree model for storing parameter names/values
 enum {
   COL_PARAMETER_NAME,
@@ -28,11 +27,12 @@ enum {
   COL_TASK_PATTERN_1,
   COL_TASK_PATTERN_2,
   COL_TASK_PATTERN_3,
+  COL_TASK_PATTERN_4,
   COL_TASK_PARAM_1,
   COL_TASK_PARAM_2,
   N_TASK_COLUMNS
 };
-*/
+
 
 
 

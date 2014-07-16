@@ -1,3 +1,5 @@
+#include "3task_model_gs.h"
+#include "3task_default_params.h"
 
 
 void three_task_parameters_htable_set_default (GHashTable * params_table) {
@@ -80,4 +82,38 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
 
 
   return;
+}
+
+
+
+
+
+void init_model (pdp_model * this_model, GHashTable *model_params_htable) {
+  // just allocate memory for simulation and run constructors  
+
+  act_func_params * activation_parameters = g_malloc (sizeof(act_func_params));
+  activation_parameters->type = ACT_GS;
+  activation_parameters->params.gs.step_size = *(double *)g_hash_table_lookup(model_params_htable, "step_size");
+  activation_parameters->params.gs.act_max = *(double *)g_hash_table_lookup(model_params_htable, "activation_max");
+  activation_parameters->params.gs.act_min = *(double *)g_hash_table_lookup(model_params_htable, "activation_min");
+  
+  this_model->activation_parameters = activation_parameters;
+
+  // now create the model
+  // gs_stroop_model_build (this_model, model_params_htable); 
+  printf ("in init_model, create model\n");
+
+}
+
+void deinit_model (pdp_model * this_model) {
+  // delete model components
+  // can be re-initialised with init_model
+
+  printf ("in deinit_model, free model\n");
+  /*
+  pdp_model_component_free (this_model->components);
+  this_model->components = NULL;
+  */
+
+  g_free (this_model->activation_parameters);
 }

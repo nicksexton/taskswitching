@@ -1,5 +1,6 @@
 #ifndef pdp_objects_h
 #define pdp_objects_h
+#include <stdbool.h>
 
 
 /* ACTIVATION FUNCTIONS */

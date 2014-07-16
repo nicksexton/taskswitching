@@ -1445,7 +1445,7 @@ void deinit_model (pdp_model * this_model) {
 
 }
 
-/*
+
 
 PdpSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
@@ -1527,7 +1527,7 @@ void free_simulation (PdpSimulation * simulation) {
 
 }
 
-*/
+
 
 static void main_quit (GtkWidget *window, PdpGuiObjects  *objects) {
 

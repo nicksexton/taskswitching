@@ -102,7 +102,7 @@ gboolean model_current_trial_is_last (PdpSimulation *simulation) {
 }
 
 
-
+/*
 
 PdpSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
@@ -154,3 +154,5 @@ void free_simulation (PdpSimulation * simulation) {
   g_free (simulation);
 
 }
+
+*/
