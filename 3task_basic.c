@@ -17,6 +17,7 @@ int main (int argc, char *argv[]) {
   gtk_init (&argc, &argv);
 
   TripleTaskSimulation * simulation = create_simulation();
+  FileData *param_config_file, *task_config_file;
 
   simulation->model = pdp_model_create (0, "3task_gs"); 
   three_task_parameters_htable_set_default (simulation->model_params_htable);
@@ -27,17 +28,19 @@ int main (int argc, char *argv[]) {
                                                                    // see gs_stroop_model for example
 
   // Import parameters
-  FileData *  param_config_file = create_param_import_objects();
+  param_config_file = create_param_import_objects();
   pdp_import_select_file ("3task_model_gs_params_default.conf", param_config_file);
   pdp_load_from_file_short (param_config_file);
- 
+  three_task_gs_parameters_import_commit (param_config_file, simulation->model_params_htable);
 
   // Import tasks
-  FileData * task_config_file = triple_task_create_task_import_objects();
+  task_config_file = triple_task_create_task_import_objects();
   pdp_import_select_file ("task_import_test.conf", task_config_file);
-
   pdp_load_from_file_long (task_config_file);
   triple_task_task_import_commit (task_config_file, simulation->task_store);
+
+
+  // Now do stuff with the model and the parameters - eg. run all blocks?
 
 
   // free memory
