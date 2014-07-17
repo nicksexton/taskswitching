@@ -8,11 +8,16 @@ LIBS = `pkg-config --libs gtk+-3.0` -lm
 OBJECTS = gs_stroop_model.o pdp_objects.o pdp_activation_funcs.o pdp_procedure.o pdp_import.o random_generator_functions.o gs_stroop_subjects.o gs_stroop_analyse.o gs_stroop_import.o 
 GUI_OBJECTS = pdpgui_plot.o pdpgui_import.o lib_cairox.o 
 
+TRIPLETASK_OBJECTS = pdp_objects.o pdp_activation_funcs.o random_generator_functions.o 3task_import.o 3task_procedure.o 3task_model_gs.o
+
 BINARIES = gs_stroop_sim_indiffs
 GUI_BINARIES = gs_stroop_gui
+TRIPLETASK = 3task_basic
+
 
 all: $(BINARIES) $(GUI_BINARIES)
 gui: $(GUI_BINARIES)
+tripletask: $(TRIPLETASK)
 console: $(BINARIES)
 
 
@@ -54,6 +59,18 @@ gs_stroop_gui.o:
 	$(CC) -c gs_stroop_gui.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 
+# tripletask
+3task_basic: 3task_basic.o $(TRIPLETASK_OBJECTS)
+	$(CC) -o $@ $(CFLAGS) 3task_basic.o $(TRIPLETASK_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
+
+3task_procedure.o: 
+	$(CC) -c 3task_procedure.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
+
+3task_model_gs.o: 
+	$(CC) -c 3task_model_gs.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
+
+3task_import.o: 
+	$(CC) -c 3task_import.c $(CFLAGS) -lgsl -lgslcblas -lm $(LIBS)
 
 clean: 
 	rm -f gs_stroop *.o *.[ch]~ $(BINARIES) $(GUI_BINARIES)

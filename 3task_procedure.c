@@ -2,6 +2,7 @@
 #include "3task_procedure.h"
 #include "random_generator_functions.h"
 #include <string.h>
+#include <gtk/gtk.h>
 
 
 // NEW
@@ -371,12 +372,11 @@ TripleTaskSimulation * create_simulation () {
 
   TripleTaskSimulation *simulation = g_malloc (sizeof(TripleTaskSimulation));
 
-
-
-
+  printf ("in create_simulation, creating random generator\n");
   simulation->random_generator = random_generator_create();
 
   // allocate memory for model parameters and set to default values
+  printf ("in create_simulation, creating model_params_htable\n");
   simulation->model_params_htable = g_hash_table_new (g_str_hash, g_str_equal); // NEW way to store global params
 
   simulation->current_subject = 0;
@@ -384,7 +384,7 @@ TripleTaskSimulation * create_simulation () {
 
 
   // set up the task store
-
+  printf ("in create_simulation, creating task_store\n");
   simulation->task_store = gtk_tree_store_new (N_TASK_COLUMNS,
 					       G_TYPE_STRING,
 					       G_TYPE_INT,

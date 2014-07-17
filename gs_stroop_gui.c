@@ -8,6 +8,7 @@
 #include <gtk/gtk.h>
 #include "gs_stroop.h"
 #include "pdp_objects.h"
+#include "pdp_procedure.h"
 
 #include <gsl/gsl_randist.h>
 #include "random_generator_functions.h" // for gaussian noise
