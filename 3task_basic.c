@@ -26,15 +26,17 @@ int main (int argc, char *argv[]) {
   init_model (simulation->model, simulation->model_params_htable); // needs to be defined in 3_task_model.c
                                                                    // see gs_stroop_model for example
 
-  printf ("in main, selecting import file\n");
-  //  param_config_file = create_param_import_objects();
+  // Import parameters
+  FileData *  param_config_file = create_param_import_objects();
+  pdp_import_select_file ("3task_model_gs_params_default.conf", param_config_file);
+  pdp_load_from_file_short (param_config_file);
+ 
+
+  // Import tasks
   FileData * task_config_file = triple_task_create_task_import_objects();
   pdp_import_select_file ("task_import_test.conf", task_config_file);
 
-  printf ("in main, loading from config file\n");
-  // do the task/param import into the simulation here
   pdp_load_from_file_long (task_config_file);
-  printf ("in main, committing import\n");
   triple_task_task_import_commit (task_config_file, simulation->task_store);
 
 
