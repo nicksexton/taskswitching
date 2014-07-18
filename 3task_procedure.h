@@ -8,7 +8,7 @@
 #include "pdp_objects.h"
 
 
-typedef struct triple_task_simulation {
+typedef struct three_task_simulation {
 
   pdp_model *model; // head of a possible list of models
   gsl_rng * random_generator;
@@ -28,7 +28,7 @@ typedef struct triple_task_simulation {
 
   void * current_trial_data;  // should be cast into whatever model-specific data type
 
-} TripleTaskSimulation;
+} ThreeTaskSimulation;
 
 
 typedef struct three_task_data {
@@ -45,6 +45,21 @@ typedef struct three_task_data {
 } ThreeTaskData;
 
 
+
+gint procedure_current_trial_get (ThreeTaskSimulation *simulation);
+gboolean procedure_current_block_is_last (ThreeTaskSimulation *simulation);
+gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation);
+void procedure_run_block (ThreeTaskSimulation *simulation);
+void procedure_run_all_blocks (ThreeTaskSimulation * simulation );
+gboolean procedure_change_trial (ThreeTaskSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path);
+void procedure_change_trial_next (ThreeTaskSimulation *simulation);
+gboolean procedure_change_trial_first (ThreeTaskSimulation *simulation, 
+				       GtkTreeStore *store);
+gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation, 
+						GtkTreeStore *store);
+bool procedure_run_current_trial (ThreeTaskSimulation * simulation);
+bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation);
+
 bool triple_task_model_parameter_import (gchar* param_name, gchar* param_value, GHashTable *model_params_ht);
 
 void triple_task_model_parameters_import_commit (FileData *config_file, 
@@ -59,8 +74,8 @@ void triple_task_task_import_commit (FileData *task_config_file,
 
 FileData * triple_task_create_task_import_objects();
 
-TripleTaskSimulation * create_simulation ();
+ThreeTaskSimulation * create_simulation ();
 
-void free_simulation (TripleTaskSimulation * simulation);
+void free_simulation (ThreeTaskSimulation * simulation);
 
 #endif

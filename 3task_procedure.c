@@ -4,6 +4,432 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
+#define DATAFILE "3task_test.txt"
+
+gint procedure_current_trial_get (ThreeTaskSimulation *simulation) {
+  
+  gint depth = -1;
+  gint *current_trial;
+
+  current_trial = gtk_tree_path_get_indices_with_depth (simulation->current_trial_path, &depth);
+
+  // printf ("procedure_current_trial_get, returning depth %d", depth);
+
+  if (depth > -1) {
+    // printf ("trial %d\n", current_trial[depth-1]);
+    return current_trial[depth-1];
+  }
+
+  else {
+    // printf ("\n");
+    return -99;
+  }
+}
+
+
+gboolean procedure_current_block_is_last (ThreeTaskSimulation *simulation) {
+
+  int num_blocks;
+  gint * trial_path;
+  // get number of top level nodes
+  num_blocks = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store), NULL); 
+  
+  if (num_blocks == 0) {
+    printf ("no blocks, is the task store empty?");
+    return true;
+  }
+  else {
+
+   trial_path = gtk_tree_path_get_indices (simulation->current_trial_path);
+   if (trial_path == NULL) {
+     return true;
+   }
+   
+   else if (trial_path[0] == num_blocks) {
+     printf ("last block!\n");
+     return true;
+   }
+   else return false;
+
+  }
+}
+
+
+// returns false if there are no trials
+gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
+
+  // get number of children of current parent
+  GtkTreeIter *current_trial = g_malloc (sizeof(GtkTreeIter));
+  GtkTreeIter *parent = g_malloc (sizeof(GtkTreeIter));
+  int num_trials;
+  int this_trial;
+
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), 
+			      current_trial, 
+			      simulation->current_trial_path)){
+    printf ("error in procedure_current_trial_is_last, there appear to be no trials loaded \n"); 
+    return false;
+  }
+  else {
+    if (!gtk_tree_model_iter_parent (GTK_TREE_MODEL(simulation->task_store),
+				     parent,
+				     current_trial)) {
+      printf ("error in model_current_trial_is_last, " 
+	      "current_trial appears to be top level (ie block header\n");
+      return false;
+    }
+    else {
+      num_trials = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store),
+						   parent);
+      this_trial = procedure_current_trial_get (simulation);
+      // if (this_trial < (num_trials - 1)) {
+      if ((this_trial + 1) < num_trials) {
+	// printf ("%dth trial of %d, continuing\n", (this_trial + 1), num_trials);
+	return false;
+      }
+      else {
+	// printf ("current trial is last one\n");
+	return true;
+      }
+    }
+  }
+}
+
+
+
+void procedure_run_block (ThreeTaskSimulation *simulation) {
+
+  /*
+  double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  double learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  double squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+  hebbian_learning_persistence hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+									  "hebb_persist");
+  double rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "rsi_scale_param");
+  */
+
+  bool block_finished = false;
+
+  // run block from start
+    procedure_change_trial_first_of_block (simulation, simulation->task_store); 
+
+    while (block_finished == false) {
+
+      // Run trial
+      /*
+      run_stroop_trial (simulation->model, 
+			(stroop_trial_data *)(simulation->current_trial_data), 
+			simulation->random_generator,
+			response_threshold,
+			hebb_persist,
+			learning_rate);
+      */
+
+      // log output
+      procedure_print_current_trial_data (simulation);
+
+      // check for last trial of block BEFORE we change trial and loop again,
+      // as we want last trial to be executed on final loop
+      block_finished = procedure_current_trial_is_last (simulation);
+
+      // set new trial
+      procedure_change_trial_next(simulation); // sets task parameters here
+
+      // squash activation values
+      /*
+      model_init_activation (simulation->model, 
+			     pow(1-squashing_param, 
+				 rsi_scale_param));
+      
+      printf ("scaling TD activation by %4.2f\n", 
+	      pow(1-squashing_param, 
+		  rsi_scale_param));
+      */
+    } 
+}
+
+void procedure_run_all_blocks (ThreeTaskSimulation * simulation ) {
+
+  gint current_block = 0;
+  // init_model (simulation->model, simulation->model_params_htable);
+  
+    // change to block 0, trial 0    
+    procedure_change_trial_first (simulation, simulation->task_store);
+  
+
+    // for each block
+    do {
+
+      // init model (zero activations)
+      // model_initialise (simulation);
+
+      // run block
+      procedure_run_block (simulation);
+
+
+      current_block ++;
+      printf ("in model_run_all_blocks: done with block %d\n", current_block);
+      gtk_tree_path_free (simulation->current_trial_path);
+      simulation->current_trial_path = gtk_tree_path_new_from_indices(current_block, 0, -1);
+      // likely to segfault if there are blocks but no trials loaded (can this happen?)
+    } while (procedure_current_block_is_last(simulation) == false);
+
+    procedure_change_trial_first (simulation, simulation->task_store);
+}
+
+
+gboolean procedure_change_trial (ThreeTaskSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path) {
+
+  // get iter to new path
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+
+  if (gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, new_trial_path)) {
+
+
+    // make stroop trial data
+    // g_free ((stroop_trial_data *)(simulation->current_trial_data));
+    // simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
+
+
+    // make_stroop_trial_data_from_task_store (simulation->task_store, 
+    //					    iter, 
+    //					    (stroop_trial_data *)(simulation->current_trial_data));
+
+    // set trial parameters
+    // printf ("debug: model_change_trial calling model_set_trial_params_from_task_store\n");
+    //model_set_trial_params_from_task_store (simulation->task_store,
+    //					    iter,
+    //					    simulation->model_params_htable);
+
+
+    // update the path
+    gtk_tree_path_free (simulation->current_trial_path);
+    simulation->current_trial_path = new_trial_path;
+    
+    return TRUE;
+  }
+
+  else {
+    g_free (iter);
+    printf ("error! model_change_trial failed to acquire valid iter from current_trial_path, returning FALSE\n");
+    return FALSE;
+  }
+}
+
+// nb function as-is does not update current_data, just sets the path
+void procedure_change_trial_next (ThreeTaskSimulation *simulation) {
+
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  // check next trial exists:
+  gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, 
+			  simulation->current_trial_path);
+
+  if (gtk_tree_model_iter_next (GTK_TREE_MODEL(simulation->task_store), iter)) {
+  
+    // advance the trial path
+    gtk_tree_path_next(simulation->current_trial_path);
+
+    // make stroop trial data
+    //    g_free ((stroop_trial_data *)(simulation->current_trial_data));
+    // simulation->current_trial_data = g_malloc (sizeof(stroop_trial_data));
+
+    // code here: set trial parameters
+
+    // make_stroop_trial_data_from_task_store (simulation->task_store, 
+    //					    iter, 
+    //					    (stroop_trial_data *)(simulation->current_trial_data));
+
+    // set trial parameters
+    // printf ("debug: model_change_trial_next calling model_set_trial_params_from_task_store\n");
+    // model_set_trial_params_from_task_store (simulation->task_store,
+    //					    iter,
+    //					    simulation->model_params_htable);
+
+
+  }
+
+  printf ("new current trial path: %s\n", gtk_tree_path_to_string (simulation->current_trial_path));
+  
+}
+
+gboolean procedure_change_trial_first (ThreeTaskSimulation *simulation, 
+				   GtkTreeStore *store) {
+
+  GtkTreeIter first_block, first_trial;
+  if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(simulation->task_store), &first_block)) {
+    // move to child node (also check this succeeds)
+    if (gtk_tree_model_iter_children (GTK_TREE_MODEL(simulation->task_store), 
+				      &first_trial, 
+				      &first_block)) {
+      // iter now positioned for first trial, set trial buffer
+      procedure_change_trial (simulation, simulation->task_store, 
+			  gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), &first_trial));
+      //      simulation->current_trial_iter = first_trial; // this line might not work
+
+      gtk_tree_path_free (simulation->current_trial_path);
+      simulation->current_trial_path = 
+                      gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), 
+					      &first_trial);
+      
+      return true;
+    }
+    else return false;
+  }
+  else return false;
+}
+
+
+gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation, 
+					    GtkTreeStore *store) {
+
+  GtkTreeIter trial, block;
+
+  if (!gtk_tree_model_get_iter (GTK_TREE_MODEL(simulation->task_store), &trial, simulation->current_trial_path)) {
+    printf ("error! model_change_trial_first_of_block could not acquire iter from current_trial_path\n");
+    return false;
+  }
+  else {
+
+    if (!gtk_tree_model_iter_parent(GTK_TREE_MODEL(simulation->task_store), &block, &trial)) {
+      printf ("error! model_change_trial_first_of_block could not acquire parent iter, "
+	      "is current_trial_path at top level?\n");
+      return false;
+    }
+    else {
+
+      if (!gtk_tree_model_iter_children(GTK_TREE_MODEL(simulation->task_store), &trial, &block)) {
+	printf ("error! model_change_trial_first_of_block could not acquire child iter of parent, "
+		"really weird?\n");
+	return false;
+      }
+
+      else {
+       
+      // iter now positioned for first trial, set trial buffer
+      procedure_change_trial (simulation, simulation->task_store, 
+			  gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), &trial));
+      //      simulation->current_trial_iter = first_trial; // this line might not work
+
+      gtk_tree_path_free (simulation->current_trial_path);
+      simulation->current_trial_path = 
+                      gtk_tree_model_get_path(GTK_TREE_MODEL(simulation->task_store), 
+					      &trial);
+
+	return true;
+
+      }      
+    }
+  }
+}
+
+
+bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
+
+  // wraps run_model or similar, in 3task_model_gs.c?
+  
+  // for now, just print current trial data
+  procedure_print_current_trial_data (simulation);
+  return TRUE;
+
+}
+
+
+/* Try to do without this code!
+
+// nb does not print newline so additional data can be written to the row
+int three_task_print_trial_data (FILE * fp, stroop_trial_data * trial_data) {
+  
+  if (fp == NULL) {
+    printf ("error, three_task_print_trial_data could not open fp, appears to be null");
+    return 1;
+  }
+  else {
+    fprintf (fp, "%d\t", trial_data->trial_id);
+    fprintf (fp, "%d\t", trial_data->trial_type);
+    fprintf (fp, "%d\t", trial_data->cue);
+    fprintf (fp, "%d\t", trial_data->stim_0);
+    fprintf (fp, "%d\t", trial_data->stim_1);
+    fprintf (fp, "%d\t", trial_data->stim_2);
+    fprintf (fp, "%d\t", trial_data->response);
+    fprintf (fp, "%d\t", trial_data->response_time);
+
+    return 0;
+  }
+}
+*/
+
+bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation) {
+  FILE *fp;
+  gchar *path;
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, simulation->current_trial_path)) {
+
+    g_free (iter);
+    printf ("error! three_task_print_current_trial_data failed to acquire valid iter from current_trial_path,"
+	    "returning FALSE\n");
+    return FALSE;
+  }
+
+  else {
+    fp = fopen (DATAFILE, "a");
+    int trial_id, stim_0, stim_1, stim_2;
+
+    path = gtk_tree_path_to_string(simulation->current_trial_path);
+    fprintf (fp, "%s\t", path);
+    g_free (path);
+
+    gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
+			COL_TASK_ID, &trial_id,
+			COL_TASK_PATTERN_1, &stim_0,
+			COL_TASK_PATTERN_2, &stim_1,
+			COL_TASK_PATTERN_3, &stim_2,
+			-1);
+
+    fprintf (fp, "%d\t", trial_id);
+    //    fprintf (fp, "%d\t", trial_data->trial_type);
+    //    fprintf (fp, "%d\t", trial_data->cue);
+    fprintf (fp, "%d\t", stim_0);
+    fprintf (fp, "%d\t", stim_1);
+    fprintf (fp, "%d\t", stim_2);
+    //    fprintf (fp, "%d\t", trial_data->response);
+    //    fprintf (fp, "%d\t", trial_data->response_time);
+
+    return TRUE;
+  }  
+
+
+  // first check response is not -666 (init value)
+  /*
+  if (((ThreeTaskData *)(simulation->current_trial_data))->response == -666) {
+    printf ("error! three_task_print_current_trial_data but current_trial_data not run (-666)\n");
+    return (1);
+  }
+  else {
+    // open file pointer here on new line at end of file (append)
+    fp = fopen (DATAFILE, "a");
+
+    // print path
+    path = gtk_tree_path_to_string(simulation->current_trial_path);
+    fprintf (fp, "%s\t", path);
+    g_free (path);
+    
+    // print data
+    three_task_print_trial_data (fp, (ThreeTaskData *)(simulation->current_trial_data));
+    fprintf (fp, "\n");
+    fclose(fp);
+    return 0;
+    
+  }
+  */
+
+}
+
+
+
+
 
 // NEW
 // import function for generic 3-task switching model
@@ -367,10 +793,10 @@ FileData * triple_task_create_task_import_objects() {
 
 
 
-TripleTaskSimulation * create_simulation () {
+ThreeTaskSimulation * create_simulation () {
   // just allocate memory for simulation and run constructors
 
-  TripleTaskSimulation *simulation = g_malloc (sizeof(TripleTaskSimulation));
+  ThreeTaskSimulation *simulation = g_malloc (sizeof(ThreeTaskSimulation));
 
   printf ("in create_simulation, creating random generator\n");
   simulation->random_generator = random_generator_create();
@@ -404,7 +830,7 @@ TripleTaskSimulation * create_simulation () {
 
 
 
-void free_simulation (TripleTaskSimulation * simulation) {
+void free_simulation (ThreeTaskSimulation * simulation) {
   // free memory for simulation
 
   free (simulation->model->activation_parameters); 

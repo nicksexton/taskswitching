@@ -3,6 +3,7 @@
 #include "3task_default_params.h"
 
 
+
 void three_task_parameters_htable_set_default (GHashTable * params_table) {
 
   double * activation_max = g_malloc(sizeof(double));
@@ -320,9 +321,9 @@ void init_model (pdp_model * this_model, GHashTable *model_params_htable) {
 
   // now create the model
   // gs_stroop_model_build (this_model, model_params_htable); 
-  printf ("in init_model, create model\n");
-
+  printf ("in init_model, create the model\n");
 }
+
 
 void deinit_model (pdp_model * this_model) {
   // delete model components
@@ -336,3 +337,5 @@ void deinit_model (pdp_model * this_model) {
 
   g_free (this_model->activation_parameters);
 }
+
+

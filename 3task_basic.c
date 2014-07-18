@@ -5,8 +5,8 @@
 #include "3task_model_gs.h" // model
 #include "3task_procedure.h"
 
-
-
+// #define DATAFILE "3task_test.txt"
+// defined elsewhere? 3task_basic.c for now
 
 
 // main function - basic test version of the model
@@ -16,13 +16,13 @@ int main (int argc, char *argv[]) {
 
   gtk_init (&argc, &argv);
 
-  TripleTaskSimulation * simulation = create_simulation();
+  ThreeTaskSimulation * simulation = create_simulation();
   FileData *param_config_file, *task_config_file;
 
   simulation->model = pdp_model_create (0, "3task_gs"); 
   three_task_parameters_htable_set_default (simulation->model_params_htable);
 
-  // now build the model
+  // build the model
   printf ("in main, building the model\n");
   init_model (simulation->model, simulation->model_params_htable); // needs to be defined in 3_task_model.c
                                                                    // see gs_stroop_model for example
@@ -41,7 +41,7 @@ int main (int argc, char *argv[]) {
 
 
   // Now do stuff with the model and the parameters - eg. run all blocks?
-
+  procedure_run_all_blocks (simulation);
 
   // free memory
   printf ("in main, now freeing memory\n");
