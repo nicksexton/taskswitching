@@ -396,7 +396,7 @@ bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation) {
     fprintf (fp, "%d\t", stim_2);
     //    fprintf (fp, "%d\t", trial_data->response);
     //    fprintf (fp, "%d\t", trial_data->response_time);
-
+    fprintf (fp, "\n");
     return TRUE;
   }  
 
