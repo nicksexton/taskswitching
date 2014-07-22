@@ -97,7 +97,8 @@ gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
 
 
 
-void procedure_run_block (ThreeTaskSimulation *simulation) {
+void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation, 
+			  void (*model_run)(pdp_model*, three_task_simulation*) ) {
 
   /*
   double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
@@ -116,6 +117,8 @@ void procedure_run_block (ThreeTaskSimulation *simulation) {
     while (block_finished == false) {
 
       // Run trial
+      procedure_run_current_trial (model, simulation, 
+				   void (*model_run)(pdp_model*, three_task_simulation*) );
       /*
       run_stroop_trial (simulation->model, 
 			(stroop_trial_data *)(simulation->current_trial_data), 
@@ -148,7 +151,8 @@ void procedure_run_block (ThreeTaskSimulation *simulation) {
     } 
 }
 
-void procedure_run_all_blocks (ThreeTaskSimulation * simulation ) {
+void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulation, 
+			       void (*model_run)(pdp_model*, three_task_simulation*) ) {
 
   gint current_block = 0;
   // init_model (simulation->model, simulation->model_params_htable);
@@ -164,7 +168,7 @@ void procedure_run_all_blocks (ThreeTaskSimulation * simulation ) {
       // model_initialise (simulation);
 
       // run block
-      procedure_run_block (simulation);
+      procedure_run_block (model, simulation, void (*model_run)(pdp_model*, three_task_simulation*));
 
 
       current_block ++;
@@ -325,10 +329,13 @@ gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation,
 }
 
 
-bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
+// bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
+bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
+				  void (*model_run)(pdp_model*, three_task_simulation*)) {
 
   // wraps run_model or similar, in 3task_model_gs.c?
-  
+  model_run (model, simulation);
+
   // for now, just print current trial data
   procedure_print_current_trial_data (simulation);
   return TRUE;

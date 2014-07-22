@@ -26,6 +26,9 @@ int main (int argc, char *argv[]) {
   printf ("in main, building the model\n");
   init_model (simulation->model, simulation->model_params_htable); // needs to be defined in 3_task_model.c
                                                                    // see gs_stroop_model for example
+  // define function pointer to model_run funciton
+  void (*model_run)(pdp_model*, ThreeTaskSimulation*);
+  model_run = &three_task_model_gs_run;
 
   // Import parameters
   param_config_file = create_param_import_objects();
@@ -41,13 +44,12 @@ int main (int argc, char *argv[]) {
 
 
   // Now do stuff with the model and the parameters - eg. run all blocks?
-  procedure_run_all_blocks (simulation);
+  procedure_run_all_blocks (simulation->model, simulation, (*model_run)(simulation->model, simulation));
 
   // free memory
-  printf ("in main, now freeing memory\n");
   pdp_model_free (simulation->model);  
   free_simulation (simulation);
-  // g_free (objects->param_config_file);
+  g_free (param_config_file);
   g_free (task_config_file);
   
   return 0;
