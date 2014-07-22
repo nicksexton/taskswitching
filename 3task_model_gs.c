@@ -306,6 +306,12 @@ void three_task_gs_parameters_import_commit (FileData *config_file,
 }
 
 
+void three_task_model_gs_run (pdp_model * model, ThreeTaskSimulation * simulation) {
+
+  printf ("model_run is running model!\n");
+
+}
+
 
 
 void init_model (pdp_model * this_model, GHashTable *model_params_htable) {
@@ -339,8 +345,4 @@ void deinit_model (pdp_model * this_model) {
 }
 
 
-void three_task_model_gs_run (pdp_model * model, ThreeTaskSimulation * simulation) {
 
-  printf ("model_run is running model!\n");
-
-}

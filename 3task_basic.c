@@ -26,9 +26,9 @@ int main (int argc, char *argv[]) {
   printf ("in main, building the model\n");
   init_model (simulation->model, simulation->model_params_htable); // needs to be defined in 3_task_model.c
                                                                    // see gs_stroop_model for example
-  // define function pointer to model_run funciton
+  // define function pointer to model_run function 
   void (*model_run)(pdp_model*, ThreeTaskSimulation*);
-  model_run = &three_task_model_gs_run;
+  model_run = &three_task_model_gs_run; // (model-specific, def in 3task_model_gs.c)
 
   // Import parameters
   param_config_file = create_param_import_objects();
