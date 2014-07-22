@@ -339,7 +339,7 @@ void deinit_model (pdp_model * this_model) {
 }
 
 
-void three_task_model_gs_run (pdp_model * model, three_task_simulation * simulation) {
+void three_task_model_gs_run (pdp_model * model, ThreeTaskSimulation * simulation) {
 
   printf ("model_run is running model!\n");
 

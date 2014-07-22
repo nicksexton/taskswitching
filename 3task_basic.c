@@ -44,7 +44,8 @@ int main (int argc, char *argv[]) {
 
 
   // Now do stuff with the model and the parameters - eg. run all blocks?
-  procedure_run_all_blocks (simulation->model, simulation, (*model_run)(simulation->model, simulation));
+  //  procedure_run_all_blocks (simulation->model, simulation, model_run(simulation->model, simulation));
+  procedure_run_all_blocks (simulation->model, simulation, model_run);
 
   // free memory
   pdp_model_free (simulation->model);  
