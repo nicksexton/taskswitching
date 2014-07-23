@@ -517,7 +517,7 @@ bool three_task_model_dummy_run_step (pdp_model * model,
 
 
 
-  return true;
+  return false; // use conditional stopping condition in proper version of the model
 
 }
 
