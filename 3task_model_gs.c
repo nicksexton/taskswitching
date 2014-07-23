@@ -1,7 +1,19 @@
+#include <stdio.h>
 #include <string.h>
 #include "3task_model_gs.h"
 #include "3task_default_params.h"
 
+
+#define ID_INPUT_0 1
+#define ID_INPUT_1 2
+#define ID_INPUT_2 3
+#define ID_OUTPUT_0 4
+#define ID_OUTPUT_1 5
+#define ID_OUTPUT_2 6
+#define ID_TASKDEMAND 7
+#define ID_TOPDOWNCONTROL 8
+
+#define ECHO
 
 
 void three_task_parameters_htable_set_default (GHashTable * params_table) {
@@ -313,9 +325,382 @@ void three_task_model_gs_run (pdp_model * model, ThreeTaskSimulation * simulatio
 }
 
 
+int three_task_model_dummy_run (pdp_model * model,  
+				ThreeTaskSimulation * simulation) {
+
+  printf ("in three_task_model_dummy_run, running model\n");
+// init inputs
+
+  double input_0_initial_act[2]   = { 0.0,  0.0 };
+  double input_1_initial_act[2]   = { 0.0,  0.0 };
+  double input_2_initial_act[2]   = { 0.0,  0.0 };
+  double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
+
+
+  // Get data for current trial 
+  gchar *path;
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, simulation->current_trial_path)) {
+
+    g_free (iter);
+    printf ("error! three_task_model_dummy_run  failed to acquire valid iter from current_trial_path,"
+	    "returning FALSE\n");
+    return -1;
+  }
+
+  else {
+    // open file for writing data
+    // fp = fopen (DATAFILE, "a");
+    int trial_id, cue, stim_0, stim_1, stim_2;
+
+    // now get params for current trial
+    path = gtk_tree_path_to_string(simulation->current_trial_path);
+    fprintf (simulation->datafile, "%s\t", path);
+    g_free (path);
+
+    gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
+			COL_TASK_ID, &trial_id,
+			COL_TASK_PATTERN_1, &cue, 
+			COL_TASK_PATTERN_2, &stim_0,
+			COL_TASK_PATTERN_3, &stim_1,
+			COL_TASK_PATTERN_4, &stim_2,
+			-1);
+
+    // print trial params to output file
+    fprintf (simulation->datafile, "%d\t", trial_id);
+    //    fprintf (fp, "%d\t", trial_data->trial_type);
+    fprintf (simulation->datafile, "%d\t", cue);
+    fprintf (simulation->datafile, "%d\t", stim_0);
+    fprintf (simulation->datafile, "%d\t", stim_1);
+    fprintf (simulation->datafile, "%d\t", stim_2);
+    //    fprintf (fp, "%d\t", trial_data->response);
+    //    fprintf (fp, "%d\t", trial_data->response_time);
+    //    fprintf (fp, "\n");
+
+  // check that trial parameters are sensible
+
+  if (stim_0 < -1 || stim_0 > 2) {
+    printf ("subject data: input_0 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_0);
+    return (0);
+  }
+
+  if (stim_1 < -1 || stim_1 > 2) {
+    printf ("subject data: input_1 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_1);
+    return (0);
+  }
+
+  if (stim_2 < -1 || stim_2 > 2) {
+    printf ("subject data: input_2 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_2);
+    return (0);
+  }
+
+  if (cue < 0 || cue > 3) {
+    printf ("subject data: task input %d out of range (should be 0 - 2)!",
+	    cue);
+    return (0);
+  }
+
+
+  // set ON inputs
+  if (stim_0 >= 0) { // check for neutral trial condition where stim is -1
+      input_0_initial_act[stim_0] = 1.0;
+  }
+
+  if (stim_1 >= 0) { // check for neutral trial condition where stim is -1
+      input_1_initial_act[stim_1] = 1.0;
+  }
+
+  if (stim_2 >= 0) { // check for neutral trial condition where stim is -1
+      input_2_initial_act[stim_2] = 1.0;
+  }
+
+  topdown_control_initial_act[cue] = 1.0;
+
+  pdp_layer_set_activation (pdp_model_component_find (model, ID_INPUT_0)->layer, 
+			    2, input_0_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (model, ID_INPUT_1)->layer, 
+			    2, input_1_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (model, ID_INPUT_2)->layer, 
+			    2, input_2_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (
+                                 model, ID_TOPDOWNCONTROL)->layer, 
+	   		    3, topdown_control_initial_act);
+
+  // <--------------------- RUN TRIAL ---------------------------->
+  // NOTE this diverges from real version of model
+
+  // run_model_step returns true when stopping_condition evaluates to false
+  while (three_task_model_dummy_run_step (model, simulation->random_generator, simulation->datafile));
+  
+  /*
+  update_associative_weights(gs_stroop_model,
+			     learning_rate,
+			     persist);
+  */
+
+  // Print activation of output units
+
+
+  // Print RT
+  fprintf (simulation->datafile, "%d\t", model->cycle); 
+  fprintf (simulation->datafile, "kitten");
+  fprintf (simulation->datafile, "\n");
+
+  return (1);
+  }
+  
+
+}
+
+// returns true while model is still running (does not satisfy stopping condition), false otherwise
+bool three_task_model_dummy_run_step (pdp_model * model, 
+				      const gsl_rng * random_generator, 
+				      //				      double response_threshold, 
+				      FILE * fp) {
+
+  // Flow for dummy model - just run one cycle, then finish (no stopping condition yet)
+  // for real model, loop the rest of this function until stopping condition is true
+
+  pdp_model_cycle (model);
+
+
+    // add noise to units 
+  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_0)->layer, 
+		      NOISE, random_generator);
+  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_1)->layer, 
+			NOISE, random_generator);
+  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_2)->layer, 
+			NOISE, random_generator);
+  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_TASKDEMAND)->layer, 
+			NOISE, random_generator);
+    
+    
+
+#if defined ECHO
+
+  printf ("\ncyc:%d\t", model->cycle);
+  pdp_layer_print_current_output (
+				  pdp_model_component_find (model, ID_OUTPUT_0)->layer);
+  pdp_layer_print_current_output (
+				  pdp_model_component_find (model, ID_OUTPUT_1)->layer);
+  pdp_layer_print_current_output (
+				  pdp_model_component_find (model, ID_OUTPUT_2)->layer);
+
+
+#endif
+
+  /*
+#if defined ECHO_WEIGHTS
+
+  printf ("\ncyc:%d\t", gs_stroop_model->cycle);
+  pdp_weights_print (pdp_input_find (pdp_model_component_find (gs_stroop_model, 
+							       ID_TASKDEMAND)
+				     ->layer, ID_WORDIN)->input_weights); 
+  printf ("\t||\t");
+  pdp_weights_print (pdp_input_find (pdp_model_component_find (gs_stroop_model, 
+							       ID_TASKDEMAND)
+				     ->layer, ID_COLOURIN)->input_weights); 
+
+#endif
+  */
+
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_1)->layer, fp);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp);
+
+
+
+  return true;
+
+}
+
+
+
+
+int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) {
+
+  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control;
+
+
+  input_0 = pdp_layer_create(ID_INPUT_0, 2, 
+				*(double *)g_hash_table_lookup(model_params, "bias_none"));
+  input_1 = pdp_layer_create(ID_INPUT_1, 2, 
+				*(double *)g_hash_table_lookup(model_params, "bias_none"));
+  input_2 = pdp_layer_create(ID_INPUT_2, 2, 
+				*(double *)g_hash_table_lookup(model_params, "bias_none"));
+
+  output_0 = pdp_layer_create(ID_OUTPUT_0, 2, 
+				 *(double *)g_hash_table_lookup(model_params, "bias_outputunit"));
+  output_1 = pdp_layer_create(ID_OUTPUT_1, 2, 
+				 *(double *)g_hash_table_lookup(model_params, "bias_outputunit"));
+  output_2 = pdp_layer_create(ID_OUTPUT_2, 2, 
+				 *(double *)g_hash_table_lookup(model_params, "bias_outputunit"));
+
+  taskdemand = pdp_layer_create(ID_TASKDEMAND, 3, 
+				*(double *)g_hash_table_lookup(model_params, "bias_taskdemand"));
+  topdown_control = pdp_layer_create(ID_TOPDOWNCONTROL, 3, 
+				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
+
+
+  
+  double initial_activation_in_0[2] = {0.0, 0.0};
+  double initial_activation_in_1[2] = {0.0, 0.0};
+  double initial_activation_in_2[2] = {0.0, 0.0};
+  double initial_activation_out_0[2] = {0.0, 0.0};
+  double initial_activation_out_1[2] = {0.0, 0.0};
+  double initial_activation_out_2[2] = {0.0, 0.0};
+  double initial_activation_taskdemand[3] = {0.0, 0.0, 0.0};
+  double initial_activation_topdown_control[3] = {0.0, 0.0, 0.0};
+
+  /*
+  double topdown_control_strength_0 = *(double *)g_hash_table_lookup(model_params, 
+									"topdown_control_strength_0");
+  double topdown_control_strength_1 = *(double *)g_hash_table_lookup(model_params, 
+									  "topdown_control_strength_1");  
+  double topdown_control_strength_2 = *(double *)g_hash_table_lookup(model_params, 
+									  "topdown_control_strength_2");  
+  */
+
+  /* set initial activation */
+  pdp_layer_set_activation(input_0, 2, initial_activation_in_0);
+  pdp_layer_set_activation(input_1, 2, initial_activation_in_1);
+  pdp_layer_set_activation(input_2, 2, initial_activation_in_2);
+  pdp_layer_set_activation(output_0, 2, initial_activation_out_0);
+  pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
+  pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
+  pdp_layer_set_activation(taskdemand, 3, initial_activation_taskdemand);
+  pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
+
+  /* <------------------------------ NETWORK CONNECTIVITY --------------------------------> */
+  /****************************** */
+  /* Input units -> output units */
+  /***************************** */
+  pdp_weights_matrix *wts_in0_out0, *wts_in1_out1, *wts_in2_out2;
+
+  double stimulus_input_strength_0 = *(double *)g_hash_table_lookup(model_params, 
+								       "stimulus_input_strength_0");
+  double stimulus_input_strength_1 = *(double *)g_hash_table_lookup(model_params, 
+								       "stimulus_input_strength_1");
+  double stimulus_input_strength_2 = *(double *)g_hash_table_lookup(model_params, 
+								       "stimulus_input_strength_2");
+
+  double wts_in0_out0_matrix[2][2] = {
+    {stimulus_input_strength_0, 0.0},
+    {0.0, stimulus_input_strength_0},
+  };
+
+  double wts_in1_out1_matrix[2][2] = {
+    {stimulus_input_strength_1, 0.0},
+    {0.0, stimulus_input_strength_1},
+  };
+
+  double wts_in2_out2_matrix[2][2] = {
+    {stimulus_input_strength_2, 0.0},
+    {0.0, stimulus_input_strength_2},
+  };
+
+  
+  wts_in0_out0 = pdp_weights_create (2,2);
+  pdp_weights_set (wts_in0_out0, 2, 2, wts_in0_out0_matrix);
+  pdp_input_connect (output_0, input_0, wts_in0_out0);
+
+  wts_in1_out1 = pdp_weights_create (2,2);
+  pdp_weights_set (wts_in1_out1, 2, 2, wts_in1_out1_matrix);
+  pdp_input_connect (output_1, input_1, wts_in1_out1);
+
+  wts_in2_out2 = pdp_weights_create (2,2);
+  pdp_weights_set (wts_in2_out2, 2, 2, wts_in2_out2_matrix);
+  pdp_input_connect (output_2, input_2, wts_in2_out2);
+
+
+  /*************************************************************************************** */
+  /* No more connectivity in dummy model! see gs_stroop_model for full connectivity analog */
+  /*************************************************************************************** */
+
+
+
+  /* Now init model object and push components */
+
+  pdp_model_component_push(model, input_0, ID_INPUT_0, FALSE); 
+  pdp_model_component_push(model, input_1, ID_INPUT_1, FALSE); 
+  pdp_model_component_push(model, input_2, ID_INPUT_2, FALSE); 
+  pdp_model_component_push(model, output_0, ID_OUTPUT_0, TRUE);
+  pdp_model_component_push(model, output_1, ID_OUTPUT_1, TRUE);
+  pdp_model_component_push(model, output_2, ID_OUTPUT_2, TRUE);
+  pdp_model_component_push(model, taskdemand, ID_TASKDEMAND, TRUE);
+  pdp_model_component_push(model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
+
+  //debug
+  printf ("Dummy 3 task model created! Limited connectivity, just for test\n");
+
+  return 0;
+
+}
+
+int model_init_activation (pdp_model * model, double persist_taskdemand_activation) {
+
+  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control;
+
+  // zero cycle counter
+  model->cycle = 0;
+
+
+  double initial_activation_in_0[2] = {0.0, 0.0};
+  double initial_activation_in_1[2] = {0.0, 0.0};
+  double initial_activation_in_2[2] = {0.0, 0.0};
+
+  double initial_activation_out_0[2] = {0.0, 0.0};
+  double initial_activation_out_1[2] = {0.0, 0.0};
+  double initial_activation_out_2[2] = {0.0, 0.0};
+  double initial_activation_topdown_control[3] = {0.0, 0.0, 0.0};
+  double initial_activation_taskdemand[2];
+
+
+  input_0 = pdp_model_component_find (model, ID_INPUT_0)->layer;
+  input_1 = pdp_model_component_find (model, ID_INPUT_1)->layer;
+  input_2 = pdp_model_component_find (model, ID_INPUT_2)->layer;
+  output_0 = pdp_model_component_find (model, ID_OUTPUT_0)->layer;
+  output_1 = pdp_model_component_find (model, ID_OUTPUT_1)->layer;
+  output_2 = pdp_model_component_find (model, ID_OUTPUT_2)->layer;
+  taskdemand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+  topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
+
+  // clear & free history
+
+  pdp_model_component * comp_i;
+  for (comp_i = model->components; comp_i != NULL; comp_i = comp_i->next) {
+    pdp_units_free (comp_i->layer->units_initial.next);
+    comp_i->layer->units_latest = &(comp_i->layer->units_initial);
+    comp_i->layer->units_initial.next = NULL;
+  }
+
+
+  /* set initial activation */
+  pdp_layer_set_activation(input_0, 2, initial_activation_in_0);
+  pdp_layer_set_activation(input_1, 2, initial_activation_in_1);
+  pdp_layer_set_activation(input_2, 2, initial_activation_in_2);
+  pdp_layer_set_activation(output_0, 2, initial_activation_out_0);
+  pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
+  pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
+  pdp_layer_set_activation(taskdemand, 3, initial_activation_taskdemand);
+  pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
+
+  return 0;
+
+}
+
+
 
 void init_model (pdp_model * this_model, GHashTable *model_params_htable) {
   // just allocate memory for simulation and run constructors  
+
 
   act_func_params * activation_parameters = g_malloc (sizeof(act_func_params));
   activation_parameters->type = ACT_GS;
@@ -326,8 +711,8 @@ void init_model (pdp_model * this_model, GHashTable *model_params_htable) {
   this_model->activation_parameters = activation_parameters;
 
   // now create the model
-  // gs_stroop_model_build (this_model, model_params_htable); 
-  printf ("in init_model, create the model\n");
+  printf ("in init_model, creating dummy model\n");
+  three_task_model_dummy_build (this_model, model_params_htable); 
 }
 
 
@@ -336,10 +721,10 @@ void deinit_model (pdp_model * this_model) {
   // can be re-initialised with init_model
 
   printf ("in deinit_model, free model\n");
-  /*
+
   pdp_model_component_free (this_model->components);
   this_model->components = NULL;
-  */
+
 
   g_free (this_model->activation_parameters);
 }

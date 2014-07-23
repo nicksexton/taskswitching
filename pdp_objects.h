@@ -1,7 +1,7 @@
 #ifndef pdp_objects_h
 #define pdp_objects_h
 #include <stdbool.h>
-
+#include <gsl/gsl_randist.h>
 
 /* ACTIVATION FUNCTIONS */
 typedef enum {ACT_GS, DUMMY} act_function_type;
@@ -163,6 +163,8 @@ int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array
 
 void pdp_layer_print_current_output (const pdp_layer * some_layer);
 
+void pdp_layer_fprintf_current_output (const pdp_layer * some_layer, FILE *fp);
+
 void pdp_layer_print_activation (const pdp_layer * some_layer);
 
 double* pdp_layer_get_unit_activation_history (const pdp_layer * some_layer, int unit_index, int current_cycle);
@@ -211,6 +213,8 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
    connected upstream layers. Note takes a pointer to a union as an
    arguments, union needs to be initialised with activation parameters
    (specific to a particular activation function */
+
+void pdp_layer_add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r);
 
 
 pdp_model * pdp_model_create (int id, char *model_name);

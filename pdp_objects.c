@@ -2,8 +2,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <gsl/gsl_randist.h>
 #include "pdp_activation_funcs.h"
 #include "pdp_objects.h"
+#include "random_generator_functions.h" // for gaussian noise
 
 #define MODEL_NAME_MAX_LENGTH 30
 
@@ -168,6 +170,16 @@ void pdp_layer_print_current_output (const pdp_layer * some_layer) {
   }
   // printf ("\n");
 }
+
+void pdp_layer_fprintf_current_output (const pdp_layer * some_layer, FILE *fp) {
+  int i;
+  for (i = 0; i < some_layer->size; i++) {
+    // printf ("[%d]: %4.2f  ", i, some_layer->units_latest->activations[i]);
+    fprintf (fp, "%5.4f\t", some_layer->units_latest->activations[i]);
+  }
+  // printf ("\n");
+}
+
   
 
 void pdp_layer_print_activation (const pdp_layer * some_layer) {
@@ -491,6 +503,28 @@ int pdp_layer_cycle_activation (pdp_layer * some_layer,
 
   return 0;
 }
+
+
+void pdp_layer_add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r) {
+  
+  int i, sz = some_layer->size;
+  
+  for (i = 0; i < sz; i ++) {
+    some_layer->units_latest->activations[i] += gsl_ran_gaussian (r, noise_sd);
+
+
+    // remember to clip values to between -1.0 and +1.0
+    if (some_layer->units_latest->activations[i] > 1.0) 
+      some_layer->units_latest->activations[i] = 1.0;
+    else if (some_layer->units_latest->activations[i] < -1.0) 
+      some_layer->units_latest->activations[i] = -1.0;
+  
+  }
+
+  return;
+}
+
+
 
 
 pdp_model * pdp_model_create (int id, char *model_name) {

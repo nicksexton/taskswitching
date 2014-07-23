@@ -126,6 +126,7 @@ void gs_stroop_parameters_htable_set_default (GHashTable * params_table) {
 }
 
 
+// now in pdp_objects, as pdp_layer_add_noise_to_units 
 void add_noise_to_units (pdp_layer * some_layer, double noise_sd, const gsl_rng *r) {
   
   int i, sz = some_layer->size;
@@ -305,7 +306,6 @@ int gs_stroop_model_build (pdp_model * gs_stroop_model, GHashTable * model_param
 									"topdown_control_strength_word");
   double topdown_control_strength_colour = *(double *)g_hash_table_lookup(model_params, 
 									  "topdown_control_strength_colour");  
-
 
   /* set initial activation */
   pdp_layer_set_activation(word_input, 3, initial_activation_wordin);
@@ -573,20 +573,6 @@ int model_init_activation (pdp_model * gs_stroop_model, double persist_taskdeman
   colour_output = pdp_model_component_find (gs_stroop_model, ID_COLOUROUT)->layer;
   taskdemand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
   topdown_control = pdp_model_component_find (gs_stroop_model, ID_TOPDOWNCONTROL)->layer;
-
-
-  // calculate new task demand activations
-  // debug
-  /*
-  printf ("new task demand activation:\t");
-  for (i = 0; i < taskdemand->size; i ++) {
-
-    initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] * 
-                                       persist_taskdemand_activation;
-    printf ("%4.3f\t", initial_activation_taskdemand[i]);
-  } 
-  printf ("\n");
-  */
 
   // clear & free history
 

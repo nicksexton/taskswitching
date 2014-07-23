@@ -4,7 +4,7 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
-#define DATAFILE "3task_test.txt"
+// #define DATAFILE "3task_test.txt"
 
 gint procedure_current_trial_get (ThreeTaskSimulation *simulation) {
   
@@ -98,7 +98,7 @@ gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
 
 
 void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation, 
-			  void (*model_run)(pdp_model*, ThreeTaskSimulation*) ) {
+			  int (*model_run)(pdp_model*, ThreeTaskSimulation*) ) {
 
   /*
   double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
@@ -129,7 +129,7 @@ void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation,
       */
 
       // log output
-      procedure_print_current_trial_data (simulation);
+      // procedure_print_current_trial_data (simulation);
 
       // check for last trial of block BEFORE we change trial and loop again,
       // as we want last trial to be executed on final loop
@@ -152,7 +152,7 @@ void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation,
 }
 
 void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulation, 
-			       void (*model_run)(pdp_model*, ThreeTaskSimulation*) ) {
+			       int (*model_run)(pdp_model*, ThreeTaskSimulation*) ) {
 
   gint current_block = 0;
   // init_model (simulation->model, simulation->model_params_htable);
@@ -331,44 +331,20 @@ gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation,
 
 // bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
 bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
-				  void (*model_run)(pdp_model*, ThreeTaskSimulation*)) {
+				  int (*model_run)(pdp_model*, ThreeTaskSimulation*)) {
 
   // wraps run_model or similar, in 3task_model_gs.c?
   model_run (model, simulation);
 
   // for now, just print current trial data
-  procedure_print_current_trial_data (simulation);
+  // procedure_print_current_trial_data (simulation);
   return TRUE;
 
 }
 
 
-/* Try to do without this code!
-
-// nb does not print newline so additional data can be written to the row
-int three_task_print_trial_data (FILE * fp, stroop_trial_data * trial_data) {
-  
-  if (fp == NULL) {
-    printf ("error, three_task_print_trial_data could not open fp, appears to be null");
-    return 1;
-  }
-  else {
-    fprintf (fp, "%d\t", trial_data->trial_id);
-    fprintf (fp, "%d\t", trial_data->trial_type);
-    fprintf (fp, "%d\t", trial_data->cue);
-    fprintf (fp, "%d\t", trial_data->stim_0);
-    fprintf (fp, "%d\t", trial_data->stim_1);
-    fprintf (fp, "%d\t", trial_data->stim_2);
-    fprintf (fp, "%d\t", trial_data->response);
-    fprintf (fp, "%d\t", trial_data->response_time);
-
-    return 0;
-  }
-}
-*/
-
 bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation) {
-  FILE *fp;
+  printf ("in procedure_print_current_trial_data\n");
   gchar *path;
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
 
@@ -381,7 +357,8 @@ bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation) {
   }
 
   else {
-    fp = fopen (DATAFILE, "a");
+    //    fp = fopen (DATAFILE, "a");
+    FILE * fp = simulation->datafile;
     int trial_id, stim_0, stim_1, stim_2;
 
     path = gtk_tree_path_to_string(simulation->current_trial_path);

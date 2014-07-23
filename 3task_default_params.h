@@ -33,12 +33,6 @@
 #define LEARNING_RATE 1.0
 #define MAX_CYCLES 500 // how long to let model run - NB check G&S defaults
                         // TODO - need to track and handle 'no response' trials
-#define ID_WORDIN 1
-#define ID_COLOURIN 2
-#define ID_WORDOUT 3
-#define ID_COLOUROUT 4
-#define ID_TASKDEMAND 5
-#define ID_TOPDOWNCONTROL 6
 
 
 

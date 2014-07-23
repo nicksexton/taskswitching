@@ -27,6 +27,7 @@ typedef struct three_task_simulation {
   GtkTreeIter * current_trial_iter;
 
   void * current_trial_data;  // should be cast into whatever model-specific data type
+  FILE * datafile;
 
 } ThreeTaskSimulation;
 
@@ -51,11 +52,11 @@ gboolean procedure_current_block_is_last (ThreeTaskSimulation *simulation);
 gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation);
 // void procedure_run_block (ThreeTaskSimulation *simulation);
 void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation, 
-			  void (*model_run)(pdp_model*, ThreeTaskSimulation*) );
+			  int (*model_run)(pdp_model*, ThreeTaskSimulation*) );
 
 // void procedure_run_all_blocks (ThreeTaskSimulation * simulation );
 void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulation, 
-			       void (*model_run)(pdp_model*, ThreeTaskSimulation*) );
+			       int (*model_run)(pdp_model*, ThreeTaskSimulation*) );
 
 gboolean procedure_change_trial (ThreeTaskSimulation *simulation, GtkTreeStore *store, GtkTreePath *new_trial_path);
 void procedure_change_trial_next (ThreeTaskSimulation *simulation);
@@ -65,7 +66,7 @@ gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation,
 						GtkTreeStore *store);
 // bool procedure_run_current_trial (ThreeTaskSimulation * simulation);
 bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
-				  void (*model_run)(pdp_model*, ThreeTaskSimulation*));
+				  int (*model_run)(pdp_model*, ThreeTaskSimulation*));
 
 bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation);
 
