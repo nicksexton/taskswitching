@@ -267,9 +267,9 @@ int pdp_file_parse_to_treestore (FileData *file_info) {
 
   char fields [MAX_FIELDS][FIELD_SIZE];
   int line_counter = 0;
-  int fields_extracted;
+  int fields_extracted, i;
   bool more_lines = true;
-
+  
   while (more_lines) {
     line_counter ++;
     fields_extracted = pdp_file_segment_new_line (file_info->fp, 
@@ -290,7 +290,7 @@ int pdp_file_parse_to_treestore (FileData *file_info) {
     }
 
     default: {
-      printf ("processing line %d\t", line_counter);
+      printf ("Processing line %d\t", line_counter);
       // process the data
       if (fields_extracted > 0) { // was any data extracted?
 	// if so, process the data
@@ -300,7 +300,12 @@ int pdp_file_parse_to_treestore (FileData *file_info) {
 					      fields,
 					      file_info->tree_store );
 
-	printf ("imported - %s:\t%s\n", fields[0], fields[1]);
+	//	printf ("imported - %s:\t%s\n", fields[0], fields[1]);
+	printf ("imported -:\t");
+	for (i = 0; i < fields_extracted; i ++) {
+	  printf ("%s\t", fields[i]);
+	}
+	printf ("\n");
 
       }
       else {
@@ -323,7 +328,7 @@ int pdp_file_parse_to_treestore_long (FileData *file_info) {
 
   char fields [MAX_FIELDS][FIELD_SIZE];
   int line_counter = 0;
-  int fields_extracted;
+  int fields_extracted, i;
   bool more_lines = true;
 
   while (more_lines) {
@@ -357,7 +362,12 @@ int pdp_file_parse_to_treestore_long (FileData *file_info) {
 						   fields,
 						   file_info->tree_store );
 
-	printf ("imported - %s:\t%s\n", fields[0], fields[1]);
+	printf ("imported -:\t");
+	for (i = 0; i < fields_extracted; i ++) {
+	  printf ("%s\t", fields[i]);
+	}
+	printf ("\n");
+
 
       }
       else {

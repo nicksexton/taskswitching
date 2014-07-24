@@ -95,10 +95,23 @@ gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
   }
 }
 
+// bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
+bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
+				  int (*model_run)(pdp_model*, ThreeTaskSimulation*),
+				  int (*model_reinit)(pdp_model*, init_type init, ThreeTaskSimulation*) ) {
 
+  // wraps run_model or similar, in 3task_model_gs.c?
+  model_run (model, simulation);
+  model_reinit (model, TRIAL, simulation);
+  // for now, just print current trial data
+  // procedure_print_current_trial_data (simulation);
+  return TRUE;
+
+}
 
 void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation, 
-			  int (*model_run)(pdp_model*, ThreeTaskSimulation*) ) {
+			  int (*model_run)(pdp_model*, ThreeTaskSimulation*), 
+			  int (*model_reinit)(pdp_model*, init_type init, ThreeTaskSimulation*) ) {
 
   /*
   double response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
@@ -118,18 +131,9 @@ void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation,
 
       // Run trial
       procedure_run_current_trial (model, simulation, 
-				   model_run);
-      /*
-      run_stroop_trial (simulation->model, 
-			(stroop_trial_data *)(simulation->current_trial_data), 
-			simulation->random_generator,
-			response_threshold,
-			hebb_persist,
-			learning_rate);
-      */
-
-      // log output
-      // procedure_print_current_trial_data (simulation);
+				   model_run,
+				   model_reinit);
+      
 
       // check for last trial of block BEFORE we change trial and loop again,
       // as we want last trial to be executed on final loop
@@ -152,14 +156,15 @@ void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation,
 }
 
 void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulation, 
-			       int (*model_run)(pdp_model*, ThreeTaskSimulation*) ) {
+			       int (*model_run)(pdp_model*, ThreeTaskSimulation*), 
+			       int (*model_reinit)(pdp_model*, init_type init, ThreeTaskSimulation*) ) {
 
   gint current_block = 0;
   // init_model (simulation->model, simulation->model_params_htable);
   
     // change to block 0, trial 0    
     procedure_change_trial_first (simulation, simulation->task_store);
-  
+    model_reinit (model, INITIAL, simulation);
 
     // for each block
     do {
@@ -168,8 +173,8 @@ void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulati
       // model_initialise (simulation);
 
       // run block
-      procedure_run_block (model, simulation, model_run);
-
+      procedure_run_block (model, simulation, model_run, model_reinit);
+      model_reinit (model, BLOCK, simulation);
 
       current_block ++;
       printf ("in model_run_all_blocks: done with block %d\n", current_block);
@@ -259,7 +264,7 @@ void procedure_change_trial_next (ThreeTaskSimulation *simulation) {
 }
 
 gboolean procedure_change_trial_first (ThreeTaskSimulation *simulation, 
-				   GtkTreeStore *store) {
+				       GtkTreeStore *store) {
 
   GtkTreeIter first_block, first_trial;
   if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(simulation->task_store), &first_block)) {
@@ -329,18 +334,7 @@ gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation,
 }
 
 
-// bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
-bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
-				  int (*model_run)(pdp_model*, ThreeTaskSimulation*)) {
 
-  // wraps run_model or similar, in 3task_model_gs.c?
-  model_run (model, simulation);
-
-  // for now, just print current trial data
-  // procedure_print_current_trial_data (simulation);
-  return TRUE;
-
-}
 
 
 bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation) {
@@ -624,10 +618,10 @@ void import_three_task_trial_data_to_treestore (GtkTreeStore * store,
 
   gtk_tree_store_set (store, iter, 
 		      COL_TASK_ID, data->trial_id, 
-		      COL_TASK_PATTERN_1, data->stim_0, 
-		      COL_TASK_PATTERN_2, data->stim_1,
-		      COL_TASK_PATTERN_3, data->stim_2,
-		      COL_TASK_PATTERN_4, data->cue,
+		      COL_TASK_PATTERN_1, data->cue, 
+		      COL_TASK_PATTERN_2, data->stim_0,
+		      COL_TASK_PATTERN_3, data->stim_1,
+		      COL_TASK_PATTERN_4, data->stim_2,
       		      -1);
 
 }
@@ -700,13 +694,18 @@ void triple_task_task_import_commit (FileData *task_config_file,
 
     gtk_tree_model_get (GTK_TREE_MODEL(task_config_file->tree_store), &iter_import, 
 			COL_TASK_ID, &import_trial_id, 
-			COL_TASK_PATTERN_1, &import_stim_0, 
-			COL_TASK_PATTERN_2, &import_stim_1,
-			COL_TASK_PATTERN_3, &import_stim_2, 
-			COL_TASK_PATTERN_4, &import_cue, 
+			COL_TASK_PATTERN_1, &import_cue, 
+			COL_TASK_PATTERN_2, &import_stim_0,
+			COL_TASK_PATTERN_3, &import_stim_1, 
+			COL_TASK_PATTERN_4, &import_stim_2, 
 			COL_TASK_PARAM_1, &task_param_1, 
 			COL_TASK_PARAM_2, &task_param_2, 
 			-1);
+    // debug
+    printf ("triple_task_import_commit, importing %s, %s, %s, %s, %s, %s, %s\n",
+	    import_trial_id, import_cue, import_stim_0, import_stim_1, import_stim_2, 
+	    task_param_1, task_param_2);
+
 
     // need to set defaults here to prevent seg fault if data not imported??
     // or, are defaults set in task_config_file when importing from text file...?
