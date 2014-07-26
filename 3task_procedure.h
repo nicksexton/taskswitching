@@ -8,6 +8,7 @@
 #include "pdp_objects.h"
 
 typedef enum {INITIAL, TRIAL, BLOCK} init_type;
+typedef enum {OFF, NEXT_TRIAL, THIS_BLOCK, FOREVER} hebbian_learning_persistence;
 
 typedef struct three_task_simulation {
 

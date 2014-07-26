@@ -341,7 +341,8 @@ int three_task_model_dummy_run (pdp_model * model,
   double input_1_initial_act[2]   = { 0.0,  0.0 };
   double input_2_initial_act[2]   = { 0.0,  0.0 };
   double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
-
+  double response_threshold;
+  int stopped;
 
   // Get data for current trial 
   gchar *path;
@@ -439,8 +440,12 @@ int three_task_model_dummy_run (pdp_model * model,
   // <--------------------- RUN TRIAL ---------------------------->
   // NOTE this diverges from real version of model
 
+  response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+
   // run_model_step returns true when stopping_condition evaluates to false
-  while (three_task_model_dummy_run_step (model, simulation->random_generator, simulation->datafile));
+  do {
+    stopped = three_task_model_dummy_run_step (model, simulation->random_generator, response_threshold, simulation->datafile); 
+  } while (stopped == false && model->cycle < MAX_CYCLES);
   
   /*
   update_associative_weights(gs_stroop_model,
@@ -453,7 +458,7 @@ int three_task_model_dummy_run (pdp_model * model,
 
   // Print RT
   fprintf (simulation->datafile, "%d\t", model->cycle); 
-  fprintf (simulation->datafile, "kitten");
+  fprintf (simulation->datafile, "stopped"); // response
   fprintf (simulation->datafile, "\n");
 
   return (1);
@@ -462,39 +467,171 @@ int three_task_model_dummy_run (pdp_model * model,
 
 }
 
+
+
+
+// returns 0 (false) if model is still running, or response (true) if it has stopped
+int stopping_condition (const pdp_model * model, 
+			 double response_threshold) {
+
+  /* evaluates whether model should stop on this cycle and returns
+     true/false. CURRENT CRITERION: most active output node is > next
+     most active output node that is not the same coloured node */
+
+  // NB code for responses: 1 = task_0:L, 2 = task_0:R, 3 = task_1:L, 4 = task_1:R, 5 = task_2:L, 6 = task_2:R
+  // ie. if (abs(response[0] - response[1])) % 2 == 0, then the nodes correspond
+
+  int outputnode;
+  int biggest_node[4] = {0, 0, 0, 0}; // stores 3 biggest activations, to compare
+                         // [0] vs. [1], or [0] vs. [2] if [0],[1] are same colour, 
+                         // or [0] vs. [3] if [0], [1], [2] are all the same colour
+  double biggest_node_act[4] = {0.0, 0.0, 0.0, 0.0};
+
+  int i; // does an insertion sort
+  int o; // iterates output layers (0, 1, 2)
+  int response;
+  pdp_layer * output_layers[3];
+
+  output_layers[0] = (pdp_model_component_find (model, ID_OUTPUT_0)->layer);  
+  output_layers[1] = (pdp_model_component_find (model, ID_OUTPUT_1)->layer);  
+  output_layers[2] = (pdp_model_component_find (model, ID_OUTPUT_2)->layer);  
+
+
+  /* do three output layers */
+  for (o = 0; o < 3; o ++) {
+
+    /* outer loop iterates all the output nodes */
+    for (outputnode = 0; outputnode < 2; outputnode ++) {
+    
+      /* inner loop does an insertion sort */
+      for (i = 0; i < 4; i ++) {
+      
+	/*  if slot is empty, insert the new response right here */
+	if (biggest_node[i] == 0) {
+	  biggest_node[i] = 2*o + outputnode +1; 
+	  biggest_node_act[i] = output_layers[o]->units_latest->activations[outputnode];
+	  continue;
+	}
+	
+	/* else, compare size of activations */
+	else {
+	  if (biggest_node_act[i] < output_layers[o]->units_latest->activations[outputnode]) {
+	    /* insert new response here, move everything down */
+
+	    switch (i) {
+	    case 3: 
+	      biggest_node[3] = 2*o + outputnode +1; 
+	      biggest_node_act[3] = output_layers[o]->units_latest->activations[outputnode];
+	      continue;
+	    
+	    
+	    case 2: 
+	      biggest_node[3] = biggest_node[2];
+	      biggest_node_act[3] = biggest_node_act[2];
+	      
+	      biggest_node[2] = 2*o + outputnode +1; 
+	      biggest_node_act[2] = output_layers[o]->units_latest->activations[outputnode];
+	  
+	      continue;
+	    
+
+	    case 1:
+	      biggest_node[3] = biggest_node[2];
+	      biggest_node_act[3] = biggest_node_act[2];
+	      
+	      biggest_node[2] = biggest_node[1];
+	      biggest_node_act[2] = biggest_node_act[1];
+	      
+	      biggest_node[1] = 2*o + outputnode +1; 
+	      biggest_node_act[1] = output_layers[o]->units_latest->activations[outputnode];
+
+
+	      continue;
+
+	    case 0:
+	      biggest_node[3] = biggest_node[2];
+	      biggest_node_act[3] = biggest_node_act[2];
+	      
+	      biggest_node[2] = biggest_node[1];
+	      biggest_node_act[2] = biggest_node_act[1];
+	      
+	      biggest_node[1] = biggest_node[0];
+	      biggest_node_act[1] = biggest_node_act[0];
+	      
+	      biggest_node[0] = 2*o + outputnode +1; 
+	      biggest_node_act[0] = output_layers[o]->units_latest->activations[outputnode];
+
+	      continue;
+
+	    default:
+	      printf ("stopping condition: weird, no cases seem to match\n");
+	    } // <-- close switch
+	  } // <-- close if 
+	} // < -- close else
+      } // <-- inner loop
+    } // <-- outer loop
+  } // <- output layers
+
+  // now, we can evaluate stopping condition
+
+  response = 0;
+
+  for (i = 1; i < 4; i ++) {
+    if (abs(biggest_node[0] - biggest_node[i]) % 2 == 0) 
+      continue;
+    else {
+      if (biggest_node_act[0] - response_threshold > biggest_node_act[i]) {
+	response = biggest_node[i];
+      }
+    }
+  }   
+ 
+  for (i = 0; i < 4; i ++) {
+    printf ("%d ", biggest_node[i]);
+  }
+  return response; 
+  
+}
+
+
+
+
 // returns true while model is still running (does not satisfy stopping condition), false otherwise
-bool three_task_model_dummy_run_step (pdp_model * model, 
+int three_task_model_dummy_run_step (pdp_model * model, 
 				      const gsl_rng * random_generator, 
-				      //				      double response_threshold, 
+				      double response_threshold, 
 				      FILE * fp) {
 
-  // Flow for dummy model - just run one cycle, then finish (no stopping condition yet)
-  // for real model, loop the rest of this function until stopping condition is true
 
-  pdp_model_cycle (model);
+  int stopped = stopping_condition (model, response_threshold);
+  if (stopped == true) {
+    return stopped; // return response so it can be recorded
+  }
+  else {
+    pdp_model_cycle (model);
 
 
     // add noise to units 
-  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_0)->layer, 
-		      NOISE, random_generator);
-  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_1)->layer, 
-			NOISE, random_generator);
-  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_2)->layer, 
-			NOISE, random_generator);
-  pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_TASKDEMAND)->layer, 
-			NOISE, random_generator);
+    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_0)->layer, 
+				  NOISE, random_generator);
+    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_1)->layer, 
+				  NOISE, random_generator);
+    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_2)->layer, 
+				  NOISE, random_generator);
+    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_TASKDEMAND)->layer, 
+				    NOISE, random_generator);
     
     
 
 #if defined ECHO
-
-  printf ("\ncyc:%d\t", model->cycle);
-  pdp_layer_print_current_output (
-				  pdp_model_component_find (model, ID_OUTPUT_0)->layer);
-  pdp_layer_print_current_output (
-				  pdp_model_component_find (model, ID_OUTPUT_1)->layer);
-  pdp_layer_print_current_output (
-				  pdp_model_component_find (model, ID_OUTPUT_2)->layer);
+    
+    printf ("\ncyc:%d\t", model->cycle);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_0)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_1)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
 
 
 #endif
@@ -514,17 +651,18 @@ bool three_task_model_dummy_run_step (pdp_model * model,
 #endif
   */
 
-  pdp_layer_fprintf_current_output (
-				    pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp);
-  pdp_layer_fprintf_current_output (
-				    pdp_model_component_find (model, ID_OUTPUT_1)->layer, fp);
-  pdp_layer_fprintf_current_output (
-				    pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_OUTPUT_1)->layer, fp);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp);
+      
 
 
-
-  return false; // use conditional stopping condition in proper version of the model
-
+    return 0; 
+  }
+  
 }
 
 
@@ -846,7 +984,12 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
 
 }
 
+
 int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskSimulation * simulation) {
+  // resets activation
+  // does not reset weights
+  // persist_taskdemand_activation sets proportion of TD activation to carry over to
+  // next trial ie. .20 = 20% of activation on previous
 
   pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control;
 
@@ -898,6 +1041,87 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   }
 
   // squash td activation where init == TRIAL, using persist_taskdemand_activation parameter
+
+  return 0;
+}
+
+
+int three_task_model_update_weights (pdp_model * gs_stroop_model, 
+				     double learning_rate, 
+				     hebbian_learning_persistence persist) {
+  // default hebbian persistence (1, NEXT_TRIAL) - weights persist for next trial only
+  // NB running this function immediately after initing model SHOULD zero associative weights
+  // (only if persist is set to NEXT_TRIAL)
+
+  int i, j;
+
+  if (persist == OFF) {
+    return 0;
+  }
+
+  pdp_layer *input_0, *input_1, *input_2, *task_demand;
+  input_0 = pdp_model_component_find (gs_stroop_model, ID_INPUT_0)->layer;
+  input_1 = pdp_model_component_find (gs_stroop_model, ID_INPUT_1)->layer;
+  input_2 = pdp_model_component_find (gs_stroop_model, ID_INPUT_2)->layer;
+  task_demand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
+  
+
+  double wts_in0_taskdemand_matrix[3][2] = {
+    {0.0, 0.0 },
+    {0.0, 0.0 },
+    {0.0, 0.0 },
+  };
+
+  double wts_in1_taskdemand_matrix[3][2] = {
+    {0.0, 0.0 },
+    {0.0, 0.0 },
+    {0.0, 0.0 },
+  };
+
+  double wts_in2_taskdemand_matrix[3][2] = {
+    {0.0, 0.0 },
+    {0.0, 0.0 },
+    {0.0, 0.0 },
+  };
+
+  
+ 
+  for (i = 0; i < 3; i ++) { // outer loop, output unit (i)
+    for (j = 0; j < 2; j ++) {// inner loop, input unit (j)
+      wts_in0_taskdemand_matrix[i][j] = 
+	task_demand->units_latest->activations[i] *
+	input_0->units_latest->activations[j] * learning_rate;
+
+      wts_in1_taskdemand_matrix[i][j] = 
+	task_demand->units_latest->activations[i] *
+	input_1->units_latest->activations[j] * learning_rate;
+
+      wts_in2_taskdemand_matrix[i][j] = 
+	task_demand->units_latest->activations[i] *
+	input_2->units_latest->activations[j] * learning_rate;
+
+    }
+  }
+
+
+  if (persist == THIS_BLOCK || persist == FOREVER) {
+    // increment existing weights
+    pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
+			   3, 2, wts_in0_taskdemand_matrix);
+    pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
+			   3, 2, wts_in1_taskdemand_matrix);
+    pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_2)->input_weights, 
+			   3, 2, wts_in2_taskdemand_matrix);
+  }
+
+  else if (persist == NEXT_TRIAL) {
+    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
+		     3, 2, wts_in0_taskdemand_matrix);
+    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
+		     3, 2, wts_in1_taskdemand_matrix);
+    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_2)->input_weights, 
+		     3, 2, wts_in2_taskdemand_matrix);
+  }
 
   return 0;
 }
