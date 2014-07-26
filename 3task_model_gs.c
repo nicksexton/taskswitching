@@ -485,7 +485,7 @@ int stopping_condition (const pdp_model * model,
   int biggest_node[4] = {0, 0, 0, 0}; // stores 3 biggest activations, to compare
                          // [0] vs. [1], or [0] vs. [2] if [0],[1] are same colour, 
                          // or [0] vs. [3] if [0], [1], [2] are all the same colour
-  double biggest_node_act[4] = {0.0, 0.0, 0.0, 0.0};
+  double biggest_node_act[4] = {-1.0, -1.0, -1.0, -1.0};
 
   int i; // does an insertion sort
   int o; // iterates output layers (0, 1, 2)
@@ -504,92 +504,95 @@ int stopping_condition (const pdp_model * model,
     for (outputnode = 0; outputnode < 2; outputnode ++) {
     
       /* inner loop does an insertion sort */
-      for (i = 0; i < 4; i ++) {
+      i = 0;
+      while (biggest_node_act[i] > output_layers[o]->units_latest->activations[outputnode] && i < 4) 
+	i ++;
       
-	/*  if slot is empty, insert the new response right here */
-	if (biggest_node[i] == 0) {
-	  biggest_node[i] = 2*o + outputnode +1; 
-	  biggest_node_act[i] = output_layers[o]->units_latest->activations[outputnode];
-	  continue;
-	}
+      if (i == 4) // if unit activation is smaller than activation in 4th slot
+	continue;
+
+      /*  if slot is empty, insert the new response right here */
+      if (biggest_node[i] == 0) {
+	biggest_node[i] = 2*o + outputnode +1; 
+	biggest_node_act[i] = output_layers[o]->units_latest->activations[outputnode];
+	continue;
+      }
 	
-	/* else, compare size of activations */
-	else {
-	  if (biggest_node_act[i] < output_layers[o]->units_latest->activations[outputnode]) {
-	    /* insert new response here, move everything down */
+      /* else, compare size of activations */
+      else {
+	  /* insert new response here, move everything down */
 
-	    switch (i) {
-	    case 3: 
-	      biggest_node[3] = 2*o + outputnode +1; 
-	      biggest_node_act[3] = output_layers[o]->units_latest->activations[outputnode];
-	      continue;
+	switch (i) {
+	case 3: 
+	  biggest_node[3] = 2*o + outputnode +1; 
+	  biggest_node_act[3] = output_layers[o]->units_latest->activations[outputnode];
+	  break;
 	    
 	    
-	    case 2: 
-	      biggest_node[3] = biggest_node[2];
-	      biggest_node_act[3] = biggest_node_act[2];
-	      
-	      biggest_node[2] = 2*o + outputnode +1; 
-	      biggest_node_act[2] = output_layers[o]->units_latest->activations[outputnode];
+	case 2: 
+	  biggest_node[3] = biggest_node[2];
+	  biggest_node_act[3] = biggest_node_act[2];
 	  
-	      continue;
+	  biggest_node[2] = 2*o + outputnode +1; 
+	  biggest_node_act[2] = output_layers[o]->units_latest->activations[outputnode];
+	  
+	  break;
 	    
 
-	    case 1:
-	      biggest_node[3] = biggest_node[2];
-	      biggest_node_act[3] = biggest_node_act[2];
+	case 1:
+	  biggest_node[3] = biggest_node[2];
+	  biggest_node_act[3] = biggest_node_act[2];
 	      
-	      biggest_node[2] = biggest_node[1];
-	      biggest_node_act[2] = biggest_node_act[1];
+	  biggest_node[2] = biggest_node[1];
+	  biggest_node_act[2] = biggest_node_act[1];
 	      
-	      biggest_node[1] = 2*o + outputnode +1; 
-	      biggest_node_act[1] = output_layers[o]->units_latest->activations[outputnode];
+	  biggest_node[1] = 2*o + outputnode +1; 
+	  biggest_node_act[1] = output_layers[o]->units_latest->activations[outputnode];
 
 
-	      continue;
+	  break;
 
-	    case 0:
-	      biggest_node[3] = biggest_node[2];
-	      biggest_node_act[3] = biggest_node_act[2];
+	case 0:
+	  biggest_node[3] = biggest_node[2];
+	  biggest_node_act[3] = biggest_node_act[2];
+	  
+	  biggest_node[2] = biggest_node[1];
+	  biggest_node_act[2] = biggest_node_act[1];
 	      
-	      biggest_node[2] = biggest_node[1];
-	      biggest_node_act[2] = biggest_node_act[1];
+	  biggest_node[1] = biggest_node[0];
+	  biggest_node_act[1] = biggest_node_act[0];
 	      
-	      biggest_node[1] = biggest_node[0];
-	      biggest_node_act[1] = biggest_node_act[0];
-	      
-	      biggest_node[0] = 2*o + outputnode +1; 
-	      biggest_node_act[0] = output_layers[o]->units_latest->activations[outputnode];
+	  biggest_node[0] = 2*o + outputnode +1; 
+	  biggest_node_act[0] = output_layers[o]->units_latest->activations[outputnode];
 
-	      continue;
+	  break;
 
-	    default:
-	      printf ("stopping condition: weird, no cases seem to match\n");
-	    } // <-- close switch
-	  } // <-- close if 
-	} // < -- close else
-      } // <-- inner loop
+	default:
+	  printf ("stopping condition: weird, no cases seem to match\n");
+	} // <-- close switch
+      } // < -- close else
+
     } // <-- outer loop
-  } // <- output layers
+  }// <- output layers
 
   // now, we can evaluate stopping condition
 
-  response = 0;
 
-  for (i = 1; i < 4; i ++) {
-    if (abs(biggest_node[0] - biggest_node[i]) % 2 == 0) 
-      continue;
-    else {
-      if (biggest_node_act[0] - response_threshold > biggest_node_act[i]) {
-	response = biggest_node[i];
-      }
-    }
-  }   
+  i = 1;
+  while (abs(biggest_node[0] - biggest_node[i]) % 2 == 0 && i < 4) {
+    i ++;
+  }
+
+  if (biggest_node_act[0] - response_threshold > biggest_node_act[i]) {
+    printf ("stopping condition met, returning %d", biggest_node[0]);
+    return (biggest_node[0]);
+  }
+  
  
   for (i = 0; i < 4; i ++) {
     printf ("%d ", biggest_node[i]);
   }
-  return response; 
+  return 0; 
   
 }
 
@@ -605,9 +608,11 @@ int three_task_model_dummy_run_step (pdp_model * model,
 
   int stopped = stopping_condition (model, response_threshold);
   if (stopped == true) {
+    printf ("three_task_model_run_step: stopping condition true, terminating.\n");
     return stopped; // return response so it can be recorded
   }
   else {
+    printf ("three_task_model_run_step: stopping condition false, cycling model.\n");
     pdp_model_cycle (model);
 
 
