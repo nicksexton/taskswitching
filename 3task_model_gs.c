@@ -641,7 +641,7 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   pdp_weights_set (wts_out0_out0, 2, 2, wts_alloutputs_lateral_matrix);
   pdp_input_connect (output_0, output_0, wts_out0_out0);
 
-  wts_out1_out2 = pdp_weights_create (2,2);
+  wts_out1_out1 = pdp_weights_create (2,2);
   pdp_weights_set (wts_out1_out1, 2, 2, wts_alloutputs_lateral_matrix);
   pdp_input_connect (output_1, output_1, wts_out1_out1);
 
@@ -715,17 +715,17 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
     { 1.0,  1.0},
   };
 
-  wts_wordout_taskdemand = pdp_weights_create (3,2);
+  wts_out0_taskdemand = pdp_weights_create (3,2);
   pdp_weights_set (wts_out0_taskdemand, 3, 2, wts_out0_taskdemand_matrix);
-  pdp_input_connect (taskdemand, output_0, wts_wordout_taskdemand);
+  pdp_input_connect (taskdemand, output_0, wts_out0_taskdemand);
 
-  wts_wordout_taskdemand = pdp_weights_create (3,2);
+  wts_out1_taskdemand = pdp_weights_create (3,2);
   pdp_weights_set (wts_out1_taskdemand, 3, 2, wts_out1_taskdemand_matrix);
-  pdp_input_connect (taskdemand, output_1, wts_wordout_taskdemand);
+  pdp_input_connect (taskdemand, output_1, wts_out1_taskdemand);
 
-  wts_wordout_taskdemand = pdp_weights_create (3,2);
+  wts_out2_taskdemand = pdp_weights_create (3,2);
   pdp_weights_set (wts_out2_taskdemand, 3, 2, wts_out2_taskdemand_matrix);
-  pdp_input_connect (taskdemand, output_2, wts_wordout_taskdemand);
+  pdp_input_connect (taskdemand, output_2, wts_out2_taskdemand);
 
 
   /**************************** */
@@ -788,7 +788,7 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   double wts_topdown_taskdemand_matrix[3][3] = {
     { topdown_control_strength_0, 0.0, 0.0 },
     { 0.0, topdown_control_strength_1, 0.0 },
-    { 0.0, 0.0, topdown_control_strength_1 },
+    { 0.0, 0.0, topdown_control_strength_2 },
   };
 
   wts_topdown_taskdemand = pdp_weights_create (3,3);
