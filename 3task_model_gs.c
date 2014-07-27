@@ -444,7 +444,10 @@ int three_task_model_dummy_run (pdp_model * model,
 
   // run_model_step returns true when stopping_condition evaluates to false
   do {
-    stopped = three_task_model_dummy_run_step (model, simulation->random_generator, response_threshold, simulation->datafile); 
+    three_task_model_dummy_run_step (model, simulation->random_generator, 
+				     response_threshold, 
+				     simulation->datafile);
+    stopped = stopping_condition (model, response_threshold);
   } while (stopped == false && model->cycle < MAX_CYCLES);
   
   /*
@@ -606,13 +609,6 @@ int three_task_model_dummy_run_step (pdp_model * model,
 				      FILE * fp) {
 
 
-  int stopped = stopping_condition (model, response_threshold);
-  if (stopped == true) {
-    printf ("three_task_model_run_step: stopping condition true, terminating.\n");
-    return stopped; // return response so it can be recorded
-  }
-  else {
-    printf ("three_task_model_run_step: stopping condition false, cycling model.\n");
     pdp_model_cycle (model);
 
 
@@ -666,7 +662,7 @@ int three_task_model_dummy_run_step (pdp_model * model,
 
 
     return 0; 
-  }
+
   
 }
 
