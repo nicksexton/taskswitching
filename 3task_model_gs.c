@@ -461,7 +461,7 @@ int three_task_model_dummy_run (pdp_model * model,
 
   // Print RT
   fprintf (simulation->datafile, "%d\t", model->cycle); 
-  fprintf (simulation->datafile, "stopped"); // response
+  fprintf (simulation->datafile, "%d", stopped); // response
   fprintf (simulation->datafile, "\n");
 
   return (1);
@@ -651,7 +651,7 @@ int three_task_model_dummy_run_step (pdp_model * model,
 
 #endif
   */
-
+    /* Output this to a second logfile?
     pdp_layer_fprintf_current_output (
 				      pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp);
     pdp_layer_fprintf_current_output (
@@ -659,7 +659,7 @@ int three_task_model_dummy_run_step (pdp_model * model,
     pdp_layer_fprintf_current_output (
 				      pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp);
       
-
+    */
 
     return 0; 
 
