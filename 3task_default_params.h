@@ -13,6 +13,7 @@
 #define RESPONSE_THRESHOLD 0.15
 #define STEP_SIZE 0.0015
 #define SQUASHING_PARAM 0.8
+#define HEBB_PERSIST 1
 
 #define NOISE 0.006
 #define OUTPUTUNIT_BIAS -6.0
@@ -33,6 +34,7 @@
 #define LEARNING_RATE 1.0
 #define MAX_CYCLES 500 // how long to let model run - NB check G&S defaults
                         // TODO - need to track and handle 'no response' trials
+
 
 
 

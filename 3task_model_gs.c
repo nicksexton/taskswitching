@@ -95,6 +95,11 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
   *max_cycles = MAX_CYCLES;
   g_hash_table_insert (params_table, "max_cycles", max_cycles);
 
+  int *hebb_persist  = g_malloc(sizeof(hebbian_learning_persistence));
+  *hebb_persist = HEBB_PERSIST;
+  g_hash_table_insert (params_table, "hebb_persist", hebb_persist);
+
+
 
   return;
 }
@@ -341,7 +346,8 @@ int three_task_model_dummy_run (pdp_model * model,
   double input_1_initial_act[2]   = { 0.0,  0.0 };
   double input_2_initial_act[2]   = { 0.0,  0.0 };
   double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
-  double response_threshold;
+  double response_threshold, learning_rate;
+  hebbian_learning_persistence hebb_persist;
   int stopped;
 
   // Get data for current trial 
@@ -441,6 +447,9 @@ int three_task_model_dummy_run (pdp_model * model,
   // NOTE this diverges from real version of model
 
   response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
+  learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
+  hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
+					     "hebb_persist");
 
   // run_model_step returns true when stopping_condition evaluates to false
   do {
@@ -450,11 +459,10 @@ int three_task_model_dummy_run (pdp_model * model,
     stopped = stopping_condition (model, response_threshold);
   } while (stopped == false && model->cycle < MAX_CYCLES);
   
-  /*
-  update_associative_weights(gs_stroop_model,
-			     learning_rate,
-			     persist);
-  */
+
+  three_task_model_update_weights(model,
+				  learning_rate,
+				  hebb_persist);
 
   // Print activation of output units
 
@@ -492,7 +500,6 @@ int stopping_condition (const pdp_model * model,
 
   int i; // does an insertion sort
   int o; // iterates output layers (0, 1, 2)
-  int response;
   pdp_layer * output_layers[3];
 
   output_layers[0] = (pdp_model_component_find (model, ID_OUTPUT_0)->layer);  
