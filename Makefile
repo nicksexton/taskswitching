@@ -12,12 +12,12 @@ TRIPLETASK_OBJECTS = pdp_objects.o pdp_activation_funcs.o random_generator_funct
 
 BINARIES = gs_stroop_sim_indiffs
 GUI_BINARIES = gs_stroop_gui
-TRIPLETASK = 3task_basic
+TRIPLETASK = 3task_basic 3task_gui
 
 
 all: $(BINARIES) $(GUI_BINARIES)
 gui: $(GUI_BINARIES)
-tripletask: $(TRIPLETASK)
+tripletask: $(TRIPLETASK) 
 console: $(BINARIES)
 
 
@@ -60,6 +60,9 @@ gs_stroop_gui.o:
 
 
 # tripletask
+3task_gui: 3task_gui.o $(TRIPLETASK_OBJECTS)
+	$(CC) -o $@ $(CFLAGS) 3task_gui.o $(TRIPLETASK_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
+
 3task_basic: 3task_basic.o $(TRIPLETASK_OBJECTS)
 	$(CC) -o $@ $(CFLAGS) 3task_basic.o $(TRIPLETASK_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
 
