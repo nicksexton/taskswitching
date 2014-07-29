@@ -13,6 +13,7 @@
 #define RESPONSE_THRESHOLD 0.15
 #define STEP_SIZE 0.0015
 #define SQUASHING_PARAM 0.8
+#define RSI_SCALE_PARAM 1
 #define HEBB_PERSIST 1
 
 #define NOISE 0.006

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "3task_procedure.h" // for init_type typedef
 #include "3task_model_gs.h"
 #include "3task_default_params.h"
@@ -38,6 +39,10 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
   double * squashing_param = g_malloc(sizeof(double));
   *squashing_param = SQUASHING_PARAM;
   g_hash_table_insert (params_table, "squashing_param", squashing_param);
+
+  double * rsi_scale_param = g_malloc(sizeof(double));
+  *rsi_scale_param = RSI_SCALE_PARAM;
+  g_hash_table_insert (params_table, "rsi_scale_param", rsi_scale_param);
 
   double * noise = g_malloc(sizeof(double));
   *noise = NOISE;
@@ -594,14 +599,15 @@ int stopping_condition (const pdp_model * model,
   }
 
   if (biggest_node_act[0] - response_threshold > biggest_node_act[i]) {
-    printf ("stopping condition met, returning %d", biggest_node[0]);
+    //    printf ("stopping condition met, returning %d", biggest_node[0]);
     return (biggest_node[0]);
   }
   
- 
+  /*
   for (i = 0; i < 4; i ++) {
     printf ("%d ", biggest_node[i]);
   }
+  */
   return 0; 
   
 }
@@ -640,7 +646,8 @@ int three_task_model_dummy_run_step (pdp_model * model,
 				    pdp_model_component_find (model, ID_OUTPUT_1)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
-
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
 
 #endif
 
@@ -1001,8 +1008,6 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
 
   pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control;
 
-  // zero cycle counter
-  model->cycle = 0;
 
 
   double initial_activation_in_0[2] = {0.0, 0.0};
@@ -1014,6 +1019,11 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   double initial_activation_out_2[2] = {0.0, 0.0};
   double initial_activation_topdown_control[3] = {0.0, 0.0, 0.0};
   double initial_activation_taskdemand[3] = {0.0, 0.0, 0.0};
+  int i;
+  double squashing_param, rsi_scale_param;
+
+  // zero cycle counter
+  model->cycle = 0;
 
 
   input_0 = pdp_model_component_find (model, ID_INPUT_0)->layer;
@@ -1025,7 +1035,27 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   taskdemand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
   topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
 
+
+  // Get and squash TD activations
+  if (init == TRIAL) {
+
+    squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
+    rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "rsi_scale_param");
+    printf ("\nsquashing TD activations by (1 - %2.1f ) ^ %2.1f:\t", squashing_param, rsi_scale_param);
+    
+    for (i = 0; i < 3; i++) {
+      initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] *
+	pow(1-squashing_param, rsi_scale_param);
+      printf ("%4.2f -> %4.2f\t", taskdemand->units_latest->activations[i], initial_activation_taskdemand[i]);
+    }
+    printf ("\n");
+    pdp_layer_set_activation (taskdemand, 3, initial_activation_taskdemand);
+  }
+
+    pdp_layer_set_activation(taskdemand, 3, initial_activation_taskdemand);
+
   // clear & free history
+
 
   pdp_model_component * comp_i;
   for (comp_i = model->components; comp_i != NULL; comp_i = comp_i->next) {
@@ -1044,11 +1074,8 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
   pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
 
-  if (init == BLOCK || init == INITIAL) {
-    pdp_layer_set_activation(taskdemand, 3, initial_activation_taskdemand);
-  }
 
-  // squash td activation where init == TRIAL, using persist_taskdemand_activation parameter
+
 
   return 0;
 }
