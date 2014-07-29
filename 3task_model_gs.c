@@ -1158,6 +1158,13 @@ int three_task_model_update_weights (pdp_model * gs_stroop_model,
 		     3, 2, wts_in2_taskdemand_matrix);
   }
 
+  pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_0)->input_weights);
+  pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_1)->input_weights);
+  pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_2)->input_weights);
+
+
+
+
   return 0;
 }
 
