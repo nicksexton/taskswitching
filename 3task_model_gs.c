@@ -6,15 +6,6 @@
 #include "3task_default_params.h"
 
 
-#define ID_INPUT_0 1
-#define ID_INPUT_1 2
-#define ID_INPUT_2 3
-#define ID_OUTPUT_0 4
-#define ID_OUTPUT_1 5
-#define ID_OUTPUT_2 6
-#define ID_TASKDEMAND 7
-#define ID_TOPDOWNCONTROL 8
-
 #define ECHO
 
 

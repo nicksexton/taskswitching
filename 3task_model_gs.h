@@ -1,7 +1,21 @@
+#ifndef three_task_model_gs_h
+#define three_task_model_gs_h
+
 #include <gtk/gtk.h>
 #include "pdp_objects.h"
 #include "3task_import.h"
 #include "3task_procedure.h"
+
+#define ID_INPUT_0 1
+#define ID_INPUT_1 2
+#define ID_INPUT_2 3
+#define ID_OUTPUT_0 4
+#define ID_OUTPUT_1 5
+#define ID_OUTPUT_2 6
+#define ID_TASKDEMAND 7
+#define ID_TOPDOWNCONTROL 8
+
+
 
 
 typedef struct three_task_response {
@@ -44,3 +58,4 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
 void init_model_simulation (pdp_model * this_model, GHashTable *model_params_htable);
 void deinit_model (pdp_model * this_model);
 
+#endif
