@@ -35,4 +35,6 @@ typedef struct three_task_objects {
 } ThreeTaskObjects;
 
 
+static void main_quit (GtkWidget *window, ThreeTaskObjects *objects);
+
 #endif
