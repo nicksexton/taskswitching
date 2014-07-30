@@ -398,7 +398,7 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
   double response_threshold = *(double *)g_hash_table_lookup(objects->simulation->model_params_htable, 
 							     "response_threshold");
 
-  if (stopping_condition (objects->simulation->model, response_threshold)) { 
+  if (!stopping_condition (objects->simulation->model, response_threshold)) { 
     three_task_model_dummy_run_step (objects->simulation->model, objects->simulation->random_generator, 
 				     response_threshold, 
 				     objects->simulation->datafile);
@@ -415,6 +415,60 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
 				   ThreeTaskObjects * objects) {
 
   three_task_model_dummy_run (objects->simulation->model, objects->simulation);
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+}
+
+
+static void model_controls_continue_cb (GtkToolItem * tool_item, 
+					ThreeTaskObjects * objects) {
+
+  double response_threshold = *(double *)g_hash_table_lookup(objects->simulation->model_params_htable, 
+							     "response_threshold");
+
+  ThreeTaskSimulation * simulation = objects->simulation;
+  while (!stopping_condition(objects->simulation->model, response_threshold)) {
+      three_task_model_dummy_run (objects->simulation->model, objects->simulation);
+  }
+  three_task_model_update_weights;
+  three_task_model_dummy_reinit;
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+  if (!procedure_current_trial_is_last(objects->simulation)) {
+    procedure_change_trial_next (objects->simulation);
+  }
+
+}
+
+static void model_controls_run_block_cb (GtkToolItem * tool_item,
+					 ThreeTaskObjects * objects) {
+
+  procedure_run_block (objects->simulation->model,
+		       objects->simulation,
+		       objects->model_run,
+		       objects->model_reinit
+		       );
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+}
+
+static void model_controls_run_all_blocks_cb (GtkToolItem * tool_item,
+					      ThreeTaskObjects * objects) {
+
+  procedure_run_all_blocks (objects->simulation->model,
+			    objects->simulation,
+			    objects->model_run,
+			    objects->model_reinit
+			    );
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
@@ -477,24 +531,24 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
   // run to end, continue
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_OK);
-  //g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_continue_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_continue_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
 			      "Run to end, continue to next trial (carry over residual activation)");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // button here for run block
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GO_FORWARD);
-  //g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_run_block_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_run_block_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
 			      "Run block from current trial");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // button here for run all blocks
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_GOTO_LAST);
-  //g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_run_all_blocks_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_run_all_blocks_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), 
 			      "Run all blocks from start");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
@@ -624,6 +678,14 @@ int main (int argc, char *argv[]) {
   objects->simulation = create_simulation();
   three_task_parameters_htable_set_default (objects->simulation->model_params_htable);
   objects->simulation->datafile = fopen (DATAFILE, "a");
+
+  // define function pointer to model_run function 
+  int (*model_run)(pdp_model*, ThreeTaskSimulation*);
+  simulation->model_run = &three_task_model_dummy_run; // (model-specific, def in 3task_model_gs.c)
+
+  int (*model_reinit)(pdp_model*, init_type, ThreeTaskSimulation*);
+  simulation->model_reinit = &three_task_model_dummy_reinit; // (model-specific, def in 3task_model_gs.c)
+
 
   // now create and build the model
   printf ("in main, building the model\n");

@@ -15,6 +15,10 @@ typedef struct three_task_objects {
 
   // GUI objects that we want to refer to 
   ThreeTaskSimulation * simulation;
+
+  int (*model_run)(pdp_model*, ThreeTaskSimulation*);
+  int (*model_reinit)(pdp_model*, init_type, ThreeTaskSimulation*);
+
   GtkWidget * model_sub_notepage;
 
 
