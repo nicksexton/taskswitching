@@ -1,7 +1,9 @@
 #ifndef pdpgui_plot_h
 #define pdpgui_plot_h
 
+
 #include <gtk/gtk.h>
+#include "pdp_objects.h"
 
 typedef struct pdpgui_coords {
   double x; 
@@ -28,6 +30,11 @@ void pdpgui_draw_unit (cairo_t *cr,
 		       PdpguiColourRgb colour_on,
 		       double activation);
 
+void pdpgui_draw_layer (cairo_t *cr, 
+			PdpguiCoords layer_centre, 
+			PdpguiColourRgb colour_off,
+			PdpguiColourRgb colour_on,
+			pdp_layer * layer);
 
 void pdpgui_draw_connection (cairo_t *cr, 
 			     PdpguiCoords unit_centre_lower, 

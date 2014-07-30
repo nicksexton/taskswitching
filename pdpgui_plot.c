@@ -8,6 +8,7 @@
 
 
 #define DEFAULT_UNIT_SIZE 20
+#define DEFAULT_UNIT_PADDING 25
 
 #define AXIS_MARGIN_X 0.1
 #define AXIS_MARGIN_Y 0.1
@@ -34,6 +35,29 @@ void pdpgui_draw_unit (cairo_t *cr,
   cairo_set_source_rgb (cr, colour_on.r, colour_on.g, colour_on.b);
   cairo_arc (cr, unit_centre.x, unit_centre.y, DEFAULT_UNIT_SIZE*activation, 0, 2*G_PI);
   cairo_fill(cr);
+
+}
+
+void pdpgui_draw_layer (cairo_t *cr, 
+			PdpguiCoords layer_centre, 
+			PdpguiColourRgb colour_off,
+			PdpguiColourRgb colour_on,
+			pdp_layer * layer) {
+
+
+
+  int n; 
+  for (n = 0; n < layer->size; n ++) {
+    
+    PdpguiCoords centre = { .x = layer_centre.x 
+			    - (layer->size/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + n * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			    .y = layer_centre.y};
+
+    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+
+  }
+  return;
 
 }
 

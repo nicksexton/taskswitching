@@ -10,6 +10,7 @@
 #include "3task_gui.h"
 #include "3task_model_gs.h"
 
+#define DATAFILE "3task_test.txt"
 
 void three_task_gui_plot_network_activation (GtkWidget *widget, 
 					     cairo_t *cr, 
@@ -194,6 +195,39 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
 }
 
 
+void three_task_gui_draw_architecture (GtkWidget *widget, 
+				       cairo_t *cr, 
+				       ThreeTaskSimulation *simulation) {
+
+  guint widget_width, widget_height;
+  widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
+  widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
+
+  printf ("%d x %d\n", widget_width, widget_height);
+
+  PdpguiCoords centre = { 
+    .x = widget_width * 0.5, 
+    .y = widget_height * 0.5, 
+  };
+
+  PdpguiColourRgb mono[2] = {{ 
+      .r = 0.1, 
+      .g = 0.1, 
+      .b = 0.1 
+    }, {
+      .r = 0.5, 
+      .g = 0.5, 
+      .b = 0.5 
+    }};
+
+
+  pdpgui_draw_layer (cr, centre, mono[0], mono[1], 
+		     pdp_model_component_find (simulation->model, ID_TOPDOWNCONTROL)->layer);
+
+  return;
+
+}
+
 
 static GtkWidget* 
 create_sub_notepage_model_plot_activation (ThreeTaskObjects * objects) {
@@ -221,6 +255,8 @@ create_sub_notepage_model_plot_activation (ThreeTaskObjects * objects) {
   gtk_grid_attach (GTK_GRID(grid), drawing_area, 0, 1, 1, 1);
 
   gtk_widget_show_all(grid);
+
+
   return (grid);
 }
 
@@ -230,22 +266,161 @@ create_sub_notepage_model_plot_activation (ThreeTaskObjects * objects) {
 static GtkWidget* 
 create_sub_notepage_model_display_architecture (ThreeTaskObjects * objects) {
 
+  GtkWidget *drawing_area;
   GtkWidget *grid;
-  GtkWidget *label;
+  //  GtkWidget *label;
 
-  label = gtk_label_new("Network architecture diagram here");
-  gtk_widget_set_hexpand (label, TRUE);
-  gtk_widget_set_vexpand (label, TRUE);
+
+  drawing_area = gtk_drawing_area_new();
+  g_signal_connect (drawing_area, "draw", 
+		    G_CALLBACK(three_task_gui_draw_architecture), objects->simulation);
+  gtk_widget_set_hexpand (drawing_area, TRUE);
+  gtk_widget_set_vexpand (drawing_area, TRUE);
+
 
   grid = gtk_grid_new();
-  gtk_grid_attach (GTK_GRID(grid), label, 0, 0, 1, 1);
-
+  gtk_grid_attach (GTK_GRID(grid), drawing_area, 0, 0, 1, 1);
+  //  gtk_grid_attach (GTK_GRID(grid), label, 0, 0, 1, 1);
 
   gtk_widget_show_all(grid);
   return (grid);
 
 }
 
+
+static void model_controls_initialise_cb (GtkToolItem * tool_item, 
+					  ThreeTaskObjects * objects) {
+
+  ThreeTaskSimulation * simulation = objects->simulation;
+  three_task_model_dummy_reinit (simulation->model, INITIAL, simulation); 
+
+  
+  /*
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+  */
+  double input_0_initial_act[2]   = { 0.0,  0.0 };
+  double input_1_initial_act[2]   = { 0.0,  0.0 };
+  double input_2_initial_act[2]   = { 0.0,  0.0 };
+  double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
+  //  double response_threshold, learning_rate;
+  //  hebbian_learning_persistence hebb_persist;
+  //  int stopped;
+
+  // Get data for current trial 
+  //  gchar *path;
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, simulation->current_trial_path)) {
+
+    g_free (iter);
+    printf ("error! three_task_model_dummy_run  failed to acquire valid iter from current_trial_path,"
+	    "returning FALSE\n");
+    return;
+  }
+
+  else {
+
+    int trial_id, cue, stim_0, stim_1, stim_2;
+    gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
+			COL_TASK_ID, &trial_id,
+			COL_TASK_PATTERN_1, &cue, 
+			COL_TASK_PATTERN_2, &stim_0,
+			COL_TASK_PATTERN_3, &stim_1,
+			COL_TASK_PATTERN_4, &stim_2,
+			-1);
+
+  // check that trial parameters are sensible
+
+  if (stim_0 < -1 || stim_0 > 2) {
+    printf ("subject data: input_0 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_0);
+    return ;
+  }
+
+  if (stim_1 < -1 || stim_1 > 2) {
+    printf ("subject data: input_1 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_1);
+    return ;
+  }
+
+  if (stim_2 < -1 || stim_2 > 2) {
+    printf ("subject data: input_2 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_2);
+    return ;
+  }
+
+  if (cue < 0 || cue > 3) {
+    printf ("subject data: task input %d out of range (should be 0 - 2)!",
+	    cue);
+    return ;
+  }
+
+
+  // set ON inputs
+  if (stim_0 >= 0) { // check for neutral trial condition where stim is -1
+      input_0_initial_act[stim_0] = 1.0;
+  }
+
+  if (stim_1 >= 0) { // check for neutral trial condition where stim is -1
+      input_1_initial_act[stim_1] = 1.0;
+  }
+
+  if (stim_2 >= 0) { // check for neutral trial condition where stim is -1
+      input_2_initial_act[stim_2] = 1.0;
+  }
+
+  topdown_control_initial_act[cue] = 1.0;
+
+  pdp_layer_set_activation (pdp_model_component_find (simulation->model, ID_INPUT_0)->layer, 
+			    2, input_0_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (simulation->model, ID_INPUT_1)->layer, 
+			    2, input_1_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (simulation->model, ID_INPUT_2)->layer, 
+			    2, input_2_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (
+                                 simulation->model, ID_TOPDOWNCONTROL)->layer, 
+	   		    3, topdown_control_initial_act);
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+  }
+
+
+}
+
+static void model_controls_step_once_cb (GtkToolItem * tool_item, 
+					 ThreeTaskObjects * objects) {
+
+  double response_threshold = *(double *)g_hash_table_lookup(objects->simulation->model_params_htable, 
+							     "response_threshold");
+
+  if (stopping_condition (objects->simulation->model, response_threshold)) { 
+    three_task_model_dummy_run_step (objects->simulation->model, objects->simulation->random_generator, 
+				     response_threshold, 
+				     objects->simulation->datafile);
+
+    if (objects->model_sub_notepage != NULL) {
+      gtk_widget_queue_draw(objects->model_sub_notepage);
+    }
+  }
+ 
+}
+
+
+static void model_controls_run_cb (GtkToolItem * tool_item, 
+				   ThreeTaskObjects * objects) {
+
+  three_task_model_dummy_run (objects->simulation->model, objects->simulation);
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+}
 
 
 
@@ -274,15 +449,15 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
   // initialise
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_REFRESH);
-  //  g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_initialise_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(model_controls_initialise_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Reinitialise model from parameters");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
   // step once
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_PLAY);
-  //g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_step_once_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_step_once_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Process single model iteration");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
@@ -295,8 +470,8 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
   // run to end
   tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_MEDIA_NEXT);
-  //g_signal_connect (G_OBJECT(tool_item), "clicked", 
-  //		    G_CALLBACK(model_controls_run_cb), (gpointer) objects);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+  		    G_CALLBACK(model_controls_run_cb), (gpointer) objects);
   gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Run model trial to end");
   gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, position ++);
 
@@ -448,19 +623,29 @@ int main (int argc, char *argv[]) {
 
   objects->simulation = create_simulation();
   three_task_parameters_htable_set_default (objects->simulation->model_params_htable);
-
+  objects->simulation->datafile = fopen (DATAFILE, "a");
 
   // now create and build the model
   printf ("in main, building the model\n");
   objects->simulation->model = pdp_model_create (0, "3task_gs"); 
   init_model_simulation (objects->simulation->model, objects->simulation->model_params_htable); 
 
-
-
   //  objects->model_sub_notepage = NULL;
 
   objects->param_config_file = create_param_import_objects();
   objects->task_config_file = triple_task_create_task_import_objects();
+
+  // <--------------------- Temporary import of params and tasks to get us going ----------------->
+  // Import parameters
+  pdp_import_select_file ("3task_model_gs_params_default.conf", objects->param_config_file);
+  pdp_load_from_file_short (objects->param_config_file);
+  three_task_gs_parameters_import_commit (objects->param_config_file, objects->simulation->model_params_htable);
+
+  // Import tasks
+  pdp_import_select_file ("3task_import_test.conf", objects->task_config_file);
+  pdp_load_from_file_long (objects->task_config_file);
+  triple_task_task_import_commit (objects->task_config_file, objects->simulation->task_store);
+  // ----------------------------------------------------------------------------------------------
 
 
   // Draw the GUI
