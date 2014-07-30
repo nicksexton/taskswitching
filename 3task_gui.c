@@ -415,11 +415,12 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
 
 
-
+/*
 static void main_quit (GtkWidget *window, ThreeTaskObjects *objects) {
 
   printf ("freeing objects\n");
-  pdp_model_free (objects->simulation->model);  
+  free (objects->simulation->model->activation_parameters); 
+  pdp_model_free (objects->simulation->model);  // irritating segfault!
 
   printf ("freeing simulation\n");
   free_simulation (objects->simulation);
@@ -428,30 +429,34 @@ static void main_quit (GtkWidget *window, ThreeTaskObjects *objects) {
   g_free (objects->param_config_file);
   g_free (objects->task_config_file);
 
+  printf ("freeing objects\n");
+  g_free (objects);
+
   printf ("gtk main quit\n");
   gtk_main_quit ();
 
 }
-
+*/
 
 
 int main (int argc, char *argv[]) {
 
   gtk_init (&argc, &argv);
 
-  ThreeTaskSimulation * simulation = create_simulation();
-
-  simulation->model = pdp_model_create (0, "3task_gs"); 
-  three_task_parameters_htable_set_default (simulation->model_params_htable);
-
-  // now build the model
-  printf ("in main, building the model\n");
-  init_model_simulation (simulation->model, simulation->model_params_htable); 
-
-
   ThreeTaskObjects * objects = g_malloc (sizeof(ThreeTaskObjects));
   // init function, set everything to null?
-  objects->simulation = simulation;
+
+  objects->simulation = create_simulation();
+  three_task_parameters_htable_set_default (objects->simulation->model_params_htable);
+
+
+  // now create and build the model
+  printf ("in main, building the model\n");
+  objects->simulation->model = pdp_model_create (0, "3task_gs"); 
+  init_model_simulation (objects->simulation->model, objects->simulation->model_params_htable); 
+
+
+
   //  objects->model_sub_notepage = NULL;
 
   objects->param_config_file = create_param_import_objects();
@@ -465,12 +470,16 @@ int main (int argc, char *argv[]) {
   GtkWidget *notes;
 
   // Create a window with a title, default size, and set border width
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  if (!(window = gtk_window_new (GTK_WINDOW_TOPLEVEL))) {
+    printf ("error, could not create toplevel window!\n");
+    return 0;
+  }
   gtk_window_set_title (GTK_WINDOW(window), "Three Task Switching: Model");
   gtk_window_set_default_size(GTK_WINDOW(window), MAIN_WINDOW_WIDTH_DEFAULT, MAIN_WINDOW_HEIGHT_DEFAULT);
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_container_set_border_width (GTK_CONTAINER(window), 10);
-  g_signal_connect (window, "destroy", G_CALLBACK(main_quit), (gpointer) objects);
+  // g_signal_connect (window, "destroy", G_CALLBACK(main_quit), (gpointer) objects); // causes irritating segfault
+  g_signal_connect (window, "destroy", G_CALLBACK(gtk_main_quit), NULL); // 
 
 
   // ------------- NOTEPAD -----------------

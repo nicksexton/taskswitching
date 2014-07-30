@@ -816,12 +816,13 @@ ThreeTaskSimulation * create_simulation () {
 void free_simulation (ThreeTaskSimulation * simulation) {
   // free memory for simulation
 
-  free (simulation->model->activation_parameters); 
+  // free (simulation->model->activation_parameters); // should be done where the model is freed!
+  printf ("\nfree_simulation: freeing hash table\n");
   g_hash_table_destroy(simulation->model_params_htable); // NEW 
+
   //  subject_popn_free (simulation->subjects);
   random_generator_free (simulation->random_generator);  
 
-  g_free (simulation->current_trial_data);
   gtk_tree_path_free(simulation->current_trial_path);
   g_free (simulation);
 

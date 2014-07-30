@@ -566,29 +566,29 @@ void pdp_model_free (pdp_model * some_model) {
   /* TODO - free all other members */
 
   /* free the components */
-  // printf ("freeing components\n");
+    printf ("pdp_model_free, freeing components\n");
   pdp_model_component_free (some_model->components);
   some_model->components = NULL; // poss optional?
 
   // Remember to fix up the links!
-
+  
   if (some_model->prev != NULL) {
-    // printf ("reassigning prev links\n");
+    printf ("pdp_model_free, reassigning prev links\n");
     some_model->prev->next = some_model->next;
   }
   if (some_model->next != NULL) {
-    // printf ("reassigning next links\n");
+    printf ("pdp_model_free, reassigning next links\n");
     some_model->next->prev = some_model->prev;
   }
-
+  
 
 
   // now free the model itself
-  // printf ("freeing model name\n");
+  printf ("pdp_model_free, freeing model name\n");
   free (some_model->name);  
-  // printf ("freeing model\n");
+  printf ("pdp_model_free, freeing model\n");
   free (some_model);
-  // printf ("model freed, returning...\n");
+  printf ("pdp_model_free, all done, returning...\n");
   return;
 }
 

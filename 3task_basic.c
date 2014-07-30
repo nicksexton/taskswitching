@@ -53,6 +53,7 @@ int main (int argc, char *argv[]) {
 
 
   // free memory
+  free (simulation->model->activation_parameters); 
   pdp_model_free (simulation->model);  
   fclose(simulation->datafile);
   free_simulation (simulation);
