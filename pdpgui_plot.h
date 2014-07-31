@@ -37,21 +37,29 @@ void pdpgui_draw_layer (cairo_t *cr,
 			pdp_layer * layer);
 
 void pdpgui_draw_connection (cairo_t *cr, 
-			     PdpguiCoords unit_centre_lower, 
-			     PdpguiCoords unit_centre_upper,
-			     int width);
+			     PdpguiCoords connection_start, 
+			     PdpguiCoords connection_end,
+			     double width);
+
 
 void pdpgui_draw_connection_curved (cairo_t *cr, 
-				    PdpguiCoords unit_centre_lower, 
-				    PdpguiCoords unit_centre_upper,
-				    PdpguiCoords intermediate_lower,
-				    PdpguiCoords intermediate_upper);
+				    PdpguiCoords connection_start, 
+				    PdpguiCoords connection_end,
+				    PdpguiCoords intermediate_1,
+				    PdpguiCoords intermediate_2,
+				    double width);
 
 void pdpgui_draw_weights (cairo_t *cr, 
 			  PdpguiCoords layer_centre_lower,  
 			  PdpguiCoords layer_centre_upper, 
 			  pdp_weights_matrix * matrix);
 
+void pdpgui_draw_weights_topdown (cairo_t *cr, 
+				  PdpguiCoords layer_centre_lower,  
+				  PdpguiCoords layer_centre_upper,
+				  PdpguiCoords intermediate_lower,  
+				  PdpguiCoords intermediate_upper,  
+				  pdp_weights_matrix * matrix);
 
 void pdpgui_draw_graph_axes (cairo_t *cr, 
 			     guint window_width, guint window_height,

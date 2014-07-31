@@ -35,29 +35,18 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     .y_max = 0.5
   };
 
-  PdpguiColourRgb plot_colour[3] = {{ 
-      .r = 1.0, 
-      .g = 0.0, 
-      .b = 0.0 
-    }, {
-      .r = 0.0, 
-      .g = 6.0, 
-      .b = 0.0 
-    }, {
-      .r = 0.0, 
-      .g = 0.0, 
-      .b = 1.0 
-    }};
+  PdpguiColourRgb plot_red[2] = {{ .r = 1.0, .g = 0.0, .b = 0.0 }, { .r = 1.0, .g = 0.4, .b = 0.4 }};
+  PdpguiColourRgb plot_green[2] = {{ .r = 0.0, .g = 0.6, .b = 0.0 }, { .r = 0.3, .g = 0.6, .b = 0.3 }};
+  PdpguiColourRgb plot_blue[2] = {{ .r = 0.0, .g = 0.0, .b = 1.0 }, { .r = 0.4, .g = 0.4, .b = 1.0 }};
 
-  PdpguiColourRgb plot_td_mono[2] = {{ 
-      .r = 0.5, 
-      .g = 0.5, 
-      .b = 0.5 
-    }, {
-      .r = 0.5, 
-      .g = 0.5, 
-      .b = 0.5 
-    }};
+
+
+  PdpguiColourRgb plot_td[3] = {
+    { .r = 1.0, .g = 0.0, .b = 0.0 }, 
+    { .r = 0.0, .g = 0.6, .b = 0.0 },
+    { .r = 0.0, .g = 0.0, .b = 1.0 },
+  };
+
 
 
   // now construct an arbitrary vector;
@@ -81,7 +70,7 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     }
     else {
       pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
-			simulation->model->cycle, units_activation, &(plot_colour[unit]));
+			simulation->model->cycle, units_activation, &(plot_red[unit]));
 
       // want more sophisticated rendering algorithm using buffering, 
       // this will probably cause flicker
@@ -107,7 +96,7 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     }
     else {
       pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
-			simulation->model->cycle, units_activation, &(plot_colour[unit]));
+			simulation->model->cycle, units_activation, &(plot_green[unit]));
 
       // want more sophisticated rendering algorithm using buffering, 
       // this will probably cause flicker
@@ -132,7 +121,7 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     }
     else {
       pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
-			simulation->model->cycle, units_activation, &(plot_colour[unit]));
+			  simulation->model->cycle, units_activation, &(plot_blue[unit]));
 
       // want more sophisticated rendering algorithm using buffering, 
       // this will probably cause flicker
@@ -157,9 +146,9 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     free(units_activation);
   }
   else {
-    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+    pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
 		      simulation->model->cycle, units_activation, 
-		      &(plot_td_mono[0]));
+		      &(plot_td[0]));
   }
 
     // task demand unit 2
@@ -172,7 +161,7 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     else {
       pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
 				 simulation->model->cycle, units_activation, 
-				 &(plot_td_mono[1]));
+				 &(plot_td[1]));
       free(units_activation);
     }
 
@@ -186,7 +175,7 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
     else {
       pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
 				 simulation->model->cycle, units_activation, 
-				 &(plot_td_mono[1]));
+				 &(plot_td[2]));
       free(units_activation);
     }
 
@@ -224,6 +213,14 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   PdpguiCoords loc_output_2 = { .x = widget_width * 0.8, .y = widget_height * 0.5, };
 
   PdpguiCoords loc_topdowncontrol = { .x = widget_width * 0.5, .y = widget_height * 0.1, };
+
+  PdpguiCoords loc_td_input0_intermed_upper = { .x = widget_width * 0.05, .y = widget_height * 0.05 };
+  PdpguiCoords loc_td_input0_intermed_lower = { .x = widget_width * 0.05, .y = widget_height * 0.95 };
+  PdpguiCoords loc_td_input1_intermed_upper = { .x = widget_width * 0.20, .y = widget_height * 0.05 };
+  PdpguiCoords loc_td_input1_intermed_lower = { .x = widget_width * 0.4, .y = widget_height * 0.90 };
+  PdpguiCoords loc_td_input2_intermed_upper = { .x = widget_width * 0.9, .y = widget_height * 0.05 };
+  PdpguiCoords loc_td_input2_intermed_lower = { .x = widget_width * 0.9, .y = widget_height * 0.90 };
+
 
 
   PdpguiColourRgb mono[2] = {{ 
@@ -265,13 +262,22 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdpgui_draw_weights (cr, loc_input_1, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_INPUT_1)->input_weights);
   pdpgui_draw_weights (cr, loc_input_2, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_INPUT_2)->input_weights);
 
-  pdpgui_draw_weights (cr, loc_output_0, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_OUTPUT_0)->input_weights);
-  pdpgui_draw_weights (cr, loc_output_1, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_OUTPUT_1)->input_weights);
-  pdpgui_draw_weights (cr, loc_output_2, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_OUTPUT_2)->input_weights);
+  pdpgui_draw_weights (cr, loc_output_0, loc_taskdemand, 
+		       pdp_input_find(layer_taskdemand, ID_OUTPUT_0)->input_weights);
+  pdpgui_draw_weights (cr, loc_output_1, loc_taskdemand, 
+		       pdp_input_find(layer_taskdemand, ID_OUTPUT_1)->input_weights);
+  pdpgui_draw_weights (cr, loc_output_2, loc_taskdemand, 
+		       pdp_input_find(layer_taskdemand, ID_OUTPUT_2)->input_weights);
 
-  pdpgui_draw_weights (cr, loc_taskdemand, loc_output_0, pdp_input_find(layer_output_0, ID_TASKDEMAND)->input_weights);
-  pdpgui_draw_weights (cr, loc_taskdemand, loc_output_1, pdp_input_find(layer_output_1, ID_TASKDEMAND)->input_weights);
-  pdpgui_draw_weights (cr, loc_taskdemand, loc_output_2, pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_0, 
+			       loc_td_input0_intermed_upper, loc_td_input0_intermed_lower,
+			       pdp_input_find(layer_output_0, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_1, 
+			       loc_td_input1_intermed_upper, loc_td_input1_intermed_lower,
+			       pdp_input_find(layer_output_1, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_2, 
+			       loc_td_input2_intermed_upper, loc_td_input2_intermed_lower,
+			       pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights);
 
   //  pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
   //                       pdp_input_find(layer_taskdemand, ID_TOPDOWNCONTROL)->input_weights);
