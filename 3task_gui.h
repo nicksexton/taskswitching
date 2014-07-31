@@ -5,8 +5,8 @@
 // dimensions of main gui widgets
 #define MAIN_WINDOW_WIDTH_DEFAULT 800
 #define MAIN_WINDOW_HEIGHT_DEFAULT 800
-#define TASK_VIEW_WIDTH 750
-#define TASK_VIEW_HEIGHT 500
+#define TASK_VIEW_WIDTH 500
+#define TASK_VIEW_HEIGHT 800
 
 
 // wrapper struct for simulation data and pointer to other objects on notepage
@@ -20,7 +20,7 @@ typedef struct three_task_objects {
   int (*model_reinit)(pdp_model*, init_type, ThreeTaskSimulation*);
 
   GtkWidget * model_sub_notepage;
-
+  GtkWidget * task_tree_view;
 
   // pointers to files & tree stores for parameter import
   // current implementation - single file treestore for all parameter imports
@@ -28,6 +28,7 @@ typedef struct three_task_objects {
   FileData * task_config_file;
 
   // pointers to label widgets - for updating dashboard information
+
   /*
   GtkWidget * model_headerbar_label_subject;
   GtkWidget * model_headerbar_label_trial;

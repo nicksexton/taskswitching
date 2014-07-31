@@ -450,6 +450,10 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
 
   }
 
+  GtkTreeSelection *sel;
+  sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(objects->task_tree_view));
+  gtk_tree_selection_select_path(sel, objects->simulation->current_trial_path);
+
 
 }
 
@@ -480,6 +484,7 @@ static void model_controls_run_cb (GtkToolItem * tool_item,
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
+
 
 }
 
@@ -512,6 +517,11 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
     procedure_change_block_next (objects->simulation);
   }
 
+  GtkTreeSelection *sel;
+  sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(objects->task_tree_view));
+  gtk_tree_selection_select_path(sel, objects->simulation->current_trial_path);
+
+
 }
 
 static void model_controls_run_block_cb (GtkToolItem * tool_item,
@@ -526,6 +536,10 @@ static void model_controls_run_block_cb (GtkToolItem * tool_item,
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
+
+  GtkTreeSelection *sel;
+  sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(objects->task_tree_view));
+  gtk_tree_selection_select_path(sel, objects->simulation->current_trial_path);
 
 }
 
@@ -542,8 +556,84 @@ static void model_controls_run_all_blocks_cb (GtkToolItem * tool_item,
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
 
+  GtkTreeSelection *sel;
+  sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(objects->task_tree_view));
+  gtk_tree_selection_select_path(sel, objects->simulation->current_trial_path);
+
+
 }
 
+static void setup_task_viewer_treeview (GtkTreeView * tree) {
+
+  GtkTreeViewColumn *column;
+  GtkCellRenderer *renderer;
+
+  // aesthetic properties:
+  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(tree), TRUE);
+
+  // COlumns:
+  // Block name
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Block", renderer,
+						     "text", COL_BLOCK_NAME,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW(tree), column);
+
+  // Trial ID
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Trial ID", renderer,
+						     "text", COL_TASK_ID,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW(tree), column);
+
+
+  // Input Patterns 
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Cue", renderer, "text",
+						     COL_TASK_PATTERN_1,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Stim 1", renderer, "text",
+						     COL_TASK_PATTERN_2,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Stim 2", renderer, "text",
+						     COL_TASK_PATTERN_3,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Stim 3", renderer, "text",
+						     COL_TASK_PATTERN_4,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+
+
+  // Trial parameters
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Parameter 1", renderer, "text",
+						     COL_TASK_PARAM_1,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+  renderer = gtk_cell_renderer_text_new ();
+  g_object_set (G_OBJECT (renderer), "family", "monospace", NULL);
+  column = gtk_tree_view_column_new_with_attributes ("Parameter 2", renderer, "text",
+						     COL_TASK_PARAM_2,
+						     NULL);
+  gtk_tree_view_append_column (GTK_TREE_VIEW (tree), column);
+
+
+
+
+}
 
 
 static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
@@ -554,16 +644,25 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
   GtkWidget *grid_headerbar;
   GtkWidget *sub_notepage;
+  GtkWidget *scrollwindow;
+  GtkWidget *tree;
 
-
-  // Task Browser
+  // ------------- Task Browser ---------------
   scrollwindow = gtk_scrolled_window_new(NULL, NULL);
   gtk_widget_set_size_request (scrollwindow, TASK_VIEW_WIDTH, TASK_VIEW_HEIGHT);
 
-  GtkWidget *tree;
+
   tree = gtk_tree_view_new();
+  objects->task_tree_view = tree;
   gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->simulation->task_store));
   setup_task_viewer_treeview(GTK_TREE_VIEW(tree));
+
+  // handle selection for current trial
+
+  GtkTreeSelection *sel;
+  sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(tree));
+  gtk_tree_selection_select_path(sel, objects->simulation->current_trial_path);
+
 
   // file import buttons here
 
@@ -713,7 +812,7 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
   gtk_grid_attach (GTK_GRID(grid), toolbar, 0, 0, 1, 1);
   gtk_grid_attach (GTK_GRID(grid), sub_notepage, 0, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID(grid_main), scrollwindow, 1, 0, 1, 2);
+  gtk_grid_attach (GTK_GRID(grid), scrollwindow, 1, 0, 1, 2);
   gtk_widget_set_vexpand (GTK_WIDGET(grid), TRUE);
 
   gtk_widget_show_all(grid);
@@ -753,6 +852,8 @@ int main (int argc, char *argv[]) {
   ThreeTaskObjects * objects = g_malloc (sizeof(ThreeTaskObjects));
   // init function, set everything to null?
 
+
+
   objects->simulation = create_simulation();
   three_task_parameters_htable_set_default (objects->simulation->model_params_htable);
   objects->simulation->datafile = fopen (DATAFILE, "a");
@@ -771,6 +872,7 @@ int main (int argc, char *argv[]) {
   init_model_simulation (objects->simulation->model, objects->simulation->model_params_htable); 
 
   objects->model_sub_notepage = NULL;
+  objects->task_tree_view = NULL;
 
   objects->param_config_file = create_param_import_objects();
   objects->task_config_file = triple_task_create_task_import_objects();
