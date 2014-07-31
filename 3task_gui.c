@@ -214,11 +214,11 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 
   PdpguiCoords loc_topdowncontrol = { .x = widget_width * 0.5, .y = widget_height * 0.1, };
 
-  PdpguiCoords loc_td_input0_intermed_upper = { .x = widget_width * 0.05, .y = widget_height * 0.05 };
+  PdpguiCoords loc_td_input0_intermed_upper = { .x = widget_width * 0.05, .y = 0.0 };
   PdpguiCoords loc_td_input0_intermed_lower = { .x = widget_width * 0.05, .y = widget_height * 0.95 };
-  PdpguiCoords loc_td_input1_intermed_upper = { .x = widget_width * 0.20, .y = widget_height * 0.05 };
+  PdpguiCoords loc_td_input1_intermed_upper = { .x = widget_width * 0.20, .y = 0.0 };
   PdpguiCoords loc_td_input1_intermed_lower = { .x = widget_width * 0.4, .y = widget_height * 0.90 };
-  PdpguiCoords loc_td_input2_intermed_upper = { .x = widget_width * 0.9, .y = widget_height * 0.05 };
+  PdpguiCoords loc_td_input2_intermed_upper = { .x = widget_width * 0.9, .y = 0.0 };
   PdpguiCoords loc_td_input2_intermed_lower = { .x = widget_width * 0.9, .y = widget_height * 0.90 };
 
 
