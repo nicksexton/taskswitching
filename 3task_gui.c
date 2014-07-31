@@ -21,7 +21,7 @@ void three_task_gui_plot_network_activation (GtkWidget *widget,
   widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
   widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
 
-  printf ("%d x %d\n", widget_width, widget_height);
+  // printf ("%d x %d\n", widget_width, widget_height);
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
 			 0.0, simulation->model->cycle * 1.0, 
@@ -199,16 +199,32 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 				       cairo_t *cr, 
 				       ThreeTaskSimulation *simulation) {
 
+  pdp_layer * layer_taskdemand = pdp_model_component_find (simulation->model, ID_TASKDEMAND)->layer;
+  pdp_layer * layer_input_0 = pdp_model_component_find (simulation->model, ID_INPUT_0)->layer;
+  pdp_layer * layer_input_1 = pdp_model_component_find (simulation->model, ID_INPUT_1)->layer;
+  pdp_layer * layer_input_2 = pdp_model_component_find (simulation->model, ID_INPUT_2)->layer;
+  pdp_layer * layer_output_0 = pdp_model_component_find (simulation->model, ID_OUTPUT_0)->layer;
+  pdp_layer * layer_output_1 = pdp_model_component_find (simulation->model, ID_OUTPUT_1)->layer;
+  pdp_layer * layer_output_2 = pdp_model_component_find (simulation->model, ID_OUTPUT_2)->layer;
+  pdp_layer * layer_topdowncontrol = pdp_model_component_find (simulation->model, ID_TOPDOWNCONTROL)->layer;
+
+
   guint widget_width, widget_height;
   widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
   widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
 
-  printf ("%d x %d\n", widget_width, widget_height);
+  //  printf ("%d x %d\n", widget_width, widget_height);
 
-  PdpguiCoords centre = { 
-    .x = widget_width * 0.5, 
-    .y = widget_height * 0.5, 
-  };
+  PdpguiCoords loc_taskdemand = { .x = widget_width * 0.5, .y = widget_height * 0.25, };
+  PdpguiCoords loc_input_0 = { .x = widget_width * 0.2, .y = widget_height * 0.8, };
+  PdpguiCoords loc_input_1 = { .x = widget_width * 0.5, .y = widget_height * 0.8, };
+  PdpguiCoords loc_input_2 = { .x = widget_width * 0.8, .y = widget_height * 0.8, };
+  PdpguiCoords loc_output_0 = { .x = widget_width * 0.2, .y = widget_height * 0.5, };
+  PdpguiCoords loc_output_1 = { .x = widget_width * 0.5, .y = widget_height * 0.5, };
+  PdpguiCoords loc_output_2 = { .x = widget_width * 0.8, .y = widget_height * 0.5, };
+
+  PdpguiCoords loc_topdowncontrol = { .x = widget_width * 0.5, .y = widget_height * 0.1, };
+
 
   PdpguiColourRgb mono[2] = {{ 
       .r = 0.1, 
@@ -216,13 +232,49 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
       .b = 0.1 
     }, {
       .r = 0.5, 
-      .g = 0.5, 
-      .b = 0.5 
+      .g = 0.1, 
+      .b = 0.1 
+    }};
+
+  PdpguiColourRgb mono_grey[2] = {{ 
+      .r = 0.4, 
+      .g = 0.4, 
+      .b = 0.4 
+    }, {
+      .r = 0.6, 
+      .g = 0.6, 
+      .b = 0.6 
     }};
 
 
-  pdpgui_draw_layer (cr, centre, mono[0], mono[1], 
-		     pdp_model_component_find (simulation->model, ID_TOPDOWNCONTROL)->layer);
+  pdpgui_draw_layer (cr, loc_taskdemand, mono[0], mono[1], layer_taskdemand);
+  pdpgui_draw_layer (cr, loc_input_0, mono[0], mono[1], layer_input_0);
+  pdpgui_draw_layer (cr, loc_input_1, mono[0], mono[1], layer_input_1);
+  pdpgui_draw_layer (cr, loc_input_2, mono[0], mono[1], layer_input_2);
+  pdpgui_draw_layer (cr, loc_output_0, mono[0], mono[1], layer_output_0);
+  pdpgui_draw_layer (cr, loc_output_1, mono[0], mono[1], layer_output_1);
+  pdpgui_draw_layer (cr, loc_output_2, mono[0], mono[1], layer_output_2);
+
+  pdpgui_draw_layer (cr, loc_topdowncontrol, mono_grey[0], mono_grey[1], layer_topdowncontrol);
+
+  pdpgui_draw_weights (cr, loc_input_0, loc_output_0, pdp_input_find(layer_output_0, ID_INPUT_0)->input_weights);
+  pdpgui_draw_weights (cr, loc_input_1, loc_output_1, pdp_input_find(layer_output_1, ID_INPUT_1)->input_weights);
+  pdpgui_draw_weights (cr, loc_input_2, loc_output_2, pdp_input_find(layer_output_2, ID_INPUT_2)->input_weights);
+
+  pdpgui_draw_weights (cr, loc_input_0, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_INPUT_0)->input_weights);
+  pdpgui_draw_weights (cr, loc_input_1, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_INPUT_1)->input_weights);
+  pdpgui_draw_weights (cr, loc_input_2, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_INPUT_2)->input_weights);
+
+  pdpgui_draw_weights (cr, loc_output_0, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_OUTPUT_0)->input_weights);
+  pdpgui_draw_weights (cr, loc_output_1, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_OUTPUT_1)->input_weights);
+  pdpgui_draw_weights (cr, loc_output_2, loc_taskdemand, pdp_input_find(layer_taskdemand, ID_OUTPUT_2)->input_weights);
+
+  pdpgui_draw_weights (cr, loc_taskdemand, loc_output_0, pdp_input_find(layer_output_0, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights (cr, loc_taskdemand, loc_output_1, pdp_input_find(layer_output_1, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights (cr, loc_taskdemand, loc_output_2, pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights);
+
+  //  pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
+  //                       pdp_input_find(layer_taskdemand, ID_TOPDOWNCONTROL)->input_weights);
 
   return;
 
@@ -292,7 +344,10 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
 					  ThreeTaskObjects * objects) {
 
   ThreeTaskSimulation * simulation = objects->simulation;
-  three_task_model_dummy_reinit (simulation->model, INITIAL, simulation); 
+
+  procedure_change_trial_first (simulation, simulation->task_store);
+  objects->model_reinit (simulation->model, INITIAL, simulation);
+  //  three_task_model_dummy_reinit (simulation->model, INITIAL, simulation); 
 
   
   /*
@@ -696,7 +751,7 @@ int main (int argc, char *argv[]) {
   objects->simulation->model = pdp_model_create (0, "3task_gs"); 
   init_model_simulation (objects->simulation->model, objects->simulation->model_params_htable); 
 
-  //  objects->model_sub_notepage = NULL;
+  objects->model_sub_notepage = NULL;
 
   objects->param_config_file = create_param_import_objects();
   objects->task_config_file = triple_task_create_task_import_objects();

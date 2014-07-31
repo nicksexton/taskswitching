@@ -33,7 +33,7 @@ void pdpgui_draw_unit (cairo_t *cr,
   cairo_fill(cr);
 
   cairo_set_source_rgb (cr, colour_on.r, colour_on.g, colour_on.b);
-  cairo_arc (cr, unit_centre.x, unit_centre.y, DEFAULT_UNIT_SIZE*activation, 0, 2*G_PI);
+  cairo_arc (cr, unit_centre.x, unit_centre.y, DEFAULT_UNIT_SIZE*(activation/2 + 0.5), 0, 2*G_PI);
   cairo_fill(cr);
 
 }
@@ -50,7 +50,7 @@ void pdpgui_draw_layer (cairo_t *cr,
   for (n = 0; n < layer->size; n ++) {
     
     PdpguiCoords centre = { .x = layer_centre.x 
-			    - (layer->size/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    - ((double)(layer->size)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
 			    + n * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
 			    .y = layer_centre.y};
 
@@ -58,16 +58,17 @@ void pdpgui_draw_layer (cairo_t *cr,
 
   }
   return;
-
 }
 
 
 void pdpgui_draw_connection (cairo_t *cr, 
 			     PdpguiCoords unit_centre_lower, 
-			     PdpguiCoords unit_centre_upper) {
+			     PdpguiCoords unit_centre_upper,
+			     int width) {
 
   // default black connections
   cairo_set_source_rgb (cr, 0, 0, 0);
+  cairo_set_line_width (cr, width);
 
   // remember to invert y axis
   cairo_move_to (cr, unit_centre_lower.x, unit_centre_lower.y - DEFAULT_UNIT_SIZE);
@@ -75,7 +76,6 @@ void pdpgui_draw_connection (cairo_t *cr,
   cairo_stroke(cr);
 
 }
-
 
 
 void pdpgui_draw_connection_curved (cairo_t *cr, 
@@ -97,6 +97,30 @@ void pdpgui_draw_connection_curved (cairo_t *cr,
 
 }
  
+void pdpgui_draw_weights (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			  pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      PdpguiCoords lower = { .x = layer_centre_lower.x 
+			    - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			    .y = layer_centre_lower.y };
+
+      PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_upper.y };
+
+      pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+
 void pdpgui_draw_graph_axes (cairo_t *cr, 
 			     guint window_width, guint window_height,
 			     int x_divisions, int y_divisions,

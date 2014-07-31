@@ -38,7 +38,8 @@ void pdpgui_draw_layer (cairo_t *cr,
 
 void pdpgui_draw_connection (cairo_t *cr, 
 			     PdpguiCoords unit_centre_lower, 
-			     PdpguiCoords unit_centre_upper);
+			     PdpguiCoords unit_centre_upper,
+			     int width);
 
 void pdpgui_draw_connection_curved (cairo_t *cr, 
 				    PdpguiCoords unit_centre_lower, 
@@ -46,6 +47,10 @@ void pdpgui_draw_connection_curved (cairo_t *cr,
 				    PdpguiCoords intermediate_lower,
 				    PdpguiCoords intermediate_upper);
 
+void pdpgui_draw_weights (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			  pdp_weights_matrix * matrix);
 
 
 void pdpgui_draw_graph_axes (cairo_t *cr, 
