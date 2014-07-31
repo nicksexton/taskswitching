@@ -76,7 +76,7 @@ gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
 				     current_trial)) {
       printf ("error in model_current_trial_is_last, " 
 	      "current_trial appears to be top level (ie block header\n");
-      return false;
+      return true;
     }
     else {
       num_trials = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(simulation->task_store),
