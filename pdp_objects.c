@@ -143,6 +143,27 @@ int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array
   return 0;
 }
 
+int pdp_layer_set_activation_starting(pdp_layer * some_layer, int size, double init_array[size]){
+  /* sets the activation of the unit_activation state referenced by
+     the HEAD pointer ie. sets activation for INITIAL CYCLE
+     only. If this is called on initialising the model then this is
+     the initial state. */
+
+  int i;
+  
+  if (some_layer->size != size) {
+    /* raise an exception! */
+    printf ("\nerror! tried to set unit activations to an incorrectly sized array\n");
+    return 1;
+  }
+
+  for (i = 0; i < size; i++) {
+    some_layer->units_initial.activations[i] = init_array[i];
+  }
+  return 0;
+}
+
+
 /* eg. for adding noise to activation levels of PDP units */
 /* does vector addition on activation values of the latest units */
 int pdp_layer_modulate_activation (pdp_layer * some_layer, int size, double modulating_array[size]){

@@ -446,6 +446,19 @@ int three_task_model_dummy_run (pdp_model * model,
   learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
   hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
 					     "hebb_persist");
+#ifdef ECHO
+
+    printf ("\ncyc:%d\t", model->cycle);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_0)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_1)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
+#endif
+
 
   // run_model_step returns true when stopping_condition evaluates to false
   do {
@@ -1040,10 +1053,9 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
       printf ("%4.2f -> %4.2f\t", taskdemand->units_latest->activations[i], initial_activation_taskdemand[i]);
     }
     printf ("\n");
-    pdp_layer_set_activation (taskdemand, 3, initial_activation_taskdemand);
   }
 
-    pdp_layer_set_activation(taskdemand, 3, initial_activation_taskdemand);
+  pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
 
   // clear & free history
 

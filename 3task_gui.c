@@ -428,14 +428,18 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
   double response_threshold = *(double *)g_hash_table_lookup(objects->simulation->model_params_htable, 
 							     "response_threshold");
+  //  double learning_rate = *(double *)g_hash_table_lookup(objects->simulation->model_params_htable, "learning_rate");
+  // int hebb_persist = *(int *)g_hash_table_lookup(objects->simulation->model_params_htable, 
+  //					     "hebb_persist");
 
-  ThreeTaskSimulation * simulation = objects->simulation;
+
   while (!stopping_condition(objects->simulation->model, response_threshold)) {
       three_task_model_dummy_run (objects->simulation->model, objects->simulation);
   }
-  three_task_model_update_weights;
-  three_task_model_dummy_reinit;
 
+  objects->model_reinit(objects->simulation->model, TRIAL, objects->simulation);
+
+  
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
   }
@@ -680,11 +684,11 @@ int main (int argc, char *argv[]) {
   objects->simulation->datafile = fopen (DATAFILE, "a");
 
   // define function pointer to model_run function 
-  int (*model_run)(pdp_model*, ThreeTaskSimulation*);
-  simulation->model_run = &three_task_model_dummy_run; // (model-specific, def in 3task_model_gs.c)
+  //  int (*model_run)(pdp_model*, ThreeTaskSimulation*);
+  objects->model_run = &three_task_model_dummy_run; // (model-specific, def in 3task_model_gs.c)
 
-  int (*model_reinit)(pdp_model*, init_type, ThreeTaskSimulation*);
-  simulation->model_reinit = &three_task_model_dummy_reinit; // (model-specific, def in 3task_model_gs.c)
+  //  int (*model_reinit)(pdp_model*, init_type, ThreeTaskSimulation*);
+  objects->model_reinit = &three_task_model_dummy_reinit; // (model-specific, def in 3task_model_gs.c)
 
 
   // now create and build the model

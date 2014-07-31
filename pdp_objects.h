@@ -160,6 +160,7 @@ pdp_layer * pdp_layer_create(const int id, const int size, double bias);
 void pdp_layer_free (pdp_layer * some_layer);
 
 int pdp_layer_set_activation(pdp_layer * some_layer, int size, double init_array[size]);
+int pdp_layer_set_activation_starting(pdp_layer * some_layer, int size, double init_array[size]);
 
 void pdp_layer_print_current_output (const pdp_layer * some_layer);
 
