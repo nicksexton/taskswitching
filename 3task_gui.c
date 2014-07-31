@@ -553,13 +553,23 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
   GtkToolItem *tool_item;
 
   GtkWidget *grid_headerbar;
-  //  GtkWidget *label1;
-  // GtkAdjustment *current_trial_adjustment;
-  // GtkWidget *spin_button;
-
   GtkWidget *sub_notepage;
 
-  //  ThreeTaskSimulation *simulation = objects->simulation;
+
+  // Task Browser
+  scrollwindow = gtk_scrolled_window_new(NULL, NULL);
+  gtk_widget_set_size_request (scrollwindow, TASK_VIEW_WIDTH, TASK_VIEW_HEIGHT);
+
+  GtkWidget *tree;
+  tree = gtk_tree_view_new();
+  gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->simulation->task_store));
+  setup_task_viewer_treeview(GTK_TREE_VIEW(tree));
+
+  // file import buttons here
+
+  // tree view here
+  gtk_container_add (GTK_CONTAINER(scrollwindow), tree);
+
 
 
   int position = 0; // toolbar position
@@ -700,10 +710,10 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
   grid = gtk_grid_new();
 
-  gtk_grid_attach (GTK_GRID(grid), grid_headerbar, 0, 0, 1, 1);
-  gtk_grid_attach (GTK_GRID(grid), toolbar, 0, 1, 1, 1);
-  gtk_grid_attach (GTK_GRID(grid), sub_notepage, 0, 2, 1, 1);
 
+  gtk_grid_attach (GTK_GRID(grid), toolbar, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), sub_notepage, 0, 1, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid_main), scrollwindow, 1, 0, 1, 2);
   gtk_widget_set_vexpand (GTK_WIDGET(grid), TRUE);
 
   gtk_widget_show_all(grid);
