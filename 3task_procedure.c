@@ -334,8 +334,15 @@ gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation,
 }
 
 
+gboolean procedure_change_block_next (ThreeTaskSimulation *simulation) {
 
-
+    gtk_tree_path_up(simulation->current_trial_path);
+    gtk_tree_path_next(simulation->current_trial_path);
+    gtk_tree_path_down(simulation->current_trial_path);
+    printf ("next block, new current trial path: %s\n", gtk_tree_path_to_string (simulation->current_trial_path));
+    
+    return true;
+}
 
 bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation) {
   printf ("in procedure_print_current_trial_data\n");

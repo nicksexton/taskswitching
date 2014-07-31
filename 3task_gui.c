@@ -502,6 +502,9 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
   if (!procedure_current_trial_is_last(objects->simulation)) {
     procedure_change_trial_next (objects->simulation);
   }
+  else if (!procedure_current_block_is_last(objects->simulation)) {
+    procedure_change_block_next (objects->simulation);
+  }
 
 }
 
@@ -763,7 +766,7 @@ int main (int argc, char *argv[]) {
   three_task_gs_parameters_import_commit (objects->param_config_file, objects->simulation->model_params_htable);
 
   // Import tasks
-  pdp_import_select_file ("3task_import_test.conf", objects->task_config_file);
+  pdp_import_select_file ("3task_import_n2_basic.conf", objects->task_config_file);
   pdp_load_from_file_long (objects->task_config_file);
   triple_task_task_import_commit (objects->task_config_file, objects->simulation->task_store);
   // ----------------------------------------------------------------------------------------------

@@ -366,6 +366,7 @@ int three_task_model_dummy_run (pdp_model * model,
     // now get params for current trial
     path = gtk_tree_path_to_string(simulation->current_trial_path);
     fprintf (simulation->datafile, "%s\t", path);
+    printf ("trial: %s", path);
     g_free (path);
 
     gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 

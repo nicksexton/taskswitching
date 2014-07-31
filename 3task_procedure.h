@@ -74,6 +74,7 @@ gboolean procedure_change_trial_first (ThreeTaskSimulation *simulation,
 				       GtkTreeStore *store);
 gboolean procedure_change_trial_first_of_block (ThreeTaskSimulation *simulation, 
 						GtkTreeStore *store);
+gboolean procedure_change_block_next (ThreeTaskSimulation *simulation);
 
 
 bool procedure_print_current_trial_data (ThreeTaskSimulation * simulation);
