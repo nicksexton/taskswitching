@@ -1,6 +1,7 @@
 // contains functions for plotting on surfaces (called from in pdpgui_test or other main code)
 // Implements basic drawing functions for a cairo drawing area
 
+#include <math.h>
 #include <gtk/gtk.h>
 #include <stdlib.h>
 #include "lib_cairox.h"
@@ -9,6 +10,7 @@
 
 #define DEFAULT_UNIT_SIZE 20
 #define DEFAULT_UNIT_PADDING 25
+#define UNIT_DISPLAY_SQUASH_CONST 8.0
 
 #define AXIS_MARGIN_X 0.1
 #define AXIS_MARGIN_Y 0.1
@@ -38,6 +40,45 @@ void pdpgui_draw_unit (cairo_t *cr,
 
 }
 
+void pdpgui_draw_unit_activation_hsl (cairo_t *cr, 
+				      PdpguiCoords unit_centre, 
+				      PdpguiColourRgb colour_off,
+				      double activation) {
+
+  // activation should be real-valued proportion from 0 to 1
+  // don't worry about negative activations or resting state for now
+
+  cairo_set_source_rgb (cr, colour_off.r, colour_off.g, colour_off.b);
+  cairo_arc (cr, unit_centre.x, unit_centre.y, DEFAULT_UNIT_SIZE, 0, 2*G_PI);
+  cairo_fill(cr);
+
+  //  cairo_set_source_rgb (cr, colour_on.r, colour_on.g, colour_on.b);
+  cairox_select_colour_scale (cr, 1 - activation);
+
+  cairo_arc (cr, unit_centre.x, unit_centre.y, DEFAULT_UNIT_SIZE*(activation/2 + 0.5), 0, 2*G_PI);
+  cairo_fill(cr);
+
+}
+
+void pdpgui_pango_print_double (cairo_t * cr,
+				PdpguiCoords text_centre,
+				double number) {
+  PangoLayout *layout;
+  char textbuf[32];
+  CairoxTextParameters text_params;
+
+  // set text parameters
+  layout = pango_cairo_create_layout (cr);
+  pangox_layout_set_font_size (layout, 10);
+
+  g_snprintf (textbuf, 10, "%1.2f", number);     
+  cairox_text_parameters_set (&text_params, 
+			      text_centre.x, 
+			      text_centre.y - 5,
+			      PANGOX_XALIGN_CENTER, PANGOX_YALIGN_TOP, 0.0);
+  cairox_paint_pango_text (cr, &text_params, layout, textbuf);
+}
+
 void pdpgui_draw_layer (cairo_t *cr, 
 			PdpguiCoords layer_centre, 
 			PdpguiColourRgb colour_off,
@@ -54,7 +95,15 @@ void pdpgui_draw_layer (cairo_t *cr,
 			    + n * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
 			    .y = layer_centre.y};
 
-    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    // squash unit activation (0 to 1) here!
+    double activation = layer->units_latest->activations[n];
+    double squashed = 1 / (1 + exp(-UNIT_DISPLAY_SQUASH_CONST * activation));
+
+    //    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
+
+    // plot text
+    pdpgui_pango_print_double (cr, centre, activation);
 
   }
   return;

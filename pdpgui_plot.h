@@ -30,6 +30,11 @@ void pdpgui_draw_unit (cairo_t *cr,
 		       PdpguiColourRgb colour_on,
 		       double activation);
 
+void pdpgui_draw_unit_activation_hsl (cairo_t *cr, 
+				      PdpguiCoords unit_centre, 
+				      PdpguiColourRgb colour_off,
+				      double activation);
+
 void pdpgui_draw_layer (cairo_t *cr, 
 			PdpguiCoords layer_centre, 
 			PdpguiColourRgb colour_off,

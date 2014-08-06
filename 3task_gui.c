@@ -251,7 +251,6 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdpgui_draw_layer (cr, loc_output_0, mono[0], mono[1], layer_output_0);
   pdpgui_draw_layer (cr, loc_output_1, mono[0], mono[1], layer_output_1);
   pdpgui_draw_layer (cr, loc_output_2, mono[0], mono[1], layer_output_2);
-
   pdpgui_draw_layer (cr, loc_topdowncontrol, mono_grey[0], mono_grey[1], layer_topdowncontrol);
 
   pdpgui_draw_weights (cr, loc_input_0, loc_output_0, pdp_input_find(layer_output_0, ID_INPUT_0)->input_weights);
