@@ -344,32 +344,16 @@ create_sub_notepage_model_display_architecture (ThreeTaskObjects * objects) {
 
 }
 
-
-static void model_controls_initialise_cb (GtkToolItem * tool_item, 
-					  ThreeTaskObjects * objects) {
+static void model_set_starting_activation (ThreeTaskObjects * objects) {
 
   ThreeTaskSimulation * simulation = objects->simulation;
 
-  procedure_change_trial_first (simulation, simulation->task_store);
-  objects->model_reinit (simulation->model, INITIAL, simulation);
-  //  three_task_model_dummy_reinit (simulation->model, INITIAL, simulation); 
 
-  
-  /*
-  if (objects->model_sub_notepage != NULL) {
-    gtk_widget_queue_draw(objects->model_sub_notepage);
-  }
-  */
   double input_0_initial_act[2]   = { 0.0,  0.0 };
   double input_1_initial_act[2]   = { 0.0,  0.0 };
   double input_2_initial_act[2]   = { 0.0,  0.0 };
   double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
-  //  double response_threshold, learning_rate;
-  //  hebbian_learning_persistence hebb_persist;
-  //  int stopped;
 
-  // Get data for current trial 
-  //  gchar *path;
   GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
 
   if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, simulation->current_trial_path)) {
@@ -448,13 +432,113 @@ static void model_controls_initialise_cb (GtkToolItem * tool_item,
   }
 
   }
+}
+
+
+static void model_controls_initialise_cb (GtkToolItem * tool_item, 
+					  ThreeTaskObjects * objects) {
+
+  ThreeTaskSimulation * simulation = objects->simulation;
+
+  procedure_change_trial_first (simulation, simulation->task_store);
+  objects->model_reinit (simulation->model, INITIAL, simulation);
+  //  three_task_model_dummy_reinit (simulation->model, INITIAL, simulation); 
+
+  model_set_starting_activation (objects);
+  /*
+  double input_0_initial_act[2]   = { 0.0,  0.0 };
+  double input_1_initial_act[2]   = { 0.0,  0.0 };
+  double input_2_initial_act[2]   = { 0.0,  0.0 };
+  double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
+
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
+
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, simulation->current_trial_path)) {
+
+    g_free (iter);
+    printf ("error! three_task_model_dummy_run  failed to acquire valid iter from current_trial_path,"
+	    "returning FALSE\n");
+    return;
+  }
+
+  else {
+
+    int trial_id, cue, stim_0, stim_1, stim_2;
+    gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
+			COL_TASK_ID, &trial_id,
+			COL_TASK_PATTERN_1, &cue, 
+			COL_TASK_PATTERN_2, &stim_0,
+			COL_TASK_PATTERN_3, &stim_1,
+			COL_TASK_PATTERN_4, &stim_2,
+			-1);
+
+  // check that trial parameters are sensible
+
+  if (stim_0 < -1 || stim_0 > 2) {
+    printf ("subject data: input_0 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_0);
+    return ;
+  }
+
+  if (stim_1 < -1 || stim_1 > 2) {
+    printf ("subject data: input_1 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_1);
+    return ;
+  }
+
+  if (stim_2 < -1 || stim_2 > 2) {
+    printf ("subject data: input_2 %d out of range (should be -1 (neutral) or 0 - 1)!",
+	    stim_2);
+    return ;
+  }
+
+  if (cue < 0 || cue > 3) {
+    printf ("subject data: task input %d out of range (should be 0 - 2)!",
+	    cue);
+    return ;
+  }
+
+
+  // set ON inputs
+  if (stim_0 >= 0) { // check for neutral trial condition where stim is -1
+      input_0_initial_act[stim_0] = 1.0;
+  }
+
+  if (stim_1 >= 0) { // check for neutral trial condition where stim is -1
+      input_1_initial_act[stim_1] = 1.0;
+  }
+
+  if (stim_2 >= 0) { // check for neutral trial condition where stim is -1
+      input_2_initial_act[stim_2] = 1.0;
+  }
+
+  topdown_control_initial_act[cue] = 1.0;
+
+  pdp_layer_set_activation (pdp_model_component_find (simulation->model, ID_INPUT_0)->layer, 
+			    2, input_0_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (simulation->model, ID_INPUT_1)->layer, 
+			    2, input_1_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (simulation->model, ID_INPUT_2)->layer, 
+			    2, input_2_initial_act);
+  pdp_layer_set_activation (pdp_model_component_find (
+                                 simulation->model, ID_TOPDOWNCONTROL)->layer, 
+	   		    3, topdown_control_initial_act);
+ 
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
+  }
+
+  }
+
+  */
 
   GtkTreeSelection *sel;
   sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(objects->task_tree_view));
   gtk_tree_selection_select_path(sel, objects->simulation->current_trial_path);
 
-
 }
+
 
 static void model_controls_step_once_cb (GtkToolItem * tool_item, 
 					 ThreeTaskObjects * objects) {
@@ -634,6 +718,21 @@ static void setup_task_viewer_treeview (GtkTreeView * tree) {
 
 }
 
+static void model_controls_select_trial_treeview_cb (GtkTreeView * tree_view,
+						     GtkTreePath * path,
+						     GtkTreeViewColumn *column,
+						     ThreeTaskObjects *objects) {
+  GtkTreePath *path_copy;
+  path_copy = gtk_tree_path_copy (path);
+
+  procedure_change_trial (objects->simulation, objects->simulation->task_store, path_copy);
+  objects->model_reinit(objects->simulation->model, TRIAL, objects->simulation);
+
+  model_set_starting_activation (objects);
+
+
+}
+
 
 static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
 
@@ -655,6 +754,10 @@ static GtkWidget* create_notepage_model_main(ThreeTaskObjects * objects) {
   objects->task_tree_view = tree;
   gtk_tree_view_set_model (GTK_TREE_VIEW(tree), GTK_TREE_MODEL(objects->simulation->task_store));
   setup_task_viewer_treeview(GTK_TREE_VIEW(tree));
+  // signal connect for selecting tree rows
+  g_signal_connect (G_OBJECT(tree), "row-activated", 
+		    G_CALLBACK(model_controls_select_trial_treeview_cb), (gpointer)objects);
+
 
   // handle selection for current trial
 
