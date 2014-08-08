@@ -30,6 +30,7 @@ typedef struct three_task_simulation {
 
   void * current_trial_data;  // should be cast into whatever model-specific data type
   FILE * datafile;
+  FILE * datafile_act;
 
 
 } ThreeTaskSimulation;

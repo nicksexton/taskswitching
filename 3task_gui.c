@@ -3,7 +3,7 @@
 #include "3task_import.h"
 #include "3task_model_gs.h" // model
 #include "3task_procedure.h"
-
+#include "lib_cairox.h" // for pango annotations
 
 #include "pdpgui_plot.h"
 // #include "pdpgui_import.h"
@@ -11,6 +11,9 @@
 #include "3task_model_gs.h"
 
 #define DATAFILE "3task_test.txt"
+#define DATAFILE_ACT "3task_act.txt"
+
+#define TEXT_SIZE_HEAD 15
 
 void three_task_gui_plot_network_activation (GtkWidget *widget, 
 					     cairo_t *cr, 
@@ -204,15 +207,42 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 
   //  printf ("%d x %d\n", widget_width, widget_height);
 
+  // TD Units
+
   PdpguiCoords loc_taskdemand = { .x = widget_width * 0.5, .y = widget_height * 0.25, };
+  PdpguiCoords loc_taskdemand_title = { .x = widget_width * 0.9, .y = widget_height * 0.25, };
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
+
+
+  // Inputs
+
   PdpguiCoords loc_input_0 = { .x = widget_width * 0.2, .y = widget_height * 0.8, };
   PdpguiCoords loc_input_1 = { .x = widget_width * 0.5, .y = widget_height * 0.8, };
   PdpguiCoords loc_input_2 = { .x = widget_width * 0.8, .y = widget_height * 0.8, };
+  PdpguiCoords loc_inputs_title = { .x = widget_width * 0.9, .y = widget_height * 0.8, };
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_inputs_title, 0, -10, "Inputs");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_0, -22, 30, "A");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_1, -22, 30, "B");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_2, -22, 30, "C");
+
+
+  // Outputs
+
   PdpguiCoords loc_output_0 = { .x = widget_width * 0.2, .y = widget_height * 0.5, };
   PdpguiCoords loc_output_1 = { .x = widget_width * 0.5, .y = widget_height * 0.5, };
   PdpguiCoords loc_output_2 = { .x = widget_width * 0.8, .y = widget_height * 0.5, };
+  PdpguiCoords loc_outputs_title = { .x = widget_width * 0.9, .y = widget_height * 0.5, };
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_outputs_title, 0, -10, "Outputs");
+
 
   PdpguiCoords loc_topdowncontrol = { .x = widget_width * 0.5, .y = widget_height * 0.1, };
+  PdpguiCoords loc_tdc_title = { .x = widget_width * 0.9, .y = widget_height * 0.1, };
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0, -10, "Top Down");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0,  12, "Inputs");
+
 
   PdpguiCoords loc_td_input0_intermed_upper = { .x = widget_width * 0.05, .y = 0.0 };
   PdpguiCoords loc_td_input0_intermed_lower = { .x = widget_width * 0.05, .y = widget_height * 0.95 };
@@ -220,6 +250,9 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   PdpguiCoords loc_td_input1_intermed_lower = { .x = widget_width * 0.4, .y = widget_height * 0.90 };
   PdpguiCoords loc_td_input2_intermed_upper = { .x = widget_width * 0.9, .y = 0.0 };
   PdpguiCoords loc_td_input2_intermed_lower = { .x = widget_width * 0.9, .y = widget_height * 0.90 };
+
+  PdpguiCoords loc_channels_title = { .x = widget_width * 0.5, .y = widget_height * 0.9, };
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_channels_title, -50, 0, "Task Processing Pathways");
 
 
 
@@ -280,6 +313,9 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 
   //  pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
   //                       pdp_input_find(layer_taskdemand, ID_TOPDOWNCONTROL)->input_weights);
+
+
+
 
   return;
 
@@ -461,10 +497,17 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
 							     "response_threshold");
 
   if (!stopping_condition (objects->simulation->model, response_threshold)) { 
+    gchar * path;
+    path = gtk_tree_path_to_string(objects->simulation->current_trial_path);
+
+
     three_task_model_dummy_run_step (objects->simulation->model, objects->simulation->random_generator, 
 				     response_threshold, 
-				     objects->simulation->datafile);
+				     objects->simulation->datafile,
+				     objects->simulation->datafile_act,
+				     path);
 
+    g_free (path);
     if (objects->model_sub_notepage != NULL) {
       gtk_widget_queue_draw(objects->model_sub_notepage);
     }
@@ -873,6 +916,7 @@ int main (int argc, char *argv[]) {
   objects->simulation = create_simulation();
   three_task_parameters_htable_set_default (objects->simulation->model_params_htable);
   objects->simulation->datafile = fopen (DATAFILE, "a");
+  objects->simulation->datafile_act = fopen (DATAFILE_ACT, "a");
 
   // define function pointer to model_run function 
   //  int (*model_run)(pdp_model*, ThreeTaskSimulation*);

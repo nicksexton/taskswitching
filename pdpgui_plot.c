@@ -79,6 +79,29 @@ void pdpgui_pango_print_double (cairo_t * cr,
   cairox_paint_pango_text (cr, &text_params, layout, textbuf);
 }
 
+void pdpgui_pango_print_annotation (cairo_t * cr,
+				    int size,
+				    PdpguiCoords text_centre,
+				    int x_offset, int y_offset,
+				    char * text) {
+  PangoLayout *layout;
+  //  char textbuf[32];
+  CairoxTextParameters text_params;
+
+  // set text parameters
+  layout = pango_cairo_create_layout (cr);
+  pangox_layout_set_font_size (layout, size);
+
+  //  g_snprintf (textbuf, 10, "%1.2f", number);     
+  cairox_text_parameters_set (&text_params, 
+			      text_centre.x + x_offset, 
+			      text_centre.y + y_offset,
+			      PANGOX_XALIGN_CENTER, PANGOX_YALIGN_TOP, 0.0);
+  cairox_paint_pango_text (cr, &text_params, layout, text);
+}
+
+
+
 void pdpgui_draw_layer (cairo_t *cr, 
 			PdpguiCoords layer_centre, 
 			PdpguiColourRgb colour_off,

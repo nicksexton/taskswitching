@@ -24,6 +24,12 @@ typedef struct pdpgui_axis_dimensions {
 } PdpguiAxisDimensions;
 
 
+void pdpgui_pango_print_annotation (cairo_t * cr,
+				    int size,
+				    PdpguiCoords text_centre,
+				    int x_offset, int y_offset,
+				    char * text);
+
 void pdpgui_draw_unit (cairo_t *cr, 
 		       PdpguiCoords unit_centre, 
 		       PdpguiColourRgb colour_off,

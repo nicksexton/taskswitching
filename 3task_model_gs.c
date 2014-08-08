@@ -367,7 +367,7 @@ int three_task_model_dummy_run (pdp_model * model,
     path = gtk_tree_path_to_string(simulation->current_trial_path);
     fprintf (simulation->datafile, "%s\t", path);
     printf ("trial: %s", path);
-    g_free (path);
+
 
     gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
 			COL_TASK_ID, &trial_id,
@@ -465,7 +465,9 @@ int three_task_model_dummy_run (pdp_model * model,
   do {
     three_task_model_dummy_run_step (model, simulation->random_generator, 
 				     response_threshold, 
-				     simulation->datafile);
+				     simulation->datafile,
+				     simulation->datafile_act,
+				     path);
     stopped = stopping_condition (model, response_threshold);
   } while (stopped == false && model->cycle < MAX_CYCLES);
   
@@ -481,6 +483,8 @@ int three_task_model_dummy_run (pdp_model * model,
   fprintf (simulation->datafile, "%d\t", model->cycle); 
   fprintf (simulation->datafile, "%d", stopped); // response
   fprintf (simulation->datafile, "\n");
+
+  g_free (path);
 
   return (1);
   }
@@ -624,7 +628,9 @@ int stopping_condition (const pdp_model * model,
 int three_task_model_dummy_run_step (pdp_model * model, 
 				      const gsl_rng * random_generator, 
 				      double response_threshold, 
-				      FILE * fp) {
+				     FILE * fp_trial,
+				     FILE * fp_act,
+				     gchar * path) {
 
 
     pdp_model_cycle (model);
@@ -670,16 +676,30 @@ int three_task_model_dummy_run_step (pdp_model * model,
 
 #endif
   */
-    /* Output this to a second logfile?
-    pdp_layer_fprintf_current_output (
-				      pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp);
-    pdp_layer_fprintf_current_output (
-				      pdp_model_component_find (model, ID_OUTPUT_1)->layer, fp);
-    pdp_layer_fprintf_current_output (
-				      pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp);
-      
-    */
+    // Output this to a second logfile
 
+    if (path != NULL) {
+      fprintf (fp_act, "%s\t", path);
+    }
+
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_INPUT_0)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_INPUT_1)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_INPUT_2)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_OUTPUT_1)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp_act);
+    pdp_layer_fprintf_current_output (
+				      pdp_model_component_find (model, ID_TASKDEMAND)->layer, fp_act);
+    fprintf (fp_act, "\n");
+    
     return 0; 
 
   

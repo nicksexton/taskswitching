@@ -43,9 +43,11 @@ int three_task_model_dummy_run (pdp_model * model,
 				ThreeTaskSimulation * simulation);
 
 int three_task_model_dummy_run_step (pdp_model * model, 
-				      const gsl_rng * random_generator, 
+				     const gsl_rng * random_generator, 
 				     double response_threshold,
-				      FILE * fp);
+				     FILE * fp, // datafile for trial-by-trial history
+				     FILE * fp_act, // datafile for cycle-by-cycle activation history
+				     gchar * path); // string of current path, for writing to fp_act
 
 int three_task_model_update_weights (pdp_model * gs_stroop_model, 
 				     double learning_rate, 

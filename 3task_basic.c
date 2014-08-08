@@ -6,6 +6,7 @@
 #include "3task_procedure.h"
 
 #define DATAFILE "3task_test.txt"
+#define DATAFILE_ACT "3task_act.txt"
 // defined elsewhere? 3task_basic.c for now
 
 
@@ -18,6 +19,7 @@ int main (int argc, char *argv[]) {
 
   ThreeTaskSimulation * simulation = create_simulation();
   simulation->datafile = fopen (DATAFILE, "a");
+  simulation->datafile_act = fopen (DATAFILE_ACT, "a");
   FileData *param_config_file, *task_config_file;
 
   simulation->model = pdp_model_create (0, "3task_gs"); 
@@ -56,6 +58,7 @@ int main (int argc, char *argv[]) {
   free (simulation->model->activation_parameters); 
   pdp_model_free (simulation->model);  
   fclose(simulation->datafile);
+  fclose(simulation->datafile_act);
   free_simulation (simulation);
   g_free (param_config_file);
   g_free (task_config_file);
