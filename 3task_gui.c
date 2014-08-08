@@ -366,6 +366,7 @@ static void model_set_starting_activation (ThreeTaskObjects * objects) {
 
   else {
 
+    // set appropriate inputs based on trial data 
     int trial_id, cue, stim_0, stim_1, stim_2;
     gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
 			COL_TASK_ID, &trial_id,
