@@ -81,12 +81,12 @@ def write_lookup (task_sequence, run_cong_sequence, trial_id, position, trial_co
 
 
 
-# first write ABA trials - n-2 repeats
-
 for block in range(0, num_blocks):
     for run in run_congruency_levels:
         for sequence in sequence_levels:
-            block_name = 'ABA_' + str(run[3]) 
+            block_name = str(sequence[3]) + "_" + str(run[3]) 
+
+            # write ABA trials
 
             write_trial (block_name + "_" + str(block), 
                          trialid+0, 
@@ -94,7 +94,7 @@ for block in range(0, num_blocks):
                          trial_congruency_levels[run[0]][0], #stim_A 
                          trial_congruency_levels[run[0]][1], #stim_B
                          trial_congruency_levels[run[0]][2], #stim_C
-                         "HebP=1", "")
+                         "HebP=0", "")
 
             write_trial (block_name + "_" + str(block), 
                          trialid+1, 
@@ -102,7 +102,7 @@ for block in range(0, num_blocks):
                          trial_congruency_levels[run[1]][0], 
                          trial_congruency_levels[run[1]][1], 
                          trial_congruency_levels[run[1]][2], 
-                         "HebP=1", "")
+                         "HebP=0", "")
 
             write_trial (block_name + "_" + str(block), 
                          trialid+2, 
@@ -110,12 +110,19 @@ for block in range(0, num_blocks):
                          trial_congruency_levels[run[2]][0], 
                          trial_congruency_levels[run[2]][1], 
                          trial_congruency_levels[run[2]][2], 
-                         "HebP=1", "")
+                         "HebP=0", "")
  
 
+
+
+
             for trial in range(0, 3):
-                write_lookup ("ABA", run[3], trialid+trial, trial, trial_congruency_levels[run[trial]][3])
+                write_lookup (sequence[3], 
+                              run[3], 
+                              trialid+trial, 
+                              trial, 
+                              trial_congruency_levels[run[trial]][3])
 
+        
             trialid += 3
-
 
