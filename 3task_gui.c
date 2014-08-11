@@ -1,3 +1,4 @@
+#include <ctype.h> // for isprint; processing cmd line arguments
 #include <gtk/gtk.h>
 #include "pdp_objects.h"
 #include "3task_import.h"
@@ -906,6 +907,33 @@ static void main_quit (GtkWidget *window, ThreeTaskObjects *objects) {
 
 int main (int argc, char *argv[]) {
 
+
+  int c;
+  char *model_confname = NULL, *task_confname = NULL;
+
+  // process command line arguments (ie specify conf files)
+    while ((c = getopt (argc, argv, "m:t:")) != -1) {
+      switch (c) 
+	{
+	case 'm':
+	  model_confname = optarg;
+	  break;
+	case 't':
+	  task_confname = optarg;
+	  break;
+	case '?':
+	  if (optopt == 'm' || optopt  == 't') {
+	    printf ("option -%c requires name of a .conf file as an argument\n", optopt);
+	  }
+	  else if (isprint (optopt))
+	    printf ("Unknown option -%c\n", optopt);
+	  else
+	    printf ("Unknown option character \\x%x \n", optopt);
+	  return 1;
+	}
+    }
+
+
   gtk_init (&argc, &argv);
 
   ThreeTaskObjects * objects = g_malloc (sizeof(ThreeTaskObjects));
@@ -939,12 +967,19 @@ int main (int argc, char *argv[]) {
 
   // <--------------------- Temporary import of params and tasks to get us going ----------------->
   // Import parameters
-  pdp_import_select_file ("3task_model_gs_params_default.conf", objects->param_config_file);
+  if (model_confname != NULL) 
+    pdp_import_select_file (model_confname, objects->param_config_file);
+  else 
+    pdp_import_select_file ("3task_model_gs_params_default.conf", objects->param_config_file);
+
   pdp_load_from_file_short (objects->param_config_file);
   three_task_gs_parameters_import_commit (objects->param_config_file, objects->simulation->model_params_htable);
 
   // Import tasks
-  pdp_import_select_file ("3task_import_n2_basic.conf", objects->task_config_file);
+  if (task_confname != NULL) 
+    pdp_import_select_file (task_confname, objects->task_config_file);
+  else
+    pdp_import_select_file ("3task_import_n2_basic.conf", objects->task_config_file);
   pdp_load_from_file_long (objects->task_config_file);
   triple_task_task_import_commit (objects->task_config_file, objects->simulation->task_store);
   // ----------------------------------------------------------------------------------------------

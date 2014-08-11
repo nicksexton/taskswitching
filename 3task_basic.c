@@ -1,4 +1,4 @@
-
+#include <ctype.h> // for processing command line arguments
 #include <gtk/gtk.h>
 #include "pdp_objects.h"
 #include "3task_import.h"
@@ -14,6 +14,32 @@
 
 
 int main (int argc, char *argv[]) {
+
+  int c;
+  char *model_confname = NULL, *task_confname = NULL;
+
+  // process command line arguments (ie specify conf files)
+    while ((c = getopt (argc, argv, "m:t:")) != -1) {
+      switch (c) 
+	{
+	case 'm':
+	  model_confname = optarg;
+	  break;
+	case 't':
+	  task_confname = optarg;
+	  break;
+	case '?':
+	  if (optopt == 'm' || optopt  == 't') {
+	    printf ("option -%c requires name of a .conf file as an argument\n", optopt);
+	  }
+	  else if (isprint (optopt))
+	    printf ("Unknown option -%c\n", optopt);
+	  else
+	    printf ("Unknown option character \\x%x \n", optopt);
+	  return 1;
+	}
+    }
+
 
   gtk_init (&argc, &argv);
 
@@ -38,13 +64,19 @@ int main (int argc, char *argv[]) {
 
   // Import parameters
   param_config_file = create_param_import_objects();
-  pdp_import_select_file ("3task_model_gs_params_default.conf", param_config_file);
+  if (model_confname != NULL) 
+    pdp_import_select_file (model_confname, param_config_file);
+  else 
+    pdp_import_select_file ("3task_model_gs_params_default.conf", param_config_file);
   pdp_load_from_file_short (param_config_file);
   three_task_gs_parameters_import_commit (param_config_file, simulation->model_params_htable);
 
   // Import tasks
   task_config_file = triple_task_create_task_import_objects();
-  pdp_import_select_file ("3task_import_test.conf", task_config_file);
+  if (task_confname != NULL) 
+    pdp_import_select_file (task_confname, task_config_file);
+  else
+    pdp_import_select_file ("3task_import_test.conf", task_config_file);
   pdp_load_from_file_long (task_config_file);
   triple_task_task_import_commit (task_config_file, simulation->task_store);
 
