@@ -84,11 +84,11 @@ gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
       this_trial = procedure_current_trial_get (simulation);
       // if (this_trial < (num_trials - 1)) {
       if ((this_trial + 1) < num_trials) {
-	// printf ("%dth trial of %d, continuing\n", (this_trial + 1), num_trials);
+	printf ("procedure_current_trial_is_last: %dth trial of %d, continuing\n", (this_trial + 1), num_trials);
 	return false;
       }
       else {
-	// printf ("current trial is last one\n");
+	printf ("procedure_current_trial_is_last: current trial is last one\n");
 	return true;
       }
     }

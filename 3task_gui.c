@@ -544,18 +544,20 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
       three_task_model_dummy_run (objects->simulation->model, objects->simulation);
   }
 
-  objects->model_reinit(objects->simulation->model, TRIAL, objects->simulation);
+  //   objects->model_reinit(objects->simulation->model, TRIAL, objects->simulation);
 
-  
-  if (objects->model_sub_notepage != NULL) {
-    gtk_widget_queue_draw(objects->model_sub_notepage);
-  }
 
   if (!procedure_current_trial_is_last(objects->simulation)) {
     procedure_change_trial_next (objects->simulation);
+    objects->model_reinit(objects->simulation->model, TRIAL, objects->simulation);
   }
   else if (!procedure_current_block_is_last(objects->simulation)) {
     procedure_change_block_next (objects->simulation);
+    objects->model_reinit(objects->simulation->model, BLOCK, objects->simulation);
+  }
+
+  if (objects->model_sub_notepage != NULL) {
+    gtk_widget_queue_draw(objects->model_sub_notepage);
   }
 
   GtkTreeSelection *sel;
