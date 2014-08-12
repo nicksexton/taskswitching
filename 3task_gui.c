@@ -11,7 +11,7 @@
 #include "3task_gui.h"
 #include "3task_model_gs.h"
 
-#define DATAFILE "3task_test.txt"
+#define DATAFILE "3task_data.txt"
 #define DATAFILE_ACT "3task_act.txt"
 
 #define TEXT_SIZE_HEAD 15
