@@ -284,9 +284,6 @@ bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value
   return return_value;
 }
 
-
-
-
 void three_task_gs_parameters_import_commit (FileData *config_file, 
 					     GHashTable *model_params) {
 
@@ -318,6 +315,80 @@ void three_task_gs_parameters_import_commit (FileData *config_file,
   }  
 
 }
+
+// cf. model_parameter_import in pdpgui_import.c
+bool three_task_task_parameter_import (gchar* param, GHashTable *model_params_ht) {
+
+  // printf ("debug: now in model_task_parameter_import\n");
+  bool return_value = true;
+  
+
+  if (!strncmp (param, "HebP=", 5)) { // Hebbian learning persistence
+    if (strlen (param) < 6) {
+      printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
+    }
+    else {
+      gint *hebb_persist  = g_malloc(sizeof(int));
+      *hebb_persist = (int) g_ascii_strtoll (&param[5], NULL, 10);
+      g_hash_table_insert (model_params_ht, "hebb_persist", hebb_persist);
+      printf ("trial parameter %s now %d\n", param, 
+	      *(int *)g_hash_table_lookup(model_params_ht, "hebb_persist"));
+    }
+  }
+
+  if (!strncmp (param, "RSIs=", 5)) { // RSI scaling parameter
+    if (strlen (param) < 6) {
+      printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
+    }
+    else {
+      gdouble *rsi_scale_param  = g_malloc(sizeof(double));
+      *rsi_scale_param = (double) g_ascii_strtod (&param[5], NULL);
+      g_hash_table_insert (model_params_ht, "rsi_scale_param", rsi_scale_param);
+      printf ("trial parameter %s now %4.2f\n", param, 
+	      *(double *)g_hash_table_lookup(model_params_ht, "rsi_scale_param"));    
+    }
+  }
+
+  // other parameter imports go here
+
+  else {
+    printf ("warning! trial parameter %s not recognised\n", param);
+    return_value = false;
+  }
+
+  return return_value;
+}
+
+
+
+int three_task_set_trial_params_from_task_store (GtkTreeStore *store, 
+						 GtkTreeIter *trial, 
+						 GHashTable *model_params_ht){
+
+  gchar* task_param_1 = NULL;
+  gchar* task_param_2 = NULL;
+
+  gtk_tree_model_get (GTK_TREE_MODEL(store), trial, 
+		      COL_TASK_PARAM_1, &task_param_1,
+		      COL_TASK_PARAM_2, &task_param_2,
+		      -1);
+
+  // set trial parameters!
+
+  // code here: if task param 1 or 2 is non-empty,
+  if (task_param_1 != NULL) {
+    // set trial parameters
+    three_task_task_parameter_import (task_param_1, model_params_ht);
+  }
+
+  if (task_param_2 != NULL) {
+    // set trial parameters
+    three_task_task_parameter_import (task_param_2, model_params_ht);
+  }
+
+  return 0;
+}
+
 
 
 void three_task_model_gs_run (pdp_model * model, ThreeTaskSimulation * simulation) {
@@ -368,6 +439,8 @@ int three_task_model_dummy_run (pdp_model * model,
     fprintf (simulation->datafile, "%s\t", path);
     printf ("trial: %s", path);
 
+
+    three_task_set_trial_params_from_task_store (simulation->task_store, iter, simulation->model_params_htable);
 
     gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
 			COL_TASK_ID, &trial_id,
@@ -1115,6 +1188,7 @@ int three_task_model_update_weights (pdp_model * gs_stroop_model,
   int i, j;
 
   if (persist == OFF) {
+    printf ("\nthree_task_model_update_weights: persist = OFF, weights not updated weights\n");
     return 0;
   }
 
@@ -1165,6 +1239,8 @@ int three_task_model_update_weights (pdp_model * gs_stroop_model,
 
   if (persist == THIS_BLOCK || persist == FOREVER) {
     // increment existing weights
+    printf ("\nthree_task_model_update_weights: persist = THIS_BLOCK or FOREVER,"
+	    "incrementing weights\n");
     pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
 			   3, 2, wts_in0_taskdemand_matrix);
     pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
@@ -1174,6 +1250,8 @@ int three_task_model_update_weights (pdp_model * gs_stroop_model,
   }
 
   else if (persist == NEXT_TRIAL) {
+    printf ("\nthree_task_model_update_weights: persist = NEXT_TRIAL,"
+	    "setting new weights\n");
     pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
 		     3, 2, wts_in0_taskdemand_matrix);
     pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
