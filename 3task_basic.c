@@ -5,7 +5,7 @@
 #include "3task_model_gs.h" // model
 #include "3task_procedure.h"
 
-#define DATAFILE "3task_test.txt"
+#define DATAFILE "3task_data.txt"
 #define DATAFILE_ACT "3task_act.txt"
 // defined elsewhere? 3task_basic.c for now
 
