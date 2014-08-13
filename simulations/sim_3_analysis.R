@@ -37,6 +37,10 @@ data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names
 data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 
+
+
+
+
 # trim unwanted columns
 data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles"))
 
@@ -47,15 +51,30 @@ data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labe
 data <- merge(data.lookuptable, data)
 
 
+# split congruency_seq
+# data.raw$congruency_seq <- as.character(data.raw$congruency_seq)
+data = transform (data, congruency = colsplit(congruency_seq, pattern = "/", names=c('1', '2', '3')))
+data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
+
+
 # filter trials for correct only
 
 
 # exclude outliers (RTs +/- 3 SDs)
 
-# now plot basic line graph showing interaction
+
 linegraph <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
 linegraph +
-  facet_wrap ( ~ congruency_seq) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
+  labs (x = "Trial Position", y = "RT", group = "Sequence") +
+  ggtitle("Simulation 3: n-2 repetition costs in the 3-task switching model with lateral inhibition")
+
+# now plot basic line graph showing interaction
+linegraph.facet <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
+linegraph.facet +
+  facet_grid (congruency.1 ~ congruency.23) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
