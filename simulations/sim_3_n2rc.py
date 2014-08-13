@@ -13,7 +13,7 @@
 
 
 
-num_blocks = 50 # number of times to run each sequence type
+num_blocks = 1 # number of times to run each sequence type
 trialid = 0
 
 run_congruency_levels = [
@@ -37,6 +37,9 @@ sequence_levels = [
     [2, 1, 0, "CBA"] 
 ]
 
+
+def get_stim_input (congruency, stim, cue):
+    return trial_congruency_levels[congruency][(stim - cue) % 3]
 
 
 def write_trial (block_id, trial_id, cue, stim_A, stim_B, stim_C, param1, param2):
@@ -91,25 +94,34 @@ for block in range(0, num_blocks):
             write_trial (block_name + "_" + str(block), 
                          trialid+0, 
                          sequence[0], #cue
-                         trial_congruency_levels[run[0]][0], #stim_A 
-                         trial_congruency_levels[run[0]][1], #stim_B
-                         trial_congruency_levels[run[0]][2], #stim_C
+                         get_stim_input (run[0], 0, sequence[0]),
+                         # trial_congruency_levels[run[0]][0], #stim_A 
+                         # trial_congruency_levels[run[0]][1], #stim_B
+                         get_stim_input (run[0], 1, sequence[0]),
+                         # trial_congruency_levels[run[0]][2], #stim_C
+                         get_stim_input (run[0], 2, sequence[0]),
                          "HebP=0", "")
 
             write_trial (block_name + "_" + str(block), 
                          trialid+1, 
                          sequence[1], 
-                         trial_congruency_levels[run[1]][0], 
-                         trial_congruency_levels[run[1]][1], 
-                         trial_congruency_levels[run[1]][2], 
+#                         trial_congruency_levels[run[1]][0], 
+#                         trial_congruency_levels[run[1]][1], 
+#                         trial_congruency_levels[run[1]][2], 
+                         get_stim_input (run[1], 0, sequence[1]),
+                         get_stim_input (run[1], 1, sequence[1]),
+                         get_stim_input (run[1], 2, sequence[1]),
                          "HebP=0", "")
 
             write_trial (block_name + "_" + str(block), 
                          trialid+2, 
                          sequence[2],  
-                         trial_congruency_levels[run[2]][0], 
-                         trial_congruency_levels[run[2]][1], 
-                         trial_congruency_levels[run[2]][2], 
+#                         trial_congruency_levels[run[2]][0], 
+#                         trial_congruency_levels[run[2]][1], 
+#                         trial_congruency_levels[run[2]][2], 
+                         get_stim_input (run[2], 0, sequence[2]),
+                         get_stim_input (run[2], 1, sequence[2]),
+                         get_stim_input (run[2], 2, sequence[2]),
                          "HebP=0", "")
  
 
