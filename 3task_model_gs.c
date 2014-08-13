@@ -894,6 +894,10 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
     {0.0, stimulus_input_strength_2},
   };
 
+  printf ("model_build, stim input strenghts %2.1f; %2.1f; %2.1f\n",
+	  stimulus_input_strength_0,
+	  stimulus_input_strength_1,
+	  stimulus_input_strength_2);
   
   wts_in0_out0 = pdp_weights_create (2,2);
   pdp_weights_set (wts_in0_out0, 2, 2, wts_in0_out0_matrix);
@@ -951,7 +955,7 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   /* out_0 -> out_2 */
   wts_out0_out2 = pdp_weights_create (2,2);
   pdp_weights_set (wts_out0_out2, 2, 2, wts_crossoutputs_matrix);
-  pdp_input_connect (output_0, output_2, wts_out0_out1);
+  pdp_input_connect (output_0, output_2, wts_out0_out2);
 
   /* out_1 -> out_0 */
   wts_out1_out0 = pdp_weights_create (2,2);
@@ -961,7 +965,7 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   /* out_1 -> out_2 */
   wts_out1_out2 = pdp_weights_create (2,2);
   pdp_weights_set (wts_out1_out2, 2, 2, wts_crossoutputs_matrix);
-  pdp_input_connect (output_1, output_2, wts_out1_out0);
+  pdp_input_connect (output_1, output_2, wts_out1_out2);
 
   /* out_2 -> out_0 */
   wts_out2_out0 = pdp_weights_create (2,2);

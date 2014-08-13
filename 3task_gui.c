@@ -255,6 +255,16 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   PdpguiCoords loc_channels_title = { .x = widget_width * 0.5, .y = widget_height * 0.9, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_channels_title, -50, 0, "Task Processing Pathways");
 
+  // intermediates for lateral connections
+  PdpguiCoords loc_outputs_lateral_intermed_upper = { .x = widget_width * 0.5, 
+						      .y = widget_height * 0.3 };
+  PdpguiCoords loc_outputs_lateral_intermed_lower = { .x = widget_width * 0.5, 
+						.y = widget_height * 0.70 };
+
+  PdpguiCoords loc_td_lateral_intermed_upper = { .x = widget_width * 0.4, 
+						      .y = widget_height * 0.1 };
+  PdpguiCoords loc_td_lateral_intermed_lower = { .x = widget_width * 0.4, 
+						.y = widget_height * 0.40 };
 
 
   PdpguiColourRgb mono[2] = {{ 
@@ -311,6 +321,45 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_2, 
 			       loc_td_input2_intermed_upper, loc_td_input2_intermed_lower,
 			       pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights);
+
+  // draw weights for lateral connections
+  pdpgui_draw_weights_topdown (cr, loc_output_0, loc_output_1, 
+			       loc_outputs_lateral_intermed_upper, 
+			       loc_outputs_lateral_intermed_lower,
+			       pdp_input_find(layer_output_1, ID_OUTPUT_0)->input_weights);
+
+  pdpgui_draw_weights_topdown (cr, loc_output_0, loc_output_2, 
+			       loc_outputs_lateral_intermed_upper, 
+			       loc_outputs_lateral_intermed_lower,
+			       pdp_input_find(layer_output_2, ID_OUTPUT_0)->input_weights);
+
+  pdpgui_draw_weights_topdown (cr, loc_output_1, loc_output_0, 
+			       loc_outputs_lateral_intermed_upper, 
+			       loc_outputs_lateral_intermed_lower,
+			       pdp_input_find(layer_output_0, ID_OUTPUT_1)->input_weights);
+
+  pdpgui_draw_weights_topdown (cr, loc_output_1, loc_output_2, 
+			       loc_outputs_lateral_intermed_upper, 
+			       loc_outputs_lateral_intermed_lower,
+			       pdp_input_find(layer_output_2, ID_OUTPUT_1)->input_weights);
+
+  pdpgui_draw_weights_topdown (cr, loc_output_2, loc_output_0, 
+			       loc_outputs_lateral_intermed_upper, 
+			       loc_outputs_lateral_intermed_lower,
+			       pdp_input_find(layer_output_0, ID_OUTPUT_2)->input_weights);
+
+  pdpgui_draw_weights_topdown (cr, loc_output_2, loc_output_1, 
+			       loc_outputs_lateral_intermed_upper, 
+			       loc_outputs_lateral_intermed_lower,
+			       pdp_input_find(layer_output_1, ID_OUTPUT_2)->input_weights);
+
+
+  // within-module inhibitory connections
+
+  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_taskdemand, 
+			       loc_td_lateral_intermed_upper, 
+			       loc_td_lateral_intermed_lower,
+			       pdp_input_find(layer_taskdemand, ID_TASKDEMAND)->input_weights);
 
   //  pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
   //                       pdp_input_find(layer_taskdemand, ID_TOPDOWNCONTROL)->input_weights);
@@ -956,11 +1005,6 @@ int main (int argc, char *argv[]) {
   objects->model_reinit = &three_task_model_dummy_reinit; // (model-specific, def in 3task_model_gs.c)
 
 
-  // now create and build the model
-  printf ("in main, building the model\n");
-  objects->simulation->model = pdp_model_create (0, "3task_gs"); 
-  init_model_simulation (objects->simulation->model, objects->simulation->model_params_htable); 
-
   objects->model_sub_notepage = NULL;
   objects->task_tree_view = NULL;
 
@@ -985,6 +1029,12 @@ int main (int argc, char *argv[]) {
   pdp_load_from_file_long (objects->task_config_file);
   triple_task_task_import_commit (objects->task_config_file, objects->simulation->task_store);
   // ----------------------------------------------------------------------------------------------
+
+
+  // now create and build the model
+  printf ("in main, building the model\n");
+  objects->simulation->model = pdp_model_create (0, "3task_gs"); 
+  init_model_simulation (objects->simulation->model, objects->simulation->model_params_htable); 
 
 
   // Draw the GUI
