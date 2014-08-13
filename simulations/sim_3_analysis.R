@@ -42,7 +42,7 @@ data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue",
 
 
 # Join lookup table with simulated data
-labels.lookup = c("trialid", "sequence", "trial_pos", "congrueny_seq", "congruency_trial", "blank")
+labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labels.lookup)
 data <- merge(data.lookuptable, data)
 
@@ -55,7 +55,7 @@ data <- merge(data.lookuptable, data)
 # now plot basic line graph showing interaction
 linegraph <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
 linegraph +
-#  facet_grid (. ~ SwitchDirection) +
+  facet_wrap ( . ~ congruency_seq) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
