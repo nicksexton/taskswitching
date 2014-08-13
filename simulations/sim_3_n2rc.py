@@ -13,7 +13,7 @@
 
 
 
-num_blocks = 1 # number of times to run each sequence type
+num_blocks = 50 # number of times to run each sequence type
 trialid = 0
 
 run_congruency_levels = [
