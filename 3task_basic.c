@@ -51,10 +51,7 @@ int main (int argc, char *argv[]) {
   simulation->model = pdp_model_create (0, "3task_gs"); 
   three_task_parameters_htable_set_default (simulation->model_params_htable);
 
-  // build the model
-  printf ("in main, building the model\n");
-  init_model_simulation (simulation->model, simulation->model_params_htable); 
-                                                                   // see gs_stroop_model for example
+
   // define function pointer to model_run function 
   int (*model_run)(pdp_model*, ThreeTaskSimulation*);
   model_run = &three_task_model_dummy_run; // (model-specific, def in 3task_model_gs.c)
@@ -80,6 +77,9 @@ int main (int argc, char *argv[]) {
   pdp_load_from_file_long (task_config_file);
   triple_task_task_import_commit (task_config_file, simulation->task_store);
 
+  // build the model
+  printf ("in main, building the model\n");
+  init_model_simulation (simulation->model, simulation->model_params_htable); 
 
   // Now do stuff with the model and the parameters - eg. run all blocks?
   //  procedure_run_all_blocks (simulation->model, simulation, model_run(simulation->model, simulation));

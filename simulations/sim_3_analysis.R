@@ -55,7 +55,7 @@ data <- merge(data.lookuptable, data)
 # now plot basic line graph showing interaction
 linegraph <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
 linegraph +
-  facet_wrap ( . ~ congruency_seq) +
+  facet_wrap ( ~ congruency_seq) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
