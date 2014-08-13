@@ -98,9 +98,10 @@ gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation) {
 // bool procedure_run_current_trial (ThreeTaskSimulation * simulation) {
 bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
 				  int (*model_run)(pdp_model*, ThreeTaskSimulation*),
-				  int (*model_reinit)(pdp_model*, init_type init, ThreeTaskSimulation*) ) {
+				  int (*model_reinit)(pdp_model*, init_type init, ThreeTaskSimulation*)) {
 
   // wraps run_model or similar, in 3task_model_gs.c?
+
   model_run (model, simulation);
   model_reinit (model, TRIAL, simulation);
   // for now, just print current trial data
@@ -126,6 +127,7 @@ void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation,
 
   // run block from start
     procedure_change_trial_first_of_block (simulation, simulation->task_store); 
+    model_reinit (model, BLOCK, simulation);
 
     while (block_finished == false) {
 
@@ -133,7 +135,7 @@ void procedure_run_block (pdp_model * model, ThreeTaskSimulation *simulation,
       procedure_run_current_trial (model, simulation, 
 				   model_run,
 				   model_reinit);
-      
+
 
       // check for last trial of block BEFORE we change trial and loop again,
       // as we want last trial to be executed on final loop
@@ -164,7 +166,6 @@ void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulati
   
     // change to block 0, trial 0    
     procedure_change_trial_first (simulation, simulation->task_store);
-    model_reinit (model, INITIAL, simulation);
 
     // for each block
     do {
@@ -173,8 +174,8 @@ void procedure_run_all_blocks (pdp_model * model, ThreeTaskSimulation * simulati
       // model_initialise (simulation);
 
       // run block
-      procedure_run_block (model, simulation, model_run, model_reinit);
-      model_reinit (model, BLOCK, simulation);
+
+      procedure_run_block (model, simulation, model_run, model_reinit); // reinits BLOCK
 
       current_block ++;
       printf ("in model_run_all_blocks: done with block %d\n", current_block);

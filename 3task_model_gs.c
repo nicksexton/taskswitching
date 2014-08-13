@@ -336,7 +336,7 @@ bool three_task_task_parameter_import (gchar* param, GHashTable *model_params_ht
     }
   }
 
-  if (!strncmp (param, "RSIs=", 5)) { // RSI scaling parameter
+  else if (!strncmp (param, "RSIs=", 5)) { // RSI scaling parameter
     if (strlen (param) < 6) {
       printf ("error in model_task_parameter_import! HebP= param shorter than 6 characters, no value?");
     }
@@ -533,6 +533,7 @@ int three_task_model_dummy_run (pdp_model * model,
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
 #endif
 
+    three_task_model_fprintf_current_state (model, path, simulation->datafile_act); // print activations to log file
 
   // run_model_step returns true when stopping_condition evaluates to false
   do {
@@ -695,6 +696,35 @@ int stopping_condition (const pdp_model * model,
 }
 
 
+void three_task_model_fprintf_current_state (pdp_model *model, gchar *path, FILE * fp_act) {
+
+
+
+  fprintf (fp_act, "%s\t%d\t", path, model->cycle);
+
+
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_INPUT_0)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_INPUT_1)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_INPUT_2)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_0)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_1)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_TASKDEMAND)->layer, fp_act);
+    fprintf (fp_act, "\n");
+    
+    return;
+ 
+
+}
 
 
 // returns true while model is still running (does not satisfy stopping condition), false otherwise
@@ -752,9 +782,10 @@ int three_task_model_dummy_run_step (pdp_model * model,
     // Output this to a second logfile
 
     if (path != NULL) {
-      fprintf (fp_act, "%s\t", path);
+      // fprintf (fp_act, "%s\t%d\t", path, model->cycle);
+      three_task_model_fprintf_current_state (model, path, fp_act);
     }
-
+    /*
     pdp_layer_fprintf_current_output (
 				      pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer, fp_act);
     pdp_layer_fprintf_current_output (
@@ -772,7 +803,7 @@ int three_task_model_dummy_run_step (pdp_model * model,
     pdp_layer_fprintf_current_output (
 				      pdp_model_component_find (model, ID_TASKDEMAND)->layer, fp_act);
     fprintf (fp_act, "\n");
-    
+    */
     return 0; 
 
   

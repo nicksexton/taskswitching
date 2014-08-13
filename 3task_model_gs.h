@@ -42,6 +42,8 @@ int stopping_condition (const pdp_model * model,
 int three_task_model_dummy_run (pdp_model * model,  
 				ThreeTaskSimulation * simulation);
 
+void three_task_model_fprintf_current_state (pdp_model *model, gchar * path, FILE * fp_act);
+
 int three_task_model_dummy_run_step (pdp_model * model, 
 				     const gsl_rng * random_generator, 
 				     double response_threshold,

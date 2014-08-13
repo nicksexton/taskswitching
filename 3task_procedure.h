@@ -55,7 +55,6 @@ gint procedure_current_trial_get (ThreeTaskSimulation *simulation);
 gboolean procedure_current_block_is_last (ThreeTaskSimulation *simulation);
 gboolean procedure_current_trial_is_last (ThreeTaskSimulation *simulation);
 
-
 bool procedure_run_current_trial (pdp_model * model, ThreeTaskSimulation * simulation, 
 				  int (*model_run)(pdp_model*, ThreeTaskSimulation*),
 				  int (*model_reinit)(pdp_model*, init_type init, ThreeTaskSimulation*));
