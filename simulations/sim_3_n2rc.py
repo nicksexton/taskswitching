@@ -13,7 +13,7 @@
 
 
 
-num_blocks = 200 # number of times to run each sequence type
+num_blocks = 2 # number of times to run each sequence type
 trialid = 0
 
 run_congruency_levels = [
@@ -43,6 +43,9 @@ def get_stim_input (congruency, stim, cue):
 
 
 def write_trial (block_id, trial_id, cue, stim_A, stim_B, stim_C, param1, param2):
+
+    stim_flip = random.randing (0, 1)
+
     f = open ("sim_3_trials.conf", "a") # opens file for appending
     f.write (block_id)
     f.write ("\t")
@@ -50,16 +53,16 @@ def write_trial (block_id, trial_id, cue, stim_A, stim_B, stim_C, param1, param2
     f.write (str(trial_id))
     f.write ("\t")
 
-    f.write (str(cue))
+    f.write str(cue)
     f.write ("\t")
 
-    f.write (str(stim_A))
+    f.write str((stim_A + stim_flip) % 2)
     f.write ("\t")
 
-    f.write (str(stim_B))
+    f.write str(stim_B + stim_flip) % 2)
     f.write ("\t")
 
-    f.write (str(stim_C))
+    f.write str(stim_C + stim_flip) % 2)
     f.write ("\t")
 
     f.write (param1)
@@ -91,37 +94,47 @@ for block in range(0, num_blocks):
 
             # write ABA trials
 
+            map_offset = random.randint (0, 2)
+            map_direction = random.choice ([-1, 1])
+
+            stim_inputs = [ get_stim_input (run[0], 0, sequence[0]), 
+                            get_stim_input (run[0], 1, sequence[0]),
+                            get_stim_input (run[0], 2, sequence[0]),        
+                            ]
+
             write_trial (block_name + "_" + str(block), 
                          trialid+0, 
-                         sequence[0], #cue
-                         get_stim_input (run[0], 0, sequence[0]),
-                         # trial_congruency_levels[run[0]][0], #stim_A 
-                         # trial_congruency_levels[run[0]][1], #stim_B
-                         get_stim_input (run[0], 1, sequence[0]),
-                         # trial_congruency_levels[run[0]][2], #stim_C
-                         get_stim_input (run[0], 2, sequence[0]),
+                         (map_direction * sequence[0] + map_offset) % 3, #cue
+                         stim_inputs[(0 * map_direction + map_offset) % 3]
+                         stim_inputs[(1 * map_direction + map_offset) % 3]
+                         stim_inputs[(2 * map_direction + map_offset) % 3]
                          "HebP=0", "")
+
+
+            stim_inputs = [ get_stim_input (run[1], 0, sequence[1]), 
+                            get_stim_input (run[1], 1, sequence[1]),
+                            get_stim_input (run[1], 2, sequence[1]),        
+                            ]
 
             write_trial (block_name + "_" + str(block), 
                          trialid+1, 
-                         sequence[1], 
-#                         trial_congruency_levels[run[1]][0], 
-#                         trial_congruency_levels[run[1]][1], 
-#                         trial_congruency_levels[run[1]][2], 
-                         get_stim_input (run[1], 0, sequence[1]),
-                         get_stim_input (run[1], 1, sequence[1]),
-                         get_stim_input (run[1], 2, sequence[1]),
+                         (map_direction * sequence[1] + map_offset) % 3, 
+                         stim_inputs[(0 * map_direction + map_offset) % 3]
+                         stim_inputs[(1 * map_direction + map_offset) % 3]
+                         stim_inputs[(2 * map_direction + map_offset) % 3]
                          "HebP=0", "")
+
+            stim_inputs = [ get_stim_input (run[2], 0, sequence[2]), 
+                            get_stim_input (run[2], 1, sequence[2]),
+                            get_stim_input (run[2], 2, sequence[2]),        
+                            ]
 
             write_trial (block_name + "_" + str(block), 
                          trialid+2, 
-                         sequence[2],  
-#                         trial_congruency_levels[run[2]][0], 
-#                         trial_congruency_levels[run[2]][1], 
-#                         trial_congruency_levels[run[2]][2], 
-                         get_stim_input (run[2], 0, sequence[2]),
-                         get_stim_input (run[2], 1, sequence[2]),
-                         get_stim_input (run[2], 2, sequence[2]),
+                         (map_direction * sequence[2] + map_offset) % 3,  
+                         stim_inputs[(0 * map_direction + map_offset) % 3]
+                         stim_inputs[(1 * map_direction + map_offset) % 3]
+                         stim_inputs[(2 * map_direction + map_offset) % 3]
                          "HebP=0", "")
  
 
