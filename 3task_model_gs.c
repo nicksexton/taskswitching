@@ -555,7 +555,7 @@ int three_task_model_dummy_run (pdp_model * model,
 
   // Print RT
   fprintf (simulation->datafile, "%d\t", model->cycle); 
-  fprintf (simulation->datafile, "%d", stopped); // response
+  fprintf (simulation->datafile, "%d", stopped - 1); // response
   fprintf (simulation->datafile, "\n");
 
   g_free (path);

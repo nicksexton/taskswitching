@@ -37,24 +37,9 @@ data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names
 data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 
-IsCorrect <- function(data) {
-    if (data$cue == 0)
-        return ((data$response - 1) % 2 == data$stim_0)
-    else {
-        if (data$cue == 1)
-            return ((data$response - 1) % 2 == data$stim_1)
-        else {
-            if (data$cue == 2)
-                return ((data$response - 1) % 2 == data$stim_2)
-            else {
-                return (-1)
-            }
-        }
-    }
-}
-    
-
-data$correct <- IsCorrect(data)
+data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response,
+                                    ifelse (cue == 1, stim_1 == response,
+                                    ifelse (cue == 2, stim_2 == response, NA))))
 
 
 # trim unwanted columns
