@@ -59,6 +59,8 @@ data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
 
 
 # filter trials for correct only
+                                        # should filter for correct sequences only!
+data = subset (data, correct == TRUE)
 
 
 # exclude outliers (RTs +/- 3 SDs)
