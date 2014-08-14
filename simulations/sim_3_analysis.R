@@ -37,9 +37,9 @@ data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names
 data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 
-data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response,
-                                    ifelse (cue == 1, stim_1 == response,
-                                    ifelse (cue == 2, stim_2 == response, NA))))
+data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
+                                    ifelse (cue == 1, stim_1 == response %% 2,
+                                    ifelse (cue == 2, stim_2 == response %% 2, NA))))
 
 
 # trim unwanted columns
@@ -63,6 +63,10 @@ data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
 
 # exclude outliers (RTs +/- 3 SDs)
 
+
+
+# Graphs!
+# Collapsing all congruency conditions
 
 linegraph <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
 linegraph +
