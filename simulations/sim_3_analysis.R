@@ -62,8 +62,19 @@ data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
                                         # should filter for correct sequences only!
 data = subset (data, correct == TRUE)
 
-
 # exclude outliers (RTs +/- 3 SDs)
+# exclude outliers (RTs +/- 3 SDs)
+descriptives <- by(data$cycles, data$trial_pos, stat.desc)
+                                        # exclude C-W trials w/ RT < mean + 3 SDs 
+data <- subset (data,
+        !((trial_pos == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
+data <- subset (data,
+        !((trial_pos == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
+data <- subset (data,
+        !((trial_pos == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
+
+
+
 
 
 
