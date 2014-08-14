@@ -37,12 +37,28 @@ data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names
 data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 
+IsCorrect <- function(data) {
+    if (data$cue == 0)
+        return ((data$response - 1) % 2 == data$stim_0)
+    else {
+        if (data$cue == 1)
+            return ((data$response - 1) % 2 == data$stim_1)
+        else {
+            if (data$cue == 2)
+                return ((data$response - 1) % 2 == data$stim_2)
+            else {
+                return (-1)
+            }
+        }
+    }
+}
+    
 
-
+data$correct <- IsCorrect(data)
 
 
 # trim unwanted columns
-data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles"))
+data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
 
 
 # Join lookup table with simulated data

@@ -11,9 +11,9 @@
 # these need to be counterbalanced across all 3 trials for both run types (ie., 8 conditions per run type)
 # disregarding congruent/congruent trials for now.
 
+import random
 
-
-num_blocks = 2 # number of times to run each sequence type
+num_blocks = 50 # number of times to run each sequence type
 trialid = 0
 
 run_congruency_levels = [
@@ -44,8 +44,6 @@ def get_stim_input (congruency, stim, cue):
 
 def write_trial (block_id, trial_id, cue, stim_A, stim_B, stim_C, param1, param2):
 
-    stim_flip = random.randing (0, 1)
-
     f = open ("sim_3_trials.conf", "a") # opens file for appending
     f.write (block_id)
     f.write ("\t")
@@ -53,16 +51,16 @@ def write_trial (block_id, trial_id, cue, stim_A, stim_B, stim_C, param1, param2
     f.write (str(trial_id))
     f.write ("\t")
 
-    f.write str(cue)
+    f.write (str(cue))
     f.write ("\t")
 
-    f.write str((stim_A + stim_flip) % 2)
+    f.write (str(stim_A))
     f.write ("\t")
 
-    f.write str(stim_B + stim_flip) % 2)
+    f.write (str(stim_B))
     f.write ("\t")
 
-    f.write str(stim_C + stim_flip) % 2)
+    f.write (str(stim_C))
     f.write ("\t")
 
     f.write (param1)
@@ -80,8 +78,8 @@ def write_lookup (task_sequence, run_cong_sequence, trial_id, position, trial_co
     f.write (str(task_sequence) + "\t")
     f.write (str(position) + "\t")
     f.write (str(run_cong_sequence) + "\t")
-    f.write (str(trial_cong) + "\t")
-
+    f.write (str(trial_cong))
+    
     f.write ("\n")
     f.close()
 
@@ -92,61 +90,76 @@ for block in range(0, num_blocks):
         for sequence in sequence_levels:
             block_name = str(sequence[3]) + "_" + str(run[3]) 
 
-            # write ABA trials
+            # write block of trials
 
             map_offset = random.randint (0, 2)
             map_direction = random.choice ([-1, 1])
 
-            stim_inputs = [ get_stim_input (run[0], 0, sequence[0]), 
-                            get_stim_input (run[0], 1, sequence[0]),
-                            get_stim_input (run[0], 2, sequence[0]),        
+            # trial 0
+            stim_flip = random.randint (0, 1)
+            stim_inputs = [ (get_stim_input (run[0], 0, sequence[0]) + stim_flip) % 2, 
+                            (get_stim_input (run[0], 1, sequence[0]) + stim_flip) % 2,
+                            (get_stim_input (run[0], 2, sequence[0]) + stim_flip) % 2,        
                             ]
 
             write_trial (block_name + "_" + str(block), 
                          trialid+0, 
                          (map_direction * sequence[0] + map_offset) % 3, #cue
-                         stim_inputs[(0 * map_direction + map_offset) % 3]
-                         stim_inputs[(1 * map_direction + map_offset) % 3]
-                         stim_inputs[(2 * map_direction + map_offset) % 3]
+                         stim_inputs[(0 * map_direction + map_offset) % 3],
+                         stim_inputs[(1 * map_direction + map_offset) % 3],
+                         stim_inputs[(2 * map_direction + map_offset) % 3],
                          "HebP=0", "")
 
+            write_lookup (sequence[3], 
+                          run[3], 
+                          trialid + 0, 
+                          0, # trial 
+                          trial_congruency_levels[run[0]][3])
 
-            stim_inputs = [ get_stim_input (run[1], 0, sequence[1]), 
-                            get_stim_input (run[1], 1, sequence[1]),
-                            get_stim_input (run[1], 2, sequence[1]),        
+            # trial 1
+            stim_flip = random.randint (0, 1)
+            stim_inputs = [ (get_stim_input (run[1], 0, sequence[1]) + stim_flip) % 2, 
+                            (get_stim_input (run[1], 1, sequence[1]) + stim_flip) % 2,
+                            (get_stim_input (run[1], 2, sequence[1]) + stim_flip) % 2,        
                             ]
+
 
             write_trial (block_name + "_" + str(block), 
                          trialid+1, 
                          (map_direction * sequence[1] + map_offset) % 3, 
-                         stim_inputs[(0 * map_direction + map_offset) % 3]
-                         stim_inputs[(1 * map_direction + map_offset) % 3]
-                         stim_inputs[(2 * map_direction + map_offset) % 3]
+                         stim_inputs[(0 * map_direction + map_offset) % 3],
+                         stim_inputs[(1 * map_direction + map_offset) % 3],
+                         stim_inputs[(2 * map_direction + map_offset) % 3],
                          "HebP=0", "")
 
-            stim_inputs = [ get_stim_input (run[2], 0, sequence[2]), 
-                            get_stim_input (run[2], 1, sequence[2]),
-                            get_stim_input (run[2], 2, sequence[2]),        
+            write_lookup (sequence[3], 
+                          run[3], 
+                          trialid + 1, 
+                          1, # trial 
+                          trial_congruency_levels[run[1]][3])
+
+
+            # trial 2
+            stim_flip = random.randint (0, 1)
+            stim_inputs = [ (get_stim_input (run[2], 0, sequence[2]) + stim_flip) % 2, 
+                            (get_stim_input (run[2], 1, sequence[2]) + stim_flip) % 2,
+                            (get_stim_input (run[2], 2, sequence[2]) + stim_flip) % 2,        
                             ]
 
             write_trial (block_name + "_" + str(block), 
                          trialid+2, 
                          (map_direction * sequence[2] + map_offset) % 3,  
-                         stim_inputs[(0 * map_direction + map_offset) % 3]
-                         stim_inputs[(1 * map_direction + map_offset) % 3]
-                         stim_inputs[(2 * map_direction + map_offset) % 3]
+                         stim_inputs[(0 * map_direction + map_offset) % 3],
+                         stim_inputs[(1 * map_direction + map_offset) % 3],
+                         stim_inputs[(2 * map_direction + map_offset) % 3],
                          "HebP=0", "")
  
+            write_lookup (sequence[3], 
+                          run[3], 
+                          trialid + 2, 
+                          2, # trial 
+                          trial_congruency_levels[run[2]][3])
 
-
-
-
-            for trial in range(0, 3):
-                write_lookup (sequence[3], 
-                              run[3], 
-                              trialid+trial, 
-                              trial, 
-                              trial_congruency_levels[run[trial]][3])
 
         
             trialid += 3
