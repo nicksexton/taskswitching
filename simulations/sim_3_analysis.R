@@ -88,6 +88,8 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Trial Position", y = "RT", group = "Sequence") +
   ggtitle("Simulation 3: n-2 repetition costs in the 3-task switching model with lateral inhibition")
+imageFile <- file.path(imageDirectory, "sim_3_1_collapsed.png") 
+ggsave(imageFile)
 
 # now plot basic line graph showing interaction
 linegraph.facet <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
@@ -98,3 +100,54 @@ linegraph.facet +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Trial Position", y = "RT", group = "Sequence") +
   ggtitle("Simulation 3: n-2 repetition costs in the 3-task switching model with lateral inhibition")
+imageFile <- file.path(imageDirectory, "sim_3_1_congruency.png") 
+ggsave(imageFile)
+
+
+# ------------------------- STATISTICAL ANALYSIS --------------
+# First do analysis collapsed across condition
+
+model.collapsed <- aov(cycles ~ sequence +
+                       trial_pos + 
+                       sequence:trial_pos,
+                       data = data)
+
+anova(model.collapsed)
+
+# T-test for position 3 only
+data.pos_3 <- subset (data, trial_pos == 2)
+t.test (data.pos_3$cycles ~ data.pos_3$sequence)
+
+
+# Now break down by congruency condition.
+# Diagnostic 1 - 2x2 ANOVA, sequence x congruency_1 on RT_1 - ie. analysing position 1 trials only.
+# sequence should NOT be significant
+data.pos_1 <- subset (data, trial_pos == 0)
+model.pos_1 <- aov(cycles ~ sequence +
+                       congruency.1 + 
+                       sequence:congruency.1,
+                       data = data.pos_1)
+anova(model.pos_1)
+
+# Diagnostic 2 - 2x2x2 ANOVA, sequence x congruency_1 x congruency_2 on RT_2 - ie. analysing position 2 trials only.
+data.pos_2 <- subset (data, trial_pos == 1)
+model.pos_2 <- aov(cycles ~
+                   sequence + congruency.1 + congruency.2 + 
+                   sequence:congruency.1 + sequence:congruency.2 + congruency.1:congruency.2 +
+                   sequence:congruency.1:congruency.2,              
+                   data = data.pos_2)
+anova(model.pos_2)
+
+# Main test - 2x2x2x2 ANOVA, sequence x congruency_1 x congruency_2 x congruency_3 on RT_3 - ie. analysing position 3 trials only.
+# already got data for pos_3
+model.pos_3 <- aov(cycles ~
+                   sequence + congruency.1 + congruency.2 + congruency.3 +
+                   sequence:congruency.1 + sequence:congruency.2 + sequence:congruency.3 +
+                   congruency.1:congruency.2 + congruency.1:congruency.3 + congruency.2:congruency.3 +
+                   sequence:congruency.1 + sequence:congruency.2 + sequence:congruency.3 +
+                   sequence:congruency.1:congruency.2 +
+                   sequence:congruency.1:congruency.3 +
+                   sequence:congruency.2:congruency.3 +
+                   sequence:congruency.1:congruency.2:congruency.3,
+                   data = data.pos_3)
+anova(model.pos_3)
