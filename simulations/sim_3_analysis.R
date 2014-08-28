@@ -56,6 +56,7 @@ data <- merge(data.lookuptable, data)
 # data.raw$congruency_seq <- as.character(data.raw$congruency_seq)
 data = transform (data, congruency = colsplit(congruency_seq, pattern = "/", names=c('1', '2', '3')))
 data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
+data$congruency.12 <- paste (data$congruency.1,  data$congruency.2, sep="/")
 
 
 # filter trials for correct only
@@ -94,7 +95,8 @@ ggsave(imageFile)
 # now plot basic line graph showing interaction
 linegraph.facet <- ggplot (data, aes(x=trial_pos, y=cycles, group=sequence, colour=sequence))
 linegraph.facet +
-  facet_grid (congruency.1 ~ congruency.23) +
+#  facet_grid (congruency.1 ~ congruency.23) +
+  facet_grid (congruency.3 ~ congruency.12, labeller= label_both) +
   stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
