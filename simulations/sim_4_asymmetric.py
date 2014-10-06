@@ -93,11 +93,11 @@ def write_lookup (task_sequence_condition, task_sequence, run_cong_sequence, tri
 
 
 
-for block in range(0, num_blocks):
-    for run in run_congruency_levels:
-        for sequence in sequence_levels:
-            for offset in map_offset:
-                for direction in map_direction:
+for run in run_congruency_levels:
+    for sequence in sequence_levels:
+        for offset in map_offset:
+            for direction in map_direction:
+                for block in range(0, num_blocks):
 
                     block_name = str(sequence[3]) + "_" + str(run[3]) 
 
