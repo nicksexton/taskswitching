@@ -51,7 +51,7 @@ data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
 
 
 # Join lookup table with simulated data
-labels.lookup = c("trialid", "sequence_type", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
+labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labels.lookup)
 data.raw <- merge(data.lookuptable, data.raw)
 data.raw = subset(data.raw, select = c("trialid", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
@@ -72,13 +72,28 @@ data = subset (data.raw, correct == TRUE)
 
 # exclude outliers (RTs +/- 3 SDs)
 # exclude outliers (RTs +/- 3 SDs)
-descriptives <- by(data$cycles, data$trial_pos, stat.desc)
+descriptives <- by(data$cycles, data$PATH.trial, stat.desc)
                                         # exclude C-W trials w/ RT < mean + 3 SDs 
 data <- subset (data,
-        !((trial_pos == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
+        !((PATH.trial == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
 data <- subset (data,
-        !((trial_pos == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
+        !((PATH.trial == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
 data <- subset (data,
-        !((trial_pos == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
+        !((PATH.trial == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
 
 
+# Now look only at trial 3
+
+
+
+#task 0 (easiest)
+data.task0<- subset (data, PATH.trial == 2 & seq.3 == 0)
+by(data.task0$cycles, data.task0$seq.2, stat.desc)
+
+#task 1 (intermediate)
+data.task1<- subset (data, PATH.trial == 2 & seq.3 == 1)
+by(data.task1$cycles, data.task1$seq.2, stat.desc)
+
+#task 2 (hardest)
+data.task2<- subset (data, PATH.trial == 2 & seq.3 == 2)
+by(data.task2$cycles, data.task2$seq.2, stat.desc)
