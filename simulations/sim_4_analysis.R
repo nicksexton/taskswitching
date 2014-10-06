@@ -56,15 +56,19 @@ data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labe
 data.raw <- merge(data.lookuptable, data.raw)
 data.raw = subset(data.raw, select = c("trialid", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
 
+# create labels for tasks making up whole sequence 
+data.raw = transform (data.raw, seq = colsplit(sequence, pattern = "/", names=c('1', '2', '3')))
+
 # NB congruency analysis not needed for simulation 4 yet 
 #data = transform (data, congruency = colsplit(congruency_seq, pattern = "/", names=c('1', '2', '3')))
 #data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
 #data$congruency.12 <- paste (data$congruency.1,  data$congruency.2, sep="/")
 
 
+
 # filter trials for correct only
                                         # should filter for correct sequences only!
-data = subset (data, correct == TRUE)
+data = subset (data.raw, correct == TRUE)
 
 # exclude outliers (RTs +/- 3 SDs)
 # exclude outliers (RTs +/- 3 SDs)
@@ -76,7 +80,5 @@ data <- subset (data,
         !((trial_pos == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
 data <- subset (data,
         !((trial_pos == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
-
-
 
 
