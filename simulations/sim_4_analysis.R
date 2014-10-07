@@ -54,7 +54,7 @@ data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labels.lookup)
 data.raw <- merge(data.lookuptable, data.raw)
-data.raw = subset(data.raw, select = c("trialid", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
+data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
 
 # create labels for tasks making up whole sequence 
 data.raw = transform (data.raw, seq = colsplit(sequence, pattern = "/", names=c('1', '2', '3')))
@@ -86,14 +86,66 @@ data <- subset (data,
 
 
 
-#task 0 (easiest)
-data.task0<- subset (data, PATH.trial == 2 & seq.3 == 0)
-by(data.task0$cycles, data.task0$seq.2, stat.desc)
+##task 0 (easiest)
+#data.task0<- subset (data, PATH.trial == 2 & seq.3 == 0)
+#by(data.task0$cycles, data.task0$seq.2, stat.desc)
 
-#task 1 (intermediate)
-data.task1<- subset (data, PATH.trial == 2 & seq.3 == 1)
-by(data.task1$cycles, data.task1$seq.2, stat.desc)
+##task 1 (intermediate)
+#data.task1<- subset (data, PATH.trial == 2 & seq.3 == 1)
+#by(data.task1$cycles, data.task1$seq.2, stat.desc)
 
-#task 2 (hardest)
-data.task2<- subset (data, PATH.trial == 2 & seq.3 == 2)
-by(data.task2$cycles, data.task2$seq.2, stat.desc)
+##task 2 (hardest)
+#data.task2<- subset (data, PATH.trial == 2 & seq.3 == 2)
+#by(data.task2$cycles, data.task2$seq.2, stat.desc)
+
+
+data$seq.3 <- factor(data$seq.3)
+
+# Plot graph for switches between tasks 0 and 1
+data.task01 <- subset (data, PATH.trial == 2 & (
+                               (seq.3 == 0 & (seq.2 == 0 | seq.2 == 1)) |
+                               (seq.3 == 1 & (seq.2 == 1 | seq.2 == 0)) )
+                       )
+
+linegraph <- ggplot (data.task01, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
+linegraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "RT", group = "Sequence") +
+  ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1")
+imageFile <- file.path(imageDirectory, "sim_4_0_tasks01.png") 
+ggsave(imageFile)
+
+
+# Plot graph for switches between tasks 0 and 2
+data.task02 <- subset (data, PATH.trial == 2 & (
+                               (seq.3 == 0 & (seq.2 == 0 | seq.2 == 2)) |
+                               (seq.3 == 2 & (seq.2 == 2 | seq.2 == 0)) )
+                       )
+
+linegraph <- ggplot (data.task02, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
+linegraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "RT", group = "Sequence") +
+  ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2")
+imageFile <- file.path(imageDirectory, "sim_4_0_tasks02.png") 
+ggsave(imageFile)
+
+
+# Plot graph for switches between tasks 1 and 2
+data.task12 <- subset (data, PATH.trial == 2 & (
+                               (seq.3 == 1 & (seq.2 == 1 | seq.2 == 2)) |
+                               (seq.3 == 2 & (seq.2 == 2 | seq.2 == 1)) )
+                       )
+
+linegraph <- ggplot (data.task12, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
+linegraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "RT", group = "Sequence") +
+  ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2")
+imageFile <- file.path(imageDirectory, "sim_4_0_tasks12.png") 
+ggsave(imageFile)
+
+
