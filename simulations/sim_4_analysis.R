@@ -101,6 +101,7 @@ data <- subset (data,
 
 data$seq.3 <- factor(data$seq.3)
 
+
 # Plot graph for switches between tasks 0 and 1
 data.task01 <- subset (data, PATH.trial == 2 & (
                                (seq.3 == 0 & (seq.2 == 0 | seq.2 == 1)) |
@@ -149,3 +150,5 @@ imageFile <- file.path(imageDirectory, "sim_4_0_tasks12.png")
 ggsave(imageFile)
 
 
+# descriptive statistics, tasks 0 (easy) and 2 (hard)
+by(subset(data.task02$cycles, seq.3 == 0), data.task02$sequence_cond, stat.desc)
