@@ -108,9 +108,9 @@ data$seq.1 <- factor(data$seq.1)
 
 ######################### DEBUG STUFF ####################################
 
+# RTs for 1SW condition
 data.1SW <- subset (data, sequence_cond == "1SW")
 by (data.1SW$cycles, data.1SW$seq.3, stat.desc)
-
 bargraph <- ggplot (data.1SW, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
 bargraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
@@ -118,6 +118,25 @@ bargraph +
   labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
   ggtitle("Simulation 4: 1SW only")
 
+# RTs for 2SW condition
+data.2SW <- subset (data, sequence_cond == "2SW")
+by (data.2SW$cycles, data.2SW$seq.3, stat.desc)
+bargraph <- ggplot (data.2SW, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
+  ggtitle("Simulation 4: 2SW only")
+
+# RTs for ALT condition
+data.ALT <- subset (data, sequence_cond == "ALT")
+by (data.ALT$cycles, data.ALT$seq.3, stat.desc)
+bargraph <- ggplot (data.ALT, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
+  ggtitle("Simulation 4: Alt Switch only")
 
 
 ##########################################################################
