@@ -38,7 +38,8 @@ imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "sim
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
 
-data.raw <- read.delim("sim_4_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+#data.raw <- read.delim("sim_4_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_4_01_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data) # symmetric
 
 # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -65,21 +66,21 @@ data.raw = transform (data.raw, seq = colsplit(sequence, pattern = "/", names=c(
 #data$congruency.12 <- paste (data$congruency.1,  data$congruency.2, sep="/")
 
 
-
+data <- data.raw
 # filter trials for correct only
                                         # should filter for correct sequences only!
-data = subset (data.raw, correct == TRUE)
+#data = subset (data.raw, correct == TRUE)
 
 # exclude outliers (RTs +/- 3 SDs)
 # exclude outliers (RTs +/- 3 SDs)
-descriptives <- by(data$cycles, data$PATH.trial, stat.desc)
+#descriptives <- by(data$cycles, data$PATH.trial, stat.desc)
                                         # exclude C-W trials w/ RT < mean + 3 SDs 
-data <- subset (data,
-        !((PATH.trial == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
-data <- subset (data,
-        !((PATH.trial == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
-data <- subset (data,
-        !((PATH.trial == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
+#data <- subset (data,
+#        !((PATH.trial == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
+#data <- subset (data,
+#        !((PATH.trial == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
+#data <- subset (data,
+#        !((PATH.trial == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
 
 
 # Now look only at trial 3
@@ -151,4 +152,15 @@ ggsave(imageFile)
 
 
 # descriptive statistics, tasks 0 (easy) and 2 (hard)
-by(subset(data.task02$cycles, seq.3 == 0), data.task02$sequence_cond, stat.desc)
+data.task02.2 <- subset(data.task02, data.task02$seq.3==2) # hard task (2)
+by(data.task02.2$cycles, data.task02.2$sequence_cond, stat.desc)
+
+data.task02.0 <- subset(data.task02, data.task02$seq.3==0) # easy task (0)
+by(data.task02.0$cycles, data.task02.0$sequence_cond, stat.desc)
+
+# descriptive statistics, tasks 1 (intermediate) and 2 (hard)
+data.task12.2 <- subset(data.task12, data.task12$seq.3==2) # hard task (2)
+by(data.task12.2$cycles, data.task12.2$sequence_cond, stat.desc)
+
+data.task12.1 <- subset(data.task12, data.task12$seq.3==1) # easy task (0)
+by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)

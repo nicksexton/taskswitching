@@ -15,7 +15,7 @@ import random
 
 filename_conf = "sim_4_trials.conf"
 filename_lookup = "sim_4_lookup.txt"
-num_blocks = 500 # number of times to run each sequence type
+num_blocks = 200 # number of times to run each sequence type
 trialid = 0
 
 # for now, just use incongruent stimuli for all non-relevant tasks
@@ -43,7 +43,7 @@ sequence_levels = [
 ]
 
 # for rotating round stimuli/tasks
-map_offset = [0, 1, 2]
+map_offset = [2, 1, 0]
 map_direction = [1, -1]
 
 def get_stim_input (congruency, stim, cue):
@@ -99,7 +99,7 @@ for run in run_congruency_levels:
             for direction in map_direction:
                 for block in range(0, num_blocks):
 
-                    block_name = str(sequence[3]) + "_" + str(run[3]) 
+                    block_name = str(sequence[3]) + "_" + str(run[3]) + "_" + str(offset) + "_" + str(direction)
 
     # write block of trials
 
