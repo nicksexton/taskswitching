@@ -15,7 +15,7 @@ import random
 
 filename_conf = "sim_4_trials.conf"
 filename_lookup = "sim_4_lookup.txt"
-num_blocks = 200 # number of times to run each sequence type
+num_blocks = 500 # number of times to run each sequence type
 trialid = 0
 
 # for now, just use incongruent stimuli for all non-relevant tasks
