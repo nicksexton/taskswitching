@@ -54,7 +54,7 @@ data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labels.lookup)
-data.raw <- merge(data.lookuptable, data.raw)
+data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
 
 # create labels for tasks making up whole sequence 
@@ -101,6 +101,28 @@ data <- data.raw
 
 
 data$seq.3 <- factor(data$seq.3)
+data$seq.2 <- factor(data$seq.2)
+data$seq.1 <- factor(data$seq.1)
+
+
+
+######################### DEBUG STUFF ####################################
+
+data.1SW <- subset (data, sequence_cond == "1SW")
+by (data.1SW$cycles, data.1SW$seq.3, stat.desc)
+
+bargraph <- ggplot (data.1SW, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
+  ggtitle("Simulation 4: 1SW only")
+
+
+
+##########################################################################
+
+
 
 
 # Plot graph for switches between tasks 0 and 1
