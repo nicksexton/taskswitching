@@ -387,17 +387,28 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
   }
 
   else {
+
+    /* debug */
+    printf ("layer %d from %d:\n", output->id, input->id);
+
     /* do the matrix multiplication */
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
-      
+      printf ("[%d]: ", i);
+
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
 	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
+	
+	/* debug */
+	printf ("%3.2f x %3.1f | \t", input->units_latest->activations[j], weights->weights[i][j]);
+
       }
+      printf ("\n");
     }
 
   return 0;
   }
 }
+
       
 int pdp_input_connect (pdp_layer * downstream_layer, const pdp_layer * upstream_layer, 
 		       pdp_weights_matrix * upstream_weights) {
@@ -458,6 +469,7 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
     // some_layer->net_inputs[j] = 0;
     some_layer->net_inputs[j] = some_layer->input_bias;
   }
+  printf ("layer %d bias: %3.1f\n", some_layer->id, some_layer->input_bias);
 
   /* update the inputs */
   while (input_iterator != NULL) {
@@ -465,7 +477,7 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
     pdp_calc_input_fromlayer (some_layer->size, some_layer, 
 			      input_iterator->input_layer->size, input_iterator->input_layer, 
 			      input_iterator->input_weights);
-	
+
     input_iterator = input_iterator->next;
   }
 
