@@ -41,6 +41,8 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
 data.raw <- read.delim("sim_4_02_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 #data.raw <- read.delim("sim_4_01_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data) # symmetric
 
+# Join lookup table with simulated data
+labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_4_02_lookup.txt", header = FALSE, col.names=labels.lookup)
 #data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labels.lookup)
 
@@ -54,8 +56,6 @@ data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
 
 
 
-# Join lookup table with simulated data
-labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 
 data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
@@ -234,10 +234,11 @@ by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
 #    main effect of seq.3 (ie., different RTs for different tasks)
 #    seq.3 x sequence_cond interaction: signf. asymmetric switch cost
 
+
 model.task02 <- aov(cycles ~ sequence_cond +
                        seq.3 + 
                        sequence_cond:seq.3,
-                       data = data.task02)
+                       data = subset(data.task02, sequence_cond == "0SW" | sequence_cond == "1SW"))
 anova(model.task02)
 
 
@@ -253,5 +254,5 @@ anova(model.task02)
 model.task12 <- aov(cycles ~ sequence_cond +
                        seq.3 + 
                        sequence_cond:seq.3,
-                       data = data.task12)
+                       data = subset(data.task12, sequence_cond == "0SW" | sequence_cond == "1SW"))
 anova(model.task12)
