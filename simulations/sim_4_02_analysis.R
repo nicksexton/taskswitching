@@ -38,8 +38,11 @@ imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "sim
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
 
-data.raw <- read.delim("sim_4_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_4_02_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 #data.raw <- read.delim("sim_4_01_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data) # symmetric
+
+data.lookuptable = read.delim("sim_4_02_lookup.txt", header = FALSE, col.names=labels.lookup)
+#data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labels.lookup)
 
 # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -53,7 +56,7 @@ data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
 
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
-data.lookuptable = read.delim("sim_4_lookup.txt", header = FALSE, col.names=labels.lookup)
+
 data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
 
@@ -166,8 +169,8 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
   ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1")
-imageFile <- file.path(imageDirectory, "sim_4_0_tasks01.png") 
-ggsave(imageFile)
+#imageFile <- file.path(imageDirectory, "sim_4_0_tasks01.png") 
+#ggsave(imageFile)
 
 
 
@@ -183,8 +186,8 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
   ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2")
-imageFile <- file.path(imageDirectory, "sim_4_0_tasks02.png") 
-ggsave(imageFile)
+#imageFile <- file.path(imageDirectory, "sim_4_0_tasks02.png") 
+#ggsave(imageFile)
 
 
 # Plot graph for switches between tasks 1 and 2
@@ -199,8 +202,8 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
   ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2")
-imageFile <- file.path(imageDirectory, "sim_4_0_tasks12.png") 
-ggsave(imageFile)
+#imageFile <- file.path(imageDirectory, "sim_4_0_tasks12.png") 
+#ggsave(imageFile)
 
 
 # descriptive statistics, tasks 0 (easy) and 2 (hard)
