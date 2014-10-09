@@ -15,7 +15,7 @@ import random
 
 filename_conf = "sim_4_trials.conf"
 filename_lookup = "sim_4_lookup.txt"
-num_blocks = 250 # number of times to run each sequence type
+num_blocks = 25 # number of times to run each sequence type
 trialid = 0
 
 # for now, just use incongruent stimuli for all non-relevant tasks
@@ -126,7 +126,8 @@ for run in run_congruency_levels:
 
                         stim_flip = random.randint (0, 1)
 
-                        cue = (sequence[trial] + offset) % 3
+#                        cue = (sequence[trial] + offset) % 3
+                        cue = (sequence[trial] * direction l+ offset) % 3
                         stim_inputs = set_stimuli (run[trial], cue, direction, offset)
 
                         write_trial (block_name + "_" + str(block), 
