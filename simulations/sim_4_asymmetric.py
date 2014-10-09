@@ -12,11 +12,35 @@
 # disregarding congruent/congruent trials for now.
 
 import random
+import sys, getopt # for parsing cmd line params
 
 filename_conf = "sim_4_trials.conf"
 filename_lookup = "sim_4_lookup.txt"
-num_blocks = 250 # number of times to run each sequence type
+num_blocks = 50 # number of times to run each sequence type
 trialid = 0
+
+
+# Store input and output file names
+ifile=''
+ofile=''
+ 
+# Read command line args
+myopts, args = getopt.getopt(sys.argv[1:],"n:")
+ 
+###############################
+# o == option
+# a == argument passed to the o
+###############################
+for o, a in myopts:
+    if o == '-n':
+        num_blocks = int(a)
+    else:
+        print("Usage: %s -n [number of blocks]" % sys.argv[0])
+ 
+
+
+
+
 
 # for now, just use incongruent stimuli for all non-relevant tasks
 run_congruency_levels = [
