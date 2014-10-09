@@ -126,7 +126,7 @@ for run in run_congruency_levels:
 
                         stim_flip = random.randint (0, 1)
 
-                        cue = (sequence[trial] + offset) % 3
+                        cue = (sequence[trial] * direction + offset) % 3
                         stim_inputs = set_stimuli (run[trial], cue, direction, offset)
 
                         write_trial (block_name + "_" + str(block), 
