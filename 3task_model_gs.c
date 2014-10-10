@@ -71,6 +71,10 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
   *taskdemand_output_excitatory_wt = TASKDEMAND_OUTPUT_EXCITATORY_WT;
   g_hash_table_insert (params_table, "taskdemand_output_excitatory_wt", taskdemand_output_excitatory_wt);
 
+  double *taskdemand_lateral_inhibitory_wt  = g_malloc(sizeof(double));
+  *taskdemand_output_excitatory_wt = TASKDEMAND_LATERAL_INHIBITORY_WT;
+  g_hash_table_insert (params_table, "taskdemand_lateral_inhibitory_wt", taskdemand_lateral_inhibitory_wt);
+
   double *topdown_control_strength_0  = g_malloc(sizeof(double));
   *topdown_control_strength_0 = TOPDOWN_CONTROL_STRENGTH_0;
   g_hash_table_insert (params_table, "topdown_control_strength_0", topdown_control_strength_0);
@@ -218,6 +222,15 @@ bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value
     printf ("parameter %s now %4.2f\n", param_name, 
 	    *(double *)g_hash_table_lookup(model_params_ht, "taskdemand_output_excitatory_wt"));
   }
+
+  else if (!strcmp (param_name, "TASKDEMAND_LATERAL_INHIBITORY_WT")) {
+    gdouble *taskdemand_lateral_inhibitory_wt  = g_malloc(sizeof(double));
+    *taskdemand_lateral_inhibitory_wt = (double) g_ascii_strtod (param_value, NULL);
+    g_hash_table_insert (model_params_ht, "taskdemand_lateral_inhibitory_wt", taskdemand_lateral_inhibitory_wt);
+    printf ("parameter %s now %4.2f\n", param_name, 
+	    *(double *)g_hash_table_lookup(model_params_ht, "taskdemand_lateral_inhibitory_wt"));
+  }
+
 
   else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_0")) {
     gdouble *topdown_control_strength_0  = g_malloc(sizeof(double));
@@ -856,6 +869,8 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
 									  "topdown_control_strength_2");  
   
 
+
+
   /* set initial activation */
   pdp_layer_set_activation(input_0, 2, initial_activation_in_0);
   pdp_layer_set_activation(input_1, 2, initial_activation_in_1);
@@ -1018,21 +1033,27 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   /* Taskdemand -> output units */
   /**************************** */
 
+  double td_out_excit_wt = *(double *)g_hash_table_lookup(model_params, 
+								       "taskdemand_output_excitatory_wt");
+
+  double td_out_inhib_wt = *(double *)g_hash_table_lookup(model_params, 
+								       "taskdemand_output_inhibitory_wt");
+
   pdp_weights_matrix *wts_taskdemand_out0, *wts_taskdemand_out1, *wts_taskdemand_out2;
 
   double wts_taskdemand_out0_matrix[2][3] = {
-    { 2.5, -2.5, -2.5},
-    { 2.5, -2.5, -2.5},
+    { td_out_excit_wt, td_out_inhib_wt, td_out_inhib_wt},
+    { td_out_excit_wt, td_out_inhib_wt, td_out_inhib_wt},
   };
 
   double wts_taskdemand_out1_matrix[2][3] = {
-    {-2.5,  2.5, -2.5},
-    {-2.5,  2.5, -2.5},
+    {td_out_inhib_wt,  td_out_excit_wt, td_out_inhib_wt},
+    {td_out_inhib_wt,  td_out_excit_wt, td_out_inhib_wt},
   };
 
   double wts_taskdemand_out2_matrix[2][3] = {
-    {-2.5, -2.5,  2.5},
-    {-2.5, -2.5,  2.5},
+    {td_out_inhib_wt, td_out_inhib_wt,  td_out_excit_wt},
+    {td_out_inhib_wt, td_out_inhib_wt,  td_out_excit_wt},
   };
 
   wts_taskdemand_out0 = pdp_weights_create (2,3);
@@ -1053,11 +1074,14 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   /* Taskdemand -> taskdemand units */
   /******************************** */
 
+  double taskdemand_lateral_inhibitory_wt = *(double *)g_hash_table_lookup(model_params, 
+								       "taskdemand_lateral_inhibitory_wt");
+
   pdp_weights_matrix *wts_taskdemand_taskdemand;
   double wts_taskdemand_taskdemand_matrix[3][3] = {
-    { 0.0, -2.0, -2.0},
-    {-2.0,  0.0, -2.0},
-    {-2.0, -2.0,  0.0},
+    { 0.0, taskdemand_lateral_inhibitory_wt, taskdemand_lateral_inhibitory_wt},
+    {taskdemand_lateral_inhibitory_wt,  0.0, taskdemand_lateral_inhibitory_wt},
+    {taskdemand_lateral_inhibitory_wt, taskdemand_lateral_inhibitory_wt,  0.0},
   };
 
   wts_taskdemand_taskdemand = pdp_weights_create (3,3);
