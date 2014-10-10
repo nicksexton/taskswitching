@@ -2,7 +2,7 @@
 # script which runs the asymmetric 3-task switching protocol with symmetric tasks
 
 ./sim_4_clean.sh
-./sim_4_asymmetric.py
+./sim_4_asymmetric.py -n 500
 
 mv sim_4_lookup.txt sim_4_02_lookup.txt
 mv sim_4_trials.conf sim_4_02_trials.conf

@@ -133,13 +133,19 @@ data$seq.1 <- factor(data$seq.1)
 
 boxplot.task0 <- ggplot (subset(data, PATH.trial == 2 & seq.3 == 0), aes(x=sequence_cond, y=cycles))
 boxplot.task0 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggtitle ("Simulation 4, boxplot of data for task 0")
+imageFile <- file.path(imageDirectory, "sim_4_02_task0_boxplot.png") 
+ggsave(imageFile)
+
 
 boxplot.task1 <- ggplot (subset(data, PATH.trial == 2 & seq.3 == 1), aes(x=sequence_cond, y=cycles))
 boxplot.task1 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggtitle ("Simulation 4, boxplot of data for task 1")
+imageFile <- file.path(imageDirectory, "sim_4_02_task1_boxplot.png") 
+ggsave(imageFile)
 
 boxplot.task2 <- ggplot (subset(data, PATH.trial == 2 & seq.3 == 2), aes(x=sequence_cond, y=cycles))
 boxplot.task2 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggtitle ("Simulation 4, boxplot of data for task 2")
-
+imageFile <- file.path(imageDirectory, "sim_4_02_task2_boxplot.png") 
+ggsave(imageFile)
 
 
 ##########################################################################
@@ -159,8 +165,8 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
   ggtitle("Simulation 4: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1")
-#imageFile <- file.path(imageDirectory, "sim_4_0_tasks01.png") 
-#ggsave(imageFile)
+imageFile <- file.path(imageDirectory, "sim_4_0_tasks01.png") 
+ggsave(imageFile)
 
 
 
@@ -213,8 +219,7 @@ by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
 
 
 ######################################### Stat Tests ######################################
-
-############## 0 and 2 ##################
+############################## Switch Costs #################################
 
 # Switch cost - assessing whether switch costs are reversed
 # 2X2 ANOVA:
@@ -225,19 +230,33 @@ by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
 #    seq.3 x sequence_cond interaction: signf. asymmetric switch cost
 
 
+############## 0 and 1 ##################
+
+model.task01 <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task01, sequence_cond == "0SW" | sequence_cond == "1SW"))
+anova(model.task01)
+
+############## 0 and 2 ##################
+
 model.task02 <- aov(cycles ~ sequence_cond +
                        seq.3 + 
                        sequence_cond:seq.3,
                        data = subset(data.task02, sequence_cond == "0SW" | sequence_cond == "1SW"))
 anova(model.task02)
 
+#### Post-hoc test - is n-2 repetition cost significant for 2-0-2 sequences?
+model.task02.2.ttest <- t.test (cycles ~ sequence_cond,
+                                data = subset (data.task02.2, sequence_cond == "0SW" | sequence_cond == "1SW"))
+model.task02.0.ttest <- t.test (cycles ~ sequence_cond,
+                                data = subset (data.task02.0, sequence_cond == "0SW" | sequence_cond == "1SW"))
+
+
 
 
 
 # Test for reversed switch cost asymmetry???
-
-
-
 
 ############## 1 and 2 ##################
 
@@ -249,10 +268,29 @@ anova(model.task12)
 
 
 
-############## 0 and 1 ##################
 
+
+
+############################## N-2 Repetition Costs #################################
+############## 0 and 1 ##################
 model.task01 <- aov(cycles ~ sequence_cond +
                        seq.3 + 
                        sequence_cond:seq.3,
-                       data = subset(data.task01, sequence_cond == "0SW" | sequence_cond == "1SW"))
+                       data = subset(data.task01, sequence_cond == "2SW" | sequence_cond == "ALT"))
 anova(model.task01)
+
+############## 0 and 2 ##################
+model.task02 <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task02, sequence_cond == "2SW" | sequence_cond == "ALT"))
+anova(model.task02)
+
+
+############## 1 and 2 ##################
+
+model.task12 <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task12, sequence_cond == "2SW" | sequence_cond == "ALT"))
+anova(model.task12)
