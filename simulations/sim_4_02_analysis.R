@@ -249,9 +249,10 @@ anova(model.task02)
 #### Post-hoc test - is n-2 repetition cost significant for 2-0-2 sequences?
 model.task02.2.ttest <- t.test (cycles ~ sequence_cond,
                                 data = subset (data.task02.2, sequence_cond == "0SW" | sequence_cond == "1SW"))
+model.task02.2.ttest
 model.task02.0.ttest <- t.test (cycles ~ sequence_cond,
                                 data = subset (data.task02.0, sequence_cond == "0SW" | sequence_cond == "1SW"))
-
+model.task02.0.ttest
 
 
 
