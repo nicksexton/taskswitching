@@ -561,9 +561,9 @@ int three_task_model_koch_conflict_run (pdp_model * model,
 				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
-    printf ("placeholder: conflict units act\t");
-    //    pdp_layer_print_current_output (
-    //				    pdp_model_component_find (model, ID_CONFLICT)->layer);
+    //    printf ("placeholder: conflict units act\t");
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT)->layer);
 
 #endif
 
@@ -667,8 +667,8 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
 				    NOISE, random_generator);
     pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT)->layer, 
 				    NOISE, random_generator);
-    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer, 
-				    NOISE, random_generator);
+    //    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer, 
+    //				    NOISE, random_generator);
     
     
 
@@ -1167,14 +1167,14 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
     
     for (i = 0; i < 3; i++) {
       initial_activation_conflict[i] = conflict->units_latest->activations[i] *
-	pow(1-squashing_param, rsi_scale_param);
+	pow(1-conflict_squashing_param, rsi_scale_param);
       printf ("%4.2f -> %4.2f\t", conflict->units_latest->activations[i], initial_activation_conflict[i]);
     }
     printf ("\n");
   }
 
   pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
-  pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_conflict);
+  pdp_layer_set_activation_starting(conflict, 3, initial_activation_conflict);
 
   // clear & free history
 

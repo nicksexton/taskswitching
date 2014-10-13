@@ -16,6 +16,7 @@
 
 #define TEXT_SIZE_HEAD 15
 
+
 void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget, 
 							   cairo_t *cr, 
 							   ThreeTaskSimulation *simulation) {
@@ -27,9 +28,12 @@ void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget,
 
   // printf ("%d x %d\n", widget_width, widget_height);
 
+  // Draw main graph
+
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
 			 0.0, simulation->model->cycle * 1.0, 
 			 -1.0, 0.5);
+
 
 
   PdpguiAxisDimensions axes = { 
@@ -43,7 +47,9 @@ void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget,
   PdpguiColourRgb plot_green[2] = {{ .r = 0.0, .g = 0.6, .b = 0.0 }, { .r = 0.3, .g = 0.6, .b = 0.3 }};
   PdpguiColourRgb plot_blue[2] = {{ .r = 0.0, .g = 0.0, .b = 1.0 }, { .r = 0.4, .g = 0.4, .b = 1.0 }};
 
-
+  PdpguiColourRgb plot_magenta = {.r = 0.7, .g = 0.0, .b = 0.7};
+  PdpguiColourRgb plot_yellow = {.r = 0.7, .g = 0.7, .b = 0.0};
+  PdpguiColourRgb plot_cyan = {.r = 0.0, .g = 0.7, .b = 0.7};
 
   PdpguiColourRgb plot_td[3] = {
     { .r = 1.0, .g = 0.0, .b = 0.0 }, 
@@ -183,6 +189,50 @@ void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget,
       free(units_activation);
     }
 
+    // ---------------------- PLOT CONFLICT MONITORING UNITS ---------------------
+
+  current_layer = pdp_model_component_find (simulation->model, 
+							ID_CONFLICT)->layer; 
+
+  //  conflict monitoring unit 0
+  units_activation = 
+    pdp_layer_get_unit_activation_history (current_layer, 0, simulation->model->cycle);
+  
+  if (units_activation == NULL) {
+    free(units_activation);
+  }
+  else {
+    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+		      simulation->model->cycle, units_activation, 
+		      &plot_yellow);
+  }
+
+  //  conflict monitoring unit 1
+  units_activation = 
+    pdp_layer_get_unit_activation_history (current_layer, 1, simulation->model->cycle);
+  
+  if (units_activation == NULL) {
+    free(units_activation);
+  }
+  else {
+    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+		      simulation->model->cycle, units_activation, 
+		      &plot_cyan);
+  }
+
+
+  //  conflict monitoring unit 2
+  units_activation = 
+    pdp_layer_get_unit_activation_history (current_layer, 2, simulation->model->cycle);
+  
+  if (units_activation == NULL) {
+    free(units_activation);
+  }
+  else {
+    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+		      simulation->model->cycle, units_activation, 
+		      &plot_magenta);
+  }
 
   
 }
@@ -575,7 +625,7 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
     path = gtk_tree_path_to_string(objects->simulation->current_trial_path);
 
 
-    three_task_model_dummy_run_step (objects->simulation->model, objects->simulation->random_generator, 
+    three_task_model_koch_conflict_run_step (objects->simulation->model, objects->simulation->random_generator, 
 				     response_threshold, 
 				     objects->simulation->datafile,
 				     objects->simulation->datafile_act,
@@ -593,7 +643,7 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
 static void model_controls_run_cb (GtkToolItem * tool_item, 
 				   ThreeTaskObjects * objects) {
 
-  three_task_model_dummy_run (objects->simulation->model, objects->simulation);
+  objects->model_run (objects->simulation->model, objects->simulation);
 
   if (objects->model_sub_notepage != NULL) {
     gtk_widget_queue_draw(objects->model_sub_notepage);
@@ -614,7 +664,7 @@ static void model_controls_continue_cb (GtkToolItem * tool_item,
 
 
   while (!stopping_condition(objects->simulation->model, response_threshold)) {
-      three_task_model_dummy_run (objects->simulation->model, objects->simulation);
+      objects->model_run (objects->simulation->model, objects->simulation);
   }
 
   //   objects->model_reinit(objects->simulation->model, TRIAL, objects->simulation);
