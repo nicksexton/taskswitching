@@ -2,14 +2,13 @@
 #include <string.h>
 #include <math.h>
 #include "3task_procedure.h" // for init_type typedef
+#include "3task_model_koch.h"
 #include "3task_model_gs.h"
-#include "3task_default_params.h"
+#include "3task_koch_default_params.h"
 
 
-#define ECHO
 
-
-void three_task_parameters_htable_set_default (GHashTable * params_table) {
+void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params_table) {
 
   double * activation_max = g_malloc(sizeof(double));
   *activation_max = ACTIVATION_MAX;
@@ -30,6 +29,10 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
   double * squashing_param = g_malloc(sizeof(double));
   *squashing_param = SQUASHING_PARAM;
   g_hash_table_insert (params_table, "squashing_param", squashing_param);
+
+  double * conflict_squashing_param = g_malloc(sizeof(double));
+  *conflict_squashing_param = SQUASHING_PARAM;
+  g_hash_table_insert (params_table, "conflict_squashing_param", conflict_squashing_param);
 
   double * rsi_scale_param = g_malloc(sizeof(double));
   *rsi_scale_param = RSI_SCALE_PARAM;
@@ -75,6 +78,14 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
   *taskdemand_output_excitatory_wt = TASKDEMAND_LATERAL_INHIBITORY_WT;
   g_hash_table_insert (params_table, "taskdemand_lateral_inhibitory_wt", taskdemand_lateral_inhibitory_wt);
 
+  double *conflict_taskdemand_wt  = g_malloc(sizeof(double));
+  *conflict_taskdemand_wt = CONFLICT_TASKDEMAND_WT;
+  g_hash_table_insert (params_table, "conflict_taskdemand_wt", taskdemand_lateral_inhibitory_wt);
+
+  double *conflict_gain  = g_malloc(sizeof(double));
+  *conflict_gain = CONFLICT_GAIN;
+  g_hash_table_insert (params_table, "conflict_gain", conflict_gain);
+
   double *topdown_control_strength_0  = g_malloc(sizeof(double));
   *topdown_control_strength_0 = TOPDOWN_CONTROL_STRENGTH_0;
   g_hash_table_insert (params_table, "topdown_control_strength_0", topdown_control_strength_0);
@@ -103,7 +114,9 @@ void three_task_parameters_htable_set_default (GHashTable * params_table) {
 }
 
 
-bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value, GHashTable *model_params_ht) {
+bool three_task_model_koch_conflict_parameter_import_ht (gchar* param_name, 
+							 gchar* param_value, 
+							 GHashTable *model_params_ht) {
 
   bool return_value = true; // returns true if import succeeds
 
@@ -147,6 +160,14 @@ bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value
     g_hash_table_insert (model_params_ht, "squashing_param", squashing_param);
     printf ("parameter %s now %4.2f\n", param_name, 
 	    *(double *)g_hash_table_lookup(model_params_ht, "squashing_param"));
+  }
+
+  else if (!strcmp (param_name, "CONFLICT_SQUASHING_PARAM")) {
+    gdouble * conflict_squashing_param = g_malloc(sizeof(double));
+    *conflict_squashing_param = (double) g_ascii_strtod (param_value, NULL);
+    g_hash_table_insert (model_params_ht, "conflict_squashing_param", conflict_squashing_param);
+    printf ("parameter %s now %4.2f\n", param_name, 
+	    *(double *)g_hash_table_lookup(model_params_ht, "conflict_squashing_param"));
   }
 
   else if (!strcmp (param_name, "NOISE")) {
@@ -229,6 +250,21 @@ bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value
 	    *(double *)g_hash_table_lookup(model_params_ht, "taskdemand_lateral_inhibitory_wt"));
   }
 
+  else if (!strcmp (param_name, "CONFLICT_TASKDEMAND_WT")) {
+    gdouble *conflict_taskdemand_wt  = g_malloc(sizeof(double));
+    *conflict_taskdemand_wt = (double) g_ascii_strtod (param_value, NULL);
+    g_hash_table_insert (model_params_ht, "conflict_taskdemand_wt", conflict_taskdemand_wt);
+    printf ("parameter %s now %4.2f\n", param_name, 
+	    *(double *)g_hash_table_lookup(model_params_ht, "conflict_taskdemand_wt"));
+  }
+
+  else if (!strcmp (param_name, "CONFLICT_GAIN")) {
+    gdouble *conflict_gain  = g_malloc(sizeof(double));
+    *conflict_gain = (double) g_ascii_strtod (param_value, NULL);
+    g_hash_table_insert (model_params_ht, "conflict_gain", conflict_gain);
+    printf ("parameter %s now %4.2f\n", param_name, 
+	    *(double *)g_hash_table_lookup(model_params_ht, "conflict_gain"));
+  }
 
   else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_0")) {
     gdouble *topdown_control_strength_0  = g_malloc(sizeof(double));
@@ -296,8 +332,8 @@ bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value
 }
 
 
-void three_task_gs_parameters_import_commit (FileData *config_file, 
-					     GHashTable *model_params) {
+void three_task_koch_conflict_parameters_import_commit (FileData *config_file, 
+							GHashTable *model_params) {
 
   GtkTreeIter iter; 
   gboolean more;
@@ -318,7 +354,7 @@ void three_task_gs_parameters_import_commit (FileData *config_file,
     g_print ("assigning:\t%s: %s\n", param_name, param_value);
 
     //    model_parameter_import (param_name, param_value, model_params);
-    three_task_model_parameter_import_ht (param_name, param_value, model_params);
+    three_task_model_koch_conflict_parameter_import_ht (param_name, param_value, model_params);
 
     g_free (param_name);
     g_free (param_value);
@@ -328,8 +364,9 @@ void three_task_gs_parameters_import_commit (FileData *config_file,
 
 }
 
+
 // cf. model_parameter_import in pdpgui_import.c
-bool three_task_task_parameter_import (gchar* param, GHashTable *model_params_ht) {
+bool three_task_koch_conflict_task_parameter_import (gchar* param, GHashTable *model_params_ht) {
 
   // printf ("debug: now in model_task_parameter_import\n");
   bool return_value = true;
@@ -373,9 +410,9 @@ bool three_task_task_parameter_import (gchar* param, GHashTable *model_params_ht
 
 
 
-int three_task_set_trial_params_from_task_store (GtkTreeStore *store, 
-						 GtkTreeIter *trial, 
-						 GHashTable *model_params_ht){
+int three_task_koch_conflict_set_trial_params_from_task_store (GtkTreeStore *store, 
+GtkTreeIter *trial, 
+GHashTable *model_params_ht){
 
   gchar* task_param_1 = NULL;
   gchar* task_param_2 = NULL;
@@ -390,36 +427,23 @@ int three_task_set_trial_params_from_task_store (GtkTreeStore *store,
   // code here: if task param 1 or 2 is non-empty,
   if (task_param_1 != NULL) {
     // set trial parameters
-    three_task_task_parameter_import (task_param_1, model_params_ht);
+    three_task_koch_conflict_task_parameter_import (task_param_1, model_params_ht);
   }
 
   if (task_param_2 != NULL) {
     // set trial parameters
-    three_task_task_parameter_import (task_param_2, model_params_ht);
+    three_task_koch_conflict_task_parameter_import (task_param_2, model_params_ht);
   }
 
   return 0;
 }
 
 
+/* Mirrors three_task_model_dummy_run in 3task_model_gs.c */
+int three_task_model_koch_conflict_run (pdp_model * model,  
+					ThreeTaskSimulation * simulation) {
 
-void three_task_model_gs_run (pdp_model * model, ThreeTaskSimulation * simulation) {
-
-  printf ("model_run is running model!\n");
-
-}
-
-
-
-
-
-
-
-int three_task_model_dummy_run (pdp_model * model,  
-				ThreeTaskSimulation * simulation) {
-
-  printf ("in three_task_model_dummy_run, running model\n");
-// init inputs
+  printf ("in three_task_model_koch_conflict_run, running model\n");
 
   double input_0_initial_act[2]   = { 0.0,  0.0 };
   double input_1_initial_act[2]   = { 0.0,  0.0 };
@@ -443,7 +467,6 @@ int three_task_model_dummy_run (pdp_model * model,
 
   else {
     // open file for writing data
-    // fp = fopen (DATAFILE, "a");
     int trial_id, cue, stim_0, stim_1, stim_2;
 
     // now get params for current trial
@@ -451,8 +474,9 @@ int three_task_model_dummy_run (pdp_model * model,
     fprintf (simulation->datafile, "%s\t", path);
     printf ("trial: %s", path);
 
-
-    three_task_set_trial_params_from_task_store (simulation->task_store, iter, simulation->model_params_htable);
+    three_task_koch_conflict_set_trial_params_from_task_store (simulation->task_store, 
+							       iter, 
+							       simulation->model_params_htable);
 
     gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
 			COL_TASK_ID, &trial_id,
@@ -464,14 +488,10 @@ int three_task_model_dummy_run (pdp_model * model,
 
     // print trial params to output file
     fprintf (simulation->datafile, "%d\t", trial_id);
-    //    fprintf (fp, "%d\t", trial_data->trial_type);
     fprintf (simulation->datafile, "%d\t", cue);
     fprintf (simulation->datafile, "%d\t", stim_0);
     fprintf (simulation->datafile, "%d\t", stim_1);
     fprintf (simulation->datafile, "%d\t", stim_2);
-    //    fprintf (fp, "%d\t", trial_data->response);
-    //    fprintf (fp, "%d\t", trial_data->response_time);
-    //    fprintf (fp, "\n");
 
   // check that trial parameters are sensible
 
@@ -526,8 +546,6 @@ int three_task_model_dummy_run (pdp_model * model,
 	   		    3, topdown_control_initial_act);
 
   // <--------------------- RUN TRIAL ---------------------------->
-  // NOTE this diverges from real version of model
-
   response_threshold = *(double *)g_hash_table_lookup(simulation->model_params_htable, "response_threshold");
   learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
   hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
@@ -543,13 +561,17 @@ int three_task_model_dummy_run (pdp_model * model,
 				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
+    printf ("placeholder: conflict units act\t");
+    //    pdp_layer_print_current_output (
+    //				    pdp_model_component_find (model, ID_CONFLICT)->layer);
+
 #endif
 
-    three_task_model_fprintf_current_state (model, path, simulation->datafile_act); // print activations to log file
+    three_task_model_koch_fprintf_current_state (model, path, simulation->datafile_act); // print activations to log file
 
   // run_model_step returns true when stopping_condition evaluates to false
   do {
-    three_task_model_dummy_run_step (model, simulation->random_generator, 
+    three_task_model_koch_conflict_run_step (model, simulation->random_generator, 
 				     response_threshold, 
 				     simulation->datafile,
 				     simulation->datafile_act,
@@ -574,141 +596,11 @@ int three_task_model_dummy_run (pdp_model * model,
 
   return (1);
   }
-  
 
 }
 
 
-
-
-// returns 0 (false) if model is still running, or response (true) if it has stopped
-int stopping_condition (const pdp_model * model, 
-			 double response_threshold) {
-
-  /* evaluates whether model should stop on this cycle and returns
-     true/false. CURRENT CRITERION: most active output node is > next
-     most active output node that is not the same coloured node */
-
-  // NB code for responses: 1 = task_0:L, 2 = task_0:R, 3 = task_1:L, 4 = task_1:R, 5 = task_2:L, 6 = task_2:R
-  // ie. if (abs(response[0] - response[1])) % 2 == 0, then the nodes correspond
-
-  int outputnode;
-  int biggest_node[4] = {0, 0, 0, 0}; // stores 3 biggest activations, to compare
-                         // [0] vs. [1], or [0] vs. [2] if [0],[1] are same colour, 
-                         // or [0] vs. [3] if [0], [1], [2] are all the same colour
-  double biggest_node_act[4] = {-1.0, -1.0, -1.0, -1.0};
-
-  int i; // does an insertion sort
-  int o; // iterates output layers (0, 1, 2)
-  pdp_layer * output_layers[3];
-
-  output_layers[0] = (pdp_model_component_find (model, ID_OUTPUT_0)->layer);  
-  output_layers[1] = (pdp_model_component_find (model, ID_OUTPUT_1)->layer);  
-  output_layers[2] = (pdp_model_component_find (model, ID_OUTPUT_2)->layer);  
-
-
-  /* do three output layers */
-  for (o = 0; o < 3; o ++) {
-
-    /* outer loop iterates all the output nodes */
-    for (outputnode = 0; outputnode < 2; outputnode ++) {
-    
-      /* inner loop does an insertion sort */
-      i = 0;
-      while (biggest_node_act[i] > output_layers[o]->units_latest->activations[outputnode] && i < 4) 
-	i ++;
-      
-      if (i == 4) // if unit activation is smaller than activation in 4th slot
-	continue;
-
-      /*  if slot is empty, insert the new response right here */
-      if (biggest_node[i] == 0) {
-	biggest_node[i] = 2*o + outputnode +1; 
-	biggest_node_act[i] = output_layers[o]->units_latest->activations[outputnode];
-	continue;
-      }
-	
-      /* else, compare size of activations */
-      else {
-	  /* insert new response here, move everything down */
-
-	switch (i) {
-	case 3: 
-	  biggest_node[3] = 2*o + outputnode +1; 
-	  biggest_node_act[3] = output_layers[o]->units_latest->activations[outputnode];
-	  break;
-	    
-	    
-	case 2: 
-	  biggest_node[3] = biggest_node[2];
-	  biggest_node_act[3] = biggest_node_act[2];
-	  
-	  biggest_node[2] = 2*o + outputnode +1; 
-	  biggest_node_act[2] = output_layers[o]->units_latest->activations[outputnode];
-	  
-	  break;
-	    
-
-	case 1:
-	  biggest_node[3] = biggest_node[2];
-	  biggest_node_act[3] = biggest_node_act[2];
-	      
-	  biggest_node[2] = biggest_node[1];
-	  biggest_node_act[2] = biggest_node_act[1];
-	      
-	  biggest_node[1] = 2*o + outputnode +1; 
-	  biggest_node_act[1] = output_layers[o]->units_latest->activations[outputnode];
-
-
-	  break;
-
-	case 0:
-	  biggest_node[3] = biggest_node[2];
-	  biggest_node_act[3] = biggest_node_act[2];
-	  
-	  biggest_node[2] = biggest_node[1];
-	  biggest_node_act[2] = biggest_node_act[1];
-	      
-	  biggest_node[1] = biggest_node[0];
-	  biggest_node_act[1] = biggest_node_act[0];
-	      
-	  biggest_node[0] = 2*o + outputnode +1; 
-	  biggest_node_act[0] = output_layers[o]->units_latest->activations[outputnode];
-
-	  break;
-
-	default:
-	  printf ("stopping condition: weird, no cases seem to match\n");
-	} // <-- close switch
-      } // < -- close else
-
-    } // <-- outer loop
-  }// <- output layers
-
-  // now, we can evaluate stopping condition
-
-
-  i = 1;
-  while (abs(biggest_node[0] - biggest_node[i]) % 2 == 0 && i < 4) {
-    i ++;
-  }
-
-  if (biggest_node_act[0] - response_threshold > biggest_node_act[i]) {
-    //    printf ("stopping condition met, returning %d", biggest_node[0]);
-    return (biggest_node[0]);
-  }
-  
-  /*
-  for (i = 0; i < 4; i ++) {
-    printf ("%d ", biggest_node[i]);
-  }
-  */
-  return 0; 
-  
-}
-
-
-void three_task_model_fprintf_current_state (pdp_model *model, gchar *path, FILE * fp_act) {
+void three_task_model_koch_fprintf_current_state (pdp_model *model, gchar *path, FILE * fp_act) {
 
 
 
@@ -731,6 +623,8 @@ void three_task_model_fprintf_current_state (pdp_model *model, gchar *path, FILE
 				    pdp_model_component_find (model, ID_OUTPUT_2)->layer, fp_act);
   pdp_layer_fprintf_current_output (
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT)->layer, fp_act);
     fprintf (fp_act, "\n");
     
     return;
@@ -739,16 +633,27 @@ void three_task_model_fprintf_current_state (pdp_model *model, gchar *path, FILE
 }
 
 
-// returns true while model is still running (does not satisfy stopping condition), false otherwise
-int three_task_model_dummy_run_step (pdp_model * model, 
-				      const gsl_rng * random_generator, 
-				      double response_threshold, 
-				     FILE * fp_trial,
-				     FILE * fp_act,
-				     gchar * path) {
+int three_task_model_koch_conflict_run_step (pdp_model * model, 
+					     const gsl_rng * random_generator, 
+					     double response_threshold, 
+					     FILE * fp_trial,
+					     FILE * fp_act,
+					     gchar * path) {
 
 
     pdp_model_cycle (model);
+
+    // calculate conflict inputs
+    pdp_layer * conflict_input =  pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
+    pdp_layer * taskdemand =  pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+
+    double conflict_input_values[3] = {0.0, 0.0, 0.0};
+    int i;
+    for (i = 0; i < 3; i ++) {
+      conflict_input_values[i] = taskdemand->units_latest->activations[i] * 
+	taskdemand->units_latest->activations[(i+1)%3];
+    } 
+    pdp_layer_set_activation (conflict_input, 3, conflict_input_values);
 
 
     // add noise to units 
@@ -759,6 +664,10 @@ int three_task_model_dummy_run_step (pdp_model * model,
     pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_2)->layer, 
 				  NOISE, random_generator);
     pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_TASKDEMAND)->layer, 
+				    NOISE, random_generator);
+    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT)->layer, 
+				    NOISE, random_generator);
+    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer, 
 				    NOISE, random_generator);
     
     
@@ -774,6 +683,8 @@ int three_task_model_dummy_run_step (pdp_model * model,
 				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT)->layer);
 
 #endif
 
@@ -795,21 +706,21 @@ int three_task_model_dummy_run_step (pdp_model * model,
 
     if (path != NULL) {
       // fprintf (fp_act, "%s\t%d\t", path, model->cycle);
-      three_task_model_fprintf_current_state (model, path, fp_act);
+      three_task_model_koch_fprintf_current_state (model, path, fp_act);
     }
 
     return 0; 
-
   
 }
 
 
+int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_params) {
 
 
-int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) {
+  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control, 
+    *conflict, *conflict_input;
 
-  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control;
-
+  printf ("in three_task_model_koch_conflict_build, building the koch conflict monitoring model\n");
 
   input_0 = pdp_layer_create(ID_INPUT_0, 2, 
 				*(double *)g_hash_table_lookup(model_params, "bias_none"));
@@ -831,6 +742,13 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
 				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
 
 
+  conflict_input = pdp_layer_create(ID_CONFLICT_INPUT, 3, 
+				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
+
+  conflict = pdp_layer_create(ID_CONFLICT, 3, 
+				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
+
+
   
   double initial_activation_in_0[2] = {0.0, 0.0};
   double initial_activation_in_1[2] = {0.0, 0.0};
@@ -840,6 +758,8 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   double initial_activation_out_2[2] = {0.0, 0.0};
   double initial_activation_taskdemand[3] = {0.0, 0.0, 0.0};
   double initial_activation_topdown_control[3] = {0.0, 0.0, 0.0};
+  double initial_activation_conflict[3] = {0.0, 0.0, 0.0};
+  double initial_activation_conflict_input[3] = {0.0, 0.0, 0.0};
 
   
   double topdown_control_strength_0 = *(double *)g_hash_table_lookup(model_params, 
@@ -861,6 +781,9 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
   pdp_layer_set_activation(taskdemand, 3, initial_activation_taskdemand);
   pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
+  pdp_layer_set_activation(conflict, 3, initial_activation_conflict);
+  pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
+
 
   /* <------------------------------ NETWORK CONNECTIVITY --------------------------------> */
   /****************************** */
@@ -1070,6 +993,42 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   pdp_input_connect (taskdemand, taskdemand, wts_taskdemand_taskdemand);
 
 
+  /******************************** */
+  /* Conflict Input -> Conflict units */
+  /******************************** */
+
+  double conflict_gain = *(double *)g_hash_table_lookup(model_params, 
+							"conflict_gain");
+
+  pdp_weights_matrix *wts_conflict_input_conflict;
+  double wts_conflict_input_conflict_matrix[3][3] = {
+    { conflict_gain, 0.0, 0.0 },
+    { 0.0, conflict_gain, 0.0 },
+    { 0.0, 0.0, conflict_gain },
+  };
+
+  wts_conflict_input_conflict = pdp_weights_create (3,3);
+  pdp_weights_set (wts_conflict_input_conflict, 3, 3, wts_conflict_input_conflict_matrix);
+  pdp_input_connect (conflict, conflict_input, wts_conflict_input_conflict);
+
+
+  /******************************** */
+  /* Conflict -> Taskdemand units */
+  /******************************** */
+
+  double conflict_taskdemand_wt = *(double *)g_hash_table_lookup(model_params, 
+								 "conflict_taskdemand_wt");
+
+  pdp_weights_matrix *wts_conflict_taskdemand;
+  double wts_conflict_taskdemand_matrix[3][3] = {
+    { conflict_taskdemand_wt, conflict_taskdemand_wt, 0.0 },
+    { 0.0, conflict_taskdemand_wt, conflict_taskdemand_wt },
+    { conflict_taskdemand_wt, 0.0, conflict_taskdemand_wt },
+  };
+
+  wts_conflict_taskdemand = pdp_weights_create (3,3);
+  pdp_weights_set (wts_conflict_taskdemand, 3, 3, wts_conflict_taskdemand_matrix);
+  pdp_input_connect (taskdemand, conflict, wts_conflict_taskdemand);
 
   /*  +--------------------------------------+  */
   /*  | Top down control -> taskdemand units |  */
@@ -1085,6 +1044,10 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   wts_topdown_taskdemand = pdp_weights_create (3,3);
   pdp_weights_set (wts_topdown_taskdemand, 3, 3, wts_topdown_taskdemand_matrix);
   pdp_input_connect (taskdemand, topdown_control, wts_topdown_taskdemand);
+
+
+
+
 
 
 
@@ -1117,6 +1080,8 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
 
 
 
+
+
   /*********************************************/
   /* Now init model object and push components */
   /*********************************************/
@@ -1129,6 +1094,8 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
   pdp_model_component_push(model, output_2, ID_OUTPUT_2, TRUE);
   pdp_model_component_push(model, taskdemand, ID_TASKDEMAND, TRUE);
   pdp_model_component_push(model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
+  pdp_model_component_push(model, conflict, ID_CONFLICT, TRUE); // do not update activation, do this manually
+  pdp_model_component_push(model, conflict, ID_CONFLICT_INPUT, FALSE); 
 
   //debug
   printf ("basic 3 task model created! Limited connectivity, just for test\n");
@@ -1137,14 +1104,13 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
 
 }
 
-
-int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskSimulation * simulation) {
+int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, ThreeTaskSimulation * simulation) {
   // resets activation
   // does not reset weights
   // persist_taskdemand_activation sets proportion of TD activation to carry over to
   // next trial ie. .20 = 20% of activation on previous
 
-  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control;
+  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control, *conflict, *conflict_input;
 
 
 
@@ -1157,8 +1123,10 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   double initial_activation_out_2[2] = {0.0, 0.0};
   double initial_activation_topdown_control[3] = {0.0, 0.0, 0.0};
   double initial_activation_taskdemand[3] = {0.0, 0.0, 0.0};
+  double initial_activation_conflict[3] = {0.0, 0.0, 0.0};
+  double initial_activation_conflict_input[3] = {0.0, 0.0, 0.0};
   int i;
-  double squashing_param, rsi_scale_param;
+  double squashing_param, rsi_scale_param, conflict_squashing_param;
 
   // zero cycle counter
   model->cycle = 0;
@@ -1171,14 +1139,20 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   output_1 = pdp_model_component_find (model, ID_OUTPUT_1)->layer;
   output_2 = pdp_model_component_find (model, ID_OUTPUT_2)->layer;
   taskdemand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+  conflict = pdp_model_component_find (model, ID_CONFLICT)->layer;
+  conflict_input = pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
   topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
 
 
   // Get and squash TD activations
   if (init == TRIAL) {
 
-    squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "squashing_param");
-    rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, "rsi_scale_param");
+    conflict_squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
+							      "conflict_squashing_param");
+    squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
+						     "squashing_param");
+    rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
+						     "rsi_scale_param");
     printf ("\nsquashing TD activations by (1 - %2.1f ) ^ %2.1f:\t", squashing_param, rsi_scale_param);
     
     for (i = 0; i < 3; i++) {
@@ -1187,9 +1161,20 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
       printf ("%4.2f -> %4.2f\t", taskdemand->units_latest->activations[i], initial_activation_taskdemand[i]);
     }
     printf ("\n");
+
+    printf ("\nsquashing Conflict activations by (1 - %2.1f ) ^ %2.1f:\t", 
+	    conflict_squashing_param, rsi_scale_param);
+    
+    for (i = 0; i < 3; i++) {
+      initial_activation_conflict[i] = conflict->units_latest->activations[i] *
+	pow(1-squashing_param, rsi_scale_param);
+      printf ("%4.2f -> %4.2f\t", conflict->units_latest->activations[i], initial_activation_conflict[i]);
+    }
+    printf ("\n");
   }
 
   pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
+  pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_conflict);
 
   // clear & free history
 
@@ -1210,109 +1195,14 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
   pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
   pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
-
-
-
-
-  return 0;
-}
-
-
-int three_task_model_update_weights (pdp_model * gs_stroop_model, 
-				     double learning_rate, 
-				     hebbian_learning_persistence persist) {
-  // default hebbian persistence (1, NEXT_TRIAL) - weights persist for next trial only
-  // NB running this function immediately after initing model SHOULD zero associative weights
-  // (only if persist is set to NEXT_TRIAL)
-
-  int i, j;
-
-  if (persist == OFF) {
-    printf ("\nthree_task_model_update_weights: persist = OFF, weights not updated weights\n");
-    return 0;
-  }
-
-  pdp_layer *input_0, *input_1, *input_2, *task_demand;
-  input_0 = pdp_model_component_find (gs_stroop_model, ID_INPUT_0)->layer;
-  input_1 = pdp_model_component_find (gs_stroop_model, ID_INPUT_1)->layer;
-  input_2 = pdp_model_component_find (gs_stroop_model, ID_INPUT_2)->layer;
-  task_demand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
-  
-
-  double wts_in0_taskdemand_matrix[3][2] = {
-    {0.0, 0.0 },
-    {0.0, 0.0 },
-    {0.0, 0.0 },
-  };
-
-  double wts_in1_taskdemand_matrix[3][2] = {
-    {0.0, 0.0 },
-    {0.0, 0.0 },
-    {0.0, 0.0 },
-  };
-
-  double wts_in2_taskdemand_matrix[3][2] = {
-    {0.0, 0.0 },
-    {0.0, 0.0 },
-    {0.0, 0.0 },
-  };
-
-  
- 
-  for (i = 0; i < 3; i ++) { // outer loop, output unit (i)
-    for (j = 0; j < 2; j ++) {// inner loop, input unit (j)
-      wts_in0_taskdemand_matrix[i][j] = 
-	task_demand->units_latest->activations[i] *
-	input_0->units_latest->activations[j] * learning_rate;
-
-      wts_in1_taskdemand_matrix[i][j] = 
-	task_demand->units_latest->activations[i] *
-	input_1->units_latest->activations[j] * learning_rate;
-
-      wts_in2_taskdemand_matrix[i][j] = 
-	task_demand->units_latest->activations[i] *
-	input_2->units_latest->activations[j] * learning_rate;
-
-    }
-  }
-
-
-  if (persist == THIS_BLOCK || persist == FOREVER) {
-    // increment existing weights
-    printf ("\nthree_task_model_update_weights: persist = THIS_BLOCK or FOREVER,"
-	    "incrementing weights\n");
-    pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
-			   3, 2, wts_in0_taskdemand_matrix);
-    pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
-			   3, 2, wts_in1_taskdemand_matrix);
-    pdp_weights_increment (pdp_input_find (task_demand, ID_INPUT_2)->input_weights, 
-			   3, 2, wts_in2_taskdemand_matrix);
-  }
-
-  else if (persist == NEXT_TRIAL) {
-    printf ("\nthree_task_model_update_weights: persist = NEXT_TRIAL,"
-	    "setting new weights\n");
-    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
-		     3, 2, wts_in0_taskdemand_matrix);
-    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
-		     3, 2, wts_in1_taskdemand_matrix);
-    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_2)->input_weights, 
-		     3, 2, wts_in2_taskdemand_matrix);
-  }
-
-  pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_0)->input_weights);
-  pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_1)->input_weights);
-  pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_2)->input_weights);
-
-
+  pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
 
 
   return 0;
 }
 
 
-
-void init_model_simulation (pdp_model * this_model, GHashTable *model_params_htable) {
+void init_model_koch_conflict_simulation (pdp_model * this_model, GHashTable *model_params_htable) {
   // just allocate memory for simulation and run constructors  
 
 
@@ -1325,22 +1215,8 @@ void init_model_simulation (pdp_model * this_model, GHashTable *model_params_hta
   this_model->activation_parameters = activation_parameters;
 
   // now create the model
-  printf ("in init_model, creating dummy model\n");
-  three_task_model_dummy_build (this_model, model_params_htable); 
-}
-
-
-void deinit_model (pdp_model * this_model) {
-  // delete model components
-  // can be re-initialised with init_model
-
-  printf ("in deinit_model, free model\n");
-
-  pdp_model_component_free (this_model->components);
-  this_model->components = NULL;
-
-
-  g_free (this_model->activation_parameters);
+  printf ("in init_model_koch_conflict_simulation, creating dummy model\n");
+  three_task_model_koch_conflict_build (this_model, model_params_htable); 
 }
 
 
