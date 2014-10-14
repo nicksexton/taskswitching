@@ -32,7 +32,7 @@ void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget,
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
 			 0.0, simulation->model->cycle * 1.0, 
-			 -1.0, 0.5);
+			 -1.0, 1.0);
 
 
 
@@ -40,7 +40,7 @@ void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget,
     .x_min = 0.0, 
     .x_max = simulation->model->cycle * 1.0, 
     .y_min = -1.0, 
-    .y_max = 0.5
+    .y_max = 1.0
   };
 
   PdpguiColourRgb plot_red[2] = {{ .r = 1.0, .g = 0.0, .b = 0.0 }, { .r = 1.0, .g = 0.4, .b = 0.4 }};
@@ -250,8 +250,8 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdp_layer * layer_output_1 = pdp_model_component_find (simulation->model, ID_OUTPUT_1)->layer;
   pdp_layer * layer_output_2 = pdp_model_component_find (simulation->model, ID_OUTPUT_2)->layer;
   pdp_layer * layer_topdowncontrol = pdp_model_component_find (simulation->model, ID_TOPDOWNCONTROL)->layer;
-  //  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
   pdp_layer * layer_conflict = pdp_model_component_find (simulation->model, ID_CONFLICT)->layer;
+  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
   guint widget_width, widget_height;
@@ -269,8 +269,14 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
 
-  PdpguiCoords loc_conflict_td_upper = { .x = widget_width * 0.95, .y = 0.0 };
-  PdpguiCoords loc_conflict_td_lower = { .x = widget_width * 0.95, .y = widget_height * 0.5 };
+  PdpguiCoords loc_conflict_td_upper = { .x = widget_width * 0.85, .y = widget_height * -0.1 };
+  PdpguiCoords loc_conflict_td_lower = { .x = widget_width * 0.85, .y = widget_height * 0.6 };
+
+
+  // Conflict Inputs
+  PdpguiCoords loc_conflict_input = { .x = widget_width * 0.7, .y = widget_height * 0.2, };
+  PdpguiCoords loc_conflict_input_title = { .x = widget_width * 0.9, .y = widget_height * 0.1, };
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
 
 
   // TD Units
@@ -362,6 +368,7 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdpgui_draw_layer (cr, loc_output_2, mono[0], mono[1], layer_output_2);
   pdpgui_draw_layer (cr, loc_topdowncontrol, mono_grey[0], mono_grey[1], layer_topdowncontrol);
   pdpgui_draw_layer (cr, loc_conflict, mono_grey[0], mono_grey[1], layer_conflict);
+  pdpgui_draw_layer (cr, loc_conflict_input, mono_grey[0], mono_grey[1], layer_conflict_input);
 
 
 
@@ -395,6 +402,10 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdpgui_draw_weights_topdown (cr, loc_conflict, loc_taskdemand, 
 			       loc_conflict_td_upper, loc_conflict_td_lower,
 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights);
+
+  pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
+		       pdp_input_find(layer_conflict, ID_CONFLICT_INPUT)->input_weights);
+
 
   // draw weights for lateral connections
   pdpgui_draw_weights_topdown (cr, loc_output_0, loc_output_1, 

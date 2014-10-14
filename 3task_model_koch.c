@@ -6,6 +6,7 @@
 #include "3task_model_gs.h"
 #include "3task_koch_default_params.h"
 
+#define ECHO
 
 
 void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params_table) {
@@ -650,8 +651,9 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
     double conflict_input_values[3] = {0.0, 0.0, 0.0};
     int i;
     for (i = 0; i < 3; i ++) {
-      conflict_input_values[i] = taskdemand->units_latest->activations[i] * 
-	taskdemand->units_latest->activations[(i+1)%3];
+      conflict_input_values[i] = 
+	(taskdemand->units_latest->activations[i] + 1)* // td unit i
+	(taskdemand->units_latest->activations[(i+1)%3] + 1); // td unit i+1
     } 
     pdp_layer_set_activation (conflict_input, 3, conflict_input_values);
 
@@ -721,6 +723,17 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
     *conflict, *conflict_input;
 
   printf ("in three_task_model_koch_conflict_build, building the koch conflict monitoring model\n");
+
+  printf ("ID_INPUT_0 = %d ", ID_INPUT_0);
+  printf ("ID_INPUT_1 = %d ", ID_INPUT_1);
+  printf ("ID_INPUT_2 = %d ", ID_INPUT_2);
+  printf ("ID_OUTPUT_0 = %d ", ID_OUTPUT_0);
+  printf ("ID_OUTPUT_1 = %d ", ID_OUTPUT_1);
+  printf ("ID_OUTPUT_2 = %d ", ID_OUTPUT_2);
+  printf ("ID_TASKDEMAND = %d ", ID_TASKDEMAND);
+  printf ("ID_TOPDOWNCONTROL = %d ", ID_TOPDOWNCONTROL);
+  printf ("ID_CONFLICT = %d ", ID_CONFLICT );
+  printf ("ID_CONFLICT_INPUT = %d ", ID_CONFLICT_INPUT);
 
   input_0 = pdp_layer_create(ID_INPUT_0, 2, 
 				*(double *)g_hash_table_lookup(model_params, "bias_none"));
@@ -1094,8 +1107,8 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
   pdp_model_component_push(model, output_2, ID_OUTPUT_2, TRUE);
   pdp_model_component_push(model, taskdemand, ID_TASKDEMAND, TRUE);
   pdp_model_component_push(model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
-  pdp_model_component_push(model, conflict, ID_CONFLICT, TRUE); // do not update activation, do this manually
-  pdp_model_component_push(model, conflict, ID_CONFLICT_INPUT, FALSE); 
+  pdp_model_component_push(model, conflict, ID_CONFLICT, TRUE); 
+  pdp_model_component_push(model, conflict_input, ID_CONFLICT_INPUT, FALSE); // do not update activation, do this manually
 
   //debug
   printf ("basic 3 task model created! Limited connectivity, just for test\n");
@@ -1162,6 +1175,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
     }
     printf ("\n");
 
+    // Squash conflict activations
     printf ("\nsquashing Conflict activations by (1 - %2.1f ) ^ %2.1f:\t", 
 	    conflict_squashing_param, rsi_scale_param);
     
@@ -1172,7 +1186,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
     }
     printf ("\n");
   }
-
+ 
   pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
   pdp_layer_set_activation_starting(conflict, 3, initial_activation_conflict);
 
@@ -1195,7 +1209,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
   pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
   pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
-  pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
+  // pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
 
 
   return 0;
