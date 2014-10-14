@@ -44,12 +44,16 @@ void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params
   g_hash_table_insert (params_table, "noise", noise);
 
   double * bias_outputunit = g_malloc(sizeof(double));
-  *bias_outputunit = OUTPUTUNIT_BIAS;
+  *bias_outputunit = BIAS_OUTPUTUNIT;
   g_hash_table_insert (params_table, "bias_outputunit", bias_outputunit);
 
   double * bias_taskdemand = g_malloc(sizeof(double));
-  *bias_taskdemand = TASKDEMAND_BIAS;
+  *bias_taskdemand = BIAS_TASKDEMAND;
   g_hash_table_insert (params_table, "bias_taskdemand", bias_taskdemand);
+
+  double * bias_conflict = g_malloc(sizeof(double));
+  *bias_conflict = BIAS_CONFLICT;
+  g_hash_table_insert (params_table, "bias_conflict", bias_conflict);
 
   double * bias_none = g_malloc(sizeof(double));
   *bias_none = BIAS_NONE;
@@ -194,6 +198,15 @@ bool three_task_model_koch_conflict_parameter_import_ht (gchar* param_name,
     printf ("parameter %s now %4.2f\n", param_name, 
 	    *(double *)g_hash_table_lookup(model_params_ht, "bias_taskdemand"));
   }  
+
+  else if (!strcmp (param_name, "BIAS_CONFLICT")) {
+    gdouble * bias_conflict = g_malloc(sizeof(double));
+    *bias_conflict = (double) g_ascii_strtod (param_value, NULL);
+    g_hash_table_insert (model_params_ht, "bias_conflict",  bias_conflict);
+    printf ("parameter %s now %4.2f\n", param_name, 
+	    *(double *)g_hash_table_lookup(model_params_ht, "bias_conflict"));
+  }  
+
 
   else if (!strcmp (param_name, "BIAS_NONE")) {
     gdouble * bias_none = g_malloc(sizeof(double));
@@ -652,8 +665,8 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
     int i;
     for (i = 0; i < 3; i ++) {
       conflict_input_values[i] = 
-	(taskdemand->units_latest->activations[i] + 1)* // td unit i
-	(taskdemand->units_latest->activations[(i+1)%3] + 1); // td unit i+1
+	(taskdemand->units_latest->activations[i] + 1) * 0.5 * // td unit i
+	(taskdemand->units_latest->activations[(i+1)%3] + 1) * 0.5; // td unit i+1
     } 
     pdp_layer_set_activation (conflict_input, 3, conflict_input_values);
 
@@ -759,7 +772,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
 				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
 
   conflict = pdp_layer_create(ID_CONFLICT, 3, 
-				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
+				     *(double *)g_hash_table_lookup(model_params, "bias_conflict"));
 
 
   
@@ -1209,7 +1222,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
   pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
   pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
-  // pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
+  pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
 
 
   return 0;
