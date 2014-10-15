@@ -12,7 +12,7 @@ TRIPLETASK_OBJECTS = pdp_objects.o pdp_activation_funcs.o random_generator_funct
 
 BINARIES = gs_stroop_sim_indiffs
 GUI_BINARIES = gs_stroop_gui
-TRIPLETASK = 3task_basic 3task_gui 3task_gui_koch_conflict
+TRIPLETASK = 3task_basic 3task_gui 3task_gui_koch_conflict 3task_basic_koch_conflict
 
 all: $(BINARIES) $(GUI_BINARIES)
 gui: $(GUI_BINARIES)
@@ -61,6 +61,9 @@ gs_stroop_gui.o:
 # tripletask
 3task_gui_koch_conflict: 3task_gui_koch_conflict.o 3task_model_koch.o $(TRIPLETASK_OBJECTS) $(GUI_OBJECTS)
 	$(CC) -o $@ $(CFLAGS) 3task_gui_koch_conflict.o 3task_model_koch.o $(TRIPLETASK_OBJECTS) $(GUI_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
+
+3task_basic_koch_conflict: 3task_basic_koch_conflict.o 3task_model_koch.o $(TRIPLETASK_OBJECTS) $(GUI_OBJECTS)
+	$(CC) -o $@ $(CFLAGS) 3task_basic_koch_conflict.o 3task_model_koch.o $(TRIPLETASK_OBJECTS) $(GUI_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
 
 3task_gui: 3task_gui.o $(TRIPLETASK_OBJECTS) $(GUI_OBJECTS)
 	$(CC) -o $@ $(CFLAGS) 3task_gui.o $(TRIPLETASK_OBJECTS) $(GUI_OBJECTS)  -lgsl -lgslcblas -lm $(LIBS) 	
