@@ -123,11 +123,11 @@ void pdp_layer_free (pdp_layer * some_layer) {
 }
 
 // creates and appends new units to units_latest
-// don't use unless layer updates activations abnormally (eg calculating a conflict signal)
+// don't use (replicated functionality in pdp_layer_cycle_activation) 
+//  unless layer updates activations abnormally (eg calculating a conflict signal)
 int pdp_layer_create_units (pdp_layer * some_layer) {
 
   pdp_units * units_new = pdp_units_create (some_layer->size);
-  int j; // iterates across output units
 
   units_new->next = NULL;
   units_new->previous = some_layer->units_latest;      
@@ -136,6 +136,8 @@ int pdp_layer_create_units (pdp_layer * some_layer) {
   /* make new linkages */
   some_layer->units_latest->next = units_new;
   some_layer->units_latest = units_new;
+
+  return 0;
 
 }
 

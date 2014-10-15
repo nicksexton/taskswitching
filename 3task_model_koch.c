@@ -655,11 +655,14 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
 					     gchar * path) {
 
 
+    // cycle the model
     pdp_model_cycle (model);
 
     // calculate conflict inputs
     pdp_layer * conflict_input =  pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
     pdp_layer * taskdemand =  pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+
+    pdp_layer_create_units (conflict_input); // append new units history to units_latest linked list
 
     double conflict_input_values[3] = {0.0, 0.0, 0.0};
     int i;
@@ -669,6 +672,9 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
 	(taskdemand->units_latest->activations[(i+1)%3] + 1) * 0.5; // td unit i+1
     } 
     pdp_layer_set_activation (conflict_input, 3, conflict_input_values);
+
+
+
 
 
     // add noise to units 
@@ -682,9 +688,7 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
 				    NOISE, random_generator);
     pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT)->layer, 
 				    NOISE, random_generator);
-    //    pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer, 
-    //				    NOISE, random_generator);
-    
+    // note doesn't add noise to conflict inputs (otherwise adding noise twice)    
     
 
 #if defined ECHO
@@ -700,6 +704,8 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_CONFLICT)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer);
 
 #endif
 

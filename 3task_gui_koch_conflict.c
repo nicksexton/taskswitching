@@ -37,57 +37,62 @@ void three_task_gui_koch_conflict_plot_conflict_activation (GtkWidget *widget,
     .y_max = 1.0
   };
 
-  PdpguiColourRgb plot_magenta = {.r = 0.7, .g = 0.0, .b = 0.7};
-  PdpguiColourRgb plot_yellow = {.r = 0.7, .g = 0.7, .b = 0.0};
-  PdpguiColourRgb plot_cyan = {.r = 0.0, .g = 0.7, .b = 0.7};
+  PdpguiColourRgb plot_conflict[3] = {
+    {.r = 0.7, .g = 0.7, .b = 0.0}, // yellow - ie. units 0 and 1
+    {.r = 0.0, .g = 0.7, .b = 0.7}, // cyan - ie units 1 and 2
+    {.r = 0.7, .g = 0.0, .b = 0.7}, // magenta - ie units 2 and 0
+  };
+
+
 
   // now construct an arbitrary vector;
   double * units_activation; // check this doesn't overflow??
 
     // ---------------------- PLOT CONFLICT MONITORING UNITS ---------------------
 
-  pdp_layer * current_layer = pdp_model_component_find (simulation->model, 
+  pdp_layer * conflict = pdp_model_component_find (simulation->model, 
 							ID_CONFLICT)->layer; 
 
-  //  conflict monitoring unit 0
-  units_activation = 
-    pdp_layer_get_unit_activation_history (current_layer, 0, simulation->model->cycle);
-  
-  if (units_activation == NULL) {
-    free(units_activation);
-  }
-  else {
-    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
-		      simulation->model->cycle, units_activation, 
-		      &plot_yellow);
+  pdp_layer * conflict_input = pdp_model_component_find (simulation->model, 
+							ID_CONFLICT_INPUT)->layer; 
+
+  int unit;
+  for (unit = 0; unit < 3; unit ++) {
+
+    // plot main conflict units  
+    units_activation = 
+      pdp_layer_get_unit_activation_history (conflict, unit, simulation->model->cycle);
+    
+    if (units_activation == NULL) {
+      free(units_activation);
+    }
+    else {
+      pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
+			  simulation->model->cycle, units_activation, 
+			  &(plot_conflict[unit]));
+      free(units_activation);
+      units_activation = NULL;
+    }
+
+    // temp - plot input to conflict units
+
+    printf ("conflict input units_initial activation 0 = %4.2f\n", conflict_input->units_initial.activations[0]);
+    units_activation = 
+      pdp_layer_get_unit_activation_history (conflict_input, unit, simulation->model->cycle);
+    
+    if (units_activation == NULL) {
+      printf ("three_task_gui_koch_conflict_plot_conflict_activation could not get conflict_input units\n"); 
+      free(units_activation);
+    }
+    else {
+      pdpgui_plot_vector_dashed (cr, widget_width, widget_height, &axes, 
+				 simulation->model->cycle, units_activation, 
+				 &(plot_conflict[unit]));
+      free(units_activation);
+    }
+
   }
 
-  //  conflict monitoring unit 1
-  units_activation = 
-    pdp_layer_get_unit_activation_history (current_layer, 1, simulation->model->cycle);
-  
-  if (units_activation == NULL) {
-    free(units_activation);
-  }
-  else {
-    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
-		      simulation->model->cycle, units_activation, 
-		      &plot_cyan);
-  }
-
-
-  //  conflict monitoring unit 2
-  units_activation = 
-    pdp_layer_get_unit_activation_history (current_layer, 2, simulation->model->cycle);
-  
-  if (units_activation == NULL) {
-    free(units_activation);
-  }
-  else {
-    pdpgui_plot_vector (cr, widget_width, widget_height, &axes, 
-		      simulation->model->cycle, units_activation, 
-		      &plot_magenta);
-  }
 
 
 
