@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 # simulation 3 - modelling the n-2 repetition cost
+# now used in simulation 5 as well!
 # in the symbolic classification paradigm - eg., Schuch & Koch 2003, experiment 2
 
 # design:
@@ -14,9 +15,9 @@
 import random
 import sys, getopt # for parsing cmd line params
 
-filename_conf = "sim_3_trials_test.conf"
-filename_lookup = "sim_3_lookup_test.txt"
-num_blocks = 500 # number of times to run each sequence type
+filename_conf = "sim_3_trials.conf"
+filename_lookup = "sim_3_lookup.txt"
+num_blocks = 50 # number of times to run each sequence type
 trialid = 0
 
 # Store input and output file names
