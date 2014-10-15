@@ -295,8 +295,7 @@ void pdpgui_draw_graph_axes (cairo_t *cr,
   layout = pango_cairo_create_layout (cr);
   pangox_layout_set_font_size (layout, 10);
 
-  // draw x axis
-  
+  // draw x axis  
   cairo_move_to (cr, axis_margin_x, (window_height - axis_margin_y));
   cairo_line_to (cr, (window_width - axis_margin_x), (window_height - axis_margin_y));
   cairo_stroke(cr);
@@ -346,11 +345,22 @@ void pdpgui_draw_graph_axes (cairo_t *cr,
 
   }
  
+  // draw x zero axis
+
+  if ((y_min * y_max) < 0) { // check y min and max are either side of zero
+    double zero_height = axis_margin_y + (window_height - 2 * axis_margin_y) * (y_max / (y_max - y_min));
+    cairo_move_to (cr, axis_margin_x, zero_height);
+    cairo_line_to (cr, (window_width - axis_margin_x), zero_height);    
+    cairo_set_line_width (cr, 1);
+    cairo_stroke(cr);
+  }
+
   
+
+
 
   // g_object_unref (layout);
   // cairo_destroy(cr);
-
 }
 
 void pdpgui_plot_vector (cairo_t *cr, 

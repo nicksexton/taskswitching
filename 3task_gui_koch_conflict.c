@@ -24,18 +24,20 @@ void three_task_gui_koch_conflict_plot_conflict_activation (GtkWidget *widget,
   widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
   widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
 
-  pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
-			 0.0, simulation->model->cycle * 1.0, 
-			 -1.0, 1.0);
-
-
-
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
     .x_max = simulation->model->cycle * 1.0, 
-    .y_min = -1.0, 
-    .y_max = 1.0
+    .y_min = -0.5, 
+    .y_max = 0.5
   };
+
+  pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
+			 axes.x_min, axes.x_max, 
+			 axes.y_min, axes.y_max);
+
+
+
+
 
   PdpguiColourRgb plot_conflict[3] = {
     {.r = 0.7, .g = 0.7, .b = 0.0}, // yellow - ie. units 0 and 1
