@@ -2,7 +2,7 @@
 
 ./sim_3_clean.sh
 ./sim_5_clean.sh
-./sim_3_n2rc.py -n 200
+./sim_3_n2rc.py -n 50
 
 mv sim_3_trials.conf sim_5_trials.conf
 mv sim_3_lookup.txt sim_5_lookup.txt
