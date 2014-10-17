@@ -7,3 +7,5 @@ rm sim_4_data.txt
 rm sim_6_data.txt
 rm sim_4_act.txt
 rm sim_6_act.txt
+
+rm sim_6_log.txt
