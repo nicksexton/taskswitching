@@ -3,7 +3,7 @@
 #include <math.h>
 #include "3task_procedure.h" // for init_type typedef
 #include "3task_model_koch.h"
-#include "3task_model_gs.h"
+#include "3task_model_gs.h" // for some shared functions
 #include "3task_koch_default_params.h"
 
 #define ECHO
@@ -323,7 +323,7 @@ bool three_task_model_koch_conflict_parameter_import_ht (gchar* param_name,
 
   else if (!strcmp (param_name, "HEBBIAN_LEARNING_PERSISTENCE")) {
     gint *hebb_persist  = g_malloc(sizeof(int));
-    *hebb_persist = (double) g_ascii_strtoll (param_value, NULL, 10);
+    *hebb_persist = (int) g_ascii_strtoll (param_value, NULL, 10);
     g_hash_table_insert (model_params_ht, "hebb_persist", hebb_persist);
     printf ("parameter %s now %d\n", param_name,
 	    *(int *)g_hash_table_lookup(model_params_ht, "hebb_persist"));    
@@ -1138,7 +1138,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
 
 int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, ThreeTaskSimulation * simulation) {
   // resets activation
-  // does not reset weights
+  // resets weights
   // persist_taskdemand_activation sets proportion of TD activation to carry over to
   // next trial ie. .20 = 20% of activation on previous
 
@@ -1159,6 +1159,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   double initial_activation_conflict_input[3] = {0.0, 0.0, 0.0};
   int i;
   double squashing_param, rsi_scale_param, conflict_squashing_param;
+  hebbian_learning_persistence hebb_persist;
 
   // zero cycle counter
   model->cycle = 0;
@@ -1175,6 +1176,14 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   conflict_input = pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
   topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
 
+
+  /* Reset Weights */
+  // check to make sure this effectively zeroes weights...
+  if (init == BLOCK) {
+    hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, "hebb_persist");
+    printf ("three_task_model_koch_conflict_reinit retrieved Hebbian Persistence parameter, = %d\n", hebb_persist);
+    three_task_model_reset_weights(model, hebb_persist);
+  }
 
   // Get and squash TD activations
   if (init == TRIAL) {

@@ -55,6 +55,9 @@ int three_task_model_update_weights (pdp_model * gs_stroop_model,
 				     double learning_rate, 
 				     hebbian_learning_persistence persist);
 
+int three_task_model_reset_weights (pdp_model * gs_stroop_model,
+				    hebbian_learning_persistence persist);
+
 int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params);
 
 int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskSimulation * simulation);

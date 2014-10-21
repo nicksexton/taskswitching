@@ -273,7 +273,7 @@ bool three_task_model_parameter_import_ht (gchar* param_name, gchar* param_value
 
   else if (!strcmp (param_name, "HEBBIAN_LEARNING_PERSISTENCE")) {
     gint *hebb_persist  = g_malloc(sizeof(int));
-    *hebb_persist = (double) g_ascii_strtoll (param_value, NULL, 10);
+    *hebb_persist = (int) g_ascii_strtoll (param_value, NULL, 10);
     g_hash_table_insert (model_params_ht, "hebb_persist", hebb_persist);
     printf ("parameter %s now %d\n", param_name,
 	    *(int *)g_hash_table_lookup(model_params_ht, "hebb_persist"));    
@@ -1140,7 +1140,7 @@ int three_task_model_dummy_build (pdp_model * model, GHashTable * model_params) 
 
 int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskSimulation * simulation) {
   // resets activation
-  // does not reset weights
+  // now resets weights if init == BLOCK
   // persist_taskdemand_activation sets proportion of TD activation to carry over to
   // next trial ie. .20 = 20% of activation on previous
 
@@ -1159,6 +1159,7 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   double initial_activation_taskdemand[3] = {0.0, 0.0, 0.0};
   int i;
   double squashing_param, rsi_scale_param;
+  hebbian_learning_persistence hebb_persist;
 
   // zero cycle counter
   model->cycle = 0;
@@ -1172,6 +1173,15 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
   output_2 = pdp_model_component_find (model, ID_OUTPUT_2)->layer;
   taskdemand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
   topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
+
+
+  /* Reset Weights */
+  // check to make sure this effectively zeroes weights...
+  if (init == BLOCK) {
+    hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, "hebb_persist");
+    printf ("three_task_model_dummy_reinit retrieved Hebbian Persistence parameter, = %d\n", hebb_persist);
+    three_task_model_reset_weights(model, hebb_persist);
+  }
 
 
   // Get and squash TD activations
@@ -1191,9 +1201,8 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
 
   pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
 
+
   // clear & free history
-
-
   pdp_model_component * comp_i;
   for (comp_i = model->components; comp_i != NULL; comp_i = comp_i->next) {
     pdp_units_free (comp_i->layer->units_initial.next);
@@ -1214,7 +1223,65 @@ int three_task_model_dummy_reinit (pdp_model * model, init_type init, ThreeTaskS
 
 
 
+
   return 0;
+}
+
+int three_task_model_reset_weights (pdp_model * gs_stroop_model,
+				    hebbian_learning_persistence persist) {
+  // resets starting Input-task demand weights
+  // use when reiniting the model (for new block)
+
+  if (persist == OFF) {
+    printf ("\nthree_task_model_reset_weights: persist = OFF, weights not reset\n");
+    return 0;
+  }
+
+  else if (persist == FOREVER) {
+    printf ("\nthree_task_model_reset_weights: persist = FOREVER, weights not reset\n");
+    return 0;
+  }
+
+  else {
+
+    pdp_layer *task_demand;
+    printf ("\nthree_task_model_reset_weights: resetting weights\n");
+
+    double wts_in0_taskdemand_matrix[3][2] = {
+      {0.0, 0.0 },
+      {0.0, 0.0 },
+      {0.0, 0.0 },
+    };
+
+    double wts_in1_taskdemand_matrix[3][2] = {
+      {0.0, 0.0 },
+      {0.0, 0.0 },
+      {0.0, 0.0 },
+    };
+
+    double wts_in2_taskdemand_matrix[3][2] = {
+      {0.0, 0.0 },
+      {0.0, 0.0 },
+      {0.0, 0.0 },
+    };
+
+    task_demand = pdp_model_component_find (gs_stroop_model, ID_TASKDEMAND)->layer;
+
+    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_0)->input_weights, 
+		     3, 2, wts_in0_taskdemand_matrix);
+    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_1)->input_weights, 
+		     3, 2, wts_in1_taskdemand_matrix);
+    pdp_weights_set (pdp_input_find (task_demand, ID_INPUT_2)->input_weights, 
+		     3, 2, wts_in2_taskdemand_matrix);
+
+    pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_0)->input_weights);
+    pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_1)->input_weights);
+    pdp_weights_print (pdp_input_find (task_demand, ID_INPUT_2)->input_weights);
+
+  }
+  return 0;
+
+
 }
 
 
