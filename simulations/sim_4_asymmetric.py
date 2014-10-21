@@ -167,7 +167,7 @@ for run in run_congruency_levels:
                                       run[3], 
                                       trialid, 
                                       trial, 
-                                      stimulus_congruency[run[0]][3])
+                                      stimulus_congruency[run[trial]][3])
 
                         trialid += 1
 
