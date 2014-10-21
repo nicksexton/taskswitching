@@ -103,26 +103,46 @@ data$seq.1 <- factor(data$seq.1)
 #
 #
 ######################### DEBUG STUFF ####################################
-#
+
 # RTs for 1SW condition
 data.1SW <- subset (data, sequence_cond == "1SW")
 by (data.1SW$cycles, data.1SW$seq.3, stat.desc)
-bargraph <- ggplot (data.1SW, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
+
+bargraph <- ggplot (subset(data.1SW, PATH.trial == 2), aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
 bargraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
   ggtitle("Simulation 4: 1SW only")
 
+#look at middle trial
+bargraph <- ggplot (subset(data.1SW, PATH.trial == 1), aes(x=seq.2, y=cycles, group=seq.1, fill=seq.1))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 2)", y = "RT", group = "task (trial 1)") +
+  ggtitle("Simulation 4: 1SW only, middle trial")
+
+
 # RTs for 2SW condition
 data.2SW <- subset (data, sequence_cond == "2SW")
 by (data.2SW$cycles, data.2SW$seq.3, stat.desc)
-bargraph <- ggplot (data.2SW, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
+bargraph <- ggplot (subset(data.2SW, PATH.trial ==1), aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
 bargraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
   ggtitle("Simulation 4: 2SW only")
+
+#look at middle trial
+bargraph <- ggplot (subset(data.2SW, PATH.trial == 1), aes(x=seq.2, y=cycles, group=seq.1, fill=seq.1))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 2)", y = "RT", group = "task (trial 1)") +
+  ggtitle("Simulation 4: 1SW only, middle trial")
+
+
 
 # RTs for ALT condition
 data.ALT <- subset (data, sequence_cond == "ALT")
