@@ -9,6 +9,7 @@
 
 #define MODEL_NAME_MAX_LENGTH 30
 
+// #define DEBUG_NETWORK_ACTIVATION // echo explicit network calculations to console
 
 /* TODO - connect bias nodes as inputs */
 
@@ -408,8 +409,17 @@ int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output,
     /* do the matrix multiplication */
     for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
       
+#ifdef DEBUG_NETWORK_ACTIVATION
+      printf ("[%d]:", i);
+#endif
+
       for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
 	output->net_inputs[i] += input->units_latest->activations[j] * weights->weights[i][j];
+
+#ifdef DEBUG_NETWORK_ACTIVATION
+	printf ("%3.2f x %3.2f + ", input->units_latest->activations[j], weights->weights[i][j]);
+#endif
+
       }
     }
 
@@ -479,10 +489,16 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
 
   /* update the inputs */
   while (input_iterator != NULL) {
-    
+
+#ifdef DEBUG_NETWORK_ACTIVATION
+    printf ("\ninput to layer %d from %d: ", some_layer->id, input_iterator->input_layer->id);
+#endif
+
+
     pdp_calc_input_fromlayer (some_layer->size, some_layer, 
 			      input_iterator->input_layer->size, input_iterator->input_layer, 
 			      input_iterator->input_weights);
+
 	
     input_iterator = input_iterator->next;
   }
