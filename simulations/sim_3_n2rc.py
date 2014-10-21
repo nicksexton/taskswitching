@@ -67,8 +67,6 @@ map_direction = [1, -1]
 
 
 
-# def get_stim_input (congruency, stim, cue):
-#    return trial_congruency_levels[congruency][(stim - cue) % 3]
 
 def set_stimuli (congruency, cue, direction, offset):
 
@@ -78,14 +76,14 @@ def set_stimuli (congruency, cue, direction, offset):
     stimuli[(cue + 1 * direction) % 3] = stimulus_congruency[congruency][1]
     stimuli[(cue + 2 * direction) % 3] = stimulus_congruency[congruency][2]
 
-#    print "cue: " + str(cue) + "; direction: " + str(direction) + "; offset: " + str(offset) + "; - [" + ",".join(str(x) for x in stimuli) + "]"
+    print "cue: " + str(cue) + "; direction: " + str(direction) + "; offset: " + str(offset) + "; - [" + ",".join(str(x) for x in stimuli) + "]" + "; congruency: " + stimulus_congruency[congruency][3] 
 
 
 # add flip
     stim_flip = random.randint (0, 1)
     stimuli = [((x + stim_flip) % 2) for x in stimuli]
 
-#    print "flipped: [" + ",".join(str(x) for x in stimuli) + "]"
+    print "flipped: [" + ",".join(str(x) for x in stimuli) + "]"
 
 
     return stimuli
@@ -152,7 +150,7 @@ for run in run_congruency_levels:
                         stim_inputs = set_stimuli (run[trial], cue, direction, offset)
                 
                         write_trial (block_name + "_" + str(block), 
-                                     trialid+0, 
+                                     trialid, 
                                      cue,
                                      stim_inputs[0],
                                      stim_inputs[1],
@@ -164,7 +162,7 @@ for run in run_congruency_levels:
                                       run[3], 
                                       trialid, 
                                       trial, 
-                                      stimulus_congruency[run[0]][3])
+                                      stimulus_congruency[run[trial]][3])
 
                         trialid += 1
 
