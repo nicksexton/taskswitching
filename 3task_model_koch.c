@@ -8,7 +8,6 @@
 
 #define ECHO
 
-
 void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params_table) {
 
   double * activation_max = g_malloc(sizeof(double));
@@ -579,6 +578,9 @@ int three_task_model_koch_conflict_run (pdp_model * model,
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_CONFLICT)->layer);
 
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer);
+
 #endif
 
     three_task_model_koch_fprintf_current_state (model, path, simulation->datafile_act); // print activations to log file
@@ -639,6 +641,8 @@ void three_task_model_koch_fprintf_current_state (pdp_model *model, gchar *path,
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer, fp_act);
   pdp_layer_fprintf_current_output (
 				    pdp_model_component_find (model, ID_CONFLICT)->layer, fp_act);
+  pdp_layer_fprintf_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer, fp_act);
     fprintf (fp_act, "\n");
     
     return;

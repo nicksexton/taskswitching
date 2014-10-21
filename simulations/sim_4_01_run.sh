@@ -9,7 +9,7 @@ rm sim_4_act.txt sim_4_01_act.txt
 rm sim_4_01_log.txt
 
 
-./sim_4_asymmetric.py -n 200
+./sim_4_asymmetric.py -n 800
 
 ../3task_basic -t sim_4_trials.conf -m sim_4_01_model_symmetric.conf > sim_4_01_log.txt
 
