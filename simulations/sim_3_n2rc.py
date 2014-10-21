@@ -76,14 +76,14 @@ def set_stimuli (congruency, cue, direction, offset):
     stimuli[(cue + 1 * direction) % 3] = stimulus_congruency[congruency][1]
     stimuli[(cue + 2 * direction) % 3] = stimulus_congruency[congruency][2]
 
-    print "cue: " + str(cue) + "; direction: " + str(direction) + "; offset: " + str(offset) + "; - [" + ",".join(str(x) for x in stimuli) + "]" + "; congruency: " + stimulus_congruency[congruency][3] 
+#    print "cue: " + str(cue) + "; direction: " + str(direction) + "; offset: " + str(offset) + "; - [" + ",".join(str(x) for x in stimuli) + "]" + "; congruency: " + stimulus_congruency[congruency][3] 
 
 
 # add flip
     stim_flip = random.randint (0, 1)
     stimuli = [((x + stim_flip) % 2) for x in stimuli]
 
-    print "flipped: [" + ",".join(str(x) for x in stimuli) + "]"
+#    print "flipped: [" + ",".join(str(x) for x in stimuli) + "]"
 
 
     return stimuli
