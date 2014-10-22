@@ -239,6 +239,14 @@ imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png")
 ggsave(imageFile)
 
 
+# descriptive statistics, tasks 0 (easy) and 1 (intermediate)
+data.task01.1 <- subset(data.task01, data.task01$seq.3==1) # harder task (1)
+by(data.task01.1$cycles, data.task01.1$sequence_cond, stat.desc)
+
+data.task01.0 <- subset(data.task01, data.task01$seq.3==0) # easier task (0)
+by(data.task01.0$cycles, data.task01.0$sequence_cond, stat.desc)
+
+
 # descriptive statistics, tasks 0 (easy) and 2 (hard)
 data.task02.2 <- subset(data.task02, data.task02$seq.3==2) # hard task (2)
 by(data.task02.2$cycles, data.task02.2$sequence_cond, stat.desc)
@@ -250,14 +258,38 @@ by(data.task02.0$cycles, data.task02.0$sequence_cond, stat.desc)
 data.task12.2 <- subset(data.task12, data.task12$seq.3==2) # hard task (2)
 by(data.task12.2$cycles, data.task12.2$sequence_cond, stat.desc)
 
-data.task12.1 <- subset(data.task12, data.task12$seq.3==1) # easy task (0)
+data.task12.1 <- subset(data.task12, data.task12$seq.3==1) # easy task (1)
 by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
 
 
 
 ######################################### Stat Tests ######################################
 
-############## 0 and 2 ##################
+
+############## FOR SYMMETRIC SWITCHING ###################
+
+data.aggregate.trial3 <-subset (data, PATH.trial==2)
+by (data.aggregate.trial3$cycles, data.aggregate.trial3$sequence_cond, stat.desc) # RT on trial 3 only
+
+# t-test for switch cost
+model.aggregate.trial3.switchcost <- t.test (cycles ~ sequence_cond,
+                                             data = subset (data.aggregate.trial3,
+                                                 sequence_cond == "0SW" | sequence_cond == "1SW"))
+model.aggregate.trial3.switchcost
+
+
+# t-test for n-2 repetition cost
+model.aggregate.trial3.n2rc <- t.test (cycles ~ sequence_cond,
+                                             data = subset (data.aggregate.trial3,
+                                                 sequence_cond == "2SW" | sequence_cond == "ALT"))
+model.aggregate.trial3.n2rc
+
+
+
+############## FOR ASYMMETRIC SWITCHING ##################
+
+
+############## 0 and 1 ##################
 
 # Switch cost - assessing whether switch costs are reversed
 # 2X2 ANOVA:
@@ -267,12 +299,33 @@ by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
 #    main effect of seq.3 (ie., different RTs for different tasks)
 #    seq.3 x sequence_cond interaction: signf. asymmetric switch cost
 
-model.task02 <- aov(cycles ~ sequence_cond +
+
+# switch cost
+model.task01.sc <- aov(cycles ~ sequence_cond +
                        seq.3 + 
                        sequence_cond:seq.3,
-                       data = data.task02)
-anova(model.task02)
+                       data = subset(data.task01, sequence_cond == "0SW" | sequence_cond == "1SW"))
+anova(model.task01.sc)
 
+#n2 repetition cost
+model.task01.n2rc <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task01, sequence_cond == "ALT" | sequence_cond == "2SW"))
+anova(model.task01.n2rc)
+
+# post-hoc test: is there a significant n-2 repetition cost in each condition
+# task 0
+model.task01.n2rc.0 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task01, seq.3 == 0),
+                               sequence_cond == "2SW" | sequence_cond == "ALT")
+model.task01.n2rc.0
+
+# task 1
+model.task01.n2rc.1 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task01, seq.3 == 1),
+                               sequence_cond == "2SW" | sequence_cond == "ALT")
+model.task01.n2rc.1
 
 
 
