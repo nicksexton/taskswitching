@@ -9,7 +9,7 @@
 
 #define MODEL_NAME_MAX_LENGTH 30
 
-#define DEBUG_NETWORK_ACTIVATION // echo explicit network calculations to console
+// #define DEBUG_NETWORK_ACTIVATION // echo explicit network calculations to console
 
 /* TODO - connect bias nodes as inputs */
 
