@@ -75,6 +75,14 @@ data <- subset (data,
         !((trial_pos == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
 
 
+# debug graph: for symmetric task difficulty, expect RTs to be equal
+
+bargraph <- ggplot (subset(data, trial_pos == 2),  aes(x=cue, y=cycles, group=cue, fill=cue))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 3)", y = "RT") +
+  ggtitle("Simulation 3: overall trial 3 RTs (debug)")
 
 
 

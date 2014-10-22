@@ -27,8 +27,8 @@ void three_task_gui_koch_conflict_plot_conflict_activation (GtkWidget *widget,
   PdpguiAxisDimensions axes = { 
     .x_min = 0.0, 
     .x_max = simulation->model->cycle * 1.0, 
-    .y_min = -0.5, 
-    .y_max = 0.5
+    .y_min = -1.0, 
+    .y_max = 1.0
   };
 
   pdpgui_draw_graph_axes(cr, widget_width, widget_height, 10, 10, 
