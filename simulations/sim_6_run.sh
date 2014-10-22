@@ -1,7 +1,18 @@
 #!/bin/bash
 
-./sim_4_clean.sh
-./sim_6_clean.sh
+# ./sim_4_clean.sh
+# ./sim_6_clean.sh
+
+rm sim_4_trials.conf
+rm sim_6_trials.conf
+rm sim_4_lookup.txt
+rm sim_6_lookup.txt
+rm sim_4_data.txt
+rm sim_6_data.txt
+rm sim_4_act.txt
+rm sim_6_act.txt
+
+rm sim_6_log.txt
 
 ./sim_4_asymmetric.py -n 250
 mv sim_4_trials.conf sim_6_trials.conf

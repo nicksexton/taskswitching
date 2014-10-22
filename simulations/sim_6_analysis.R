@@ -104,6 +104,17 @@ data$seq.1 <- factor(data$seq.1)
 #
 ######################### DEBUG STUFF ####################################
 
+# 0SW
+data.0SW <- subset (data, sequence_cond == "0SW")
+bargraph <- ggplot (subset(data.0SW, PATH.trial == 2), aes(x=seq.3, y=cycles, group=seq.1, fill=seq.1))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trials 2 & 3)", y = "RT", group = "task (trial 1)") +
+  ggtitle("Simulation 4: 0SW only")
+
+
+
 # RTs for 1SW condition
 data.1SW <- subset (data, sequence_cond == "1SW")
 by (data.1SW$cycles, data.1SW$seq.3, stat.desc)
@@ -124,7 +135,7 @@ bargraph +
   ggtitle("Simulation 4: 1SW only, middle trial")
 
 
-# RTs for 2SW condition
+#================ RTs for 2SW condition
 data.2SW <- subset (data, sequence_cond == "2SW")
 by (data.2SW$cycles, data.2SW$seq.3, stat.desc)
 bargraph <- ggplot (subset(data.2SW, PATH.trial ==1), aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
@@ -140,11 +151,19 @@ bargraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Task (trial 2)", y = "RT", group = "task (trial 1)") +
-  ggtitle("Simulation 4: 1SW only, middle trial")
+  ggtitle("Simulation 4: 2SW only, middle trial")
+
+# Look at initial trial (broken out by task.sequence
+bargraph <- ggplot (subset(data.2SW, PATH.trial == 0), aes(x=seq.1, y=cycles, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Task (trial 0)", y = "RT", group = "sequence") +
+  ggtitle("Simulation 4: 2SW only, initial trial")
 
 
 
-# RTs for ALT condition
+#=============== RTs for ALT condition
 data.ALT <- subset (data, sequence_cond == "ALT")
 by (data.ALT$cycles, data.ALT$seq.3, stat.desc)
 bargraph <- ggplot (data.ALT, aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
