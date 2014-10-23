@@ -69,6 +69,24 @@ plotdata.summary.sd <- ddply (plotdata.subset,
                            taskdemand.2 = sd(taskdemand.2),
                            layer = "Task Demand")
 
+
+plotdata.conflict.summary.mean <- ddply (plotdata.subset,
+                           c("cycle"),
+                           summarise,
+                           conflict.01 = mean(conflict.01),
+                           conflict.12 = mean(conflict.12),
+                           conflict.02 = mean(conflict.02),
+                           layer = "Conflict") 
+plotdata.conflict.summary.sd <- ddply (plotdata.subset,
+                           c("cycle"),
+                           summarise,
+                           conflict.01 = sd(conflict.01),
+                           conflict.12 = sd(conflict.12),
+                           conflict.02 = sd(conflict.02),
+                           layer = "Conflict")
+
+
+
 plotdata.long.mean <- melt (plotdata.summary.mean,
                        id.vars = c("cycle", "layer"),
                        measure.vars = c("taskdemand.0", "taskdemand.1", "taskdemand.2"),
@@ -80,13 +98,29 @@ plotdata.long.sd <- melt (plotdata.summary.sd,
                        variable.name = "unit",
                        value.name = "sd")
 
+plotdata.conflict.long.mean <- melt (plotdata.conflict.summary.mean,
+                       id.vars = c("cycle", "layer"),
+                       measure.vars = c("conflict.01", "conflict.12", "conflict.02"),
+                       variable.name = "unit",
+                       value.name = "activation")
+plotdata.conflict.long.sd <- melt (plotdata.conflict.summary.sd,
+                       id.vars = c("cycle", "layer"),
+                       measure.vars = c("conflict.01", "conflict.12", "conflict.02"),                                
+                       variable.name = "unit",
+                       value.name = "sd")
+
+plotdata.long.mean <- rbind (plotdata.long.mean, plotdata.conflict.long.mean)
+plotdata.long.sd <- rbind (plotdata.long.sd, plotdata.conflict.long.sd)
+
+
+
 plotdata <- merge (plotdata.long.mean, plotdata.long.sd, 
                    by=c("cycle", "unit", "layer"), sort=FALSE)
 
 
 act.plot <- ggplot(plotdata,
                    aes(x=cycle, y=activation, colour=unit)) + geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.1, fill=unit)) + geom_line()  
-act.plot
+act.plot + facet_grid (layer ~ .)
 
 
 
