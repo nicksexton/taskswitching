@@ -333,11 +333,61 @@ model.task01.n2rc.1
 
 
 
-
 ############## 1 and 2 ##################
 
-model.task12 <- aov(cycles ~ sequence_cond +
+# switch cost
+model.task12.sc <- aov(cycles ~ sequence_cond +
                        seq.3 + 
                        sequence_cond:seq.3,
-                       data = data.task12)
-anova(model.task12)
+                       data = subset(data.task12, sequence_cond == "0SW" | sequence_cond == "1SW"))
+anova(model.task12.sc)
+
+#n2 repetition cost
+model.task12.n2rc <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task12, sequence_cond == "ALT" | sequence_cond == "2SW"))
+anova(model.task12.n2rc)
+
+# post-hoc test: is there a significant n-2 repetition cost in each condition
+# task 1
+model.task12.n2rc.1 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task12, seq.3 == 1),
+                               sequence_cond == "2SW" | sequence_cond == "ALT")
+model.task12.n2rc.1
+
+# task 2
+model.task12.n2rc.2 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task12, seq.3 == 2),
+                               sequence_cond == "2SW" | sequence_cond == "ALT")
+model.task12.n2rc.2
+
+############## 0 and 2 ##################
+
+# switch cost
+model.task02.sc <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task02, sequence_cond == "0SW" | sequence_cond == "1SW"))
+anova(model.task02.sc)
+
+#n2 repetition cost
+model.task02.n2rc <- aov(cycles ~ sequence_cond +
+                       seq.3 + 
+                       sequence_cond:seq.3,
+                       data = subset(data.task02, sequence_cond == "ALT" | sequence_cond == "2SW"))
+anova(model.task02.n2rc)
+
+# post-hoc test: is there a significant n-2 repetition cost in each condition
+# task 1
+model.task02.n2rc.0 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task02, seq.3 == 0),
+                               sequence_cond == "2SW" | sequence_cond == "ALT")
+model.task02.n2rc.0
+
+# task 2
+model.task02.n2rc.2 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task02, seq.3 == 2),
+                               sequence_cond == "2SW" | sequence_cond == "ALT")
+model.task02.n2rc.2
+
