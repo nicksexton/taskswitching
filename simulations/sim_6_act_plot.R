@@ -45,6 +45,8 @@ activations <- merge(activations, lookuptable, by="trialid", sort=FALSE)
 
 # ========================== segment trials ========================================
 
+
+
 plotdata.subset <- subset(activations,
                           correct == TRUE &
                           sequence == "0/1/1" &
@@ -54,20 +56,20 @@ plotdata.subset <- subset(activations,
 
 
 # summarise data
-plotdata.summary.mean <- ddply (plotdata.subset,
+plotdata.taskdemand.summary.mean <- ddply (plotdata.subset,
                            c("cycle"),
                            summarise,
                            taskdemand.0 = mean(taskdemand.0),
                            taskdemand.1 = mean(taskdemand.1),
                            taskdemand.2 = mean(taskdemand.2),
-                           layer = "Task Demand") 
-plotdata.summary.sd <- ddply (plotdata.subset,
+                           layer = "2. Task Demand") 
+plotdata.taskdemand.summary.sd <- ddply (plotdata.subset,
                            c("cycle"),
                            summarise,
                            taskdemand.0 = sd(taskdemand.0),
                            taskdemand.1 = sd(taskdemand.1),
                            taskdemand.2 = sd(taskdemand.2),
-                           layer = "Task Demand")
+                           layer = "2. Task Demand")
 
 
 plotdata.conflict.summary.mean <- ddply (plotdata.subset,
@@ -76,23 +78,42 @@ plotdata.conflict.summary.mean <- ddply (plotdata.subset,
                            conflict.01 = mean(conflict.01),
                            conflict.12 = mean(conflict.12),
                            conflict.02 = mean(conflict.02),
-                           layer = "Conflict") 
+                           layer = "1. Conflict") 
 plotdata.conflict.summary.sd <- ddply (plotdata.subset,
                            c("cycle"),
                            summarise,
                            conflict.01 = sd(conflict.01),
                            conflict.12 = sd(conflict.12),
                            conflict.02 = sd(conflict.02),
-                           layer = "Conflict")
+                           layer = "1. Conflict")
 
+plotdata.outputs.summary.mean <- ddply (plotdata.subset,
+                           c("cycle"),
+                           summarise,
+                           output.0.0 = mean(output.0.0),
+                           output.0.1 = mean(output.0.1),
+                           output.1.0 = mean(output.1.0),
+                           output.1.1 = mean(output.1.1),
+                           output.2.0 = mean(output.2.0),
+                           output.2.1 = mean(output.2.1),
+                           layer = "3. Output") 
+plotdata.outputs.summary.sd <- ddply (plotdata.subset,
+                           c("cycle"),
+                           summarise,
+                           output.0.0 = sd(output.0.0),
+                           output.0.1 = sd(output.0.1),
+                           output.1.0 = sd(output.1.0),
+                           output.1.1 = sd(output.1.1),
+                           output.2.0 = sd(output.2.0),
+                           output.2.1 = sd(output.2.1),
+                           layer = "3. Output")
 
-
-plotdata.long.mean <- melt (plotdata.summary.mean,
+plotdata.taskdemand.long.mean <- melt (plotdata.taskdemand.summary.mean,
                        id.vars = c("cycle", "layer"),
                        measure.vars = c("taskdemand.0", "taskdemand.1", "taskdemand.2"),
                        variable.name = "unit",
                        value.name = "activation")
-plotdata.long.sd <- melt (plotdata.summary.sd,
+plotdata.taskdemand.long.sd <- melt (plotdata.taskdemand.summary.sd,
                        id.vars = c("cycle", "layer"),
                        measure.vars = c("taskdemand.0", "taskdemand.1", "taskdemand.2"),
                        variable.name = "unit",
@@ -109,8 +130,24 @@ plotdata.conflict.long.sd <- melt (plotdata.conflict.summary.sd,
                        variable.name = "unit",
                        value.name = "sd")
 
-plotdata.long.mean <- rbind (plotdata.long.mean, plotdata.conflict.long.mean)
-plotdata.long.sd <- rbind (plotdata.long.sd, plotdata.conflict.long.sd)
+plotdata.outputs.long.mean <- melt (plotdata.outputs.summary.mean,
+                       id.vars = c("cycle", "layer"),
+                       measure.vars = c("output.0.0", "output.0.1",
+                         "output.1.0", "output.1.1",
+                         "output.2.0", "output.2.1"),
+                       variable.name = "unit",
+                       value.name = "activation")
+plotdata.outputs.long.sd <- melt (plotdata.outputs.summary.sd,
+                       id.vars = c("cycle", "layer"),
+                       measure.vars = c("output.0.0", "output.0.1",
+                         "output.1.0", "output.1.1",
+                         "output.2.0", "output.2.1"),
+                       variable.name = "unit",
+                       value.name = "sd")
+
+
+plotdata.long.mean <- rbind (plotdata.taskdemand.long.mean, plotdata.conflict.long.mean, plotdata.outputs.long.mean)
+plotdata.long.sd <- rbind (plotdata.taskdemand.long.sd, plotdata.conflict.long.sd, plotdata.outputs.long.sd)
 
 
 
