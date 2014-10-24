@@ -188,9 +188,9 @@ colours.scale <- c("#CC6666", # light red
                    "#FF0000", # red
                    "#00BB00", # green
                    "#0000FF", # blue
-                   "#444400", # yellow
-                   "#004444", # cyan
-                   "#440044") # magenta
+                   "#BBBB00", # yellow
+                   "#00BBBB", # cyan
+                   "#BB00BB") # magenta
                    
 plotdata.raw <- subset(activations,
                    correct == TRUE &
