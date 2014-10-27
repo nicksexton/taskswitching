@@ -4,6 +4,7 @@
 rm (list = ls())
 library (plyr) #for ddply
 library (reshape2) # for melt
+library (ggplot2)
 
 activations.file = "sim_6_act_small.txt"
 data.file = "sim_6_data_small.txt"
@@ -149,7 +150,7 @@ prepare.data <- function (plotdata.subset) {
   plotdata <- merge (plotdata.long.mean, plotdata.long.sd, 
                      by=c("cycle", "unit", "layer", "trial_pos"), sort=FALSE)
 
-  rbind (df1, df2, df3, df4)
+#  rbind (df1, df2, df3, df4) #??
   
   return (plotdata)
 
@@ -191,7 +192,8 @@ colours.scale <- c("#CC6666", # light red
                    "#BBBB00", # yellow
                    "#00BBBB", # cyan
                    "#BB00BB") # magenta
-                   
+
+
 plotdata.raw <- subset(activations,
                    correct == TRUE &
                    sequence == "2/0/2" &
