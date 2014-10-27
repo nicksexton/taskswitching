@@ -4,7 +4,8 @@
 rm (list = ls())
 library (plyr) #for ddply
 library (reshape2) # for melt
-library (ggplot2)
+library (ggplot2) # for ggplot2
+library(pastecs) # for descriptive statistics
 
 activations.file = "sim_6_act_small.txt"
 data.file = "sim_6_data_small.txt"
@@ -30,9 +31,6 @@ data.raw <- read.delim(data.file, header=FALSE, sep=c("", ":"), col.names=labels
 data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
                                     ifelse (cue == 1, stim_1 == response %% 2,
                                     ifelse (cue == 2, stim_2 == response %% 2, NA))))
-#
-
-activations <- merge (activations.raw, data.raw[, c("trialpath", "trialid", "RT", "response", "correct")], by.x = c("path"), by.y = c("trialpath"), sort=FALSE)
 
 
 # Join lookup table with simulated data
@@ -40,7 +38,43 @@ labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruen
 lookuptable = read.delim(lookup.file, header = FALSE, col.names=labels.lookup)
 lookuptable$trial_pos <- factor (lookuptable$trial_pos)
 
-activations <- merge(activations, lookuptable, by="trialid", sort=FALSE)
+data <- merge(data.raw, lookuptable, by="trialid", sort=FALSE)
+
+                                        # filter data 
+
+#filters data for outliers (multiplier * SD)
+
+filter.criteria.sd = 3 # number of SDs to filter data
+
+  descriptives <- by(data$RT, data$trial_pos, stat.desc)
+                                        # filter by trial position (no point filtering by task for symmetric
+  data <- subset (data,
+                  !((trial_pos == 0 ) & RT > descriptives$"0"[9] + filter.criteria.sd * descriptives$"0"[13]))
+  data <- subset (data,
+                  !((trial_pos == 1 ) & RT > descriptives$"1"[9] + filter.criteria.sd * descriptives$"1"[13]))
+  data <- subset (data,
+                  !((trial_pos == 2 ) & RT > descriptives$"2"[9] + filter.criteria.sd * descriptives$"2"[13]))
+#
+  data <- subset (data,
+                  !((trial_pos == 0 ) & RT < descriptives$"0"[9] - filter.criteria.sd * descriptives$"0"[13]))
+  data <- subset (data,
+                  !((trial_pos == 1 ) & RT < descriptives$"1"[9] - filter.criteria.sd * descriptives$"1"[13]))
+  data <- subset (data,
+                  !((trial_pos == 2 ) & RT < descriptives$"2"[9] - filter.criteria.sd * descriptives$"2"[13]))
+
+
+
+# filter activations for trialids now contained in data
+activations.filtered <- activations.raw[which(activations.raw$path %in% data$trialpath),]
+
+# merge
+activations <- merge (activations.filtered, data[, c("trialpath", "trialid", "RT", "response", "correct", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial")], by.x = c("path"), by.y = c("trialpath"), sort=FALSE)
+
+
+
+
+
+
 
 # ========================== Function to organise data for plot ================================
 
@@ -150,16 +184,11 @@ prepare.data <- function (plotdata.subset) {
   plotdata <- merge (plotdata.long.mean, plotdata.long.sd, 
                      by=c("cycle", "unit", "layer", "trial_pos"), sort=FALSE)
 
-#  rbind (df1, df2, df3, df4) #??
+
+ #  rbind (df1, df2, df3, df4) #??
+
+  # prepare columns to allow fancy plotting
   
-  return (plotdata)
-
-}
-
-
-# ========================== segment trials ========================================
-
-
   unit <- c("output.0.0", "output.1.0", "output.2.0")
   task <- as.factor(c("0.0", "1.0", "2.0"))
   df1 <- data.frame(unit, task)
@@ -180,40 +209,101 @@ colours <- c("yellow", "cyan", "magenta")
   
 unit.colours <- rbind (df1, df2, df3, df4)
 
-colours.scale <- c("#CC6666", # light red
-                   "#66BB66", # light green
-                   "#6666CC", # light blue
-                   "#770000", # dark red
-                   "#007700", # dark green
-                   "#000077", # dark blue
-                   "#FF0000", # red
-                   "#00BB00", # green
-                   "#0000FF", # blue
-                   "#BBBB00", # yellow
-                   "#00BBBB", # cyan
-                   "#BB00BB") # magenta
+  plotdata <- merge (plotdata, unit.colours, by = "unit")
+  
+  return (plotdata)
+
+}
 
 
-plotdata.raw <- subset(activations,
+
+
+plot.triple.activation <- function (data.subset, title) {
+
+
+  colours.scale <- c("#CC6666", # light red
+                     "#66BB66", # light green
+                     "#6666CC", # light blue
+                     "#770000", # dark red
+                     "#007700", # dark green
+                     "#000077", # dark blue
+                     "#FF0000", # red
+                     "#00BB00", # green
+                     "#0000FF", # blue
+                     "#BBBB00", # yellow
+                     "#00BBBB", # cyan
+                     "#BB00BB") # magenta
+
+
+  plotdata <- prepare.data (data.subset)
+
+  act.plot <- ggplot(plotdata,
+                   aes(x=cycle, y=activation, colour=task)) +
+  geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
+  geom_line() +
+  scale_fill_manual(values=colours.scale) +
+  scale_colour_manual(values=colours.scale) +
+  ggtitle (title) +
+  facet_grid (layer ~ trial_pos)
+
+  return (act.plot)
+  
+}
+
+
+
+
+# ========================== segment trials ========================================
+
+imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_6")
+
+symmetric.2SW <- subset(activations,
                    correct == TRUE &
-                   sequence == "2/0/2" &
-                   # trial_pos == 0 &
+                   sequence == "2/1/0" &
+                   (response %% 2) == 0
+                   )
+#
+symmetric.ALT <- subset(activations,
+                   correct == TRUE &
+                   sequence == "0/1/0" &
+                   (response %% 2) == 0
+                   )
+#
+symmetric.0SW <- subset(activations,
+                   correct == TRUE &
+                   sequence == "1/0/0" &
+                   (response %% 2) == 0
+                   )
+#
+symmetric.1SW <- subset(activations,
+                   correct == TRUE &
+                   sequence == "1/1/0" &
                    (response %% 2) == 0
                    )
 
-plotdata <- prepare.data (plotdata.raw)
-plotdata <- merge (plotdata, unit.colours, by = "unit")
-
-act.plot <- ggplot(plotdata,
-                   aes(x=cycle, y=activation, colour=task)) +
-#  geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
-  geom_line() +
-  scale_fill_manual(values=colours.scale) +
-  scale_colour_manual(values=colours.scale)
-#  scale_fill_manual(values=c("red", "green", "blue", "yellow", "cyan", "magenta")) +
-#  scale_colour_manual(values=c("red", "green", "blue", "yellow", "cyan", "magenta"))
+plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2-Switch (CBA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_2SW.png") 
+ggsave(imageFile)
 #
-act.plot + facet_grid (layer ~ trial_pos) 
+plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Symmetric tasks, Alt-Switch (ABA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_ALT.png") 
+ggsave(imageFile)
+#
+plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "Symmetric tasks, 1-Switch (BBA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_1SW.png") 
+ggsave(imageFile)
+#
+plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "Symmetric tasks, 0-Switch (BAA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_0SW.png") 
+ggsave(imageFile)
+
+
+plot.symmetric.2SW
+plot.symmetric.ALT
+
+
+my.plot
+
 
 
                                                                                                                                           
