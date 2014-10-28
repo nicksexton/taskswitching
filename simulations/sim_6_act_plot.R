@@ -44,23 +44,23 @@ data <- merge(data.raw, lookuptable, by="trialid", sort=FALSE)
 
 #filters data for outliers (multiplier * SD)
 
-filter.criteria.sd = 3 # number of SDs to filter data
-
-  descriptives <- by(data$RT, data$trial_pos, stat.desc)
-                                        # filter by trial position (no point filtering by task for symmetric
-  data <- subset (data,
-                  !((trial_pos == 0 ) & RT > descriptives$"0"[9] + filter.criteria.sd * descriptives$"0"[13]))
-  data <- subset (data,
-                  !((trial_pos == 1 ) & RT > descriptives$"1"[9] + filter.criteria.sd * descriptives$"1"[13]))
-  data <- subset (data,
-                  !((trial_pos == 2 ) & RT > descriptives$"2"[9] + filter.criteria.sd * descriptives$"2"[13]))
+#filter.criteria.sd = 3 # number of SDs to filter data
 #
-  data <- subset (data,
-                  !((trial_pos == 0 ) & RT < descriptives$"0"[9] - filter.criteria.sd * descriptives$"0"[13]))
-  data <- subset (data,
-                  !((trial_pos == 1 ) & RT < descriptives$"1"[9] - filter.criteria.sd * descriptives$"1"[13]))
-  data <- subset (data,
-                  !((trial_pos == 2 ) & RT < descriptives$"2"[9] - filter.criteria.sd * descriptives$"2"[13]))
+#  descriptives <- by(data$RT, data$trial_pos, stat.desc)
+#                                        # filter by trial position (no point filtering by task for symmetric
+#  data <- subset (data,
+#                  !((trial_pos == 0 ) & RT > descriptives$"0"[9] + filter.criteria.sd * descriptives$"0"[13]))
+#  data <- subset (data,
+#                  !((trial_pos == 1 ) & RT > descriptives$"1"[9] + filter.criteria.sd * descriptives$"1"[13]))
+#  data <- subset (data,
+#                  !((trial_pos == 2 ) & RT > descriptives$"2"[9] + filter.criteria.sd * descriptives$"2"[13]))
+#
+#  data <- subset (data,
+#                  !((trial_pos == 0 ) & RT < descriptives$"0"[9] - filter.criteria.sd * descriptives$"0"[13]))
+#  data <- subset (data,
+#                  !((trial_pos == 1 ) & RT < descriptives$"1"[9] - filter.criteria.sd * descriptives$"1"[13]))
+#  data <- subset (data,
+#                  !((trial_pos == 2 ) & RT < descriptives$"2"[9] - filter.criteria.sd * descriptives$"2"[13]))
 
 
 
@@ -72,8 +72,27 @@ activations <- merge (activations.filtered, data[, c("trialpath", "trialid", "RT
 
 
 
+# trims subsetted data for outliers (top and bottom deciles)
+filter.data.decile <- function (data) {
+
+  decile <- function(x) quantile(x, prob=seq(0, 1, length=11), type=5, names=FALSE) 
+
+  data.deciles <- by (data$RT, data$trial_pos, decile)
 
 
+  filter <- function(x, n) subset(x, !((trial_pos == toString(n)) &
+                                       (x$RT < data.deciles[[toString(n)]][2] |
+                                         x$RT >= data.deciles[[toString(n)]][10])))
+
+  data.filtered <- filter (data, 0)
+  data.filtered <- filter (data.filtered, 1)
+  data.filtered <- filter (data.filtered, 2)
+
+  
+  return (data.filtered)
+
+}
+  
 
 
 # ========================== Function to organise data for plot ================================
@@ -294,19 +313,24 @@ symmetric.1SW <- subset(activations,
                    (response %% 2) == 0
                    )
 
+
+symmetric.2SW <- filter.data.decile (symmetric.2SW)
 plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2-Switch (CBA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_2SW.png") 
 ggsave(imageFile)
 plot.symmetric.2SW
-                                        
+
+symmetric.ALT <- filter.data.decile (symmetric.ALT)
 plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Symmetric tasks, Alt-Switch (ABA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_ALT.png") 
 ggsave(imageFile)
 
+symmetric.1SW <- filter.data.decile (symmetric.1SW)
 plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "Symmetric tasks, 1-Switch (BBA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_1SW.png") 
 ggsave(imageFile)
 
+symmetric.0SW <- filter.data.decile (symmetric.0SW)
 plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "Symmetric tasks, 0-Switch (BAA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_0SW.png") 
 ggsave(imageFile)
