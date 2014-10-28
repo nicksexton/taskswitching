@@ -258,12 +258,14 @@ plot.triple.activation <- function (data.subset, title) {
 
   unique.trials <- data.frame (unique (data.subset[c("trialid", "trial_pos", "RT")]))
   quantiles <- by (unique.trials$RT, unique.trials$trial_pos, quantile)
-# calculate median and IQR for each trial_pos  
+
   stats.plot <- data.frame (trial_pos =
                             factor(c(0, 1, 2)),
                             median = c(quantiles[["0"]][[3]], quantiles[["1"]][[3]], quantiles[["2"]][[3]]),
                             qu = c(quantiles[["0"]][[4]], quantiles[["1"]][[4]], quantiles[["2"]][[4]]),
                             ql = c(quantiles[["0"]][[2]], quantiles[["1"]][[2]], quantiles[["2"]][[2]]))
+  
+
   
   
   act.plot <- ggplot(plotdata,
@@ -313,6 +315,10 @@ symmetric.1SW <- subset(activations,
                    (response %% 2) == 0
                    )
 
+
+# Note that current code plots the median/IQR AFTER trials have been filtered for top/bottom decile
+# Should add filtering into code for plot.triple.activation() so that median/IQR is calculated before data filtered
+#
 
 symmetric.2SW <- filter.data.decile (symmetric.2SW)
 plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2-Switch (CBA)")
