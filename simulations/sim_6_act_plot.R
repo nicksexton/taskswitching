@@ -237,14 +237,29 @@ plot.triple.activation <- function (data.subset, title) {
 
   plotdata <- prepare.data (data.subset)
 
+  unique.trials <- data.frame (unique (data.subset[c("trialid", "trial_pos", "RT")]))
+  descriptives <- by (unique.trials$RT, unique.trials$trial_pos, stat.desc)
+  means.plot <- data.frame (trial_pos = factor(c(0, 1, 2)),
+                            mean = c(descriptives$"0"[9], descriptives$"1"[9], descriptives$"2"[9]),
+                            xmax = c(descriptives$"0"[9] + descriptives$"0"[13],
+                              descriptives$"1"[9] + descriptives$"1"[13],
+                              descriptives$"2"[9] + descriptives$"2"[13]),
+                            xmin = c(descriptives$"0"[9] - descriptives$"0"[13],
+                              descriptives$"1"[9] - descriptives$"1"[13],
+                              descriptives$"2"[9] - descriptives$"2"[13]))
+  
+  
   act.plot <- ggplot(plotdata,
                    aes(x=cycle, y=activation, colour=task)) +
-  geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
-  geom_line() +
-  scale_fill_manual(values=colours.scale) +
-  scale_colour_manual(values=colours.scale) +
-  ggtitle (title) +
-  facet_grid (layer ~ trial_pos)
+                     facet_grid (layer ~ trial_pos) +
+                       geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
+                         geom_line() +
+                           scale_fill_manual(values=colours.scale) +
+                             scale_colour_manual(values=colours.scale) +
+                               ggtitle (title) +
+                                 geom_vline(aes(xintercept=mean), data = means.plot) + # plot mean
+                                   geom_vline(aes(xintercept=xmax), data = means.plot) + # plot mean + 1SD
+                                     geom_vline(aes(xintercept=xmin), data = means.plot) # plot mean - 1SD
 
   return (act.plot)
   
@@ -262,7 +277,7 @@ symmetric.2SW <- subset(activations,
                    sequence == "2/1/0" &
                    (response %% 2) == 0
                    )
-#
+                                        #
 symmetric.ALT <- subset(activations,
                    correct == TRUE &
                    sequence == "0/1/0" &
@@ -284,7 +299,8 @@ symmetric.1SW <- subset(activations,
 plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2-Switch (CBA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_2SW.png") 
 ggsave(imageFile)
-#
+plot.symmetric.2SW
+                                        #
 plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Symmetric tasks, Alt-Switch (ABA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_ALT.png") 
 ggsave(imageFile)
