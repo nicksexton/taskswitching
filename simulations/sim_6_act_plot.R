@@ -238,15 +238,13 @@ plot.triple.activation <- function (data.subset, title) {
   plotdata <- prepare.data (data.subset)
 
   unique.trials <- data.frame (unique (data.subset[c("trialid", "trial_pos", "RT")]))
-  descriptives <- by (unique.trials$RT, unique.trials$trial_pos, stat.desc)
-  means.plot <- data.frame (trial_pos = factor(c(0, 1, 2)),
-                            mean = c(descriptives$"0"[9], descriptives$"1"[9], descriptives$"2"[9]),
-                            xmax = c(descriptives$"0"[9] + descriptives$"0"[13],
-                              descriptives$"1"[9] + descriptives$"1"[13],
-                              descriptives$"2"[9] + descriptives$"2"[13]),
-                            xmin = c(descriptives$"0"[9] - descriptives$"0"[13],
-                              descriptives$"1"[9] - descriptives$"1"[13],
-                              descriptives$"2"[9] - descriptives$"2"[13]))
+  quantiles <- by (unique.trials$RT, unique.trials$trial_pos, quantile)
+# calculate median and IQR for each trial_pos  
+  stats.plot <- data.frame (trial_pos =
+                            factor(c(0, 1, 2)),
+                            median = c(quantiles[["0"]][[3]], quantiles[["1"]][[3]], quantiles[["2"]][[3]]),
+                            qu = c(quantiles[["0"]][[4]], quantiles[["1"]][[4]], quantiles[["2"]][[4]]),
+                            ql = c(quantiles[["0"]][[2]], quantiles[["1"]][[2]], quantiles[["2"]][[2]]))
   
   
   act.plot <- ggplot(plotdata,
@@ -257,9 +255,9 @@ plot.triple.activation <- function (data.subset, title) {
                            scale_fill_manual(values=colours.scale) +
                              scale_colour_manual(values=colours.scale) +
                                ggtitle (title) +
-                                 geom_vline(aes(xintercept=mean), data = means.plot) + # plot mean
-                                   geom_vline(aes(xintercept=xmax), data = means.plot) + # plot mean + 1SD
-                                     geom_vline(aes(xintercept=xmin), data = means.plot) # plot mean - 1SD
+                                 geom_vline(aes(xintercept=median), data = stats.plot) + # median
+                                   geom_vline(aes(xintercept=qu), data = stats.plot) + # upper quartile
+                                     geom_vline(aes(xintercept=ql), data = stats.plot) # lower quartile
 
   return (act.plot)
   
@@ -300,15 +298,15 @@ plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_2SW.png") 
 ggsave(imageFile)
 plot.symmetric.2SW
-                                        #
+                                        
 plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Symmetric tasks, Alt-Switch (ABA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_ALT.png") 
 ggsave(imageFile)
-#
+
 plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "Symmetric tasks, 1-Switch (BBA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_1SW.png") 
 ggsave(imageFile)
-#
+
 plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "Symmetric tasks, 0-Switch (BAA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_0SW.png") 
 ggsave(imageFile)
@@ -322,5 +320,4 @@ my.plot
 
 
 
-                                                                                                                                          
-
+                                                                                                                                       
