@@ -76,8 +76,11 @@ activations <- merge (activations.filtered, data[, c("trialpath", "trialid", "RT
 filter.data.decile <- function (data) {
 
   decile <- function(x) quantile(x, prob=seq(0, 1, length=11), type=5, names=FALSE) 
-
-  data.deciles <- by (data$RT, data$trial_pos, decile)
+  unique.trials <- function(x) data.frame (unique (x[c("trialid", "trial_pos", "RT")]))
+  
+  
+  # need to calculate deciles on unique trialids only
+  data.deciles <- by (unique.trials(data)$RT, unique.trials(data)$trial_pos, decile)
 
 
   filter <- function(x, n) subset(x, !((trial_pos == toString(n)) &
@@ -254,8 +257,8 @@ plot.triple.activation <- function (data.subset, title) {
                      "#BB00BB") # magenta
 
 
-  plotdata <- prepare.data (data.subset)
 
+# calculate quartiles to plot Q1/Q2/Q3 RTs on graph
   unique.trials <- data.frame (unique (data.subset[c("trialid", "trial_pos", "RT")]))
   quantiles <- by (unique.trials$RT, unique.trials$trial_pos, quantile)
 
@@ -266,6 +269,11 @@ plot.triple.activation <- function (data.subset, title) {
                             ql = c(quantiles[["0"]][[2]], quantiles[["1"]][[2]], quantiles[["2"]][[2]]))
   
 
+  # filter data (exclude top and bottom deciles from averaging)
+  data.filtered <- filter.data.decile (data.subset)
+
+  # arrange data in right format
+  plotdata <- prepare.data (data.filtered)
   
   
   act.plot <- ggplot(plotdata,
@@ -320,33 +328,34 @@ symmetric.1SW <- subset(activations,
 # Should add filtering into code for plot.triple.activation() so that median/IQR is calculated before data filtered
 #
 
-symmetric.2SW <- filter.data.decile (symmetric.2SW)
+
 plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2-Switch (CBA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_2SW.png") 
-ggsave(imageFile)
+ggsave(imageFile, width=300, height=200, units="mm")
 plot.symmetric.2SW
 
-symmetric.ALT <- filter.data.decile (symmetric.ALT)
+
 plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Symmetric tasks, Alt-Switch (ABA)")
 imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_ALT.png") 
-ggsave(imageFile)
-
-symmetric.1SW <- filter.data.decile (symmetric.1SW)
-plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "Symmetric tasks, 1-Switch (BBA)")
-imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_1SW.png") 
-ggsave(imageFile)
-
-symmetric.0SW <- filter.data.decile (symmetric.0SW)
-plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "Symmetric tasks, 0-Switch (BAA)")
-imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_0SW.png") 
-ggsave(imageFile)
-
-
-plot.symmetric.2SW
+ggsave(imageFile, width=300, height=200, units="mm")
 plot.symmetric.ALT
 
 
-my.plot
+plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "Symmetric tasks, 1-Switch (BBA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_1SW.png") 
+ggsave(imageFile, width=300, height=200, units="mm")
+plot.symmetric.1SW
+
+plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "Symmetric tasks, 0-Switch (BAA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_0SW.png") 
+ggsave(imageFile, width=300, height=200, units="mm")
+plot.symmetric.0SW
+
+
+
+
+
+
 
 
 
