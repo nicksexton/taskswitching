@@ -184,10 +184,41 @@ tabulate.RT <- function (data) {
 
   return (output)
 }
-                                          
-calculate.switchcost <- function (x) calculate.RT.mean(x, "1SW") - calculate.RT.mean(x, "0SW")
+
+
+
+# calculate.switchcost <- function (x) calculate.RT.mean(x, "1SW") - calculate.RT.mean(x, "0SW")
 calculate.n2rc <- function (x) calculate.RT.mean(x, "ALT") - calculate.RT.mean(x, "2SW")
 
+test.switchcost <- function (x)
+  t.test (cycles ~ sequence_cond, data = subset(x, sequence_cond == "0SW" | sequence_cond =="1SW"))
+
+test.n2rc <- function (x)
+  t.test (cycles ~ sequence_cond, data = subset(x, sequence_cond == "2SW" | sequence_cond =="ALT"))
+
+calculate.switchcost <- function (x){
+  data.frame (
+    mean.0SW = calculate.RT.mean (x, "0SW"),
+    mean.1SW = calculate.RT.mean (x, "1SW"),
+    sc = calculate.RT.mean (x, "0SW") - calculate.RT.mean (x, "1SW"),
+    t = test.switchcost(x)[[1]][[1]],
+    df = test.switchcost(x)[[2]][[1]],
+    p = test.switchcost(x)[[3]][[1]]
+   )     
+}
+
+calculate.n2rc <- function (x){
+  data.frame (
+    mean.2SW = calculate.RT.mean (x, "2SW"),
+    mean.ALT = calculate.RT.mean (x, "ALT"),
+    n2rc = calculate.RT.mean (x, "ALT") - calculate.RT.mean (x, "2SW"),
+    t = test.n2rc(x)[[1]][[1]],
+    df = test.n2rc(x)[[2]][[1]],
+    p = test.n2rc(x)[[3]][[1]]
+   ) 
+}
+
+  
 
 data.off <- subset(data.all, conflict=="no conflict")
 tabulate.RT (data.off)
