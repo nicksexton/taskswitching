@@ -595,7 +595,6 @@ int three_task_model_koch_conflict_run (pdp_model * model,
 				    pdp_model_component_find (model, ID_OUTPUT_2)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_TASKDEMAND)->layer);
-    //    printf ("placeholder: conflict units act\t");
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_CONFLICT)->layer);
 
@@ -695,24 +694,30 @@ int three_task_koch_pdp_layer_cycle_inputs (pdp_layer * some_layer, conflict_neg
 #endif
 
     if ((some_layer->id == ID_TASKDEMAND) && 
-	(input_iterator->input_layer->id == ID_CONFLICT)) {
+	(input_iterator->input_layer->id == ID_CONFLICT) &&
+	(conflict_negative == CLIP || conflict_negative == RESCALE)) {
 
-      if (conflict_negative == CLIP) {
+      switch (conflict_negative) {
+      case CLIP:
 	pdp_calc_input_fromlayer_clip (some_layer->size, some_layer, 
 				       input_iterator->input_layer->size, input_iterator->input_layer, 
 				       input_iterator->input_weights,
 				       TRUE // clip_negative, TRUE clips negative 
 				       );
+	break;
+
+      case RESCALE:
+	pdp_calc_input_fromlayer_rescale ( some_layer->size, some_layer, 
+					   input_iterator->input_layer->size, input_iterator->input_layer, 
+					   input_iterator->input_weights,
+					   0.5, 0.5); // scales by x * 0.5 + 0.5
+	break;
+
+      default:
+	printf ("in three_task_koch_pdp_layer_cycle_inputs, uh oh\n");
       }
-      else {
-	if (conflict_negative == RESCALE) { // rescales activation when calculating input
-	  pdp_calc_input_fromlayer_rescale ( some_layer->size, some_layer, 
-					     input_iterator->input_layer->size, input_iterator->input_layer, 
-					     input_iterator->input_weights,
-					     0.5, 0.5); // scales by x * 0.5 + 0.5
-	}
-      }
-    }	
+
+    }
     else {
       pdp_calc_input_fromlayer (some_layer->size, some_layer, 
 				input_iterator->input_layer->size, input_iterator->input_layer, 
