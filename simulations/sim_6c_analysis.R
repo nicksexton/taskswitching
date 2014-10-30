@@ -168,14 +168,49 @@ linegraph +
 
 # descriptive statistics, tasks 0 (easy) and 1 (intermediate)
 
-data.allow <- subset(data.all, conflict="allow") # 
-by(data.allow$cycles, data.allow$sequence_cond, stat.desc)
+descriptives <- function (x) by (x$cycles, x$sequence_cond, stat.desc)
 
-data.clip <- subset(data.all, conflict="clip") # 
-by(data.clip$cycles, data.clip$sequence_cond, stat.desc)
+calculate.RT.mean <- function (x, condition) descriptives(x)[[condition]][["mean"]]
+calculate.RT.sd <- function (x, condition) descriptives(x)[[condition]][["std.dev"]]
 
-data.rescale <- subset(data.rescale, conflict="rescale") # 
-by(data.rescale$cycles, data.rescale$sequence_cond, stat.desc)
+
+tabulate.RT <- function (data) {
+
+  output <- data.frame (sequence = c("0SW", "1SW", "2SW", "ALT"))
+  for (i in 1:4) {
+    output$mean[i] <- calculate.RT.mean (data, output$sequence[i])
+    output$sd[i] <- calculate.RT.sd (data, output$sequence[i])
+  }
+
+  return (output)
+}
+                                          
+calculate.switchcost <- function (x) calculate.RT.mean(x, "1SW") - calculate.RT.mean(x, "0SW")
+calculate.n2rc <- function (x) calculate.RT.mean(x, "ALT") - calculate.RT.mean(x, "2SW")
+
+
+data.off <- subset(data.all, conflict=="no conflict")
+tabulate.RT (data.off)
+calculate.switchcost (data.off)
+calculate.n2rc (data.off)
+
+
+data.allow <- subset(data.all, conflict=="allow")
+tabulate.RT (data.allow)
+calculate.switchcost (data.allow)
+calculate.n2rc (data.allow)
+
+
+data.clip <- subset(data.all, conflict=="clip") # 
+tabulate.RT (data.clip)
+calculate.switchcost (data.clip)
+calculate.n2rc (data.clip)
+
+
+data.rescale <- subset(data.all, conflict=="rescale") # 
+tabulate.RT (data.rescale)
+calculate.switchcost (data.rescale)
+calculate.n2rc (data.rescale)
 
 
 
