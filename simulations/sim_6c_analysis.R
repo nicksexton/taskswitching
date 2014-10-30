@@ -39,6 +39,8 @@ imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "sim
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
 #
+data.off <- read.delim("sim_6_data_conflict_off.txt",
+                         header=FALSE, sep=c("", ":"), col.names=labels.data)
 data.allow <- read.delim("sim_6_data_conflict_neg_allow.txt",
                          header=FALSE, sep=c("", ":"), col.names=labels.data)
 data.clip <- read.delim("sim_6_data_conflict_neg_clip.txt",
@@ -46,10 +48,11 @@ data.clip <- read.delim("sim_6_data_conflict_neg_clip.txt",
 data.rescale <- read.delim("sim_6_data_conflict_neg_rescale.txt",
                            header=FALSE, sep=c("", ":"), col.names=labels.data)
                                         # now split trial path into block and trial ID
+data.off <- cbind (data.off, conflict="no conflict")
 data.allow <- cbind (data.allow, conflict="allow")
 data.clip <- cbind (data.clip, conflict="clip")
 data.rescale <- cbind (data.rescale, conflict="rescale")
-data.raw <- rbind (data.allow, data.clip, data.rescale) # commented while testing only single method
+data.raw <- rbind (data.off, data.allow, data.clip, data.rescale) # commented while testing only single method
 # data.raw <- rbind (data.allow)
 
 
@@ -157,9 +160,9 @@ linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6c: Asymmetric switch costs and n-2 repetition costs\n negative conflict treatments ")
-# imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
-# ggsave(imageFile)
+  ggtitle("Simulation 6c: Switch costs and n-2 repetition costs\n Effect of negative conflict treatments")
+ imageFile <- file.path(imageDirectory, "sim_6c_treatment_0.png") 
+ ggsave(imageFile)
 
 
 

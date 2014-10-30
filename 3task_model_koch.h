@@ -17,7 +17,11 @@
 #define ID_CONFLICT 9
 #define ID_CONFLICT_INPUT 10
 
-typedef enum {ALLOW, CLIP, RESCALE} conflict_negative_options;
+typedef enum {NO_CONFLICT, ALLOW, CLIP, RESCALE} conflict_negative_options; 
+/*  off = no conflict, 
+   allow = allow negative conflict, 
+   clip = clip below zero conflict, 
+   rescale = rescale -1 to 1 as 0-1 */
 
 void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params_table);
 

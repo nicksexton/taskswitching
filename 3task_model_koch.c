@@ -695,7 +695,7 @@ int three_task_koch_pdp_layer_cycle_inputs (pdp_layer * some_layer, conflict_neg
 
     if ((some_layer->id == ID_TASKDEMAND) && 
 	(input_iterator->input_layer->id == ID_CONFLICT) &&
-	(conflict_negative == CLIP || conflict_negative == RESCALE)) {
+	(conflict_negative == NO_CONFLICT || conflict_negative == CLIP || conflict_negative == RESCALE)) {
 
       switch (conflict_negative) {
       case CLIP:
@@ -711,6 +711,10 @@ int three_task_koch_pdp_layer_cycle_inputs (pdp_layer * some_layer, conflict_neg
 					   input_iterator->input_layer->size, input_iterator->input_layer, 
 					   input_iterator->input_weights,
 					   0.5, 0.5); // scales by x * 0.5 + 0.5
+	break;
+
+      case OFF:
+	// disregard input from conflict monitoring units, do nothing!
 	break;
 
       default:
