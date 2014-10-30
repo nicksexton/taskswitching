@@ -670,6 +670,10 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
 
   double response_threshold = *(double *)g_hash_table_lookup(objects->simulation->model_params_htable, 
 							     "response_threshold");
+  
+  // check what to do (if anything) about negative conflict
+  conflict_negative_options conflict_negative = 
+    *(gint *)g_hash_table_lookup(objects->simulation->model_params_htable, "conflict_negative");  
 
   if (!stopping_condition (objects->simulation->model, response_threshold)) { 
     gchar * path;
@@ -677,10 +681,11 @@ static void model_controls_step_once_cb (GtkToolItem * tool_item,
 
 
     three_task_model_koch_conflict_run_step (objects->simulation->model, objects->simulation->random_generator, 
-				     response_threshold, 
-				     objects->simulation->datafile,
-				     objects->simulation->datafile_act,
-				     path);
+					     response_threshold, 
+					     objects->simulation->datafile,
+					     objects->simulation->datafile_act,
+					     path,
+					     conflict_negative);
 
     g_free (path);
     if (objects->model_sub_notepage != NULL) {

@@ -15,13 +15,23 @@ rm sim_4_act.txt
 rm sim_6_act.txt
 
 rm sim_6_log.txt
+rm sim_6_log_allow.txt
+rm sim_6_log_basic.txt
+rm sim_6_log_rescale.txt
 
-./sim_4_asymmetric.py -n 1000
+rm sim_6_data_conflict_neg_allow.txt
+rm sim_6_data_conflict_neg_clip.txt
+rm sim_6_data_conflict_neg_rescale.txt
+rm sim_6_act_conflict_neg_allow.txt
+rm sim_6_act_conflict_neg_clip.txt
+rm sim_6_act_conflict_neg_rescale.txt
+
+./sim_4_asymmetric.py -n 250
 mv sim_4_trials.conf sim_6_trials.conf
 mv sim_4_lookup.txt sim_6_lookup.txt
 
 # Allow negative conflict
-../3task_basic_koch_conflict -t sim_6_trials.conf -m sim_6_model_symmetric_conflict_neg.conf > sim_6_log_allow.txt
+../3task_basic_koch_conflict -t sim_6_trials.conf -m sim_6_model_symmetric_conflict_allow.conf > sim_6_log_allow.txt
 mv 3task_act.txt sim_6_act_conflict_neg_allow.txt
 mv 3task_data.txt sim_6_data_conflict_neg_allow.txt
 

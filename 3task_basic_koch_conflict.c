@@ -1,4 +1,4 @@
-#define DEBUG_NETWORK_ACTIVATION
+// #define DEBUG_NETWORK_ACTIVATION
 
 #include <ctype.h> // for processing command line arguments
 #include <gtk/gtk.h>

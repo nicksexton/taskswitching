@@ -187,6 +187,23 @@ void pdp_weights_set_v1 (pdp_weights_matrix * some_weights,
 		      int size_output, int size_input, double * init_array);
 */
 
+// replacement for pdp_calc_input_fromlayer
+// rescales activation before calculating input
+// scales, then adds offset
+int pdp_calc_input_fromlayer_rescale (int size_output, struct pdp_layer * output, 
+				      int size_input, const struct pdp_layer * input, 
+				      struct pdp_weights_matrix * weights,
+				      double scale,
+				      double offset);
+
+// replacement for pdp_calc_input_fromlayer
+// clips activation at zero (either positive or negative)
+// clip_negative == TRUE clips negative, FALSE clips positive
+int pdp_calc_input_fromlayer_clip (int size_output, struct pdp_layer * output, 
+				   int size_input, const struct pdp_layer * input, 
+				   struct pdp_weights_matrix * weights,
+				   bool clip_negative);
+
 int pdp_calc_input_fromlayer (int size_output, struct pdp_layer * output, 
 			      int size_input, const struct pdp_layer * input, 
 			      struct pdp_weights_matrix * weights);

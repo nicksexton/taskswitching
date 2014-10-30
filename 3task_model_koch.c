@@ -1,3 +1,5 @@
+// #define DEBUG_NETWORK_ACTIVATION
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -89,6 +91,10 @@ void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params
   double *conflict_gain  = g_malloc(sizeof(double));
   *conflict_gain = CONFLICT_GAIN;
   g_hash_table_insert (params_table, "conflict_gain", conflict_gain);
+
+  int *conflict_negative = g_malloc(sizeof(conflict_negative_options));
+  *conflict_negative = CONFLICT_NEGATIVE;
+  g_hash_table_insert (params_table, "conflict_negative", conflict_negative);
 
   double *topdown_control_strength_0  = g_malloc(sizeof(double));
   *topdown_control_strength_0 = TOPDOWN_CONTROL_STRENGTH_0;
@@ -279,6 +285,15 @@ bool three_task_model_koch_conflict_parameter_import_ht (gchar* param_name,
 	    *(double *)g_hash_table_lookup(model_params_ht, "conflict_gain"));
   }
 
+  else if (!strcmp (param_name, "CONFLICT_NEGATIVE")) {
+    gint *conflict_negative  = g_malloc(sizeof(gint));
+    *conflict_negative = (int) g_ascii_strtoll (param_value, NULL, 10);
+    g_hash_table_insert (model_params_ht, "conflict_negative", conflict_negative);
+    printf ("parameter %s now %d\n", param_name, 
+	    *(int *)g_hash_table_lookup(model_params_ht, "conflict_negative"));
+  }
+
+
   else if (!strcmp (param_name, "TOPDOWN_CONTROL_STRENGTH_0")) {
     gdouble *topdown_control_strength_0  = g_malloc(sizeof(double));
     *topdown_control_strength_0 = (double) g_ascii_strtod (param_value, NULL);
@@ -464,6 +479,7 @@ int three_task_model_koch_conflict_run (pdp_model * model,
   double topdown_control_initial_act[3]   = { 0.0,  0.0, 0.0 };
   double response_threshold, learning_rate;
   hebbian_learning_persistence hebb_persist;
+  conflict_negative_options conflict_negative;
   int stopped;
 
   // Get data for current trial 
@@ -563,6 +579,11 @@ int three_task_model_koch_conflict_run (pdp_model * model,
   learning_rate = *(double *)g_hash_table_lookup(simulation->model_params_htable, "learning_rate");
   hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, 
 					     "hebb_persist");
+
+  // check what to do (if anything) about negative conflict
+  conflict_negative = *(gint *)g_hash_table_lookup(simulation->model_params_htable, 
+									     "conflict_negative");  
+
 #ifdef ECHO
 
     printf ("\ncyc:%d\t", model->cycle);
@@ -588,10 +609,11 @@ int three_task_model_koch_conflict_run (pdp_model * model,
   // run_model_step returns true when stopping_condition evaluates to false
   do {
     three_task_model_koch_conflict_run_step (model, simulation->random_generator, 
-				     response_threshold, 
-				     simulation->datafile,
-				     simulation->datafile_act,
-				     path);
+					     response_threshold, 
+					     simulation->datafile,
+					     simulation->datafile_act,
+					     path,
+					     conflict_negative);
     stopped = stopping_condition (model, response_threshold);
   } while (stopped == false && model->cycle < MAX_CYCLES);
   
@@ -651,16 +673,116 @@ void three_task_model_koch_fprintf_current_state (pdp_model *model, gchar *path,
 }
 
 
+// replaces pdp_layer_cycle_inputs. Only used when layer->id is TASKDEMAND and conflict_negative == CLIP
+// checks whether input is from a conflict monitoring unit: if so, clips activation at zero
+int three_task_koch_pdp_layer_cycle_inputs (pdp_layer * some_layer, conflict_negative_options conflict_negative) {
+
+  pdp_input * input_iterator; 
+  input_iterator = some_layer->upstream_layers;
+
+  /* remember to zero the accumulators, then add bias now */
+  int j;
+  for (j = 0; j < some_layer->size; j++) {
+    // some_layer->net_inputs[j] = 0;
+    some_layer->net_inputs[j] = some_layer->input_bias;
+  }
+
+  /* update the inputs */
+  while (input_iterator != NULL) {
+
+#ifdef DEBUG_NETWORK_ACTIVATION
+    printf ("\ninput to layer %d from %d: ", some_layer->id, input_iterator->input_layer->id);
+#endif
+
+    if ((some_layer->id == ID_TASKDEMAND) && 
+	(input_iterator->input_layer->id == ID_CONFLICT)) {
+
+      if (conflict_negative == CLIP) {
+	pdp_calc_input_fromlayer_clip (some_layer->size, some_layer, 
+				       input_iterator->input_layer->size, input_iterator->input_layer, 
+				       input_iterator->input_weights,
+				       TRUE // clip_negative, TRUE clips negative 
+				       );
+      }
+      else {
+	if (conflict_negative == RESCALE) { // rescales activation when calculating input
+	  pdp_calc_input_fromlayer_rescale ( some_layer->size, some_layer, 
+					     input_iterator->input_layer->size, input_iterator->input_layer, 
+					     input_iterator->input_weights,
+					     0.5, 0.5); // scales by x * 0.5 + 0.5
+	}
+      }
+    }	
+    else {
+      pdp_calc_input_fromlayer (some_layer->size, some_layer, 
+				input_iterator->input_layer->size, input_iterator->input_layer, 
+				input_iterator->input_weights);
+    }
+    
+
+	
+    input_iterator = input_iterator->next;
+  }
+  
+  /* <--------------- DEBUG ------------------- */
+  /*
+  printf ("net inputs:\n");
+  for (j = 0; j < some_layer->size; j++) {
+    printf ("[%d]:, %4.2f  ", j, some_layer->net_inputs[j]);
+  }
+  printf ("\n");
+  */
+
+  return 0;
+}
+
+
+// replaces pdp_model_cycle in pdp_objects.c
+// needed as input from conflict monitoring to TD units might need to be clipped
+void three_task_koch_model_cycle (pdp_model * some_model, conflict_negative_options conflict_negative) {
+  pdp_model_component * component_i;
+
+  /* first calc the summed inputs for all components*/
+  component_i = some_model->components;
+  while (component_i != NULL) {
+
+    three_task_koch_pdp_layer_cycle_inputs (component_i->layer, conflict_negative); 
+    // specifically checks for CM->TD input and clips/rescales
+    
+    component_i = component_i->next;
+  }
+
+
+  /* now update activations */
+  component_i = some_model->components;
+  while (component_i != NULL) {
+
+    if (component_i->update_activation == true) {
+      pdp_layer_cycle_activation (component_i->layer, 
+				  some_model->activation_parameters);
+    }
+
+    component_i = component_i->next;
+  }
+
+  some_model->cycle ++;
+  return;
+}
+
+
+
 int three_task_model_koch_conflict_run_step (pdp_model * model, 
 					     const gsl_rng * random_generator, 
 					     double response_threshold, 
 					     FILE * fp_trial,
 					     FILE * fp_act,
-					     gchar * path) {
+					     gchar * path, 
+					     conflict_negative_options conflict_negative) {
 
 
     // cycle the model
-    pdp_model_cycle (model);
+    // pdp_model_cycle (model);
+   three_task_koch_model_cycle (model, conflict_negative);
 
     // calculate conflict inputs
     pdp_layer * conflict_input =  pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;

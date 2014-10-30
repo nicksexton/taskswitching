@@ -49,7 +49,8 @@ data.rescale <- read.delim("sim_6_data_conflict_neg_rescale.txt",
 data.allow <- cbind (data.allow, conflict="allow")
 data.clip <- cbind (data.clip, conflict="clip")
 data.rescale <- cbind (data.rescale, conflict="rescale")
-data.raw <- rbind (data.allow, data.clip, data.rescale)
+#data.raw <- rbind (data.allow, data.clip, data.rescale) # commented while testing only single method
+data.raw <- rbind (data.clip)
 
 
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -120,11 +121,11 @@ data$seq.1 <- factor(data$seq.1)
 
 boxplot.clip <- ggplot (subset(data, PATH.trial == 2 & conflict=="clip"), aes(x=sequence_cond, y=cycles))
 boxplot.clip + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") +
-  ggtitle ("Simulation 6c, negative conflict allowed")
+  ggtitle ("Simulation 6c, negative conflict clipped")
 
 boxplot.allow <- ggplot (subset(data, PATH.trial == 2 & conflict=="allow"), aes(x=sequence_cond, y=cycles))
 boxplot.allow + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") +
-  ggtitle ("Simulation 6c, negative conflict clipped")
+  ggtitle ("Simulation 6c, negative conflict allowed")
 
 boxplot.rescale <- ggplot (subset(data, PATH.trial == 2 & conflict=="rescale"), aes(x=sequence_cond, y=cycles))
 boxplot.rescale + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") +
@@ -139,34 +140,61 @@ boxplot.rescale + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") +
 
 
 # Plot graph for switches between tasks 0 and 1
-data.task01 <- subset (data, PATH.trial == 2 & (
-                               (seq.3 == 0 & (seq.2 == 0 | seq.2 == 1)) |
-                               (seq.3 == 1 & (seq.2 == 1 | seq.2 == 0)) )
-                       )
+#data.clip.task01 <- subset (data,
+#                            conflict == "clip" &
+#                            PATH.trial == 2 & (
+#                              (seq.3 == 0 & (seq.2 == 0 | seq.2 == 1)) |
+#                              (seq.3 == 1 & (seq.2 == 1 | seq.2 == 0)) )
+#                       )
 
+data.all <- subset (data,
+                    PATH.trial == 2)
 
-# Plot graph for switches between tasks 0 and 2
-data.task02 <- subset (data, PATH.trial == 2 & (
-                               (seq.3 == 0 & (seq.2 == 0 | seq.2 == 2)) |
-                               (seq.3 == 2 & (seq.2 == 2 | seq.2 == 0)) )
-                       )
-
-
-
-# Plot graph for switches between tasks 1 and 2
-data.task12 <- subset (data, PATH.trial == 2 & (
-                               (seq.3 == 1 & (seq.2 == 1 | seq.2 == 2)) |
-                               (seq.3 == 2 & (seq.2 == 2 | seq.2 == 1)) )
-                       )
-
-linegraph <- ggplot (data.task12, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
+linegraph <- ggplot (data.all, aes(x=sequence_cond, y=cycles, group=conflict, fill=conflict))
 linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2")
-imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
-ggsave(imageFile)
+  ggtitle("Simulation 6c: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1\n negative conflict clipped ")
+# imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
+# ggsave(imageFile)
+
+
+
+# Plot graph for switches between tasks 0 and 2
+#data.clip.task02 <- subset (data,
+#                            conflict == "clip" &
+#                            PATH.trial == 2 & (
+#                              (seq.3 == 0 & (seq.2 == 0 | seq.2 == 2)) |
+#                              (seq.3 == 2 & (seq.2 == 2 | seq.2 == 0)) )
+#                       )
+
+#linegraph <- ggplot (data.clip.task02, aes(x=sequence_cond, y=cycles, group=conflict, fill=conflict))
+#linegraph +
+#  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+#  labs (x = "Sequence", y = "RT", group = "Sequence") +
+#  ggtitle("Simulation 6c: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2\n negative conflict clipped ")
+# imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
+# ggsave(imageFile)
+
+
+# Plot graph for switches between tasks 1 and 2
+#data.clip.task12 <- subset (data,
+#                            conflict == clip &
+#                            PATH.trial == 2 & (
+#                              (seq.3 == 1 & (seq.2 == 1 | seq.2 == 2)) |
+#                               (seq.3 == 2 & (seq.2 == 2 | seq.2 == 1)) )
+#                       )
+
+#linegraph <- ggplot (data.clip.task12, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
+#linegraph +
+#  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+#  labs (x = "Sequence", y = "RT", group = "Sequence") +
+#  ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2")
+# imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
+# ggsave(imageFile)
 
 
 # descriptive statistics, tasks 0 (easy) and 1 (intermediate)

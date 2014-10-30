@@ -17,6 +17,7 @@
 #define ID_CONFLICT 9
 #define ID_CONFLICT_INPUT 10
 
+typedef enum {ALLOW, CLIP, RESCALE} conflict_negative_options;
 
 void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params_table);
 
@@ -29,12 +30,17 @@ void three_task_koch_conflict_parameters_import_commit (FileData *config_file,
 
 int three_task_model_koch_conflict_run (pdp_model * model, ThreeTaskSimulation * simulation);
 
+int three_task_koch_pdp_layer_cycle_inputs (pdp_layer * some_layer, conflict_negative_options conflict_negative);
+
+void three_task_koch_model_cycle (pdp_model * some_model, conflict_negative_options conflict_negative);
+
 int three_task_model_koch_conflict_run_step (pdp_model * model, 
 					     const gsl_rng * random_generator, 
 					     double response_threshold, 
 					     FILE * fp_trial,
 					     FILE * fp_act,
-					     gchar * path);
+					     gchar * path,
+					     conflict_negative_options conflict_negative);
 
 void three_task_model_koch_fprintf_current_state (pdp_model *model, gchar *path, FILE * ofp_act);
 

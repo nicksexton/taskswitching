@@ -37,6 +37,8 @@
 
 #define CONFLICT_GAIN 1.0
 #define CONFLICT_TASKDEMAND_WT 2.5
+#define CONFLICT_NEGATIVE 0 // 0 allow, 1 clip, 2 rescale. only needed with the GS activation function
+
 
 #define TOPDOWN_CONTROL_STRENGTH_0 14.0
 #define TOPDOWN_CONTROL_STRENGTH_1 14.0

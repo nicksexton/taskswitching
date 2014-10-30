@@ -371,6 +371,135 @@ void pdp_weights_free (struct pdp_weights_matrix * some_weights) {
 }
 
 
+// replacement for pdp_calc_input_fromlayer
+// rescales activation before calculating input
+// scales, then adds offset
+int pdp_calc_input_fromlayer_rescale (int size_output, struct pdp_layer * output, 
+				      int size_input, const struct pdp_layer * input, 
+				      struct pdp_weights_matrix * weights,
+				      double scale,
+				      double offset) {
+
+  /* check sizes */
+  int size_inputs, size_outputs, i, j;
+
+  size_inputs = weights->size_input;
+  size_outputs = weights->size_output;
+
+  if (input->size != size_inputs) {
+    /* raise an exception here!! */
+    printf ("\nERROR! input size (%d) and weights matrix (%d) do not agree, terminating\n",
+	    input->size, size_inputs);
+
+    return 1;
+  }
+
+  else if  (output->size != size_outputs) {
+    /* raise an exception here!! */
+    printf ("\nERROR! output size (%d) and weights matrix (%d) do not agree, terminating\n",
+	    output->size, size_outputs);
+
+    return 1;
+  }
+
+  else {
+    /* do the matrix multiplication */
+    for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
+      
+#ifdef DEBUG_NETWORK_ACTIVATION
+      printf ("[%d]:", i);
+#endif
+
+      for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
+
+
+	output->net_inputs[i] += (input->units_latest->activations[j] * scale + offset) * weights->weights[i][j];
+
+
+#ifdef DEBUG_NETWORK_ACTIVATION
+	printf ("(%3.2f x %2.1f + %2.1f) x %3.2f + ", input->units_latest->activations[j], 
+						       scale, offset, weights->weights[i][j]);
+#endif
+
+
+
+      }
+    }
+
+  return 0;
+  }
+}
+
+
+
+
+// replacement for pdp_calc_input_fromlayer
+// clips activation at zero (either positive or negative)
+// clip_negative == TRUE clips negative, FALSE clips positive
+int pdp_calc_input_fromlayer_clip (int size_output, struct pdp_layer * output, 
+				   int size_input, const struct pdp_layer * input, 
+				   struct pdp_weights_matrix * weights,
+				   bool clip_negative) {
+
+  /* check sizes */
+  int size_inputs, size_outputs, i, j;
+
+  size_inputs = weights->size_input;
+  size_outputs = weights->size_output;
+
+  if (input->size != size_inputs) {
+    /* raise an exception here!! */
+    printf ("\nERROR! input size (%d) and weights matrix (%d) do not agree, terminating\n",
+	    input->size, size_inputs);
+
+    return 1;
+  }
+
+  else if  (output->size != size_outputs) {
+    /* raise an exception here!! */
+    printf ("\nERROR! output size (%d) and weights matrix (%d) do not agree, terminating\n",
+	    output->size, size_outputs);
+
+    return 1;
+  }
+
+  else {
+    /* do the matrix multiplication */
+    for (i = 0; i < size_output; i++) { /* calculate input to the ith output neuron */
+      
+#ifdef DEBUG_NETWORK_ACTIVATION
+      printf ("[%d]:", i);
+#endif
+
+      for (j = 0; j < size_input; j++) { /* calculate weighted input from jth input neuron */
+
+	if (clip_negative == true) {
+	  output->net_inputs[i] += (input->units_latest->activations[j] > 0 ?
+				    input->units_latest->activations[j] : 0) * weights->weights[i][j];
+
+#ifdef DEBUG_NETWORK_ACTIVATION
+	printf ("%3.2f x %3.2f + ", (input->units_latest->activations[j] > 0 ?
+				    input->units_latest->activations[j] : 0), weights->weights[i][j]);
+#endif
+	}
+	else {
+	  output->net_inputs[i] += (input->units_latest->activations[j] < 0 ?
+				    input->units_latest->activations[j] : 0) * weights->weights[i][j];
+
+#ifdef DEBUG_NETWORK_ACTIVATION
+	printf ("%3.2f x %3.2f + ", (input->units_latest->activations[j] < 0 ?
+				    input->units_latest->activations[j] : 0), weights->weights[i][j]);
+#endif
+
+	}
+
+      }
+    }
+
+  return 0;
+  }
+}
+
 
 
 /* calculates the input to layer i from layer j by multiplying a
@@ -504,13 +633,13 @@ int pdp_layer_cycle_inputs (pdp_layer * some_layer) {
   }
 
   /* <--------------- DEBUG ------------------- */
-  /*
+#ifdef DEBUG_NETWORK_ACTIVATION
   printf ("net inputs:\n");
   for (j = 0; j < some_layer->size; j++) {
     printf ("[%d]:, %4.2f  ", j, some_layer->net_inputs[j]);
   }
   printf ("\n");
-  */
+#endif
 
   return 0;
 }
