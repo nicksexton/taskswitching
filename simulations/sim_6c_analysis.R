@@ -49,8 +49,8 @@ data.rescale <- read.delim("sim_6_data_conflict_neg_rescale.txt",
 data.allow <- cbind (data.allow, conflict="allow")
 data.clip <- cbind (data.clip, conflict="clip")
 data.rescale <- cbind (data.rescale, conflict="rescale")
-#data.raw <- rbind (data.allow, data.clip, data.rescale) # commented while testing only single method
-data.raw <- rbind (data.clip)
+data.raw <- rbind (data.allow, data.clip, data.rescale) # commented while testing only single method
+# data.raw <- rbind (data.allow)
 
 
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -77,20 +77,22 @@ data.raw = transform (data.raw, seq = colsplit(sequence, pattern = "/", names=c(
 #data$congruency.12 <- paste (data$congruency.1,  data$congruency.2, sep="/")
 #
 #
-data <- data.raw
-# filter trials for correct only
+
+#######################################################
+################### FILTERING #########################
+#######################################################
                                         # should filter for correct sequences only!
 data = subset (data.raw, correct == TRUE)
 #
 # exclude outliers (RTs +/- 3 SDs) for each task (irrespective of trial position or switch condition)
 # exclude outliers (RTs +/- 3 SDs)
-descriptives <- by(data$cycles, data$cue, stat.desc)
-data <- subset (data,
-        !((cue == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
-data <- subset (data,
-        !((PATH.trial == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
-data <- subset (data,
-        !((PATH.trial == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
+#descriptives <- by(data$cycles, data$cue, stat.desc)
+#data <- subset (data,
+#        !((cue == 0 ) & cycles > descriptives$"0"[9] + 3 * descriptives$"0"[13]))
+#data <- subset (data,
+#        !((PATH.trial == 1 ) & cycles > descriptives$"1"[9] + 3 * descriptives$"1"[13]))
+#data <- subset (data,
+#        !((PATH.trial == 2 ) & cycles > descriptives$"2"[9] + 3 * descriptives$"2"[13]))
 #
 #
 # Now look only at trial 3
@@ -155,69 +157,22 @@ linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6c: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1\n negative conflict clipped ")
+  ggtitle("Simulation 6c: Asymmetric switch costs and n-2 repetition costs\n negative conflict treatments ")
 # imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
 # ggsave(imageFile)
 
-
-
-# Plot graph for switches between tasks 0 and 2
-#data.clip.task02 <- subset (data,
-#                            conflict == "clip" &
-#                            PATH.trial == 2 & (
-#                              (seq.3 == 0 & (seq.2 == 0 | seq.2 == 2)) |
-#                              (seq.3 == 2 & (seq.2 == 2 | seq.2 == 0)) )
-#                       )
-
-#linegraph <- ggplot (data.clip.task02, aes(x=sequence_cond, y=cycles, group=conflict, fill=conflict))
-#linegraph +
-#  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
-#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-#  labs (x = "Sequence", y = "RT", group = "Sequence") +
-#  ggtitle("Simulation 6c: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2\n negative conflict clipped ")
-# imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
-# ggsave(imageFile)
-
-
-# Plot graph for switches between tasks 1 and 2
-#data.clip.task12 <- subset (data,
-#                            conflict == clip &
-#                            PATH.trial == 2 & (
-#                              (seq.3 == 1 & (seq.2 == 1 | seq.2 == 2)) |
-#                               (seq.3 == 2 & (seq.2 == 2 | seq.2 == 1)) )
-#                       )
-
-#linegraph <- ggplot (data.clip.task12, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
-#linegraph +
-#  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
-#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-#  labs (x = "Sequence", y = "RT", group = "Sequence") +
-#  ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2")
-# imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
-# ggsave(imageFile)
 
 
 # descriptive statistics, tasks 0 (easy) and 1 (intermediate)
-data.task01.1 <- subset(data.task01, data.task01$seq.3==1) # harder task (1)
-by(data.task01.1$cycles, data.task01.1$sequence_cond, stat.desc)
 
-data.task01.0 <- subset(data.task01, data.task01$seq.3==0) # easier task (0)
-by(data.task01.0$cycles, data.task01.0$sequence_cond, stat.desc)
+data.allow <- subset(data.all, conflict="allow") # 
+by(data.allow$cycles, data.allow$sequence_cond, stat.desc)
 
+data.clip <- subset(data.all, conflict="clip") # 
+by(data.clip$cycles, data.clip$sequence_cond, stat.desc)
 
-# descriptive statistics, tasks 0 (easy) and 2 (hard)
-data.task02.2 <- subset(data.task02, data.task02$seq.3==2) # hard task (2)
-by(data.task02.2$cycles, data.task02.2$sequence_cond, stat.desc)
-
-data.task02.0 <- subset(data.task02, data.task02$seq.3==0) # easy task (0)
-by(data.task02.0$cycles, data.task02.0$sequence_cond, stat.desc)
-
-# descriptive statistics, tasks 1 (intermediate) and 2 (hard)
-data.task12.2 <- subset(data.task12, data.task12$seq.3==2) # hard task (2)
-by(data.task12.2$cycles, data.task12.2$sequence_cond, stat.desc)
-
-data.task12.1 <- subset(data.task12, data.task12$seq.3==1) # easy task (1)
-by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
+data.rescale <- subset(data.rescale, conflict="rescale") # 
+by(data.rescale$cycles, data.rescale$sequence_cond, stat.desc)
 
 
 
