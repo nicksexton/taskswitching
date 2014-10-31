@@ -74,9 +74,7 @@ system.time (data.off.1 <- block.is.correct2 (data.processed))
 
 system.time (data.off.1 <- block.is.correct3 (data.processed))
 
-
-
-#
+                                        #
 #
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
