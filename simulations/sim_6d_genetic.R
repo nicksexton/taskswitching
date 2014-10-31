@@ -2,15 +2,16 @@ rm (list = ls())
 
 source ("sim_6_analysis_functions.R")
 
-blocksize <- 100
-model.conf.tempfile <- "sim_6d_model_genetic.conf" # will be created
-output.data.tempfile <- "sim_6d_data_temp.txt"
+blocksize <- 5
+filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
+filename.output.data.temp <- "sim_6d_data_temp.txt"
 
 system2 ("rm", args="sim_6d_lookup.txt sim_6d_trials.conf")
 system2 ("./sim_6d_genetic_trials.py", args=paste("-n", blocksize))
 
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_6d_lookup.txt", header = FALSE, col.names=labels.lookup)
+
 
 model.conf.stem = (" 
 ACTIVATION_MAX 1.0 
@@ -24,7 +25,6 @@ HEBBIAN_LEARNING_PERSISTENCE 1
 RSI_SCALE_PARAM 1.0 
 BIAS_OUTPUTUNIT -6.0 
 BIAS_TASKDEMAND -4.0 
-BIAS_CONFLICT -7.5 
 BIAS_NONE 0 
 STIMULUS_INPUT_STRENGTH_0 3.0 
 STIMULUS_INPUT_STRENGTH_1 3.0 
@@ -32,29 +32,46 @@ STIMULUS_INPUT_STRENGTH_2 3.0
 TASKDEMAND_OUTPUT_INHIBITORY_WT -2.5 
 TASKDEMAND_OUTPUT_EXCITATORY_WT 2.5 
 TASKDEMAND_LATERAL_INHIBITORY_WT -2.0 
-CONFLICT_GAIN 39.0 
-CONFLICT_TASKDEMAND_WT -14.0 
 CONFLICT_NEGATIVE 1 
 TOPDOWN_CONTROL_STRENGTH_0 12.0 
 TOPDOWN_CONTROL_STRENGTH_1 12.0  
 TOPDOWN_CONTROL_STRENGTH_2 12.0 
 LEARNING_RATE 1.0 
 MAX_CYCLES 500") # tailing spaces eliminates double newlines, for some reason
+                                        # Leaf parameters: 
+                                        # BIAS_CONFLICT -7.5 
+                                        # CONFLICT_GAIN 39.0 
+                                        # CONFLICT_TASKDEMAND_WT -14.0 
 
 
-model.run <- function (model.conf) {
+model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
+model.conf.leaf.min <- data.frame (conflict.gain = 0.5, conflict.tdwt = -40.0, conflict.bias = -30.0)
+model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = -0.0, conflict.bias = -0.0)
 
-  write (model.conf, model.conf.tempfile)
 
-  system2 ("rm", args=output.data.tempfile) # optional, just being tidy
+generation <- data.frame (conflict.gain = c(30.0, 35.0, 39.0),
+                          conflict.tdwt = c(-12.0, -14.0, -16.0),
+                          conflict.bias = c(-7.5, -8.5, -9.5)
+                          )
+
+
+model.conf.makeleaf <- function (x) paste ("\nCONFLICT_GAIN", x$conflict.gain,
+                                          "\nCONFLICT_TASKDEMAND_WT", x$conflict.tdwt,
+                                          "\nBIAS_CONFLICT", x$conflict.bias)
+
+
+model.run <- function (stem, leaf, conf.tempfile, output.tempfile) {
+
+  system2 ("rm", args=conf.tempfile) # optional, just being tidy
+  write (paste(stem, leaf), conf.tempfile, append=FALSE)
+
+  system2 ("rm", args=output.tempfile) # optional, just being tidy
   system2 ("rm", args="3task_act.txt") # optional, just being tidy
   
-  run.args = paste("-t sim_6_trials.conf -m ", model.conf.tempfile, "> sim_6d_log.txt", sep=" ")
-  system2 ("../3task_basic_koch_conflict", args=run.args, stdout = NULL, stderr = NULL)
+  run.args = paste("-t sim_6d_trials.conf -m ", conf.tempfile, sep=" ")
+  system2 ("../3task_basic_koch_conflict", args=run.args, stdout = "sim_6d_log.txt", stderr = NULL)
 
-  system2 ("mv", args=paste("3task_data.txt", output.data.tempfile))
-
-  
+  system2 ("mv", args=paste("3task_data.txt", output.tempfile))  
 }
 
 
@@ -81,16 +98,42 @@ data.preprocess <- function (datafile, lookuptable) {
   data$seq.2 <- factor(data$seq.2)
   data$seq.1 <- factor(data$seq.1)
 
-
   return (data)
 }
 
 
+run.individual <- function (leaf, # parameter leaf (a data frame)
+                            stem, # parameter file stem (a (long) character vector)
+                            conf.file.temp, #filename for temp conf file
+                            output.file.temp) { # filename for temp data
 
-model.run (model.conf.stem)
+  model.run (stem,
+             model.conf.makeleaf (leaf),
+             conf.file.temp,
+             output.file.temp)
+  data <- data.preprocess (filename.output.data.temp, data.lookuptable)
+  results <- calculate.switchcost (data)
+  return (results)
+  
+}
 
-data <- data.preprocess (output.data.tempfile, data.lookuptable)
+run.individual (generation[1,],
+                model.conf.stem,
+                filename.conf.temp,
+                filename.output.data.temp)
 
+# create new data frame
 
+n <- 100
+results <- data.frame (mean.0SW=numeric(n),
+                       mean.1SW=numeric(n),
+                       sc=numeric(n),
+                       t=numeric(n),
+                       df=numeric(n),
+                       p=numeric(n))
 
-data.desc <- descriptives (data)
+for (i in 1:nrow(generation)) {
+  results[i,] <- run.individual (generation[i,],
+                                stem=model.conf.stem,
+                                conf.file.temp = filename.conf.temp,
+                                output.file.temp = filename.output.data.temp) }
