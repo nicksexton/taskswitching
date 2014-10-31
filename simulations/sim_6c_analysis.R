@@ -52,17 +52,56 @@ data.off <- cbind (data.off, conflict="no conflict")
 data.allow <- cbind (data.allow, conflict="allow")
 data.clip <- cbind (data.clip, conflict="clip")
 data.rescale <- cbind (data.rescale, conflict="rescale")
-data.raw <- rbind (data.off, data.allow, data.clip, data.rescale) # commented while testing only single method
+# data.raw <- rbind (data.off, data.allow, data.clip, data.rescale) # commented while testing only single method
 # data.raw <- rbind (data.allow)
 
 
-data.raw$trialpath <- as.character(data.raw$trialpath)
-data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
-#
-data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
-                                    ifelse (cue == 1, stim_1 == response %% 2,
-                                    ifelse (cue == 2, stim_2 == response %% 2, NA))))
-#
+
+split.trialpath <- function (x) {
+  x$trialpath <- as.character(x$trialpath)
+  transform (x, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
+}
+
+
+# evaluates to TRUE of FALSE
+trial.is.correct <- function (x) with (x, ifelse (cue == 0, stim_0 == response %% 2,
+                                                  ifelse (cue == 1, stim_1 == response %% 2,
+                                                          ifelse (cue == 2, stim_2 == response %% 2, NA))))
+
+
+# returns TRUE if all trials with same PATH.block are correct
+# note trialpath needs to be unique for each row
+block.is.correct <- function (x) {
+
+  num.blocks <- length(unique(x$PATH.block))
+  block <- vector (mode="numeric", length=num.blocks) 
+  correct.block <- vector (mode="logical", length=num.blocks)
+  
+  for (i in unique(x$PATH.block)) {
+    this.block <- subset (x, PATH.block == i)
+
+    block[i+1] <- i
+    correct.block[i+1] <- (all (this.block$correct.trial == TRUE))
+  }
+       
+  x <- merge (x, data.frame (block, correct.block), by.x="PATH.block", by.y="block")
+  # return (data.frame (block, correct.block))
+  return (x)
+}
+
+
+# combine in a process.data function
+process.data <- function (x) {
+  x <- split.trialpath (x)
+  x$correct.trial <- trial.is.correct (x)
+  x <- block.is.correct (x)
+}
+
+data.raw$correct <- trial.is.correct (data.raw)
+
+# data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
+
+                                        #
 #
 #
 # Join lookup table with simulated data
@@ -85,8 +124,13 @@ data.raw = transform (data.raw, seq = colsplit(sequence, pattern = "/", names=c(
 ################### FILTERING #########################
 #######################################################
                                         # should filter for correct sequences only!
+exclude.outliers <- function (x, field, max, min) subset(x, x$field > min || x$field < max)
+
 data = subset (data.raw, correct == TRUE)
-#
+
+
+
+
 # exclude outliers (RTs +/- 3 SDs) for each task (irrespective of trial position or switch condition)
 # exclude outliers (RTs +/- 3 SDs)
 #descriptives <- by(data$cycles, data$cue, stat.desc)
@@ -167,7 +211,6 @@ linegraph +
 
 
 # descriptive statistics, tasks 0 (easy) and 1 (intermediate)
-
 descriptives <- function (x) by (x$cycles, x$sequence_cond, stat.desc)
 
 calculate.RT.mean <- function (x, condition) descriptives(x)[[condition]][["mean"]]
@@ -184,7 +227,6 @@ tabulate.RT <- function (data) {
 
   return (output)
 }
-
 
 
 # calculate.switchcost <- function (x) calculate.RT.mean(x, "1SW") - calculate.RT.mean(x, "0SW")
@@ -218,7 +260,6 @@ calculate.n2rc <- function (x){
    ) 
 }
 
-  
 
 data.off <- subset(data.all, conflict=="no conflict")
 tabulate.RT (data.off)
@@ -242,6 +283,7 @@ data.rescale <- subset(data.all, conflict=="rescale") #
 tabulate.RT (data.rescale)
 calculate.switchcost (data.rescale)
 calculate.n2rc (data.rescale)
+
 
 
 
