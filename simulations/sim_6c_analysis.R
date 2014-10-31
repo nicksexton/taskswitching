@@ -35,6 +35,10 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
+# library (lineprof) # for profiling
+
+source ("sim_6_analysis_functions.R")
+
 imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_6")
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
@@ -52,56 +56,26 @@ data.off <- cbind (data.off, conflict="no conflict")
 data.allow <- cbind (data.allow, conflict="allow")
 data.clip <- cbind (data.clip, conflict="clip")
 data.rescale <- cbind (data.rescale, conflict="rescale")
+
+
+# Need to clean data (ie work out block.correct) before binding multiple data sets together
+
 # data.raw <- rbind (data.off, data.allow, data.clip, data.rescale) # commented while testing only single method
-# data.raw <- rbind (data.allow)
+
+data.processed <- split.trialpath (data.off)
+data.processed$correct.trial <- trial.is.correct (data.processed)
+
+# l <- lineprof (data.off <- process.data (data.off))
+system.time (data.off.1 <- block.is.correct (data.processed))
+
+system.time (data.off.1 <- block.is.correct1 (data.processed))
+
+system.time (data.off.1 <- block.is.correct2 (data.processed))
+
+system.time (data.off.1 <- block.is.correct3 (data.processed))
 
 
 
-split.trialpath <- function (x) {
-  x$trialpath <- as.character(x$trialpath)
-  transform (x, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
-}
-
-
-# evaluates to TRUE of FALSE
-trial.is.correct <- function (x) with (x, ifelse (cue == 0, stim_0 == response %% 2,
-                                                  ifelse (cue == 1, stim_1 == response %% 2,
-                                                          ifelse (cue == 2, stim_2 == response %% 2, NA))))
-
-
-# returns TRUE if all trials with same PATH.block are correct
-# note trialpath needs to be unique for each row
-block.is.correct <- function (x) {
-
-  num.blocks <- length(unique(x$PATH.block))
-  block <- vector (mode="numeric", length=num.blocks) 
-  correct.block <- vector (mode="logical", length=num.blocks)
-  
-  for (i in unique(x$PATH.block)) {
-    this.block <- subset (x, PATH.block == i)
-
-    block[i+1] <- i
-    correct.block[i+1] <- (all (this.block$correct.trial == TRUE))
-  }
-       
-  x <- merge (x, data.frame (block, correct.block), by.x="PATH.block", by.y="block")
-  # return (data.frame (block, correct.block))
-  return (x)
-}
-
-
-# combine in a process.data function
-process.data <- function (x) {
-  x <- split.trialpath (x)
-  x$correct.trial <- trial.is.correct (x)
-  x <- block.is.correct (x)
-}
-
-data.raw$correct <- trial.is.correct (data.raw)
-
-# data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
-
-                                        #
 #
 #
 # Join lookup table with simulated data
