@@ -1,5 +1,8 @@
 rm (list = ls())
 
+library (reshape2) # for colsplit
+library (pastecs) # for stat.desc
+
 source ("sim_6_analysis_functions.R")
 
 blocksize <- 5
@@ -42,17 +45,6 @@ MAX_CYCLES 500") # tailing spaces eliminates double newlines, for some reason
                                         # BIAS_CONFLICT -7.5 
                                         # CONFLICT_GAIN 39.0 
                                         # CONFLICT_TASKDEMAND_WT -14.0 
-
-
-model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
-model.conf.leaf.min <- data.frame (conflict.gain = 0.5, conflict.tdwt = -40.0, conflict.bias = -30.0)
-model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = -0.0, conflict.bias = -0.0)
-
-
-generation <- data.frame (conflict.gain = c(30.0, 35.0, 39.0),
-                          conflict.tdwt = c(-12.0, -14.0, -16.0),
-                          conflict.bias = c(-7.5, -8.5, -9.5)
-                          )
 
 
 model.conf.makeleaf <- function (x) paste ("\nCONFLICT_GAIN", x$conflict.gain,
@@ -117,6 +109,56 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   
 }
 
+
+########################### Main algorithm #############################
+
+
+model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
+model.conf.leaf.min <- data.frame (conflict.gain = 0.5, conflict.tdwt = -40.0, conflict.bias = -30.0)
+model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = -0.0, conflict.bias = -0.0)
+
+generation <- data.frame (conflict.gain = c(30.0, 35.0, 39.0),
+                          conflict.tdwt = c(-12.0, -14.0, -16.0),
+                          conflict.bias = c(-7.5, -8.5, -9.5)
+                          )
+
+
+generate.random <- function (min, max) {
+                                        # generates a random (uniform dist) indidual between min and max
+  apply (X=rbind (min, max),
+         MARGIN = 2, # apply over columns
+         FUN = function (x) runif (1, x[1], x[2]))
+}
+
+generate.cross <- function (x, y) {
+  apply (X=rbind (x, y),
+         MARGIN = 2,
+         FUN = function (x) ifelse (sample(0:1, 1) == 0, x[1], x[2]))
+}
+
+generate.mutation <- function (x, min, max) {
+  apply (X=rbind (x, min, max),
+         MARGIN = 2,
+         FUN = function (x) {
+           new <- rnorm (n=1, mean=x[1], sd = abs(x[2]-x[3])/3) # min - max = 3SDs
+           ifelse (new < x[2],
+                   x[2],
+                   ifelse(new > x[3],
+                          x[3],
+                          new))
+       })
+}
+
+
+
+calculate.fit <- function (results, target.0SW, target.1SW) {
+                                        # sum squared error
+  (results$mean.0SW - target.0SW)^2 + (results$mean.1SW - target.1SW)^2
+}
+
+
+
+
 run.individual (generation[1,],
                 model.conf.stem,
                 filename.conf.temp,
@@ -124,7 +166,7 @@ run.individual (generation[1,],
 
 # create new data frame
 
-n <- 100
+n <- nrow(generation)
 results <- data.frame (mean.0SW=numeric(n),
                        mean.1SW=numeric(n),
                        sc=numeric(n),
@@ -137,3 +179,5 @@ for (i in 1:nrow(generation)) {
                                 stem=model.conf.stem,
                                 conf.file.temp = filename.conf.temp,
                                 output.file.temp = filename.output.data.temp) }
+
+
