@@ -13,8 +13,8 @@ path.ramdisk <- "/media/ramdisk/"
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
-blocksize <- 40
-n <- 200 # population size
+blocksize <- 10
+n <- 10 # population size
 
 
 
@@ -202,12 +202,17 @@ evolve.generation <- function (gen, minimum, maximum) {
 
 test.generation <- function (gen) {
 
+  progress <- txtProgressBar (min=0, max=nrow(gen), style=3)
   for (i in 1:nrow(gen)) {
     gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
                                              stem=model.conf.stem,
                                              conf.file.temp=filename.conf.temp,
-                                             output.file.temp=filename.output.data.temp) }
+                                             output.file.temp=filename.output.data.temp)
+    setTxtProgressBar(progress, i)
+  }
 
+  close (progress)
+  
   gen$ssqerror <- calculate.fit (results=gen[names(results)],
                                  target.0SW=65.0, target.1SW=105.0)
 
@@ -265,6 +270,8 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-for (i in 1:20) {
+total.generations <- 2
+for (i in 1:total.generations) {
+    print (paste ("Generation:", i, "of:", total.generations))
   gen <- run.generation (gen, i)
 }
