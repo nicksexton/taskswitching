@@ -1,13 +1,17 @@
 rm (list = ls())
 
+
+
 library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
+library (plyr) # for ddply
 
 source ("sim_6_analysis_functions.R")
 
-blocksize <- 5
+blocksize <- 20
 filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
 filename.output.data.temp <- "sim_6d_data_temp.txt"
+filename.output.genetic.results <- "sim_6d_genetic_results" # results of GA
 
 system2 ("rm", args="sim_6d_lookup.txt sim_6d_trials.conf")
 system2 ("./sim_6d_genetic_trials.py", args=paste("-n", blocksize))
@@ -159,27 +163,48 @@ calculate.fit <- function (results, target.0SW, target.1SW) {
 }
 
 
-evolve.generation <- function (gen) {
-
+evolve.generation <- function (gen, minimum, maximum) {
+#gen - only parameters from generation (ie., generation[names(params)]
   
+  # Q1 = best 25% of current population
+  # Q2 = crossed 25% of current popn
+  # Q3 = mutated best 25%
+  # Q4 = new randomly generated
 
+  q.size <- ceiling(as.numeric(nrow(gen)/4)) # to avoid decreasing population due to rounding problems
+
+  q1 <- gen[1:q.size,] 
+  q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))))
+#   q3 <- apply (X=q1, MARGIN=2, FUN=function (x) generate.mutation (x, min, max))
+
+  q3 <- ddply (.data=q1[names(minimum)],
+               .variables=names(minimum),
+               .fun= function(x) generate.mutation (x, minimum, maximum))
+
+  q4 <- generate.population.seed (q.size, minimum, maximum)
+
+  new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisable by 4
+  rownames (new) <- 1:nrow(new)
+
+  return (new)
 }
 
 
-run.generation <- function (gen) {
+test.generation <- function (gen) {
 
-  for (i in seq(gen)) {
-    gen[i,names(results)] <- run.individual (gen[i,names(model.conf.leaf.min)],
-                                             gen=model.conf.stem,
-                                             conf.file.temp = filename.conf.temp,
-                                             output.file.temp = filename.output.data.temp) }
+  for (i in 1:nrow(gen)) {
+    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
+                                             stem=model.conf.stem,
+                                             conf.file.temp=filename.conf.temp,
+                                             output.file.temp=filename.output.data.temp) }
 
   gen$ssqerror <- calculate.fit (results=gen[names(results)],
                                  target.0SW=65.0, target.1SW=105.0)
 
   gen <- gen[order (gen$ssqerror),] # sort by ssqerror
 
-  evolve.generation (gen)
+#  head (gen)                            #output this generation to file here
+
   
   return (gen)
 
@@ -187,10 +212,32 @@ run.generation <- function (gen) {
 
 
 
-n <- 10
+run.generation <- function (gen, iteration) {
+
+  generation <- cbind (gen, results, data.frame("ssqerror"=0))
+  generation.results <- test.generation (generation)
+  
+  # print here
+  print (generation.results)
+  write (paste("\nGENERATION ", iteration, ": \n"), filename.output.genetic.results, append=TRUE)
+  write.table (generation.results, filename.output.genetic.results, sep="\t", append=TRUE)
+  write ("\n", filename.output.genetic.results, append=TRUE)
+         
+  evolve.generation (generation.results[names(model.conf.leaf.min)],
+                     min=model.conf.leaf.min,
+                     max=model.conf.leaf.max)
+}
+
+
+
+n <- 40
 # model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
+
+
 model.conf.leaf.min <- data.frame (conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
 model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
+
+params <- names (model.conf.leaf.min)
 
   results <- data.frame (mean.0SW=numeric(n),
                          mean.1SW=numeric(n),
@@ -199,21 +246,13 @@ model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 0.0, c
                          df=numeric(n),
                          p=numeric(n))
 
-
-
 generation.seed <- generate.population.seed (n,
                                              model.conf.leaf.min,
                                              model.conf.leaf.max)
 
-generation.seed <- cbind (generation.seed, results, data.frame("ssqerror"=0))
+gen <- generation.seed
 
-
-run.generation (generation.seed)
-
-
-############################## Test Code
-
-
-
-
-
+# temp
+for (i in 1:5) {
+  gen <- run.generation (gen, i)
+}
