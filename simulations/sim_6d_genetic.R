@@ -54,16 +54,13 @@ model.conf.makeleaf <- function (x) paste ("\nCONFLICT_GAIN", x$conflict.gain,
 
 model.run <- function (stem, leaf, conf.tempfile, output.tempfile) {
 
-  system2 ("rm", args=conf.tempfile) # optional, just being tidy
-  write (paste(stem, leaf), conf.tempfile, append=FALSE)
 
-  system2 ("rm", args=output.tempfile) # optional, just being tidy
-  system2 ("rm", args="3task_act.txt") # optional, just being tidy
+  write (paste(stem, leaf), conf.tempfile, append=FALSE)
   
   run.args = paste("-t sim_6d_trials.conf -m ", conf.tempfile, sep=" ")
-  system2 ("../3task_basic_koch_conflict", args=run.args, stdout = "sim_6d_log.txt", stderr = NULL)
+  system2 ("../3task_basic_koch_conflict", args=run.args, stdout = NULL, stderr = NULL)
 
-  system2 ("mv", args=paste("3task_data.txt", output.tempfile))  
+  system2 ("mv", args=paste("3task_data.txt", output.tempfile)) 
 }
 
 
@@ -103,7 +100,10 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
              model.conf.makeleaf (leaf),
              conf.file.temp,
              output.file.temp)
-  data <- data.preprocess (filename.output.data.temp, data.lookuptable)
+  data <- data.preprocess (output.file.temp, data.lookuptable)
+  # clean up output file
+  system2 ("rm", args=output.file.temp, conf.file.temp, "3task_act.txt") # run.individual cleans output tempfile  
+
   results <- calculate.switchcost (data)
   return (results)
   
@@ -113,14 +113,6 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
 ########################### Main algorithm #############################
 
 
-model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
-model.conf.leaf.min <- data.frame (conflict.gain = 0.5, conflict.tdwt = -40.0, conflict.bias = -30.0)
-model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = -0.0, conflict.bias = -0.0)
-
-generation <- data.frame (conflict.gain = c(30.0, 35.0, 39.0),
-                          conflict.tdwt = c(-12.0, -14.0, -16.0),
-                          conflict.bias = c(-7.5, -8.5, -9.5)
-                          )
 
 
 generate.random <- function (min, max) {
@@ -149,6 +141,16 @@ generate.mutation <- function (x, min, max) {
        })
 }
 
+generate.population.seed <- function (n, min, max) {
+                                        # pre-allocate the data frame
+  seed <- data.frame (matrix(nrow=n, ncol=ncol(min)))
+  colnames (seed) <- names(min)
+
+  for (i in seq(from=1, to=n))
+    seed[i,] <- apply (X=seed[i,], MARGIN=2, FUN=function (x) generate.random (min, max))
+
+  return (seed)
+}
 
 
 calculate.fit <- function (results, target.0SW, target.1SW) {
@@ -157,27 +159,61 @@ calculate.fit <- function (results, target.0SW, target.1SW) {
 }
 
 
+evolve.generation <- function (gen) {
+
+  
+
+}
 
 
-run.individual (generation[1,],
-                model.conf.stem,
-                filename.conf.temp,
-                filename.output.data.temp)
+run.generation <- function (gen) {
 
-# create new data frame
+  for (i in seq(gen)) {
+    gen[i,names(results)] <- run.individual (gen[i,names(model.conf.leaf.min)],
+                                             gen=model.conf.stem,
+                                             conf.file.temp = filename.conf.temp,
+                                             output.file.temp = filename.output.data.temp) }
 
-n <- nrow(generation)
-results <- data.frame (mean.0SW=numeric(n),
-                       mean.1SW=numeric(n),
-                       sc=numeric(n),
-                       t=numeric(n),
-                       df=numeric(n),
-                       p=numeric(n))
+  gen$ssqerror <- calculate.fit (results=gen[names(results)],
+                                 target.0SW=65.0, target.1SW=105.0)
 
-for (i in 1:nrow(generation)) {
-  results[i,] <- run.individual (generation[i,],
-                                stem=model.conf.stem,
-                                conf.file.temp = filename.conf.temp,
-                                output.file.temp = filename.output.data.temp) }
+  gen <- gen[order (gen$ssqerror),] # sort by ssqerror
+
+  evolve.generation (gen)
+  
+  return (gen)
+
+}
+
+
+
+n <- 10
+# model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
+model.conf.leaf.min <- data.frame (conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
+model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
+
+  results <- data.frame (mean.0SW=numeric(n),
+                         mean.1SW=numeric(n),
+                         sc=numeric(n),
+                         t=numeric(n),
+                         df=numeric(n),
+                         p=numeric(n))
+
+
+
+generation.seed <- generate.population.seed (n,
+                                             model.conf.leaf.min,
+                                             model.conf.leaf.max)
+
+generation.seed <- cbind (generation.seed, results, data.frame("ssqerror"=0))
+
+
+run.generation (generation.seed)
+
+
+############################## Test Code
+
+
+
 
 

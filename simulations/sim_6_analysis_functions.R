@@ -73,9 +73,12 @@ block.is.correct2 <- function (x) {
   return (x)
 }
 
-# same as version 2 but disregards safety checks that data frame is in order of trialid
-block.is.correct3 <- function (x) {
 
+block.is.correct3 <- function (x) {
+                                        # fastest version
+                                        # same as version 2 but disregards safety checks that data frame
+                                        # is correctly sorted (in order of trialid)
+  
   correct.block <- vector (mode="logical", length=nrow(x))
   for (i in 1:nrow(x)) {
    
@@ -148,15 +151,16 @@ test.n2rc <- function (x)
   t.test (cycles ~ sequence_cond, data = subset(x, sequence_cond == "2SW" | sequence_cond =="ALT"))
 
 calculate.switchcost <- function (x){
-  ifelse ((nrow(x[x$"0SW"]) > 0 & nrow(x[x$"1SW"]) > 0),
-        data.frame (
+  ifelse (nrow(subset(x, x$"sequence_cond"=="0SW")) > 0 &
+          nrow(subset(x, x$"sequence_cond"=="1SW")) > 0,
+        results <- data.frame (
             mean.0SW = calculate.RT.mean.unsafe (x, "0SW"),
             mean.1SW = calculate.RT.mean.unsafe (x, "1SW"),
-            sc = calculate.RT.mean (x, "1SW") - calculate.RT.mean (x, "0SW"),
+            sc = calculate.RT.mean.unsafe (x, "1SW") - calculate.RT.mean.unsafe (x, "0SW"),
             t = test.switchcost(x)[[1]][[1]],
             df = test.switchcost(x)[[2]][[1]],
             p = test.switchcost(x)[[3]][[1]]),
-          data.frame (
+          results <- data.frame (
             mean.0SW = NA,
             mean.1SW = NA,
             sc = NA,
@@ -164,19 +168,21 @@ calculate.switchcost <- function (x){
             df = NA,
             p = NA)
           )
+  return (results)
 }
 
 calculate.n2rc <- function (x){
+  ifelse (nrow(subset(x, x$"sequence_cond"=="2SW")) > 0 &
+        nrow(subset(x, x$"sequence_cond"=="ALT")) > 0,
 
-    ifelse ((nrow(x[x$"2SW"]) > 0 | nrow(x[x$"ALT"]) > 0),
-            data.frame (
+            results <- data.frame (
               mean.2SW = calculate.RT.mean.unsafe (x, "2SW"),
               mean.ALT = calculate.RT.mean.unsafe (x, "ALT"),
-              n2rc = calculate.RT.mean (x, "ALT") - calculate.RT.mean (x, "2SW"),
+              n2rc = calculate.RT.mean.unsafe (x, "ALT") - calculate.RT.mean.unsafe (x, "2SW"),
               t = test.n2rc(x)[[1]][[1]],
               df = test.n2rc(x)[[2]][[1]],
               p = test.n2rc(x)[[3]][[1]]),
-            data.frame (
+            results <- data.frame (
               mean.0SW = NA,
               mean.1SW = NA,
               sc = NA,
@@ -185,4 +191,5 @@ calculate.n2rc <- function (x){
               p = NA
               )
             )
+    return (results)
 }
