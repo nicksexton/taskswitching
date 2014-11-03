@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mount -t tmpfs -o size=2G tmpfs /media/ramdisk
+mount -t tmpfs -o size=200M tmpfs /media/ramdisk

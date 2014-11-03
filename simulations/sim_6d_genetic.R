@@ -8,17 +8,24 @@ library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
 library (plyr) # for ddply
 
-source ("sim_6_analysis_functions.R")
+path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
+path.ramdisk <- "/media/ramdisk/"
+
+source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
 blocksize <- 10 
-n <- 40 # population size
+n <- 10 # population size
 
-filename.conf.temp <- "/media/ramdisk/sim_6d_params_temp.conf" # will be created
-filename.output.data.temp <- "/media/ramdisk/sim_6d_data_temp.txt"
-filename.output.genetic.results <- "sim_6d_genetic_results" # results of GA
 
+
+filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
+filename.output.data.temp <- "sim_6d_data_temp.txt"
+filename.output.genetic.results <- "sim_6d_genetic_results.txt" # results of GA
+
+
+setwd (path.ramdisk)
 system2 ("rm", args="sim_6d_lookup.txt sim_6d_trials.conf")
-system2 ("./sim_6d_genetic_trials.py", args=paste("-n", blocksize))
+system2 (paste(path.simulation, "sim_6d_genetic_trials.py", sep=""), args=paste("-n", blocksize))
 
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 data.lookuptable = read.delim("sim_6d_lookup.txt", header = FALSE, col.names=labels.lookup)
@@ -62,13 +69,13 @@ model.conf.makeleaf <- function (x) paste ("\nCONFLICT_GAIN", x$conflict.gain,
 
 model.run <- function (stem, leaf, conf.tempfile, output.tempfile) {
 
-
   write (paste(stem, leaf), conf.tempfile, append=FALSE)
   
   run.args = paste("-t sim_6d_trials.conf -m ", conf.tempfile, sep=" ")
-  system2 ("../3task_basic_koch_conflict", args=run.args, stdout = NULL, stderr = NULL)
+  system2 (paste(path.simulation, "/../3task_basic_koch_conflict", sep=""),
+           args=run.args, stdout = NULL, stderr = NULL)
 
-  system2 ("mv", args=paste("3task_data.txt", output.tempfile)) 
+  system2 ("mv", args=paste("3task_data.txt", paste(path.ramdisk, output.tempfile, sep=""))) 
 }
 
 
@@ -76,7 +83,7 @@ data.preprocess <- function (datafile, lookuptable) {
 
   labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
-  data <- read.delim(datafile,
+  data <- read.delim(paste(path.ramdisk, datafile, sep=""),
                      header=FALSE, sep=c("", ":"), col.names=labels.data)
   data <- split.trialpath (data)
   data <- process.data (data)
@@ -219,12 +226,14 @@ run.generation <- function (gen, iteration) {
 
   generation <- cbind (gen, results, data.frame("ssqerror"=0))
   generation.results <- test.generation (generation)
+
+  file <- paste(path.simulation, filename.output.genetic.results, sep="")
   
   # print here
   print (generation.results)
-  write (paste("\nGENERATION ", iteration, ": \n"), filename.output.genetic.results, append=TRUE)
-  write.table (generation.results, filename.output.genetic.results, sep="\t", append=TRUE)
-  write ("\n", filename.output.genetic.results, append=TRUE)
+  write (paste("\nGENERATION ", iteration, ": \n"), file, append=TRUE)
+  write.table (format(generation.results, digits=4), file, sep="\t", append=TRUE)
+  write ("\n", file, append=TRUE)
          
   evolve.generation (generation.results[names(model.conf.leaf.min)],
                      min=model.conf.leaf.min,
@@ -256,6 +265,6 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-for (i in 1:2) {
+for (i in 1:1) {
   gen <- run.generation (gen, i)
 }
