@@ -1,5 +1,7 @@
 rm (list = ls())
 
+# IMPORTANT! run create_ramdisk.sh as root before executing script to create ramdisk for temporary files
+
 
 
 library (reshape2) # for colsplit
@@ -8,9 +10,11 @@ library (plyr) # for ddply
 
 source ("sim_6_analysis_functions.R")
 
-blocksize <- 20
-filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
-filename.output.data.temp <- "sim_6d_data_temp.txt"
+blocksize <- 10 
+n <- 40 # population size
+
+filename.conf.temp <- "/media/ramdisk/sim_6d_params_temp.conf" # will be created
+filename.output.data.temp <- "/media/ramdisk/sim_6d_data_temp.txt"
 filename.output.genetic.results <- "sim_6d_genetic_results" # results of GA
 
 system2 ("rm", args="sim_6d_lookup.txt sim_6d_trials.conf")
@@ -175,7 +179,6 @@ evolve.generation <- function (gen, minimum, maximum) {
 
   q1 <- gen[1:q.size,] 
   q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))))
-#   q3 <- apply (X=q1, MARGIN=2, FUN=function (x) generate.mutation (x, min, max))
 
   q3 <- ddply (.data=q1[names(minimum)],
                .variables=names(minimum),
@@ -230,12 +233,12 @@ run.generation <- function (gen, iteration) {
 
 
 
-n <- 40
+
 # model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
 
 
 model.conf.leaf.min <- data.frame (conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
-model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
+model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 1.0, conflict.bias = -1.0)
 
 params <- names (model.conf.leaf.min)
 
@@ -253,6 +256,6 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-for (i in 1:5) {
+for (i in 1:2) {
   gen <- run.generation (gen, i)
 }
