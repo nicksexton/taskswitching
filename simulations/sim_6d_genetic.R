@@ -13,8 +13,8 @@ path.ramdisk <- "/media/ramdisk/"
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
-blocksize <- 10 
-n <- 10 # population size
+blocksize <- 40
+n <- 200 # population size
 
 
 
@@ -265,6 +265,6 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-for (i in 1:1) {
+for (i in 1:20) {
   gen <- run.generation (gen, i)
 }
