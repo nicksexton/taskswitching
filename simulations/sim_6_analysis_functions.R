@@ -151,8 +151,8 @@ test.n2rc <- function (x)
   t.test (cycles ~ sequence_cond, data = subset(x, sequence_cond == "2SW" | sequence_cond =="ALT"))
 
 calculate.switchcost <- function (x){
-  ifelse (nrow(subset(x, x$"sequence_cond"=="0SW")) > 1 &
-          nrow(subset(x, x$"sequence_cond"=="1SW")) > 1,
+  ifelse (nrow(subset(x, x$"sequence_cond"=="0SW")) > 5 &
+          nrow(subset(x, x$"sequence_cond"=="1SW")) > 5,
         results <- data.frame (
             mean.0SW = calculate.RT.mean.unsafe (x, "0SW"),
             mean.1SW = calculate.RT.mean.unsafe (x, "1SW"),
