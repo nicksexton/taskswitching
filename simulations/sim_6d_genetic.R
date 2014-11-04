@@ -14,7 +14,7 @@ path.ramdisk <- "/media/ramdisk/"
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
 blocksize <- 30
-n <- 30 # population size
+n <- 12 # population size
 
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
@@ -186,7 +186,11 @@ evolve.generation <- function (gen, minimum, maximum) {
   q.size <- ceiling(as.numeric(nrow(gen)/4)) # to avoid decreasing population due to rounding problems
 
   q1 <- gen[1:q.size,] 
-  q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))))
+#  q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))))
+
+  q2 <- ddply (.data=q1,
+               .variables=names(minimum),
+               .fun=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))
 
   q3 <- ddply (.data=q1[names(minimum)],
                .variables=names(minimum),
@@ -194,7 +198,8 @@ evolve.generation <- function (gen, minimum, maximum) {
 
   q4 <- generate.population.seed (q.size, minimum, maximum)
 
-  new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisible by 4
+  # new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisible by 4
+  new <- rbind (q1, q2, q3, q4) # trim in case nrow(gen) wasn't divisible by 4
   rownames (new) <- 1:nrow(new)
 
   return (new)
@@ -248,7 +253,13 @@ run.generation <- function (gen, iteration) {
   # print here
   print (generation.results)
   write (paste("\nGENERATION ", iteration, ": \n"), file, append=TRUE)
-  write.table (format(generation.results, digits=4), file, sep="\t", append=TRUE)
+
+  write.table (format(generation.results, digits=4),
+               file,
+               sep="\t",
+               append=TRUE,
+               quote=FALSE,
+               col.names=TRUE)
   write ("\n", file, append=TRUE)
          
   evolve.generation (generation.results[names(model.conf.leaf.min)],
@@ -283,11 +294,11 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-total.generations <- 5
+total.generations <- 20
 for (i in 1:total.generations) {
     print (paste ("Generation", i, "of", total.generations))
   gen <- run.generation (gen, i)
+  print (nrow(gen))
 }
-
 
 
