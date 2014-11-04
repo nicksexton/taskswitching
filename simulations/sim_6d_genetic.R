@@ -14,7 +14,7 @@ path.ramdisk <- "/media/ramdisk/"
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
 blocksize <- 30
-n <- 200 # population size
+n <- 30 # population size
 
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
@@ -118,7 +118,7 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
              output.file.temp)
   data <- data.preprocess (output.file.temp, data.lookuptable)
   # clean up output file
-  system2 ("rm", args=output.file.temp, conf.file.temp, "3task_act.txt") # run.individual cleans output tempfile  
+  system2 ("rm", args=c(output.file.temp, conf.file.temp, "3task_act.txt")) # run.individual cleans output tempfile  
 
   results <- calculate.switchcost (data)
   return (results)
@@ -208,7 +208,7 @@ test.generation <- function (gen, iteration) {
   for (i in 1:nrow(gen)) {
 
     conf <- paste (filename.conf.temp.stem, ".", iteration, ".", i, ".conf", sep="")
-    data <- paste (filename.output.data.temp.stem, ".", iteration, ".", i, ".txt", sep="")
+    data <- paste (filename.output.temp.stem, ".", iteration, ".", i, ".txt", sep="")
     
 #    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
 #                                             stem=model.conf.stem,
@@ -265,7 +265,7 @@ run.generation <- function (gen, iteration) {
 model.conf.leaf.min <- data.frame (conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
 model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 1.0, conflict.bias = -1.0)
 
-model.conf.leaf.TEST <- data.frame (conflict.gain = NA, conflict.tdwt = NA, conflict.bias = NA)
+# model.conf.leaf.TEST <- data.frame (conflict.gain = NA, conflict.tdwt = NA, conflict.bias = NA)
 
 params <- names (model.conf.leaf.min)
 
@@ -283,7 +283,7 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-total.generations <- 20
+total.generations <- 5
 for (i in 1:total.generations) {
     print (paste ("Generation", i, "of", total.generations))
   gen <- run.generation (gen, i)
