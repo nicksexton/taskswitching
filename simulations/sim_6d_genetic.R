@@ -17,7 +17,8 @@ blocksize <- 30
 n <- 200 # population size
 
 
-
+filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
+filename.output.temp.stem <- "sim_6d_data_" # for parallel version
 filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
 filename.output.data.temp <- "sim_6d_data_temp.txt"
 filename.output.genetic.results <- "sim_6d_genetic_results.txt" # results of GA
@@ -193,21 +194,31 @@ evolve.generation <- function (gen, minimum, maximum) {
 
   q4 <- generate.population.seed (q.size, minimum, maximum)
 
-  new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisable by 4
+  new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisible by 4
   rownames (new) <- 1:nrow(new)
 
   return (new)
 }
 
 
-test.generation <- function (gen) {
+test.generation <- function (gen, iteration) {
 
   progress <- txtProgressBar (min=0, max=nrow(gen), style=3)
+
   for (i in 1:nrow(gen)) {
+
+    conf <- paste (filename.conf.temp.stem, ".", iteration, ".", i, ".conf", sep="")
+    data <- paste (filename.output.data.temp.stem, ".", iteration, ".", i, ".txt", sep="")
+    
+#    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
+#                                             stem=model.conf.stem,
+#                                             conf.file.temp=filename.conf.temp,
+#                                             output.file.temp=filename.output.data.temp)
     gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
                                              stem=model.conf.stem,
-                                             conf.file.temp=filename.conf.temp,
-                                             output.file.temp=filename.output.data.temp)
+                                             conf.file.temp=conf,
+                                             output.file.temp=data)
+
     setTxtProgressBar(progress, i)
   }
 
@@ -230,7 +241,7 @@ test.generation <- function (gen) {
 run.generation <- function (gen, iteration) {
 
   generation <- cbind (gen, results, data.frame("ssqerror"=0))
-  generation.results <- test.generation (generation)
+  generation.results <- test.generation (generation, iteration)
 
   file <- paste(path.simulation, filename.output.genetic.results, sep="")
   
@@ -253,6 +264,8 @@ run.generation <- function (gen, iteration) {
 
 model.conf.leaf.min <- data.frame (conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
 model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 1.0, conflict.bias = -1.0)
+
+model.conf.leaf.TEST <- data.frame (conflict.gain = NA, conflict.tdwt = NA, conflict.bias = NA)
 
 params <- names (model.conf.leaf.min)
 
