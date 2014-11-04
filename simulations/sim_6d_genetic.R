@@ -8,6 +8,10 @@ library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
 library (plyr) # for ddply
 
+#library (foreach)
+#library (doParallel)
+
+
 path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
 path.ramdisk <- "/media/ramdisk/"
 
@@ -138,11 +142,10 @@ generate.random <- function (min, max) {
          FUN = function (x) runif (1, x[1], x[2]))
 }
 
-generate.cross <- function (x, y) {
-  apply (X=rbind (x, y),
-         MARGIN = 2,
-         FUN = function (x) ifelse (sample(0:1, 1) == 0, x[1], x[2]))
-}
+generate.cross <- function (x, y) apply (X=rbind (x, y),
+                                         MARGIN = 2,
+                                         FUN = function (x) ifelse (sample(0:1, 1) == 0, x[1], x[2]))
+
 
 generate.mutation <- function (x, min, max) {
   apply (X=rbind (x, min, max),
@@ -156,6 +159,15 @@ generate.mutation <- function (x, min, max) {
                           new))
        })
 }
+
+generate.mutation1 <- function (x, min, max) {
+
+  apply (X=rbind (x, min, max),
+         MARGIN = 2,
+         FUN = function (x) rnorm (n=1, mean=x[1], sd = abs(x[2]-x[3])/3)) # min - max = 3SDs
+
+}
+
 
 generate.population.seed <- function (n, min, max) {
                                         # pre-allocate the data frame
@@ -184,22 +196,49 @@ evolve.generation <- function (gen, minimum, maximum) {
   # Q4 = new randomly generated
 
   q.size <- ceiling(as.numeric(nrow(gen)/4)) # to avoid decreasing population due to rounding problems
-
   q1 <- gen[1:q.size,] 
-#  q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))))
 
-  q2 <- ddply (.data=q1,
-               .variables=names(minimum),
-               .fun=function (x) generate.cross (x, q1[sample(1:q.size, 1),]))
+  # debug!
+#  q1 <- rbind (q1, q1[3,])
+#  print (q1)
+  
+#  q2 <- ddply (.data=q1,
+#               .variables=c("id", names(minimum)),
+#               .fun=function (x) {
+#                 y <- sample(1:q.size)
+#                 generate.cross (x, q1[y,])
+#               })
+  q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) {
+                  y <- sample(1:q.size, 1)
+                 generate.cross (x, q1[y,])
+               })))
 
-  q3 <- ddply (.data=q1[names(minimum)],
-               .variables=names(minimum),
-               .fun= function(x) generate.mutation (x, minimum, maximum))
+#  print (q2)
 
+#  browser()
+
+#  q3 <- ddply (.data=q1,
+#               .variables=c("id", names(minimum)),
+#               .fun= function(x) generate.mutation (x, minimum, maximum))
+  q3 <- data.frame(t(apply (X=q1,
+                            MARGIN=1,
+                            FUN = function(x) generate.mutation (x, minimum, maximum))))
+
+#  print (q3)
+  
   q4 <- generate.population.seed (q.size, minimum, maximum)
-
+#  print (q4)
+  
+#  size <- data.frame (segment=c("q1", "q2", "q3", "q4"), pop=c(nrow(q1), nrow(q2), nrow(q3), nrow(q4)))
+#  print (size)
+#  ifelse (size$pop != q.size, browser(), print ("ok")) 
+  
   # new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisible by 4
-  new <- rbind (q1, q2, q3, q4) # trim in case nrow(gen) wasn't divisible by 4
+  new <- rbind (q1, q2, q3, q4) 
+
+#  print (paste ("total:", nrow(new)))
+  print (new)
+  
   rownames (new) <- 1:nrow(new)
 
   return (new)
@@ -215,10 +254,6 @@ test.generation <- function (gen, iteration) {
     conf <- paste (filename.conf.temp.stem, ".", iteration, ".", i, ".conf", sep="")
     data <- paste (filename.output.temp.stem, ".", iteration, ".", i, ".txt", sep="")
     
-#    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
-#                                             stem=model.conf.stem,
-#                                             conf.file.temp=filename.conf.temp,
-#                                             output.file.temp=filename.output.data.temp)
     gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
                                              stem=model.conf.stem,
                                              conf.file.temp=conf,
@@ -241,12 +276,45 @@ test.generation <- function (gen, iteration) {
 
 }
 
+test.generation.parallel <- function (gen, iteration) {
+
+#  progress <- txtProgressBar (min=0, max=nrow(gen), style=3)
+
+  foreach (i=1:nrow(gen), .packages=c("reshape2", "pastecs", "plyr")) %dopar% {
+
+    conf <- paste ("sim_6d_params_.", iteration, ".", i, ".conf", sep="")
+    data <- paste ("sim_6d_data_.", iteration, ".", i, ".txt", sep="")
+    
+    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
+                                             stem=model.conf.stem,
+                                             conf.file.temp=conf,
+                                             output.file.temp=data)
+
+#    setTxtProgressBar(progress, icount)
+  }
+
+#  close (progress)
+  
+  gen$ssqerror <- calculate.fit (results=gen[names(results)],
+                                 target.0SW=65.0, target.1SW=105.0)
+
+  gen <- gen[order (gen$ssqerror),] # sort by ssqerror
+
+#  head (gen)                            #output this generation to file here
+
+  
+  return (gen)
+
+}
+
 
 
 run.generation <- function (gen, iteration) {
 
   generation <- cbind (gen, results, data.frame("ssqerror"=0))
+
   generation.results <- test.generation (generation, iteration)
+#  generation.results <- test.generation.parallel (generation, iteration)
 
   file <- paste(path.simulation, filename.output.genetic.results, sep="")
   
@@ -262,9 +330,10 @@ run.generation <- function (gen, iteration) {
                col.names=TRUE)
   write ("\n", file, append=TRUE)
          
-  evolve.generation (generation.results[names(model.conf.leaf.min)],
-                     min=model.conf.leaf.min,
-                     max=model.conf.leaf.max)
+  gen <- evolve.generation (generation.results[names(model.conf.leaf.min)],
+                            min=model.conf.leaf.min,
+                            max=model.conf.leaf.max)
+  return (gen)
 }
 
 
@@ -273,8 +342,8 @@ run.generation <- function (gen, iteration) {
 # model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
 
 
-model.conf.leaf.min <- data.frame (conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
-model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = 1.0, conflict.bias = -1.0)
+model.conf.leaf.min <- data.frame (conflict.gain = 1.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
+model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = -1.0, conflict.bias = -1.0)
 
 # model.conf.leaf.TEST <- data.frame (conflict.gain = NA, conflict.tdwt = NA, conflict.bias = NA)
 
@@ -294,11 +363,9 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-total.generations <- 20
+total.generations <- 100
 for (i in 1:total.generations) {
     print (paste ("Generation", i, "of", total.generations))
   gen <- run.generation (gen, i)
   print (nrow(gen))
 }
-
-
