@@ -9,7 +9,7 @@
 #include "3task_procedure.h"
 
 #define DATAFILE "3task_data.txt"
-#define DATAFILE_ACT "3task_act.txt"
+#define DATAFILE_ACT  "3task_act.txt"
 // defined elsewhere? 3task_basic.c for now
 
 

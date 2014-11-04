@@ -1,4 +1,7 @@
 // #define DEBUG_NETWORK_ACTIVATION
+// #define ECHO
+// #define ECHO_ACTIVATION
+
 
 #include <stdio.h>
 #include <string.h>
@@ -8,7 +11,6 @@
 #include "3task_model_gs.h" // for some shared functions
 #include "3task_koch_default_params.h"
 
-#define ECHO
 
 void three_task_koch_conflict_parameters_htable_set_default (GHashTable * params_table) {
 
@@ -860,11 +862,12 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
   */
     // Output this to a second logfile
 
+#if defined ECHO_ACTIVATION
     if (path != NULL) {
       // fprintf (fp_act, "%s\t%d\t", path, model->cycle);
       three_task_model_koch_fprintf_current_state (model, path, fp_act);
     }
-
+#endif
     return 0; 
   
 }
