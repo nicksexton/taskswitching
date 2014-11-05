@@ -10,9 +10,10 @@ split.trialpath <- function (x) {
 
 
 # evaluates to TRUE of FALSE
-trial.is.correct <- function (x) with (x, ifelse (cue == 0, stim_0 == response %% 2,
-                                                  ifelse (cue == 1, stim_1 == response %% 2,
-                                                          ifelse (cue == 2, stim_2 == response %% 2, NA))))
+trial.is.correct <- function (x, max.cycles) 
+  with (x, cycles < max.cycles & (ifelse (cue == 0, stim_0 == response %% 2,
+                                          ifelse (cue == 1, stim_1 == response %% 2,
+                                                  ifelse (cue == 2, stim_2 == response %% 2, NA)))))
 
 
 # returns TRUE if all trials with same PATH.block are correct
@@ -92,9 +93,9 @@ block.is.correct3 <- function (x) {
 
 
 # combine in a process.data function
-process.data <- function (x) {
+process.data <- function (x, max.cycles = 500) {
   x <- split.trialpath (x)
-  x$correct.trial <- trial.is.correct (x)
+  x$correct.trial <- trial.is.correct (x, max.cycles)
   x <- block.is.correct3 (x)
 
   return (x)

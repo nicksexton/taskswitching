@@ -17,9 +17,9 @@ path.ramdisk <- "/media/ramdisk/"
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
-blocksize <- 30
-n <- 12 # population size
-
+blocksize <- 50
+n <- 200 # population size
+max.cycles <- 500
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
 filename.output.temp.stem <- "sim_6d_data_" # for parallel version
@@ -91,7 +91,7 @@ data.preprocess <- function (datafile, lookuptable) {
   data <- read.delim(paste(path.ramdisk, datafile, sep=""),
                      header=FALSE, sep=c("", ":"), col.names=labels.data)
   data <- split.trialpath (data)
-  data <- process.data (data)
+  data <- process.data (data, max.cycles=max.cycles)
 
   data <- merge(lookuptable, data, by.x = "trialid", by.y = "trialid")
   data <- subset(data, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct.trial", "correct.block"))
@@ -363,7 +363,7 @@ generation.seed <- generate.population.seed (n,
 gen <- generation.seed
 
 # temp
-total.generations <- 100
+total.generations <- 40
 for (i in 1:total.generations) {
     print (paste ("Generation", i, "of", total.generations))
   gen <- run.generation (gen, i)
