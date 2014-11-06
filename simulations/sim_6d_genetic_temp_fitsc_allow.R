@@ -187,7 +187,7 @@ generate.population.seed <- function (n, min, max) {
 calculate.fit <- function (results, target.0SW, target.1SW) {
                                         # sum squared error
 #  (results$mean.0SW - target.0SW)^2 + (results$mean.1SW - target.1SW)^2
-    (results$mean.0SW - results$mean.1SW)^2 - (target.0SW - target.1SW)^2 # fit the magnitude of the SC only
+    ((results$mean.1SW - results$mean.0SW) - (target.1SW - target.0SW))^2 # fit the SC only
 }
 
 
