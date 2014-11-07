@@ -13,20 +13,22 @@ library (plyr) # for ddply
 #library (doParallel)
 
 
+
 path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
 path.ramdisk <- "/media/ramdisk/"
+setwd (path.simulation)
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
-# blocksize <- 50
-n <- 10 # size of grid (ie total observations is n^ncols(min)
+blocksize <- 50
+n <- 3 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
 filename.output.temp.stem <- "sim_6d_data_" # for parallel version
 filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
 filename.output.data.temp <- "sim_6d_data_temp.txt"
-filename.output.genetic.results <- "sim_6d_genetic_results.txt" # results of GA
+filename.output.genetic.results <- "sim_6d_gridsearch_results.txt" # results of GA
 
 
 setwd (path.ramdisk)
@@ -134,51 +136,47 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
 ########################### Main algorithm #############################
 
 
-# test data frames
-min <- c(a=1.0, b=0.0, c=-10.0)
-max <- c(a=5.0, b=1.0, c=10.0)
 
-interpolate.1d <- function (n, min, max) vect <- seq (from=min, to=max, length.out=n) 
-
-expand.1d <- function (vect, d) {
-# expands a vector n to size n*d by repeating each element d times
-  as.vector(sapply(X=vect, FUN=function(x) rep(x, d)))
-}
 
 generate.grid <- function (n, min, max) {
 # Generates a data frame containing a multidimensional grid with n divisions per dimension, ie n^(ncol(min)) rows
 
+  interpolate.1d <- function (n, min, max) vect <- seq (from=min, to=max, length.out=n) 
+  expand.1d <- function (vect, d) as.vector(sapply(X=vect, FUN=function(x) rep(x, d)))
+  
                                         # pre-allocate the data frame
 
   ndims <- length(min)
   grid <- matrix (nrow = n^ndims, ncol=ndims)
+  fill <- function (n, min, max, dimensions) {
+    if (dimensions == 1) return (interpolate.1d (n, min, max))
+#  else expand.1d (fill(n, min, max, dimensions-1), 2)
+    else return (expand.1d (fill(n, min, max, dimensions-1), n))
+  }
 
-#  grid[,1] <- rep(interpolate.1d (n, min[1], max[1]), n^(ndims-1))
-  grid[,1] <- (interpolate.1d (n, min[1], max[1]), n^(ndims-1))
-
-  if (ndims > 1) {
-    for (dimension in 2:ndims) {
-      grid[,dimension] <- expand.1d(grid[1:n^(dimension-1),dimension-1], n)
-    }
+  for (dimension in 1:ndims) {
+    grid[,dimension] <- fill (n, min[dimension], max[dimension], dimension)
   }
 
   grid <- data.frame (grid)
   colnames (grid) <- names(min)
+
+  return (grid)
+
 }
 
 
 
+test.population <- function (pop) {
 
-test.generation <- function (gen, iteration) {
+  progress <- txtProgressBar (min=0, max=nrow(pop), style=3)
 
-  progress <- txtProgressBar (min=0, max=nrow(gen), style=3)
+  for (i in 1:nrow(pop)) {
 
-  for (i in 1:nrow(gen)) {
-
-    conf <- paste (filename.conf.temp.stem, ".", iteration, ".", i, ".conf", sep="")
-    data <- paste (filename.output.temp.stem, ".", iteration, ".", i, ".txt", sep="")
+    conf <- paste (filename.conf.temp.stem, ".", i, ".conf", sep="")
+    data <- paste (filename.output.temp.stem, ".", i, ".txt", sep="")
     
-    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
+    pop[i,names(results)] <- run.individual (leaf=pop[i,names(model.conf.leaf.min)],
                                              stem=model.conf.stem,
                                              conf.file.temp=conf,
                                              output.file.temp=data)
@@ -188,34 +186,23 @@ test.generation <- function (gen, iteration) {
 
   close (progress)
   
-  gen$ssqerror <- calculate.fit (results=gen[names(results)],
-                                 target.0SW=65.0, target.1SW=105.0)
-
-  gen <- gen[order (gen$ssqerror),] # sort by ssqerror
-
-#  head (gen)                            #output this generation to file here
-
-  
-  return (gen)
+  return (pop)
 
 }
 
 
 
-run.generation <- function (gen, iteration) {
+run <- function (pop) {
 
-  generation <- cbind (gen, results, data.frame("ssqerror"=0))
-
-  generation.results <- test.generation (generation, iteration)
-#  generation.results <- test.generation.parallel (generation, iteration)
+  pop <- cbind (pop, results)
+  pop <- test.population (pop)
 
   file <- paste(path.simulation, filename.output.genetic.results, sep="")
   
   # print here
-  print (generation.results)
-  write (paste("\nGENERATION ", iteration, ": \n"), file, append=TRUE)
+  print (pop)
 
-  write.table (format(generation.results, digits=4),
+  write.table (format(pop, digits=4),
                file,
                sep="\t",
                append=TRUE,
@@ -223,42 +210,29 @@ run.generation <- function (gen, iteration) {
                col.names=TRUE)
   write ("\n", file, append=TRUE)
          
-  gen <- evolve.generation (generation.results[names(model.conf.leaf.min)],
-                            min=model.conf.leaf.min,
-                            max=model.conf.leaf.max)
-  return (gen)
+  return (pop)
 }
 
 
 
 
-# model.conf.leaf.default <- data.frame (conflict.gain = 39.0, conflict.tdwt = -14.0, conflict.bias = -7.5)
+model.conf.leaf.min <- c(conflict.gain = 1.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
+model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = -1.0, conflict.bias = -1.0)
 
-
-model.conf.leaf.min <- data.frame (conflict.gain = 1.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
-model.conf.leaf.max <- data.frame (conflict.gain = 100.0, conflict.tdwt = -1.0, conflict.bias = -1.0)
-
-# model.conf.leaf.TEST <- data.frame (conflict.gain = NA, conflict.tdwt = NA, conflict.bias = NA)
 
 params <- names (model.conf.leaf.min)
 
-  results <- data.frame (mean.0SW=numeric(n),
-                         mean.1SW=numeric(n),
-                         sc=numeric(n),
-                         t=numeric(n),
-                         df=numeric(n),
-                         p=numeric(n))
+results <- data.frame (mean.0SW=numeric(n),
+                       mean.1SW=numeric(n),
+                       sc=numeric(n),
+                       t=numeric(n),
+                       df=numeric(n),
+                       p=numeric(n))
 
-generation.seed <- generate.population.seed (n,
-                                             model.conf.leaf.min,
-                                             model.conf.leaf.max)
+grid <- generate.grid (n,
+                       model.conf.leaf.min,
+                       model.conf.leaf.max)
 
-gen <- generation.seed
 
-# temp
-total.generations <- 40
-for (i in 1:total.generations) {
-    print (paste ("Generation", i, "of", total.generations))
-  gen <- run.generation (gen, i)
-  print (nrow(gen))
-}
+  grid <- run (grid)
+
