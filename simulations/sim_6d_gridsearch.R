@@ -19,7 +19,7 @@ path.ramdisk <- "/media/ramdisk/"
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
 # blocksize <- 50
-n <- 200 # population size
+n <- 10 # size of grid (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
@@ -134,116 +134,39 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
 ########################### Main algorithm #############################
 
 
+# test data frames
+min <- c(a=1.0, b=0.0, c=-10.0)
+max <- c(a=5.0, b=1.0, c=10.0)
 
+interpolate.1d <- function (n, min, max) vect <- seq (from=min, to=max, length.out=n) 
 
-generate.random <- function (min, max) {
-                                        # generates a random (uniform dist) indidual between min and max
-  apply (X=rbind (min, max),
-         MARGIN = 2, # apply over columns
-         FUN = function (x) runif (1, x[1], x[2]))
+expand.1d <- function (vect, d) {
+# expands a vector n to size n*d by repeating each element d times
+  as.vector(sapply(X=vect, FUN=function(x) rep(x, d)))
 }
 
-generate.cross <- function (x, y) apply (X=rbind (x, y),
-                                         MARGIN = 2,
-                                         FUN = function (x) ifelse (sample(0:1, 1) == 0, x[1], x[2]))
+generate.grid <- function (n, min, max) {
+# Generates a data frame containing a multidimensional grid with n divisions per dimension, ie n^(ncol(min)) rows
 
-
-generate.mutation <- function (x, min, max) {
-  apply (X=rbind (x, min, max),
-         MARGIN = 2,
-         FUN = function (x) {
-           new <- rnorm (n=1, mean=x[1], sd = abs(x[2]-x[3])/3) # min - max = 3SDs
-           ifelse (new < x[2],
-                   x[2],
-                   ifelse(new > x[3],
-                          x[3],
-                          new))
-       })
-}
-
-generate.mutation1 <- function (x, min, max) {
-
-  apply (X=rbind (x, min, max),
-         MARGIN = 2,
-         FUN = function (x) rnorm (n=1, mean=x[1], sd = abs(x[2]-x[3])/3)) # min - max = 3SDs
-
-}
-
-
-generate.population.seed <- function (n, min, max) {
                                         # pre-allocate the data frame
-  seed <- data.frame (matrix(nrow=n, ncol=ncol(min)))
-  colnames (seed) <- names(min)
 
-  for (i in seq(from=1, to=n))
-    seed[i,] <- apply (X=seed[i,], MARGIN=2, FUN=function (x) generate.random (min, max))
+  ndims <- length(min)
+  grid <- matrix (nrow = n^ndims, ncol=ndims)
 
-  return (seed)
+#  grid[,1] <- rep(interpolate.1d (n, min[1], max[1]), n^(ndims-1))
+  grid[,1] <- (interpolate.1d (n, min[1], max[1]), n^(ndims-1))
+
+  if (ndims > 1) {
+    for (dimension in 2:ndims) {
+      grid[,dimension] <- expand.1d(grid[1:n^(dimension-1),dimension-1], n)
+    }
+  }
+
+  grid <- data.frame (grid)
+  colnames (grid) <- names(min)
 }
 
 
-calculate.fit <- function (results, target.0SW, target.1SW) {
-                                        # sum squared error
-  (results$mean.0SW - target.0SW)^2 + (results$mean.1SW - target.1SW)^2
-}
-
-
-evolve.generation <- function (gen, minimum, maximum) {
-#gen - only parameters from generation (ie., generation[names(params)]
-  
-  # Q1 = best 25% of current population
-  # Q2 = crossed 25% of current popn
-  # Q3 = mutated best 25%
-  # Q4 = new randomly generated
-
-  q.size <- ceiling(as.numeric(nrow(gen)/4)) # to avoid decreasing population due to rounding problems
-  q1 <- gen[1:q.size,] 
-
-  # debug!
-#  q1 <- rbind (q1, q1[3,])
-#  print (q1)
-  
-#  q2 <- ddply (.data=q1,
-#               .variables=c("id", names(minimum)),
-#               .fun=function (x) {
-#                 y <- sample(1:q.size)
-#                 generate.cross (x, q1[y,])
-#               })
-  q2 <- data.frame(t(apply (X=q1, MARGIN=1, FUN=function (x) {
-                  y <- sample(1:q.size, 1)
-                 generate.cross (x, q1[y,])
-               })))
-
-#  print (q2)
-
-#  browser()
-
-#  q3 <- ddply (.data=q1,
-#               .variables=c("id", names(minimum)),
-#               .fun= function(x) generate.mutation (x, minimum, maximum))
-  q3 <- data.frame(t(apply (X=q1,
-                            MARGIN=1,
-                            FUN = function(x) generate.mutation (x, minimum, maximum))))
-
-#  print (q3)
-  
-  q4 <- generate.population.seed (q.size, minimum, maximum)
-#  print (q4)
-  
-#  size <- data.frame (segment=c("q1", "q2", "q3", "q4"), pop=c(nrow(q1), nrow(q2), nrow(q3), nrow(q4)))
-#  print (size)
-#  ifelse (size$pop != q.size, browser(), print ("ok")) 
-  
-  # new <- rbind (q1, q2, q3, q4)[1:nrow(gen),] # trim in case nrow(gen) wasn't divisible by 4
-  new <- rbind (q1, q2, q3, q4) 
-
-#  print (paste ("total:", nrow(new)))
-  print (new)
-  
-  rownames (new) <- 1:nrow(new)
-
-  return (new)
-}
 
 
 test.generation <- function (gen, iteration) {
@@ -264,37 +187,6 @@ test.generation <- function (gen, iteration) {
   }
 
   close (progress)
-  
-  gen$ssqerror <- calculate.fit (results=gen[names(results)],
-                                 target.0SW=65.0, target.1SW=105.0)
-
-  gen <- gen[order (gen$ssqerror),] # sort by ssqerror
-
-#  head (gen)                            #output this generation to file here
-
-  
-  return (gen)
-
-}
-
-test.generation.parallel <- function (gen, iteration) {
-
-#  progress <- txtProgressBar (min=0, max=nrow(gen), style=3)
-
-  foreach (i=1:nrow(gen), .packages=c("reshape2", "pastecs", "plyr")) %dopar% {
-
-    conf <- paste ("sim_6d_params_.", iteration, ".", i, ".conf", sep="")
-    data <- paste ("sim_6d_data_.", iteration, ".", i, ".txt", sep="")
-    
-    gen[i,names(results)] <- run.individual (leaf=gen[i,names(model.conf.leaf.min)],
-                                             stem=model.conf.stem,
-                                             conf.file.temp=conf,
-                                             output.file.temp=data)
-
-#    setTxtProgressBar(progress, icount)
-  }
-
-#  close (progress)
   
   gen$ssqerror <- calculate.fit (results=gen[names(results)],
                                  target.0SW=65.0, target.1SW=105.0)
