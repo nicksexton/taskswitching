@@ -20,8 +20,8 @@ setwd (path.simulation)
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
-blocksize <- 50
-n <- 3 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+blocksize <- 100
+n <- 10 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
@@ -127,7 +127,9 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   # clean up output file
   system2 ("rm", args=c(output.file.temp, conf.file.temp, "3task_act.txt")) # run.individual cleans output tempfile  
 
-  results <- calculate.switchcost (data)
+
+  
+  results <- cbind (calculate.switchcost (data), calculate.n2rc(data))
   return (results)
   
 }
@@ -225,9 +227,16 @@ params <- names (model.conf.leaf.min)
 results <- data.frame (mean.0SW=numeric(n),
                        mean.1SW=numeric(n),
                        sc=numeric(n),
-                       t=numeric(n),
-                       df=numeric(n),
-                       p=numeric(n))
+                       sc.t=numeric(n),
+                       sc.df=numeric(n),
+                       sc.p=numeric(n),
+                       mean.2SW=numeric(n),
+                       mean.ALT=numeric(n),
+                       n2rc=numeric(n),
+                       n2rc.t=numeric(n),
+                       n2rc.df=numeric(n),
+                       n2rc.p=numeric(n)
+                       )
 
 grid <- generate.grid (n,
                        model.conf.leaf.min,
