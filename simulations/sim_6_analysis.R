@@ -33,12 +33,20 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
-imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_6")
+imageDirectory <- file.path("/media/ramdisk/simulation_6d_diagnostic") # path to save images to
+                                        #(eg ~/Dropbox/PhD/Thesis/simulations/etc
+
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
-#
-data.raw <- read.delim("sim_6_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-# now split trial path into block and trial ID
+
+                                        #Default, use this
+# data.raw <- read.delim("sim_6_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+
+                                        # Temp, just for diagnostic
+data.raw <- read.delim("/media/ramdisk/simulation_6d_diagnostic/sim_6_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+
+
+                                        # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 #

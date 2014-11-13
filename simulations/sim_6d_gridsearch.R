@@ -9,9 +9,8 @@ library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
 library (plyr) # for ddply
 
-#library (foreach)
-#library (doParallel)
 
+source ("sim_6d_gridsearch_init.R") # init file SPECIFIC TO A SIMULATION
 
 
 path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
@@ -20,15 +19,15 @@ setwd (path.simulation)
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
 
-blocksize <- 100
-n <- 10 # resolution of grid to explore param space (ie total observations is n^ncols(min)
-max.cycles <- 500
+
+
 
 filename.conf.temp.stem <- "sim_6d_params_" # for parallel version
 filename.output.temp.stem <- "sim_6d_data_" # for parallel version
 filename.conf.temp <- "sim_6d_params_temp.conf" # will be created
 filename.output.data.temp <- "sim_6d_data_temp.txt"
-filename.output.genetic.results <- "sim_6d_gridsearch_results.txt" # results of GA
+#Now specified in init file
+#filename.output.genetic.results <- "sim_6d_gridsearch_results_clip_lownoise.txt" # where to store results
 
 
 setwd (path.ramdisk)
@@ -46,7 +45,7 @@ RESPONSE_THRESHOLD 0.15
 STEP_SIZE 0.0015 
 SQUASHING_PARAM 0.8 
 CONFLICT_SQUASHING_PARAM 0.5 
-NOISE 0.006 
+NOISE 0.004 # default .006
 HEBBIAN_LEARNING_PERSISTENCE 1 
 RSI_SCALE_PARAM 1.0 
 BIAS_OUTPUTUNIT -6.0 
@@ -58,7 +57,7 @@ STIMULUS_INPUT_STRENGTH_2 3.0
 TASKDEMAND_OUTPUT_INHIBITORY_WT -2.5 
 TASKDEMAND_OUTPUT_EXCITATORY_WT 2.5 
 TASKDEMAND_LATERAL_INHIBITORY_WT -2.0 
-CONFLICT_NEGATIVE 3 
+CONFLICT_NEGATIVE 1 
 TOPDOWN_CONTROL_STRENGTH_0 12.0 
 TOPDOWN_CONTROL_STRENGTH_1 12.0  
 TOPDOWN_CONTROL_STRENGTH_2 12.0 
@@ -218,8 +217,6 @@ run <- function (pop) {
 
 
 
-model.conf.leaf.min <- c(conflict.gain = 1.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
-model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = -1.0, conflict.bias = -1.0)
 
 
 params <- names (model.conf.leaf.min)
