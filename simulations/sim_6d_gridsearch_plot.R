@@ -100,6 +100,23 @@ plot.heatmap.n2rc.p <- function (data, condition.title) {
 }
 
 
+# Temp function - plotting heatmap of base RTs in 1SW condition.
+# Should really average eg. mean.0SW and mean.1SW properly (ie., weighted for number of correct trials) or,
+# even better, modify gridsearch code to output error rate (or number of correct vs. incorrect trials) to data
+
+plot.heatmap.rt.0SW <- function (data, condition.title) {
+
+  rt.ALT <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=mean.2SW))
+  rt.ALT + geom_raster() +
+    facet_wrap( ~ conflict.tdwt) +                                        
+    scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(60,300)) +
+    ggtitle(paste (condition.title,
+                   "\nParameter space for conflict parameters\n RT (ALT condition)") ) +
+  labs(fill="RT (cycles)") +
+  theme (legend.position=c(0.87,0.1))
+
+}
+
 
 plot.heatmaps <- function (data, condition.title, image.directory, filename.stem, save=FALSE) {
 
