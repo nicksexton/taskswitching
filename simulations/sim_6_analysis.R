@@ -184,13 +184,18 @@ bargraph +
 
 boxplot.task0 <- ggplot (subset(data, PATH.trial == 2 & seq.3 == 0), aes(x=sequence_cond, y=cycles))
 boxplot.task0 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggtitle ("Simulation 6, task 0")
+#imageFile <- file.path(imageDirectory, "sim_6d_diagnostic_task0_boxplot.png") 
+#ggsave(imageFile)
 
 boxplot.task1 <- ggplot (subset(data, PATH.trial == 2 & seq.3 == 1), aes(x=sequence_cond, y=cycles))
 boxplot.task1 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggtitle ("Simulation 6, task 1")
+#imageFile <- file.path(imageDirectory, "sim_6d_diagnostic_task1_boxplot.png") 
+#ggsave(imageFile)
 
 boxplot.task2 <- ggplot (subset(data, PATH.trial == 2 & seq.3 == 2), aes(x=sequence_cond, y=cycles))
 boxplot.task2 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggtitle ("Simulation 6, task 2")
-
+#imageFile <- file.path(imageDirectory, "sim_6d_diagnostic_task2_boxplot.png") 
+#ggsave(imageFile)
 
 
 ##########################################################################
