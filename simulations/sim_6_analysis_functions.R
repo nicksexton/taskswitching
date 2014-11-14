@@ -99,7 +99,7 @@ process.data <- function (x, max.cycles = 500) {
   x <- block.is.correct3 (x)
 
 # select PATH.trial == 3 only?!
-  x <- subset (x$PATH.trial == 2)
+  x <- subset (x, PATH.trial == 2)
   
   return (x)
 }

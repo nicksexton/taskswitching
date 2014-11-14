@@ -2,7 +2,7 @@
 
 # rm (list = ls())
 
-filename.output.genetic.results <- "sim_6d_gridsearch_results_clip_lownoise_2.txt" # where to store results
+filename.output.genetic.results <- "sim_6d_gridsearch_results_test_trial3only.txt" # where to store results
 
 
 blocksize <- 100
