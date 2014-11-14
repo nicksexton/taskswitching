@@ -2,6 +2,9 @@ rm (list = ls())
 setwd("~/Programming/c_pdp_models/simulations")
 library (ggplot2)
 
+# 5x5x5 test that we are now only looking at trial 3
+data.trial3 = read.delim("sim_6d_gridsearch_results_test_trial3only.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+
 # 10x10x10, wide region
 data.allow = read.delim("sim_6d_gridsearch_results_allow.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
@@ -180,6 +183,8 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
   }
 
 }
+
+plot.heatmaps (data.trial3, condition.title="Test Condition, only trial 3", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_test_trial3only", save=TRUE)
 
 plot.heatmaps (data.clip, condition.title="Conflict Clipped", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_clip", save=TRUE)
 
