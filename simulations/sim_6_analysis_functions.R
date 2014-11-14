@@ -98,6 +98,9 @@ process.data <- function (x, max.cycles = 500) {
   x$correct.trial <- trial.is.correct (x, max.cycles)
   x <- block.is.correct3 (x)
 
+# select PATH.trial == 3 only?!
+  x <- subset (PATH.trial == 2)
+  
   return (x)
 }
 
@@ -121,6 +124,7 @@ calculate.RT.mean.unsafe <- function (x, condition) {
                                         # returns an error if length of x is zero (eg if all trials fail)
                                         # use safe version if this needs to be checked
   descriptives(x)[[condition]][["mean"]]
+
 }
 
 calculate.RT.sd.unsafe <- function (x, condition) {
@@ -154,7 +158,7 @@ test.n2rc <- function (x)
 calculate.switchcost <- function (x){
   ifelse (nrow(subset(x, x$"sequence_cond"=="0SW")) > 5 &
           nrow(subset(x, x$"sequence_cond"=="1SW")) > 5,
-        results <- data.frame (
+          results <- data.frame (           
             mean.0SW = calculate.RT.mean.unsafe (x, "0SW"),
             mean.1SW = calculate.RT.mean.unsafe (x, "1SW"),
             sc = calculate.RT.mean.unsafe (x, "1SW") - calculate.RT.mean.unsafe (x, "0SW"),
@@ -169,12 +173,15 @@ calculate.switchcost <- function (x){
             df = NA,
             p = NA)
           )
+
+
   return (results)
+
 }
 
 calculate.n2rc <- function (x){
-  ifelse (nrow(subset(x, x$"sequence_cond"=="2SW")) > 1 &
-        nrow(subset(x, x$"sequence_cond"=="ALT")) > 1,
+  ifelse (nrow(subset(x, x$"sequence_cond"=="2SW")) > 5 &
+        nrow(subset(x, x$"sequence_cond"=="ALT")) > 5,
 
             results <- data.frame (
               mean.2SW = calculate.RT.mean.unsafe (x, "2SW"),
