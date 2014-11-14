@@ -8,12 +8,35 @@ data.allow = read.delim("sim_6d_gridsearch_results_allow.txt", sep=c("\t"), stri
 # 10x10x10, wide region
 data.clip = read.delim("sim_6d_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
-# Low noise version, 15x15x15, wide region
-data.clip.lownoise = read.delim("sim_6d_gridsearch_results_clip_lownoise.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
 #10x10x10, wide region
 data.rescale = read.delim("sim_6d_gridsearch_results_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
+
+
+# Low noise version, 15x15x15, wide region
+data.clip.lownoise.0 = read.delim("sim_6d_gridsearch_results_clip_lownoise.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+data.clip.lownoise.1 = read.delim("sim_6d_gridsearch_results_clip_lownoise_1.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+
+
+### Averaging across multiple runs, mung the data sets together
+cols.to.avg = c("conflict.gain", "conflict.tdwt", "conflict.bias", "mean.0SW", "mean.1SW", "mean.2SW", "mean.ALT")
+
+data.clip.lownoise.merge <- merge (data.clip.lownoise.0[cols.to.avg], data.clip.lownoise.1[cols.to.avg], by=c("conflict.gain", "conflict.tdwt", "conflict.bias"))
+
+
+recalc.means <- function (x1, x2) apply(X=cbind(x1, x2), MARGIN=1, FUN=mean) 
+
+data.clip.lownoise.merge$mean.0SW <-recalc.means (data.clip.lownoise.merge$mean.0SW.x,
+                                                  data.clip.lownoise.merge$mean.0SW.y)
+data.clip.lownoise.merge$mean.1SW <-recalc.means (data.clip.lownoise.merge$mean.1SW.x,
+                                                  data.clip.lownoise.merge$mean.1SW.y)
+data.clip.lownoise.merge$mean.2SW <-recalc.means (data.clip.lownoise.merge$mean.2SW.x,
+                                                  data.clip.lownoise.merge$mean.2SW.y)
+data.clip.lownoise.merge$mean.ALT <-recalc.means (data.clip.lownoise.merge$mean.ALT.x,
+                                                  data.clip.lownoise.merge$mean.ALT.y)
+data.clip.lownoise.merge <- subset (data.clip.lownoise.merge, select=c(cols.to.avg))
+data.clip.lownoise.merge$sc <- data.clip.lownoise.merge$mean.1SW - data.clip.lownoise.merge$mean.0SW
+data.clip.lownoise.merge$n2rc <- data.clip.lownoise.merge$mean.ALT - data.clip.lownoise.merge$mean.2SW
 
 # NB 1SW > 0SW = +ve switch costs (empirical), ALT > 2SW = +ve n-2rc (empirical)
 
@@ -164,5 +187,9 @@ plot.heatmaps (data.rescale, condition.title="Conflict Rescaled", image.director
 
 plot.heatmaps (data.allow, condition.title="Negative Conflict Allowed", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_allow", save=TRUE)
 
-plot.heatmaps (data.clip.lownoise, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_clip_lownoise", save=TRUE)
+plot.heatmaps (data.clip.lownoise.0, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_clip_lownoise", save=TRUE)
+
+plot.heatmaps (data.clip.lownoise.1, condition.title="Conflict Clipped 1\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_clip_lownoise_1", save=TRUE)
+
+plot.heatmaps (data.clip.lownoise.merge, condition.title="Conflict Clipped Merge\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6d", filename.stem="simulation_6d_gridsearch_clip_lownoise_merge", save=TRUE)
 
