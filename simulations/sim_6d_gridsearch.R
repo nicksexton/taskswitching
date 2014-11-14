@@ -4,21 +4,21 @@
 
 rm (list = ls())
 
-
 library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
 library (plyr) # for ddply
 
 
-source ("sim_6d_gridsearch_init.R") # init file SPECIFIC TO A SIMULATION
+source ("sim_6d_gridsearch_init.R") # init file SPECIFIC TO A RUN OF A SIMULATION
 
 
 path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
-path.ramdisk <- "/media/ramdisk/"
+
+path.ramdisk <- paste("/media/ramdisk/", path.ramdiskfolder, "/", sep="")
+system2("mkdir", args=path.ramdisk)
 setwd (path.simulation)
 
 source (paste(path.simulation, "sim_6_analysis_functions.R", sep=""))
-
 
 
 
