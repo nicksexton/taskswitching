@@ -3,7 +3,7 @@
 
 # Version of the gridsearch that uses resampling to improve data from each voxel
 
-rm (list = ls())
+# rm (list = ls())
 
 library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
@@ -12,7 +12,7 @@ library (plyr) # for ddply
 path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
 setwd (path.simulation)
 
-source ("sim_6e_gridsearch_init.R") # init file SPECIFIC TO A RUN OF A SIMULATION
+# source ("sim_6e_gridsearch_init.R") # init file SPECIFIC TO A RUN OF A SIMULATION
 source (paste(path.simulation, "sim_6_analysis_functions_calcerrors.R", sep=""))
 
 path.ramdisk <- paste("/media/ramdisk/", path.ramdiskfolder, "/", sep="")

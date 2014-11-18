@@ -1,12 +1,16 @@
 # Initialisation file for specific run of a simulation
 
-# rm (list = ls())
+rm (list = ls())
 
-filename.output.genetic.results <- "sim_6e_gridsearch_errors_test.txt" # where to store results
+path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
+setwd (path.simulation)
 
 
-blocksize <- 10
-n <- 5 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+filename.output.genetic.results <- "sim_6e_gridsearch_allow.txt" # where to store results
+
+
+blocksize <- 200
+n <- 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Original parameter bounds for gridsearch
@@ -14,10 +18,10 @@ max.cycles <- 500
 #model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = -1.0, conflict.bias = -1.0)
 
 # temp bounds to get reasonable response rate for test
-model.conf.leaf.min <- c(conflict.gain = 25.0, conflict.tdwt = -20.0, conflict.bias = -20.0)
-model.conf.leaf.max <- c(conflict.gain = 75.0, conflict.tdwt = -15.0, conflict.bias = -5.0)
+model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -0.0, conflict.bias = -40.0)
+model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = 30.0, conflict.bias = 0.0)
 
-path.ramdiskfolder <- "errors_test"
+path.ramdiskfolder <- "6e_errors_allow_0"
 
 # define stem in init file
 model.conf.stem = (" 
@@ -39,7 +43,7 @@ STIMULUS_INPUT_STRENGTH_2 3.0
 TASKDEMAND_OUTPUT_INHIBITORY_WT -2.5 
 TASKDEMAND_OUTPUT_EXCITATORY_WT 2.5 
 TASKDEMAND_LATERAL_INHIBITORY_WT -2.0 
-CONFLICT_NEGATIVE 2 # clip
+CONFLICT_NEGATIVE 1 # allow
 TOPDOWN_CONTROL_STRENGTH_0 12.0 
 TOPDOWN_CONTROL_STRENGTH_1 12.0  
 TOPDOWN_CONTROL_STRENGTH_2 12.0 
@@ -53,4 +57,4 @@ MAX_CYCLES 500") # tailing spaces eliminates double newlines, for some reason
 
 
 
-# source ("sim_6d_gridsearch.R")
+source ("sim_6e_gridsearch.R")
