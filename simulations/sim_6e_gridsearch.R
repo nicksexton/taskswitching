@@ -132,15 +132,15 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   errors.trial12 <- calculate.errors (data$correct.block12, data$sequence_cond) 
   names(errors.trial12) <- c("err.12.0SW", "err.12.1SW", "err.12.2SW", "err.12.ALT")  
 
-  gaveresponse.trial12 <- calculate.errors (data$gaveresponse.block12, data$sequence_cond)
-  names(gaveresponse.trial12) <- c("gaveresponse.12.0SW", "gaveresponse.12.1SW", "gaveresponse.12.2SW", "gaveresponse.12.ALT")  
+  timeouts.trial12 <- calculate.errors (data$gaveresponse.block12, data$sequence_cond)
+  names(timeouts.trial12) <- c("timeout.12.0SW", "timeout.12.1SW", "timeout.12.2SW", "timeout.12.ALT")  
                                         # now we can filter out blocks where there was an error on trials 1 or 2
   data <- subset (data, correct.block12 == TRUE)
   
   
   errors.trial3 <- calculate.errors (data$correct.trial, data$sequence_cond)
-  gaveresponse.trial3 <- calculate.errors (data$gaveresponse.trial, data$sequence_cond)
-  names(gaveresponse.trial12) <- c("gaveresponse.3.0SW", "gaveresponse.3.1SW", "gaveresponse.3.2SW", "gaveresponse.3.ALT")   
+  timeouts.trial3 <- calculate.errors (data$gaveresponse.trial, data$sequence_cond)
+  names(timeouts.trial12) <- c("timeout.3.0SW", "timeout.3.1SW", "timeout.3.2SW", "timeout.3.ALT")   
   names(errors.trial3) <- c("err.3.0SW", "err.3.1SW", "err.3.2SW", "err.3.ALT")
 
   
@@ -153,9 +153,9 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   results <- cbind (calculate.switchcost (data),
                     calculate.n2rc(data),
                     t(errors.trial12),
-                    t(gaveresponse.trial12),
+                    t(timeouts.trial12),
                     t(errors.trial3),
-                    t(gaveresponse.trial3))
+                    t(timeouts.trial3))
   return (results)
   
 }
@@ -264,18 +264,18 @@ results <- data.frame (mean.0SW=numeric(n),
                        err.12.1SW=numeric(n),
                        err.12.2SW=numeric(n),
                        err.12.ALT=numeric(n),
-                       gaveresponse.12.0SW=numeric(n),
-                       gaveresponse.12.1SW=numeric(n),
-                       gaveresponse.12.2SW=numeric(n),
-                       gaveresponse.12.ALT=numeric(n),
+                       timeout.12.0SW=numeric(n),
+                       timeout.12.1SW=numeric(n),
+                       timeout.12.2SW=numeric(n),
+                       timeout.12.ALT=numeric(n),
                        err.3.0SW=numeric(n),
                        err.3.1SW=numeric(n),
                        err.3.2SW=numeric(n),
                        err.3.ALT=numeric(n),
-                       gaveresponse.3.0SW=numeric(n),
-                       gaveresponse.3.1SW=numeric(n),
-                       gaveresponse.3.2SW=numeric(n),
-                       gaveresponse.3.ALT=numeric(n)
+                       timeout.3.0SW=numeric(n),
+                       timeout.3.1SW=numeric(n),
+                       timeout.3.2SW=numeric(n),
+                       timeout.3.ALT=numeric(n)
                        )
 
 grid <- generate.grid (n,
