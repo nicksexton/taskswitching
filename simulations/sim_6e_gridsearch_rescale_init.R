@@ -58,4 +58,4 @@ MAX_CYCLES 500") # tailing spaces eliminates double newlines, for some reason
 
 
 
-source ("sim_6d_gridsearch.R")
+source ("sim_6e_gridsearch.R")
