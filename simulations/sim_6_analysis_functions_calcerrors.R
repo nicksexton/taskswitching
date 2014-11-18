@@ -12,73 +12,19 @@ split.trialpath <- function (x) {
 
 
 # evaluates to TRUE of FALSE
-trial.is.correct <- function (x, max.cycles) 
+trial.is.correct <- function (x, max.cycles)
   with (x, cycles < max.cycles & (ifelse (cue == 0, stim_0 == response %% 2,
                                           ifelse (cue == 1, stim_1 == response %% 2,
-                                                  ifelse (cue == 2, stim_2 == response %% 2, NA)))))
+                                                  ifelse (cue == 2, stim_2 == response %% 2, NA)))))        
 
 
-# returns TRUE if all trials with same PATH.block are correct
-# note trialpath needs to be unique for each row
-block.is.correct <- function (x) {
 
-  num.blocks <- length(unique(x$PATH.block))
-  block <- vector (mode="numeric", length=num.blocks) 
-  correct.block <- vector (mode="logical", length=num.blocks)
-  
-  for (i in unique(x$PATH.block)) {
-    this.block <- subset (x, PATH.block == i)
-    block[i+1] <- i
-    correct.block[i+1] <- (all (this.block$correct.trial == TRUE))
-  }
-       
-  x <- merge (x, data.frame (block, correct.block), by.x="PATH.block", by.y="block")
-  # return (data.frame (block, correct.block))
-  return (x)
-}
-
-
-# faster
-block.is.correct1 <- function (x) {
-
-  num.blocks <- length(unique(x$PATH.block))
-  block <- vector (mode="numeric", length=num.blocks) 
-  correct.block <- vector (mode="logical", length=num.blocks)
-
-  reduce <- subset (x, select=c("PATH.block", "correct.trial"))
-  
-  for (i in unique(x$PATH.block)) {
-    this.block <- subset (reduce, PATH.block == i)
-    block[i+1] <- i
-    correct.block[i+1] <- (all (this.block$correct.trial == TRUE))
-  }
-       
-  x <- merge (x, data.frame (block, correct.block), by.x="PATH.block", by.y="block")
-  # return (data.frame (block, correct.block))
-  return (x)
-}
-
-
-block.is.correct2 <- function (x) {
-
-  correct.block <- vector (mode="logical", length=nrow(x))
-  for (i in 1:nrow(x)) {
-    
-    if ((x[i,]$PATH.trial == 0) & (x[i+1,]$PATH.trial == 1) & (x[i+2,]$PATH.trial == 2)) { # check optional if data frame sorted
-      if ((x[i,]$PATH.block == x[i+1,]$PATH.block) & (x[i,]$PATH.block == x[i+2,]$PATH.trial)) { # check optional if data frame sorted
-        ifelse ((x[i,]$correct.trial & x[i+1,]$correct.trial & x[i+2,]$correct.trial), correct.block[i:i+2] <- TRUE, correct.block[i:i+2] <- FALSE)
-      }
-    }
-
-  }
-  cbind (x, correct.block)
-  # return (data.frame (block, correct.block))
-  return (x)
-}
 
 
 block.is.correct3 <- function (x) {
+
                                         # fastest version
+                                        # see sim_6_analysis_functions.R for alternative (slower, but less hacky) versions
                                         # same as version 2 but disregards safety checks that data frame
                                         # is correctly sorted (in order of trialid)
   
@@ -97,32 +43,39 @@ block.is.correct3 <- function (x) {
 block.is.trials12.correct <- function (x) {
 # only checks whether trials 1 & 2 are correct.
 # Useful if you want to assess whether trial 3 is correct independently
-
+# returns TRUE if both correct, FALSE if at least one is incorrect, NA if at least one is a timeout
+# if both an error and a timeout, returns the first one to occur
+  
   correct.block12 <- vector (mode="logical", length=nrow(x))
+  gaveresponse.block12 <- vector (mode="logical", length=nrow(x))
+  
   for (i in 1:nrow(x)) {
    
     if (x[i,]$PATH.trial == 0) {
       ifelse ((x[i,]$correct.trial & x[i+1,]$correct.trial),
               correct.block12[i:(i+2)] <- TRUE,
               correct.block12[i:(i+2)] <- FALSE)
+      ifelse ((x[i,]$gaveresponse.trial & x[i+1,]$gaveresponse.trial),
+              gaveresponse.block12[i:(i+2)] <- TRUE,
+              gaveresponse.block12[i:(i+2)] <- FALSE)
     }
   }
-  x <- cbind (x, correct.block12)
+  x <- cbind (x, correct.block12, gaveresponse.block12)
   return (x)
-  
 }
 
 # combine in a process.data function
 process.data <- function (x, max.cycles = 500) {
   x <- split.trialpath (x)
+  x$gaveresponse.trial <- x$response != -1
   x$correct.trial <- trial.is.correct (x, max.cycles)
-  x <- block.is.trials12.correct (x)
+  x <- block.is.trials12.correct (x) # calculates trials and timeouts
 
-
-# select PATH.trial == 3 only?!
+#  browser ()
+  
   # Don't filter data here as it's needed to calc errors,
   # this needs to be done by whatever calling function calculates DVs
-#  x <- subset (x, PATH.trial == 2) # make sure this gets done before RT is calculated!
+
   
   return (x)
 }
@@ -236,6 +189,9 @@ calculate.errors <- function (errorcounts, condition) {
   }
   
   errors.tab <- table (errorcounts, condition)
+
+#  browser()
+  
   if (all(dim (errors.tab) == c(2,4))) {  # if table has two rows
     error.rates <- errors.tab["FALSE",] / (2 * apply (X=errors.tab, MARGIN=2, FUN=sum)) # calc error rates
   } else {

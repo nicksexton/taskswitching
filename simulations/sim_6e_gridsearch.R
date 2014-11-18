@@ -96,7 +96,7 @@ data.preprocess <- function (datafile, lookuptable) {
   data <- process.data (data, max.cycles=max.cycles) # filters data for trial 3 only!
 
   data <- merge(lookuptable, data, by.x = "trialid", by.y = "trialid")
-  data <- subset(data, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct.trial", "correct.block12"))
+  data <- subset(data, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "gaveresponse.trial", "correct.trial", "correct.block12", "gaveresponse.block12"))
 
 
 ### filter the data
@@ -128,35 +128,19 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
 
 # browser()
 
-                                        # total errors on trials 1 & 2, not counting double errors
-#  errors.trial12.tab = table (data$correct.block12, data$sequence_cond) 
-
-#  if (all(dim (errors.trial12.tab) == c(2,4))) {  # if table has two rows
-#    errors.trial12 <- errors.trial12.tab["FALSE",] / (2 * apply (X=errors.trial12.tab, MARGIN=2, FUN=sum)) # calc error rates
-#  } else {
-#    if (attr(errors.trial12.tab, "dimnames")[1] == TRUE) {
-#      errors.trial12 <- c(0, 0, 0, 0) # else
-#    }
-#    else {
-#      errors.trial12 <- c(1, 1, 1, 1) # else
-#    }
-#  } 
 
   errors.trial12 <- calculate.errors (data$correct.block12, data$sequence_cond) 
   names(errors.trial12) <- c("err.12.0SW", "err.12.1SW", "err.12.2SW", "err.12.ALT")  
 
+  gaveresponse.trial12 <- calculate.errors (data$gaveresponse.block12, data$sequence_cond)
+  names(gaveresponse.trial12) <- c("gaveresponse.12.0SW", "gaveresponse.12.1SW", "gaveresponse.12.2SW", "gaveresponse.12.ALT")  
                                         # now we can filter out blocks where there was an error on trials 1 or 2
   data <- subset (data, correct.block12 == TRUE)
   
-                                        #calculate trial 3 errors
-#  errors.trial3.tab = table (data$correct.trial, data$sequence_cond)
-#  if (all(dim (errors.trial3.tab) == c(2,4))) { # if table has two rows
-#    errors.trial3 = errors.trial3.tab["FALSE",] / (2 * apply (X=errors.trial3.tab, MARGIN=2, FUN=sum))
-#  } else { # calc error rates
-#    errors.trial3 <- c(0, 0, 0, 0) # else no errors
-#  }
   
-  errors.trial3 <- calculate.errors (data$correct.trial, data$sequence_cond)   
+  errors.trial3 <- calculate.errors (data$correct.trial, data$sequence_cond)
+  gaveresponse.trial3 <- calculate.errors (data$gaveresponse.trial, data$sequence_cond)
+  names(gaveresponse.trial12) <- c("gaveresponse.3.0SW", "gaveresponse.3.1SW", "gaveresponse.3.2SW", "gaveresponse.3.ALT")   
   names(errors.trial3) <- c("err.3.0SW", "err.3.1SW", "err.3.2SW", "err.3.ALT")
 
   
@@ -166,7 +150,12 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
 
   
   
-  results <- cbind (calculate.switchcost (data), calculate.n2rc(data), t(errors.trial12), t(errors.trial3))
+  results <- cbind (calculate.switchcost (data),
+                    calculate.n2rc(data),
+                    t(errors.trial12),
+                    t(gaveresponse.trial12),
+                    t(errors.trial3),
+                    t(gaveresponse.trial3))
   return (results)
   
 }
@@ -275,10 +264,18 @@ results <- data.frame (mean.0SW=numeric(n),
                        err.12.1SW=numeric(n),
                        err.12.2SW=numeric(n),
                        err.12.ALT=numeric(n),
+                       gaveresponse.12.0SW=numeric(n),
+                       gaveresponse.12.1SW=numeric(n),
+                       gaveresponse.12.2SW=numeric(n),
+                       gaveresponse.12.ALT=numeric(n),
                        err.3.0SW=numeric(n),
                        err.3.1SW=numeric(n),
                        err.3.2SW=numeric(n),
-                       err.3.ALT=numeric(n)
+                       err.3.ALT=numeric(n),
+                       gaveresponse.3.0SW=numeric(n),
+                       gaveresponse.3.1SW=numeric(n),
+                       gaveresponse.3.2SW=numeric(n),
+                       gaveresponse.3.ALT=numeric(n)
                        )
 
 grid <- generate.grid (n,
