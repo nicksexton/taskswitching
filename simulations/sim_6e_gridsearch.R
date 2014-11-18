@@ -131,7 +131,13 @@ system2 ("rm", args=c(output.file.temp, conf.file.temp, "3task_act.txt")) # run.
 
                                         # total errors on trials 1 & 2, not counting double errors
   errors.trial12.tab = table (data$correct.block12, data$sequence_cond) 
-  errors.trial12 = errors.trial12.tab[1,] / (2 * apply (X=errors.trial12.tab, MARGIN=2, FUN=sum)) # calc error rates
+
+  if (all(dim (errors.trial12.tab) == c(2,4))) {  # if table has two rows
+    errors.trial12 <- errors.trial12.tab["FALSE",] / (2 * apply (X=errors.trial12.tab, MARGIN=2, FUN=sum)) # calc error rates
+  } else {  
+    errors.trial12 <- c(0, 0, 0, 0) # else no errors
+  } 
+
   names(errors.trial12) <- c("err.12.0SW", "err.12.1SW", "err.12.2SW", "err.12.ALT")  
 
                                         # now we can filter out blocks where there was an error on trials 1 or 2
@@ -139,8 +145,15 @@ system2 ("rm", args=c(output.file.temp, conf.file.temp, "3task_act.txt")) # run.
   
                                         #calculate trial 3 errors
   errors.trial3.tab = table (data$correct.trial, data$sequence_cond)
-  errors.trial3 = errors.trial3.tab[1,] / apply (X=errors.trial3.tab, MARGIN=2, FUN=sum) # calc error rates  
+  if (all(dim (errors.trial3.tab) == c(2,4))) { # if table has two rows
+    errors.trial3 = errors.trial3.tab["FALSE",] / (2 * apply (X=errors.trial3.tab, MARGIN=2, FUN=sum))
+  } else { # calc error rates
+    errors.trial3 <- c(0, 0, 0, 0) # else no errors
+  }
+  
   names(errors.trial3) <- c("err.3.0SW", "err.3.1SW", "err.3.2SW", "err.3.ALT")
+
+  
   
                                         # filter the errors out to calc switchcost 
   data <- subset (data, PATH.trial == 2 & correct.trial == TRUE)
