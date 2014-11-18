@@ -9,17 +9,16 @@ library (reshape2) # for colsplit
 library (pastecs) # for stat.desc
 library (plyr) # for ddply
 
+path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
+setwd (path.simulation)
 
 source ("sim_6e_gridsearch_init.R") # init file SPECIFIC TO A RUN OF A SIMULATION
-
-
-path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
+source (paste(path.simulation, "sim_6_analysis_functions_calcerrors.R", sep=""))
 
 path.ramdisk <- paste("/media/ramdisk/", path.ramdiskfolder, "/", sep="")
 system2("mkdir", args=path.ramdisk)
-setwd (path.simulation)
 
-source (paste(path.simulation, "sim_6_analysis_functions_calcerrors.R", sep=""))
+
 
 
 
@@ -125,32 +124,39 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
              output.file.temp)
   data <- data.preprocess (output.file.temp, data.lookuptable)
   # clean up output file
-system2 ("rm", args=c(output.file.temp, conf.file.temp, "3task_act.txt")) # run.individual cleans output tempfile  
+  system2 ("rm", args=c(output.file.temp, conf.file.temp, "3task_act.txt")) # run.individual cleans output tempfile  
 
-#  browser()
+# browser()
 
                                         # total errors on trials 1 & 2, not counting double errors
-  errors.trial12.tab = table (data$correct.block12, data$sequence_cond) 
+#  errors.trial12.tab = table (data$correct.block12, data$sequence_cond) 
 
-  if (all(dim (errors.trial12.tab) == c(2,4))) {  # if table has two rows
-    errors.trial12 <- errors.trial12.tab["FALSE",] / (2 * apply (X=errors.trial12.tab, MARGIN=2, FUN=sum)) # calc error rates
-  } else {  
-    errors.trial12 <- c(0, 0, 0, 0) # else no errors
-  } 
+#  if (all(dim (errors.trial12.tab) == c(2,4))) {  # if table has two rows
+#    errors.trial12 <- errors.trial12.tab["FALSE",] / (2 * apply (X=errors.trial12.tab, MARGIN=2, FUN=sum)) # calc error rates
+#  } else {
+#    if (attr(errors.trial12.tab, "dimnames")[1] == TRUE) {
+#      errors.trial12 <- c(0, 0, 0, 0) # else
+#    }
+#    else {
+#      errors.trial12 <- c(1, 1, 1, 1) # else
+#    }
+#  } 
 
+  errors.trial12 <- calculate.errors (data$correct.block12, data$sequence_cond) 
   names(errors.trial12) <- c("err.12.0SW", "err.12.1SW", "err.12.2SW", "err.12.ALT")  
 
                                         # now we can filter out blocks where there was an error on trials 1 or 2
   data <- subset (data, correct.block12 == TRUE)
   
                                         #calculate trial 3 errors
-  errors.trial3.tab = table (data$correct.trial, data$sequence_cond)
-  if (all(dim (errors.trial3.tab) == c(2,4))) { # if table has two rows
-    errors.trial3 = errors.trial3.tab["FALSE",] / (2 * apply (X=errors.trial3.tab, MARGIN=2, FUN=sum))
-  } else { # calc error rates
-    errors.trial3 <- c(0, 0, 0, 0) # else no errors
-  }
+#  errors.trial3.tab = table (data$correct.trial, data$sequence_cond)
+#  if (all(dim (errors.trial3.tab) == c(2,4))) { # if table has two rows
+#    errors.trial3 = errors.trial3.tab["FALSE",] / (2 * apply (X=errors.trial3.tab, MARGIN=2, FUN=sum))
+#  } else { # calc error rates
+#    errors.trial3 <- c(0, 0, 0, 0) # else no errors
+#  }
   
+  errors.trial3 <- calculate.errors (data$correct.trial, data$sequence_cond)   
   names(errors.trial3) <- c("err.3.0SW", "err.3.1SW", "err.3.2SW", "err.3.ALT")
 
   

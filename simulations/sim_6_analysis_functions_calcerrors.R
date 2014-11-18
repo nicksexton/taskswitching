@@ -226,3 +226,27 @@ calculate.n2rc <- function (x){
             )
     return (results)
 }
+
+calculate.errors <- function (errorcounts, condition) {
+
+                                        # check data has been passed in, else no trials survived to be checked!
+                                        # (eg 100% error rate on trials 12, filtered before checking trial 3)
+  if (length(errorcounts) == 0) {
+    return (c(err.0SW=NA, err.1SW=NA, err.2SW=NA, err.ALT=NA))
+  }
+  
+  errors.tab <- table (errorcounts, condition)
+  if (all(dim (errors.tab) == c(2,4))) {  # if table has two rows
+    error.rates <- errors.tab["FALSE",] / (2 * apply (X=errors.tab, MARGIN=2, FUN=sum)) # calc error rates
+  } else {
+    if (attr(errors.tab, "dimnames")[1] == TRUE) {
+      error.rates <- c(err.0SW=0, err.1SW=0, err.2SW=0, err.ALT=0) # else
+    }
+    else {
+      error.rates <- c(err.0SW=1, err.1SW=1, err.2SW=1, err.ALT=1) # else
+    }
+  } 
+
+  return (error.rates)
+}
+  
