@@ -1,4 +1,6 @@
 # Initialisation file for specific run of a simulation
+# noise .006 vs. .004 in previous gridsearch
+
 
 rm (list = ls())
 
@@ -6,7 +8,7 @@ path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/"
 setwd (path.simulation)
 
 
-filename.output.genetic.results <- "sim_6e_gridsearch_allow.txt" # where to store results
+filename.output.genetic.results <- "sim_6e_gridsearch_results_highnoise_allow.txt" # where to store results
 
 
 blocksize <- 100
@@ -28,7 +30,7 @@ RESPONSE_THRESHOLD 0.15
 STEP_SIZE 0.0015 
 SQUASHING_PARAM 0.8 
 CONFLICT_SQUASHING_PARAM 0.5 
-NOISE 0.004 # default .006
+NOISE 0.006 # default .006
 HEBBIAN_LEARNING_PERSISTENCE 1 
 RSI_SCALE_PARAM 1.0 
 BIAS_OUTPUTUNIT -6.0 
