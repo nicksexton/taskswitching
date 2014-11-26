@@ -10,7 +10,7 @@ setwd (path.simulation)
 filename.output.genetic.results <- "sim_6e_gridsearch_clip.txt" # where to store results
 
 
-blocksize <- 200
+blocksize <- 100
 n <- 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
@@ -19,8 +19,8 @@ max.cycles <- 500
 #model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = -1.0, conflict.bias = -1.0)
 
 # temp bounds to get reasonable response rate for test
-model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -0.0, conflict.bias = -40.0)
-model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = 30.0, conflict.bias = 0.0)
+model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
+model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
 
 path.ramdiskfolder <- "6e_errors_clip_0"
 
