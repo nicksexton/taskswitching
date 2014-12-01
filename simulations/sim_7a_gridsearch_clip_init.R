@@ -11,8 +11,8 @@ setwd (path.simulation)
 filename.output.results <- "sim_7a_gridsearch_results_highnoise_clip.txt" # where to store results
 
 
-blocksize <- 50
-n <- 7 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+blocksize <- 100
+n <- 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Bounds for gridsearch

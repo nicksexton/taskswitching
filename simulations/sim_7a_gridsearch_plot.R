@@ -1,4 +1,4 @@
-rm (list = ls())
+srm (list = ls())
 setwd("~/Programming/c_pdp_models/simulations")
 library (ggplot2)
 
@@ -7,45 +7,10 @@ library (ggplot2)
 ### Averaging across multiple runs, mung the data sets together
 #cols.to.avg = c("conflict.gain", "conflict.tdwt", "conflict.bias", "mean.0SW", "mean.1SW", "mean.2SW", "mean.ALT")
 
-# Temp data for pilot
-data.temp <- read.delim("sim_7a_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-
 # CLIP Low noise version 3
-#data.clip.lownoise.0 = read.delim("sim_6e_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-#data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+data.clip = read.delim("sim_7a_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
-# ALLOW low noise version 3
-#data.allow.lownoise.0 = read.delim("sim_6e_gridsearch_allow.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-#data.allow.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_allow.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-# RESCALE low noise version
-#data.rescale.lownoise.0 = read.delim("sim_6e_gridsearch_results_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-#data.rescale.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-
-
-
-
-#recalc.means <- function (x1, x2) apply(X=cbind(x1, x2), MARGIN=1, FUN=mean) 
-
-#data.clip.lownoise.merge$mean.0SW <-recalc.means (data.clip.lownoise.merge$mean.0SW.x,
-#                                                  data.clip.lownoise.merge$mean.0SW.y)
-#data.clip.lownoise.merge$mean.1SW <-recalc.means (data.clip.lownoise.merge$mean.1SW.x,
-#                                                  data.clip.lownoise.merge$mean.1SW.y)
-#data.clip.lownoise.merge$mean.2SW <-recalc.means (data.clip.lownoise.merge$mean.2SW.x,
-#                                                  data.clip.lownoise.merge$mean.2SW.y)
-#data.clip.lownoise.merge$mean.ALT <-recalc.means (data.clip.lownoise.merge$mean.ALT.x,
-#                                                  data.clip.lownoise.merge$mean.ALT.y)
-#data.clip.lownoise.merge <- subset (data.clip.lownoise.merge, select=c(cols.to.avg))
-#data.clip.lownoise.merge$sc <- data.clip.lownoise.merge$mean.1SW - data.clip.lownoise.merge$mean.0SW
-#data.clip.lownoise.merge$n2rc <- data.clip.lownoise.merge$mean.ALT - data.clip.lownoise.merge$mean.2SW
-
-# NB 1SW > 0SW = +ve switch costs (empirical), ALT > 2SW = +ve n-2rc (empirical)
 
 # transformation function for switch/n2-rep costs with small range
 compress <- function (x) 2*((1/(1+exp(-0.5 * x)) - 0.5))
@@ -61,48 +26,11 @@ intersect <- function (sc, n2rc)  { max (sc, 0) * max (n2rc, 0)}
 intersectErr <- function (error.sc, error.n2rc) {max (error.sc, 0) * max (error.n2rc, 0)}
 
 # Code could be vectorised!
-data.clip.lownoise.0$intersect <- rep(0, nrow(data.clip.lownoise.0))
-data.clip.lownoise.0$intersectErr <- rep(0, nrow(data.clip.lownoise.0))
-for (i in 1:nrow(data.clip.lownoise.0)) {
-  data.clip.lownoise.0[i,]$intersect <- intersect (data.clip.lownoise.0[i,]$sc, data.clip.lownoise.0[i,]$n2rc)
-  data.clip.lownoise.0[i,]$intersectErr <- intersectErr ((data.clip.lownoise.0[i,]$err.3.1SW - data.clip.lownoise.0[i,]$err.3.0SW), (data.clip.lownoise.0[i,]$err.3.ALT - data.clip.lownoise.0[i,]$err.3.2SW))
-}
-
-data.allow.lownoise.0$intersect <- rep(0, nrow(data.allow.lownoise.0))
-data.allow.lownoise.0$intersectErr <- rep(0, nrow(data.allow.lownoise.0))
-for (i in 1:nrow(data.allow.lownoise.0)) {
-  data.allow.lownoise.0[i,]$intersect <- intersect (data.allow.lownoise.0[i,]$sc, data.allow.lownoise.0[i,]$n2rc)
-  data.allow.lownoise.0[i,]$intersectErr <- intersectErr ((data.allow.lownoise.0[i,]$err.3.1SW - data.allow.lownoise.0[i,]$err.3.0SW), (data.allow.lownoise.0[i,]$err.3.ALT - data.allow.lownoise.0[i,]$err.3.2SW))
-}
-
-data.rescale.lownoise.0$intersect <- rep(0, nrow(data.rescale.lownoise.0))
-data.rescale.lownoise.0$intersectErr <- rep(0, nrow(data.rescale.lownoise.0))
-for (i in 1:nrow(data.rescale.lownoise.0)) {
-  data.rescale.lownoise.0[i,]$intersect <- intersect (data.rescale.lownoise.0[i,]$sc, data.rescale.lownoise.0[i,]$n2rc)
-  data.rescale.lownoise.0[i,]$intersectErr <- intersectErr ((data.rescale.lownoise.0[i,]$err.3.1SW - data.rescale.lownoise.0[i,]$err.3.0SW), (data.rescale.lownoise.0[i,]$err.3.ALT - data.rescale.lownoise.0[i,]$err.3.2SW))
-}
-
-
-### Highnoise
-data.clip.highnoise.0$intersect <- rep(0, nrow(data.clip.lownoise.0))
-data.clip.highnoise.0$intersectErr <- rep(0, nrow(data.clip.lownoise.0))
-for (i in 1:nrow(data.clip.highnoise.0)) {
-  data.clip.highnoise.0[i,]$intersect <- intersect (data.clip.highnoise.0[i,]$sc, data.clip.highnoise.0[i,]$n2rc)
-  data.clip.highnoise.0[i,]$intersectErr <- intersectErr ((data.clip.highnoise.0[i,]$err.3.1SW - data.clip.highnoise.0[i,]$err.3.0SW), (data.clip.highnoise.0[i,]$err.3.ALT - data.clip.highnoise.0[i,]$err.3.2SW))
-}
-
-data.allow.highnoise.0$intersect <- rep(0, nrow(data.allow.highnoise.0))
-data.allow.highnoise.0$intersectErr <- rep(0, nrow(data.allow.highnoise.0))
-for (i in 1:nrow(data.allow.highnoise.0)) {
-  data.allow.highnoise.0[i,]$intersect <- intersect (data.allow.highnoise.0[i,]$sc, data.allow.highnoise.0[i,]$n2rc)
-  data.allow.highnoise.0[i,]$intersectErr <- intersectErr ((data.allow.highnoise.0[i,]$err.3.1SW - data.allow.highnoise.0[i,]$err.3.0SW), (data.allow.highnoise.0[i,]$err.3.ALT - data.allow.highnoise.0[i,]$err.3.2SW))
-}
-
-data.rescale.highnoise.0$intersect <- rep(0, nrow(data.rescale.highnoise.0))
-data.rescale.highnoise.0$intersectErr <- rep(0, nrow(data.rescale.highnoise.0))
-for (i in 1:nrow(data.rescale.highnoise.0)) {
-  data.rescale.highnoise.0[i,]$intersect <- intersect (data.rescale.highnoise.0[i,]$sc, data.rescale.highnoise.0[i,]$n2rc)
-  data.rescale.highnoise.0[i,]$intersectErr <- intersectErr ((data.rescale.highnoise.0[i,]$err.3.1SW - data.rescale.highnoise.0[i,]$err.3.0SW), (data.rescale.highnoise.0[i,]$err.3.ALT - data.rescale.highnoise.0[i,]$err.3.2SW))
+data.clip$intersect <- rep(0, nrow(data.clip))
+data.clip$intersectErr <- rep(0, nrow(data.clip))
+for (i in 1:nrow(data.clip)) {
+  data.clip[i,]$intersect <- intersect (data.clip[i,]$sc, data.clip[i,]$n2rc)
+  data.clip[i,]$intersectErr <- intersectErr ((data.clip[i,]$err.3.1SW - data.clip[i,]$err.3.0SW), (data.clip[i,]$err.3.ALT - data.clip[i,]$err.3.2SW))
 }
 
 
@@ -503,35 +431,6 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 
 ## Re-run of 15x, clip lownoise
-plot.heatmaps (data.clip.lownoise.0, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
+plot.heatmaps (data.clip, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
 
-plot.errormaps (data.clip.lownoise.0, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
-
-
-                                        # Clip highnoise
-plot.heatmaps (data.clip.highnoise.0, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/highnoise_clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
-
-plot.errormaps (data.clip.highnoise.0, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/highnoise_clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
-
-
-
-                                        # 15x, allow lownoise
-plot.heatmaps (data.allow.lownoise.0, condition.title="Neg Conflict Allowed run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/allow", filename.stem="simulation_6e_gridsearch_allow", save=TRUE)
-
-plot.errormaps (data.allow.lownoise.0, condition.title="Neg Conflict Allowed run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/allow", filename.stem="simulation_6e_gridsearch_allow", save=TRUE)
-
-
-                                        # 15x, allow highnoise
-plot.heatmaps (data.allow.highnoise.0, condition.title="Neg Conflict Allowed run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/highnoise_allow", filename.stem="simulation_6e_gridsearch_allow", save=TRUE)
-plot.errormaps (data.allow.highnoise.0, condition.title="Neg Conflict Allowed run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/highnoise_allow", filename.stem="simulation_6e_gridsearch_allow", save=TRUE)
-
-
-
-                                        # 15x rescale lownoise
-plot.heatmaps (data.rescale.lownoise.0, condition.title="Conflict Rescaled run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/rescale", filename.stem="simulation_6e_gridsearch_rescale", save=TRUE)
-plot.errormaps (data.rescale.lownoise.0, condition.title="Conflict Rescaled run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/rescale", filename.stem="simulation_6e_gridsearch_rescale", save=TRUE)
-
-
-                                        # 15x rescale highnoise
-plot.heatmaps (data.rescale.highnoise.0, condition.title="Conflict Rescaled run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/highnoise_rescale", filename.stem="simulation_6e_gridsearch_rescale", save=TRUE)
-plot.errormaps (data.rescale.highnoise.0, condition.title="Conflict Rescaled run 0\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/highnoise_rescale", filename.stem="simulation_6e_gridsearch_rescale", save=TRUE)
+plot.errormaps (data.clip, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
