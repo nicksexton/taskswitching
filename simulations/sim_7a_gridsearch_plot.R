@@ -1,4 +1,4 @@
-srm (list = ls())
+rm (list = ls())
 setwd("~/Programming/c_pdp_models/simulations")
 library (ggplot2)
 
@@ -37,7 +37,7 @@ for (i in 1:nrow(data.clip)) {
 plot.heatmap.sc <- function (data, condition.title) {
 
 #  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.tdwt, fill=sc))
-  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc))
+  sc <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=sc))
   sc + geom_raster() +
 #    facet_wrap( ~ conflict.bias) +
     facet_wrap( ~ conflict.tdwt) +
@@ -50,7 +50,7 @@ plot.heatmap.sc <- function (data, condition.title) {
 
 plot.heatmapCompress.sc <- function (data, condition.title) {
   
-  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(sc)))
+  sc <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=compress1(sc)))
   sc + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
@@ -64,7 +64,7 @@ plot.heatmapCompress.sc <- function (data, condition.title) {
 
 plot.heatmap.sc.p <- function (data, condition.title) {
 
-  sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc.p))
+  sc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=sc.p))
   sc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=.05, low="red", mid="grey70", high="grey70", limits=c(0,0.1)) +
@@ -78,7 +78,7 @@ plot.heatmap.sc.p <- function (data, condition.title) {
 
 plot.heatmap.n2rc <- function (data, condition.title) {
 
-  n2rc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc))
+  n2rc <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=n2rc))
   n2rc + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-30,40)) +
@@ -92,7 +92,7 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
 # use a suitable squashing function as transf
 
 #  FUN = match.fun(FUN)  
-  n2rc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(n2rc)))
+  n2rc <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=compress1(n2rc)))
   n2rc + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
@@ -104,7 +104,7 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
 
 
 plot.heatmap.n2rc.p <- function (data, condition.title) {
-  n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc.p))
+  n2rc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=n2rc.p))
   n2rc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
@@ -120,7 +120,7 @@ plot.heatmap.n2rc.p <- function (data, condition.title) {
 plot.heatmap.sctimesn2rc <- function (data, condition.title) {
 # plots the intersection of SCs and N2RCs by calculating the product of both DVs
 
-  SCtimesN2RC <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(intersect)))
+  SCtimesN2RC <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=compress1(intersect)))
   SCtimesN2RC + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
@@ -133,17 +133,17 @@ plot.heatmap.sctimesn2rc <- function (data, condition.title) {
 
 plot.heatmaps <- function (data, condition.title, image.directory, filename.stem, save=FALSE) {
 
-  plot.heatmap.sctimesn2rc (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_sctimesn2rc.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+#  plot.heatmap.sctimesn2rc (data, condition.title)
+#  if (save==TRUE) {
+#    image.file <- file.path(image.directory, paste(filename.stem, "_sctimesn2rc.png", sep=""))
+#    ggsave(filename=image.file, width=200, height=250, units="mm")
+#  }
   
-  plot.heatmap.rt.0SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_rt0SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+#  plot.heatmap.rt.0SW (data, condition.title)
+#  if (save==TRUE) {
+#    image.file <- file.path(image.directory, paste(filename.stem, "_rt0SW.png", sep=""))
+#    ggsave(filename=image.file, width=200, height=250, units="mm")
+#  }
   
   plot.heatmap.sc (data, condition.title)
   if (save==TRUE) {
@@ -157,11 +157,11 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
     ggsave(filename=image.file, width=200, height=250, units="mm")
   }  
   
-  plot.heatmap.sc.p (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_sc_p.png", sep="")) 
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+#  plot.heatmap.sc.p (data, condition.title)
+#  if (save==TRUE) {
+#    image.file <- file.path(image.directory, paste(filename.stem, "_sc_p.png", sep="")) 
+#    ggsave(filename=image.file, width=200, height=250, units="mm")
+#  }
 
   plot.heatmap.n2rc (data, condition.title)
   if (save==TRUE) {
@@ -175,11 +175,21 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
     ggsave(filename=image.file, width=200, height=250, units="mm")    
   }
   
-  plot.heatmap.n2rc.p (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_n2rc_p.png", sep="") )
-    ggsave(filename=image.file, width=200, height=250, units="mm")    
-  }
+#  plot.heatmap.n2rc.p (data, condition.title)
+#  if (save==TRUE) {
+#    image.file <- file.path(image.directory, paste(filename.stem, "_n2rc_p.png", sep="") )
+#    ggsave(filename=image.file, width=200, height=250, units="mm")    
+#  }
+
+}
+
+plot.heatmaps.bytaskseq <- function (data, cond.title, image.directory, file.stem, save=FALSE) {
+
+  plot.heatmaps (subset(data, data$alternation=="AB"),
+                        condition.title=paste("Task sequence AB\n",cond.title, sep=""),
+                        image.directory=image.directory,
+                        filename.stem=paste("AB_", file.stem, sep=""),
+                        save=save)
 
 }
 
@@ -431,6 +441,5 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 
 ## Re-run of 15x, clip lownoise
-plot.heatmaps (data.clip, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)
+plot.heatmaps.bytaskseq (data.clip, cond.title="Conflict Clipped\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_7a/clip", file.stem="simulation_7a_gridsearch_clip", save=TRUE)
 
-plot.errormaps (data.clip, condition.title="Conflict Clipped\nNoise=.004", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_6e/clip", filename.stem="simulation_6e_gridsearch_clip", save=TRUE)

@@ -229,7 +229,6 @@ test.population <- function (pop, pop.results) {
     
     pop.results[(1+(nlevels*(i-1))):(i*nlevels),names(results)] <- results.indiv[,2:ncol(results.indiv)]
 
-
     # browser()
     setTxtProgressBar(progress, i)
   }
@@ -261,7 +260,7 @@ run <- function (pop, levels) {
   # print here
   print (pop.results)
 
-  write.table (format(pop, digits=4),
+  write.table (format(pop.results, digits=4),
                file,
                sep="\t",
                append=TRUE,
@@ -269,7 +268,7 @@ run <- function (pop, levels) {
                col.names=TRUE)
   write ("\n", file, append=TRUE)
          
-  return (pop)
+  return (pop.results)
 }
 
 
@@ -319,4 +318,4 @@ grid <- generate.grid (n,
 
 
 
-grid <- run (grid, levels)
+results <- run (grid, levels)
