@@ -167,9 +167,11 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
                timeout.3.2SW=vector(mode="numeric", length=6),
                timeout.3.ALT=vector(mode="numeric", length=6))
 
-  #  browser ()
+
   
   results <- ddply (.data=data, .(alternation), .fun=data.analyse)
+#  browser ()
+
   return (results)
   
 }
@@ -208,40 +210,56 @@ generate.grid <- function (n, min, max) {
 
 
 
-test.population <- function (pop) {
+test.population <- function (pop, pop.results) {
 
+  # how many levels in pop.results?
+  nlevels <- nrow(pop.results) / nrow(pop)
+  
   progress <- txtProgressBar (min=0, max=nrow(pop), style=3)
 
   for (i in 1:nrow(pop)) {
 
     conf <- paste (filename.conf.temp.stem, ".", i, ".conf", sep="")
     data <- paste (filename.output.temp.stem, ".", i, ".txt", sep="")
-    
-    pop[i,names(results)] <- run.individual (leaf=pop[i,names(model.conf.leaf.min)],
-                                             stem=model.conf.stem,
-                                             conf.file.temp=conf,
-                                             output.file.temp=data)
 
+    results.indiv <- run.individual (leaf=pop[i,names(model.conf.leaf.min)],
+                                     stem=model.conf.stem,
+                                     conf.file.temp=conf,
+                                     output.file.temp=data)
+    
+    pop.results[(1+(nlevels*(i-1))):(i*nlevels),names(results)] <- results.indiv[,2:ncol(results.indiv)]
+
+
+    # browser()
     setTxtProgressBar(progress, i)
   }
 
   close (progress)
   
-  return (pop)
+  return (pop.results)
 
 }
 
 
 
-run <- function (pop) {
+run <- function (pop, levels) {
 
-  pop <- cbind (pop, results)
-  pop <- test.population (pop)
+  expand.1d <- function (vect, d) as.vector(sapply(X=vect, FUN=function(x) rep(x, d)))
+
+#  browser()
+  
+  pop.expanded <- apply (X=pop, MARGIN=2, FUN=function(x) expand.1d(x, length(levels)))
+  pop.expanded <- cbind (data.frame(pop.expanded), alternation=rep(levels, nrow(pop)))
+#  pop <- cbind (pop, apply (X=results, MARGIN=2, FUN=function(x) expand.1d(x, length(levels))))
+  pop.results <- cbind (pop.expanded, results)
+
+  
+  pop.results <- test.population (pop, pop.results)
 
   file <- paste(path.simulation, filename.output.results, sep="")
   
   # print here
-  print (pop)
+  print (pop.results)
 
   write.table (format(pop, digits=4),
                file,
@@ -260,7 +278,6 @@ run <- function (pop) {
 
 
 params <- names (model.conf.leaf.min)
-
 results <- data.frame (mean.0SW=numeric(n),
                        mean.1SW=numeric(n),
                        sc=numeric(n),
@@ -291,10 +308,15 @@ results <- data.frame (mean.0SW=numeric(n),
                        timeout.3.ALT=numeric(n)
                        )
 
+levels <- c("AB", "AC", "BA", "BC", "CA", "CB")
+
 grid <- generate.grid (n,
                        model.conf.leaf.min,
                        model.conf.leaf.max)
-                                        # include alternation to force grid to create space in results table
+
+# Now expand the results grid to make data frame for results
 
 
-  grid <- run (grid)
+
+
+grid <- run (grid, levels)
