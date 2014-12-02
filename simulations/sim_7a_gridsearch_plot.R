@@ -28,9 +28,11 @@ intersectErr <- function (error.sc, error.n2rc) {max (error.sc, 0) * max (error.
 # Code could be vectorised!
 data.clip$intersect <- rep(0, nrow(data.clip))
 data.clip$intersectErr <- rep(0, nrow(data.clip))
+progress <- txtProgressBar (min=0, max=nrow(data.clip), style=3)
 for (i in 1:nrow(data.clip)) {
   data.clip[i,]$intersect <- intersect (data.clip[i,]$sc, data.clip[i,]$n2rc)
   data.clip[i,]$intersectErr <- intersectErr ((data.clip[i,]$err.3.1SW - data.clip[i,]$err.3.0SW), (data.clip[i,]$err.3.ALT - data.clip[i,]$err.3.2SW))
+  setTxtProgressBar(progress, i)  
 }
 
 
@@ -42,7 +44,9 @@ plot.heatmap.sc <- function (data, condition.title) {
 #    facet_wrap( ~ conflict.bias) +
     facet_wrap( ~ conflict.tdwt) +
     scale_fill_gradient2(midpoint=0,  mid="grey70", limits=c(-30,40)) +
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n Switch Costs")) +
     labs(fill="Switch Costs\n(cycles)") +
     theme (legend.position=c(0.87,0.1))
@@ -54,7 +58,9 @@ plot.heatmapCompress.sc <- function (data, condition.title) {
   sc + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
-        ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                        "\nParameter space for conflict parameters\n Switch costs") ) +
     labs(fill="Switch Costs\ntransform(cycles)") +
     theme (legend.position=c(0.87,0.1))
@@ -68,7 +74,9 @@ plot.heatmap.sc.p <- function (data, condition.title) {
   sc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=.05, low="red", mid="grey70", high="grey70", limits=c(0,0.1)) +
-        ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                        "\nParameter space for conflict parameters\n p value of Switch costs") ) +
   labs(fill="significance (p)") +
   theme (legend.position=c(0.87,0.1))
@@ -82,6 +90,8 @@ plot.heatmap.n2rc <- function (data, condition.title) {
   n2rc + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-30,40)) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
         ggtitle(paste (condition.title,
                        "\nParameter space for conflict parameters\n N-2 Repetition costs") ) +
   labs(fill="N-2 Repetition Costs\n(cycles)") +
@@ -96,7 +106,9 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
   n2rc + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n N-2 Repetition costs") ) +
   labs(fill="N-2 Repetition Costs\ntransform(cycles)") +
   theme (legend.position=c(0.87,0.1))
@@ -108,6 +120,8 @@ plot.heatmap.n2rc.p <- function (data, condition.title) {
   n2rc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
         ggtitle(paste (condition.title,
                        "\nParameter space for conflict parameters\n p value of N-2 Repetition costs") ) +
   labs(fill="significance (p)") +
@@ -124,7 +138,9 @@ plot.heatmap.sctimesn2rc <- function (data, condition.title) {
   SCtimesN2RC + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for intersection of SCs and N2RCs") ) +
   labs(fill="compress (sqrt(n2rc x sc))") +
   theme (legend.position=c(0.87,0.1))
@@ -145,11 +161,11 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
     ggsave(filename=image.file, width=200, height=250, units="mm")
   }
   
-  plot.heatmap.sc (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_sc.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }  
+#  plot.heatmap.sc (data, condition.title)
+#  if (save==TRUE) {
+#    image.file <- file.path(image.directory, paste(filename.stem, "_sc.png", sep=""))
+#    ggsave(filename=image.file, width=200, height=250, units="mm")
+#  }  
 
   plot.heatmapCompress.sc (data, condition.title)
   if (save==TRUE) {
@@ -200,8 +216,11 @@ plot.heatmap.rt.0SW <- function (data, condition.title) {
   rt.0SW <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=log(mean.0SW)))
   rt.0SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
-    scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs, breaks=bre) +
-    ggtitle(paste (condition.title,
+      scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
+                           breaks=bre, limits=c(log(25), log(500))) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+        ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n RT (0SW condition)") ) +
   labs(fill="log RT") +
   theme (legend.position=c(0.87,0.1))
@@ -216,8 +235,11 @@ plot.heatmap.rt.1SW <- function (data, condition.title) {
   rt.1SW <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=log(mean.1SW)))
   rt.1SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
-      scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs, breaks=bre) +
-    ggtitle(paste (condition.title,
+      scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
+                           breaks=bre, limits=c(log(50), log(400))) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+        ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n RT (1SW condition)") ) +
   labs(fill="log RT") +
   theme (legend.position=c(0.87,0.1))
@@ -232,8 +254,11 @@ plot.heatmap.rt.2SW <- function (data, condition.title) {
   rt.0SW <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=log(mean.2SW)))
   rt.0SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
-    scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs, breaks=bre) +
-    ggtitle(paste (condition.title,
+    scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
+                         breaks=bre, limits=c(log(50), log(400))) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n RT (2SW condition)") ) +
   labs(fill="log RT") +
   theme (legend.position=c(0.87,0.1))
@@ -248,8 +273,11 @@ plot.heatmap.rt.ALT <- function (data, condition.title) {
   rt.1SW <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=log(mean.ALT)))
   rt.1SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
-      scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs, breaks=bre) +
-    ggtitle(paste (condition.title,
+      scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
+                           breaks=bre, limits=c(log(50), log(400))) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+        ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n RT (ALT condition)") ) +
   labs(fill="log RT") +
   theme (legend.position=c(0.87,0.1))
@@ -273,6 +301,8 @@ plot.heatmap.logErrors.0SW <- function (data, condition.title) {
    scale_fill_gradientn(name="Error Rate", colours=colrs,
                         na.value="white", breaks=bre, labels=lab) +
 #scale_fill_gradientn(colours=c("black", "red4", "red3", "red2", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks                          
    ggtitle(paste (condition.title,
                    "\nParameter space for Errors(1,2) in 0SW condition") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
@@ -291,6 +321,8 @@ plot.heatmap.logErrors.1SW <- function (data, condition.title) {
    facet_wrap( ~ conflict.tdwt) +                                        
    scale_fill_gradientn(name="Error Rate", colours=colrs,
                         na.value="white", breaks=bre, labels=lab) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks                          
   ggtitle(paste (condition.title,
                    "\nParameter space for Errors(1,2) in 1SW condition") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
@@ -306,6 +338,8 @@ plot.heatmap.errors.1SW <- function (data, condition.title) {
   facet_wrap( ~ conflict.tdwt) +
  # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white") +
 scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
   ggtitle(paste (condition.title,
                    "\nParameter space for Errors(1,2) in 1SW condition") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
@@ -325,7 +359,9 @@ plot.heatmap.logErrors.3.ALT <- function (data, condition.title) {
   scale_fill_gradientn(name="Error Rate", colours=colrs,
                            na.value="white", breaks=bre, labels=lab) +
 # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+        ggtitle(paste (condition.title,
                    "\nParameter space for Errors(3) in ALT condition") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
   theme (legend.position=c(0.87,0.1))
@@ -344,7 +380,9 @@ plot.heatmap.logErrors.3.2SW <- function (data, condition.title) {
   scale_fill_gradientn(name="Error Rate", colours=colrs,
                            na.value="white", breaks=bre, labels=lab) +
 # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+        ggtitle(paste (condition.title,
                    "\nParameter space for Errors(3) in 2SW condition") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
   theme (legend.position=c(0.87,0.1))
@@ -371,7 +409,9 @@ plot.heatmap.errors.n2rc <- function (data, condition.title) {
   error.rates + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(-1,1)) + 
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for Error n-2RC: contrast between ALT and 2SW conditions") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
   theme (legend.position=c(0.87,0.1))
@@ -380,11 +420,13 @@ plot.heatmap.errors.n2rc <- function (data, condition.title) {
 plot.heatmap.errors.sc <- function (data, condition.title) {
 #Errors switch cost: Difference between Errors(3) in ALT and 2SW conditions
   
-  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress.err(err.3.1SW - err.3.0SW)))
+  error.rates <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=compress.err(err.3.1SW - err.3.0SW)))
   error.rates + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(-1,1)) + 
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for Error switch cost: contrast between 1SW and 0SW conditions") ) +
   #labs(fill="compress (sqrt(n2rc x sc))") +
   theme (legend.position=c(0.87,0.1))
@@ -398,7 +440,9 @@ plot.errormap.sctimesn2rc <- function (data, condition.title) {
   SCtimesN2RC + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
-    ggtitle(paste (condition.title,
+      geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
+      geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
+      ggtitle(paste (condition.title,
                    "\nParameter space for intersection of Error SCs and N2RCs") ) +
   theme (legend.position=c(0.87,0.1))
 }
@@ -484,7 +528,7 @@ plot.heatmaps.bytaskseq <- function (data, cond.title, image.directory, file.ste
                         save=save)
 
   plot.heatmaps (subset(data, data$alternation=="BA"),
-                        condition.title=paste("Task sequence AB\n",cond.title, sep=""),
+                        condition.title=paste("Task sequence BA\n",cond.title, sep=""),
                         image.directory=image.directory,
                         filename.stem=paste(file.stem, "BA_", sep=""),
                         save=save)
@@ -496,10 +540,16 @@ plot.heatmaps.bytaskseq <- function (data, cond.title, image.directory, file.ste
                         save=save)
 
   plot.errormaps (subset(data, data$alternation=="BA"),
-                        condition.title=paste("Task sequence AB\n",cond.title, sep=""),
-                        image.directory=image.directory,
-                        filename.stem=paste(file.stem, "BA_", sep=""),
-                        save=save)
+                  condition.title=paste("Task sequence BA\n",cond.title, sep=""),
+                  image.directory=image.directory,
+                  filename.stem=paste(file.stem, "BA_", sep=""),
+                  save=save)
+
+#  plot.errormaps (subset(data, data$alternation=="BA"),
+#                        condition.title=paste("Task sequence BA\n",cond.title, sep=""),
+#                        image.directory=image.directory,
+#                        filename.stem=paste(file.stem, "BA_", sep=""),
+#                        save=save)
 
  
   
