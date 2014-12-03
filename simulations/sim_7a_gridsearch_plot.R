@@ -8,7 +8,10 @@ library (ggplot2)
 #cols.to.avg = c("conflict.gain", "conflict.tdwt", "conflict.bias", "mean.0SW", "mean.1SW", "mean.2SW", "mean.ALT")
 
 # CLIP Low noise version 3
-data.clip = read.delim("sim_7a_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+data.clip <- read.delim("sim_7a_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+
+# CLIP Low noise version 3
+data.rescale <- read.delim("sim_7a_gridsearch_results_highnoise_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
 
@@ -34,6 +37,7 @@ for (i in 1:nrow(data.clip)) {
   data.clip[i,]$intersectErr <- intersectErr ((data.clip[i,]$err.3.1SW - data.clip[i,]$err.3.0SW), (data.clip[i,]$err.3.ALT - data.clip[i,]$err.3.2SW))
   setTxtProgressBar(progress, i)  
 }
+
 
 
 plot.heatmap.sc <- function (data, condition.title) {
@@ -155,12 +159,6 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
     ggsave(filename=image.file, width=200, height=250, units="mm")
   }
   
-  plot.heatmap.rt.0SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_rt0SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
-  
 #  plot.heatmap.sc (data, condition.title)
 #  if (save==TRUE) {
 #    image.file <- file.path(image.directory, paste(filename.stem, "_sc.png", sep=""))
@@ -207,6 +205,7 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
 # even better, modify gridsearch code to output error rate (or number of correct vs. incorrect trials) to data
 
 rt.colour.scale <- c("skyblue1", "springgreen4", "yellow", "red", "darkred")
+rt.limits <- c(log(30), log(500))
 
 plot.heatmap.rt.0SW <- function (data, condition.title) {
 
@@ -217,7 +216,7 @@ plot.heatmap.rt.0SW <- function (data, condition.title) {
   rt.0SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
       scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
-                           breaks=bre, limits=c(log(25), log(500))) +
+                           breaks=bre, limits=rt.limits) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
         ggtitle(paste (condition.title,
@@ -236,7 +235,7 @@ plot.heatmap.rt.1SW <- function (data, condition.title) {
   rt.1SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
-                           breaks=bre, limits=c(log(50), log(400))) +
+                           breaks=bre, limits=rt.limits) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
         ggtitle(paste (condition.title,
@@ -255,7 +254,7 @@ plot.heatmap.rt.2SW <- function (data, condition.title) {
   rt.0SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +                                        
     scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
-                         breaks=bre, limits=c(log(50), log(400))) +
+                         breaks=bre, limits=rt.limits) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
       ggtitle(paste (condition.title,
@@ -274,7 +273,7 @@ plot.heatmap.rt.ALT <- function (data, condition.title) {
   rt.1SW + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs,
-                           breaks=bre, limits=c(log(50), log(400))) +
+                           breaks=bre, limits=rt.limits) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
         ggtitle(paste (condition.title,
