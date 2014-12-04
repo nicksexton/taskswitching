@@ -80,7 +80,7 @@ data.preprocess <- function (datafile, lookuptable) {
 
 data.analyse <- function (data) {
 
-    errors.trial12 <- calculate.errors (data$correct.block12, data$sequence_cond) 
+  errors.trial12 <- calculate.errors (data$correct.block12, data$sequence_cond) 
   names(errors.trial12) <- c("err.12.0SW", "err.12.1SW", "err.12.2SW", "err.12.ALT")  
 
   timeouts.trial12 <- calculate.errors (data$gaveresponse.block12, data$sequence_cond)
@@ -91,8 +91,15 @@ data.analyse <- function (data) {
   
   errors.trial3 <- calculate.errors (data$correct.trial, data$sequence_cond)
   timeouts.trial3 <- calculate.errors (data$gaveresponse.trial, data$sequence_cond)
-  names(timeouts.trial12) <- c("timeout.3.0SW", "timeout.3.1SW", "timeout.3.2SW", "timeout.3.ALT")   
+  names(timeouts.trial3) <- c("timeout.3.0SW", "timeout.3.1SW", "timeout.3.2SW", "timeout.3.ALT")   
   names(errors.trial3) <- c("err.3.0SW", "err.3.1SW", "err.3.2SW", "err.3.ALT")
+  
+
+  # Debug: what is going on with NAs in trial 3 errors
+  data <- subset (data, PATH.trial == 2)
+#  browser()
+  if (is.na(errors.trial3[1]) | is.na (errors.trial3[2])) { browser() }
+  ## End debug
   
                                         # filter the errors out to calc switchcost 
   data <- subset (data, PATH.trial == 2 & correct.trial == TRUE)
@@ -105,7 +112,7 @@ data.analyse <- function (data) {
                     t(timeouts.trial12),
                     t(errors.trial3),
                     t(timeouts.trial3))
-  
+#  browser ()
   return (results)
 
 }
@@ -171,7 +178,7 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   
   results <- ddply (.data=data, .(alternation), .fun=data.analyse)
 #  browser ()
-
+  if(any(is.na(results))) {browser()}
   return (results)
   
 }
@@ -226,6 +233,15 @@ test.population <- function (pop, pop.results) {
                                      stem=model.conf.stem,
                                      conf.file.temp=conf,
                                      output.file.temp=data)
+
+    #debug
+#    browser()
+    if (is.na(results.indiv$err.3.0SW) | 
+        is.na(results.indiv$err.3.1SW) |
+        is.na(results.indiv$err.3.2SW) |
+        is.na(results.indiv$err.3.ALT)) { browser() }
+
+
     
     pop.results[(1+(nlevels*(i-1))):(i*nlevels),names(results)] <- results.indiv[,2:ncol(results.indiv)]
 

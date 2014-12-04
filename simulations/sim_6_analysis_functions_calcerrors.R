@@ -169,9 +169,9 @@ calculate.n2rc <- function (x){
               df = test.n2rc(x)[[2]][[1]],
               p = test.n2rc(x)[[3]][[1]]),
             results <- data.frame (
-              mean.0SW = NA,
-              mean.1SW = NA,
-              sc = NA,
+              mean.2SW = NA,
+              mean.ALT = NA,
+              n2rc = NA,
               t = NA,
               df = NA,
               p = NA

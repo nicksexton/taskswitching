@@ -14,6 +14,8 @@ data.clip <- read.delim("sim_7a_gridsearch_results_highnoise_clip.txt", sep=c("\
 data.rescale <- read.delim("sim_7a_gridsearch_results_highnoise_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
+# temp test
+data.temp <- read.delim("temp_sim_7a_results.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 # transformation function for switch/n2-rep costs with small range
 compress <- function (x) 2*((1/(1+exp(-0.5 * x)) - 0.5))
@@ -35,6 +37,16 @@ progress <- txtProgressBar (min=0, max=nrow(data.clip), style=3)
 for (i in 1:nrow(data.clip)) {
   data.clip[i,]$intersect <- intersect (data.clip[i,]$sc, data.clip[i,]$n2rc)
   data.clip[i,]$intersectErr <- intersectErr ((data.clip[i,]$err.3.1SW - data.clip[i,]$err.3.0SW), (data.clip[i,]$err.3.ALT - data.clip[i,]$err.3.2SW))
+  setTxtProgressBar(progress, i)  
+}
+
+# Code could be vectorised!
+data.temp$intersect <- rep(0, nrow(data.temp))
+data.temp$intersectErr <- rep(0, nrow(data.temp))
+progress <- txtProgressBar (min=0, max=nrow(data.temp), style=3)
+for (i in 1:nrow(data.temp)) {
+  data.temp[i,]$intersect <- intersect (data.temp[i,]$sc, data.temp[i,]$n2rc)
+  data.temp[i,]$intersectErr <- intersectErr ((data.temp[i,]$err.3.1SW - data.temp[i,]$err.3.0SW), (data.temp[i,]$err.3.ALT - data.temp[i,]$err.3.2SW))
   setTxtProgressBar(progress, i)  
 }
 
@@ -557,3 +569,5 @@ plot.heatmaps.bytaskseq <- function (data, cond.title, image.directory, file.ste
 ## Re-run of 15x, clip lownoise
 plot.heatmaps.bytaskseq (data.clip, cond.title="Conflict Clipped\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_7a/clip", file.stem="simulation_7a_gridsearch_clip", save=TRUE)
 
+## temp debug 
+plot.heatmaps.bytaskseq (data.temp, cond.title="Temp\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_7a/temp", file.stem="simulation_7a_gridsearch_clip", save=TRUE)
