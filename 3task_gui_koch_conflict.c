@@ -15,6 +15,10 @@
 #define DATAFILE_ACT "3task_koch_act.txt"
 
 #define TEXT_SIZE_HEAD 15
+#define EXPORT_IMAGE_WIDTH 600
+#define EXPORT_IMAGE_HEIGHT 400
+
+
 
 void three_task_gui_koch_conflict_plot_conflict_activation (GtkWidget *widget, 
 							   cairo_t *cr, 
@@ -274,9 +278,12 @@ void three_task_gui_koch_conflict_plot_network_activation (GtkWidget *widget,
 }
 
 
-void three_task_gui_draw_architecture (GtkWidget *widget, 
-				       cairo_t *cr, 
-				       ThreeTaskSimulation *simulation) {
+
+/******************************************************************************/
+
+
+void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation *simulation) {
+
 
   pdp_layer * layer_taskdemand = pdp_model_component_find (simulation->model, ID_TASKDEMAND)->layer;
   pdp_layer * layer_input_0 = pdp_model_component_find (simulation->model, ID_INPUT_0)->layer;
@@ -290,35 +297,27 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
   pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
-  guint widget_width, widget_height;
-  widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
-  widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
-
-  //  printf ("%d x %d\n", widget_width, widget_height);
-
-  // Conflict Units
-
-  PdpguiCoords loc_conflict = { .x = widget_width * 0.7, .y = widget_height * 0.1, };
-  PdpguiCoords loc_conflict_title = { .x = widget_width * 0.9, .y = widget_height * 0.1, };
+  PdpguiCoords loc_conflict = { .x = width * 0.7, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_title = { .x = width * 0.9, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict Monitoring");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
 
-  PdpguiCoords loc_conflict_td_upper = { .x = widget_width * 0.85, .y = widget_height * -0.1 };
-  PdpguiCoords loc_conflict_td_lower = { .x = widget_width * 0.85, .y = widget_height * 0.6 };
+  PdpguiCoords loc_conflict_td_upper = { .x = width * 0.85, .y = height * -0.1 };
+  PdpguiCoords loc_conflict_td_lower = { .x = width * 0.85, .y = height * 0.6 };
 
 
   // Conflict Inputs
-  PdpguiCoords loc_conflict_input = { .x = widget_width * 0.7, .y = widget_height * 0.2, };
-  PdpguiCoords loc_conflict_input_title = { .x = widget_width * 0.9, .y = widget_height * 0.1, };
+  PdpguiCoords loc_conflict_input = { .x = width * 0.7, .y = height * 0.2, };
+  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
 
 
   // TD Units
 
-  PdpguiCoords loc_taskdemand = { .x = widget_width * 0.5, .y = widget_height * 0.3, };
-  PdpguiCoords loc_taskdemand_title = { .x = widget_width * 0.9, .y = widget_height * 0.3, };
+  PdpguiCoords loc_taskdemand = { .x = width * 0.5, .y = height * 0.3, };
+  PdpguiCoords loc_taskdemand_title = { .x = width * 0.9, .y = height * 0.3, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
@@ -327,10 +326,10 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 
   // Inputs
 
-  PdpguiCoords loc_input_0 = { .x = widget_width * 0.2, .y = widget_height * 0.8, };
-  PdpguiCoords loc_input_1 = { .x = widget_width * 0.5, .y = widget_height * 0.8, };
-  PdpguiCoords loc_input_2 = { .x = widget_width * 0.8, .y = widget_height * 0.8, };
-  PdpguiCoords loc_inputs_title = { .x = widget_width * 0.9, .y = widget_height * 0.8, };
+  PdpguiCoords loc_input_0 = { .x = width * 0.2, .y = height * 0.8, };
+  PdpguiCoords loc_input_1 = { .x = width * 0.5, .y = height * 0.8, };
+  PdpguiCoords loc_input_2 = { .x = width * 0.8, .y = height * 0.8, };
+  PdpguiCoords loc_inputs_title = { .x = width * 0.9, .y = height * 0.8, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_inputs_title, 0, -10, "Inputs");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_0, -22, 30, "A");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_1, -22, 30, "B");
@@ -339,39 +338,39 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 
   // Outputs
 
-  PdpguiCoords loc_output_0 = { .x = widget_width * 0.2, .y = widget_height * 0.5, };
-  PdpguiCoords loc_output_1 = { .x = widget_width * 0.5, .y = widget_height * 0.5, };
-  PdpguiCoords loc_output_2 = { .x = widget_width * 0.8, .y = widget_height * 0.5, };
-  PdpguiCoords loc_outputs_title = { .x = widget_width * 0.9, .y = widget_height * 0.5, };
+  PdpguiCoords loc_output_0 = { .x = width * 0.2, .y = height * 0.5, };
+  PdpguiCoords loc_output_1 = { .x = width * 0.5, .y = height * 0.5, };
+  PdpguiCoords loc_output_2 = { .x = width * 0.8, .y = height * 0.5, };
+  PdpguiCoords loc_outputs_title = { .x = width * 0.9, .y = height * 0.5, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_outputs_title, 0, -10, "Outputs");
 
 
-  PdpguiCoords loc_topdowncontrol = { .x = widget_width * 0.3, .y = widget_height * 0.1, };
-  PdpguiCoords loc_tdc_title = { .x = widget_width * 0.9, .y = widget_height * 0.1, };
+  PdpguiCoords loc_topdowncontrol = { .x = width * 0.3, .y = height * 0.1, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.9, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0,  12, "Inputs");
 
 
-  PdpguiCoords loc_td_input0_intermed_upper = { .x = widget_width * 0.05, .y = 0.0 };
-  PdpguiCoords loc_td_input0_intermed_lower = { .x = widget_width * 0.05, .y = widget_height * 0.95 };
-  PdpguiCoords loc_td_input1_intermed_upper = { .x = widget_width * 0.20, .y = 0.0 };
-  PdpguiCoords loc_td_input1_intermed_lower = { .x = widget_width * 0.4, .y = widget_height * 0.90 };
-  PdpguiCoords loc_td_input2_intermed_upper = { .x = widget_width * 0.9, .y = 0.0 };
-  PdpguiCoords loc_td_input2_intermed_lower = { .x = widget_width * 0.9, .y = widget_height * 0.90 };
+  PdpguiCoords loc_td_input0_intermed_upper = { .x = width * 0.05, .y = 0.0 };
+  PdpguiCoords loc_td_input0_intermed_lower = { .x = width * 0.05, .y = height * 0.95 };
+  PdpguiCoords loc_td_input1_intermed_upper = { .x = width * 0.20, .y = 0.0 };
+  PdpguiCoords loc_td_input1_intermed_lower = { .x = width * 0.4, .y = height * 0.90 };
+  PdpguiCoords loc_td_input2_intermed_upper = { .x = width * 0.9, .y = 0.0 };
+  PdpguiCoords loc_td_input2_intermed_lower = { .x = width * 0.9, .y = height * 0.90 };
 
-  PdpguiCoords loc_channels_title = { .x = widget_width * 0.5, .y = widget_height * 0.9, };
+  PdpguiCoords loc_channels_title = { .x = width * 0.5, .y = height * 0.9, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_channels_title, -50, 0, "Task Processing Pathways");
 
   // intermediates for lateral connections
-  PdpguiCoords loc_outputs_lateral_intermed_upper = { .x = widget_width * 0.5, 
-						      .y = widget_height * 0.3 };
-  PdpguiCoords loc_outputs_lateral_intermed_lower = { .x = widget_width * 0.5, 
-						.y = widget_height * 0.70 };
+  PdpguiCoords loc_outputs_lateral_intermed_upper = { .x = width * 0.5, 
+						      .y = height * 0.3 };
+  PdpguiCoords loc_outputs_lateral_intermed_lower = { .x = width * 0.5, 
+						.y = height * 0.70 };
 
-  PdpguiCoords loc_td_lateral_intermed_upper = { .x = widget_width * 0.4, 
-						      .y = widget_height * 0.1 };
-  PdpguiCoords loc_td_lateral_intermed_lower = { .x = widget_width * 0.4, 
-						.y = widget_height * 0.40 };
+  PdpguiCoords loc_td_lateral_intermed_upper = { .x = width * 0.4, 
+						      .y = height * 0.1 };
+  PdpguiCoords loc_td_lateral_intermed_lower = { .x = width * 0.4, 
+						.y = height * 0.40 };
 
 
   PdpguiColourRgb mono[2] = {{ 
@@ -487,6 +486,22 @@ void three_task_gui_draw_architecture (GtkWidget *widget,
 
 
 
+}
+
+void three_task_gui_draw_architecture (GtkWidget *widget, 
+				       cairo_t *cr, 
+				       ThreeTaskSimulation *simulation) {
+
+
+  guint widget_width, widget_height;
+  widget_width = gtk_widget_get_allocated_width (GTK_WIDGET(widget));
+  widget_height = gtk_widget_get_allocated_height (GTK_WIDGET(widget));
+
+  //  printf ("%d x %d\n", widget_width, widget_height);
+
+  // Conflict Units
+  draw_architecture (cr, widget_width, widget_height, simulation);
+
 
   return;
 
@@ -529,25 +544,61 @@ create_sub_notepage_model_plot_activation (ThreeTaskObjects * objects) {
 }
 
 
+static void print_architecture(GtkWidget *caller, ThreeTaskObjects * objects)
+{
+
+    cairo_surface_t *surface;
+    cairo_t *cr;
+
+
+
+    surface = cairo_pdf_surface_create("screen_dump_architecture.pdf", EXPORT_IMAGE_WIDTH, EXPORT_IMAGE_HEIGHT);
+    cr = cairo_create(surface);
+    draw_architecture (cr, EXPORT_IMAGE_WIDTH, EXPORT_IMAGE_HEIGHT, objects->simulation);
+    
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+
+}
+
+
 
 
 static GtkWidget* 
 create_sub_notepage_model_display_architecture (ThreeTaskObjects * objects) {
 
+  GtkWidget *toolbar;
+  GtkToolItem *tool_item;
   GtkWidget *drawing_area;
   GtkWidget *grid;
   //  GtkWidget *label;
 
+  // todo - add a widget to print the architecture
 
+  toolbar = gtk_toolbar_new();
+  gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+
+  // Toolbar (could be better use of space?)
+  tool_item = gtk_tool_button_new_from_stock (GTK_STOCK_SAVE);
+  g_signal_connect (G_OBJECT(tool_item), "clicked", 
+		    G_CALLBACK(print_architecture), (gpointer) objects);
+  gtk_widget_set_tooltip_text(GTK_WIDGET(tool_item), "Save Archiecture as pdf/png");
+  gtk_toolbar_insert(GTK_TOOLBAR(toolbar), tool_item, 0);
+
+
+  // Drawing area
   drawing_area = gtk_drawing_area_new();
   g_signal_connect (drawing_area, "draw", 
 		    G_CALLBACK(three_task_gui_draw_architecture), objects->simulation);
+  gtk_widget_set_size_request (drawing_area, EXPORT_IMAGE_WIDTH, EXPORT_IMAGE_HEIGHT);
   gtk_widget_set_hexpand (drawing_area, TRUE);
   gtk_widget_set_vexpand (drawing_area, TRUE);
 
 
+
   grid = gtk_grid_new();
-  gtk_grid_attach (GTK_GRID(grid), drawing_area, 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), GTK_WIDGET(toolbar), 0, 0, 1, 1);
+  gtk_grid_attach (GTK_GRID(grid), drawing_area, 0, 1, 1, 1);
   //  gtk_grid_attach (GTK_GRID(grid), label, 0, 0, 1, 1);
 
   gtk_widget_show_all(grid);
