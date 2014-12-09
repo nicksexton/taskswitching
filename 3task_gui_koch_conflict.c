@@ -304,8 +304,8 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
 
-  PdpguiCoords loc_conflict_td_upper = { .x = width * 0.85, .y = height * -0.1 };
-  PdpguiCoords loc_conflict_td_lower = { .x = width * 0.85, .y = height * 0.6 };
+  PdpguiCoords loc_conflict_td_upper = { .x = width * 0.95, .y = height * -0.2 };
+  PdpguiCoords loc_conflict_td_lower = { .x = width * 0.95, .y = height * 0.8 };
 
 
   // Conflict Inputs
