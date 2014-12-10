@@ -178,7 +178,7 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   
   results <- ddply (.data=data, .(alternation), .fun=data.analyse)
 #  browser ()
-  if(any(is.na(results))) {browser()}
+#  if(any(is.na(results))) {browser()}
   return (results)
   
 }
@@ -236,10 +236,10 @@ test.population <- function (pop, pop.results) {
 
     #debug
 #    browser()
-    if (is.na(results.indiv$err.3.0SW) | 
-        is.na(results.indiv$err.3.1SW) |
-        is.na(results.indiv$err.3.2SW) |
-        is.na(results.indiv$err.3.ALT)) { browser() }
+#    if (is.na(results.indiv$err.3.0SW) | 
+#        is.na(results.indiv$err.3.1SW) |
+#        is.na(results.indiv$err.3.2SW) |
+#        is.na(results.indiv$err.3.ALT)) { browser() }
 
 
     

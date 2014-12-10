@@ -16,7 +16,7 @@ n <- 10 # resolution of grid to explore param space (ie total observations is n^
 max.cycles <- 500
 
 # Bounds for gridsearch
-model.conf.leaf.min <- c(task.input.str = 1.5, task.topdown.str = 6.0, conflict.tdwt = -3.0)
+model.conf.leaf.min <- c(task.input.str = 1.5, task.topdown.str = 6.0, conflict.tdwt = -1.5)
 model.conf.leaf.max <- c(task.input.str = 5.0, task.topdown.str = 20.0, conflict.tdwt = 0.0)
 
 

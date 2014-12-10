@@ -14,6 +14,9 @@ data.clip <- read.delim("sim_7a_gridsearch_results_highnoise_clip.txt", sep=c("\
 data.rescale <- read.delim("sim_7a_gridsearch_results_highnoise_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
+# Sim 8 (scaling conflict td weights by TD control strength)
+data.sim8 <- read.delim("sim_8a_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+
 # temp test
 data.temp <- read.delim("temp_sim_7a_results.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
@@ -49,6 +52,17 @@ for (i in 1:nrow(data.temp)) {
   data.temp[i,]$intersectErr <- intersectErr ((data.temp[i,]$err.3.1SW - data.temp[i,]$err.3.0SW), (data.temp[i,]$err.3.ALT - data.temp[i,]$err.3.2SW))
   setTxtProgressBar(progress, i)  
 }
+
+# Code could be vectorised!
+data.sim8$intersect <- rep(0, nrow(data.sim8))
+data.sim8$intersectErr <- rep(0, nrow(data.sim8))
+progress <- txtProgressBar (min=0, max=nrow(data.sim8), style=3)
+for (i in 1:nrow(data.sim8)) {
+  data.sim8[i,]$intersect <- intersect (data.sim8[i,]$sc, data.sim8[i,]$n2rc)
+  data.sim8[i,]$intersectErr <- intersectErr ((data.sim8[i,]$err.3.1SW - data.sim8[i,]$err.3.0SW), (data.sim8[i,]$err.3.ALT - data.sim8[i,]$err.3.2SW))
+  setTxtProgressBar(progress, i)  
+}
+
 
 
 
