@@ -33,6 +33,9 @@ compress.err <- function (x) 2*((1/(1+exp(-100 * x)) - 0.5))
 intersect <- function (sc, n2rc)  { max (sc, 0) * max (n2rc, 0)}
 intersectErr <- function (error.sc, error.n2rc) {max (error.sc, 0) * max (error.n2rc, 0)}
 
+twotailed <- function (p, effect) {  return (ifelse (effect > 0, p, 1-p))  }
+
+
 # Code could be vectorised!
 data.clip$intersect <- rep(0, nrow(data.clip))
 data.clip$intersectErr <- rep(0, nrow(data.clip))
@@ -100,10 +103,15 @@ plot.heatmapCompress.sc <- function (data, condition.title) {
 
 plot.heatmap.sc.p <- function (data, condition.title) {
 
-  sc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=sc.p))
+  labs <- c(0.05, 0.95)
+  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+# scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+  
+  sc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=twotailed (sc.p, sc)))
   sc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
-      scale_fill_gradient2(midpoint=.05, low="red", mid="grey70", high="grey70", limits=c(0,0.1)) +
+      scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
+                           labels=labs, breaks=labs) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
       ggtitle(paste (condition.title,
@@ -146,7 +154,7 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
 
 
 plot.heatmap.n2rc.p <- function (data, condition.title) {
-  n2rc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=n2rc.p))
+  n2rc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=twotailed (n2rc.p, n2rc)))
   n2rc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
       scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
