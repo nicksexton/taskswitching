@@ -140,16 +140,16 @@ calculate.switchcost <- function (x){
             mean.0SW = calculate.RT.mean.unsafe (x, "0SW"),
             mean.1SW = calculate.RT.mean.unsafe (x, "1SW"),
             sc = calculate.RT.mean.unsafe (x, "1SW") - calculate.RT.mean.unsafe (x, "0SW"),
-            t = test.switchcost(x)[[1]][[1]],
-            df = test.switchcost(x)[[2]][[1]],
-            p = test.switchcost(x)[[3]][[1]]),
+            sc.t = test.switchcost(x)[[1]][[1]],
+            sc.df = test.switchcost(x)[[2]][[1]],
+            sc.p = test.switchcost(x)[[3]][[1]]),
           results <- data.frame (
             mean.0SW = NA,
             mean.1SW = NA,
             sc = NA,
-            t = NA,
-            df = NA,
-            p = NA)
+            sc.t = NA,
+            sc.df = NA,
+            sc.p = NA)
           )
 
 
@@ -165,16 +165,16 @@ calculate.n2rc <- function (x){
               mean.2SW = calculate.RT.mean.unsafe (x, "2SW"),
               mean.ALT = calculate.RT.mean.unsafe (x, "ALT"),
               n2rc = calculate.RT.mean.unsafe (x, "ALT") - calculate.RT.mean.unsafe (x, "2SW"),
-              t = test.n2rc(x)[[1]][[1]],
-              df = test.n2rc(x)[[2]][[1]],
-              p = test.n2rc(x)[[3]][[1]]),
+              n2rc.t = test.n2rc(x)[[1]][[1]],
+              n2rc.df = test.n2rc(x)[[2]][[1]],
+              n2rc.p = test.n2rc(x)[[3]][[1]]),
             results <- data.frame (
               mean.2SW = NA,
               mean.ALT = NA,
               n2rc = NA,
-              t = NA,
-              df = NA,
-              p = NA
+              n2rc.t = NA,
+              n2rc.df = NA,
+              n2rc.p = NA
               )
             )
     return (results)

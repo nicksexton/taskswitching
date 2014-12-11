@@ -12,7 +12,6 @@ library (plyr) # for ddply
 path.simulation <- "/home/nickdbn/Programming/c_pdp_models/simulations/" 
 setwd (path.simulation)
 
-# source ("sim_6e_gridsearch_init.R") # init file SPECIFIC TO A RUN OF A SIMULATION
 source (paste(path.simulation, "sim_6_analysis_functions_calcerrors.R", sep=""))
 
 path.ramdisk <- paste("/media/ramdisk/", path.ramdiskfolder, "/", sep="")
@@ -80,6 +79,8 @@ data.preprocess <- function (datafile, lookuptable) {
 
 data.analyse <- function (data) {
 
+
+#  browser()
   errors.trial12 <- calculate.errors (data$correct.block12, data$sequence_cond) 
   names(errors.trial12) <- c("err.12.0SW", "err.12.1SW", "err.12.2SW", "err.12.ALT")  
 
@@ -87,18 +88,21 @@ data.analyse <- function (data) {
   names(timeouts.trial12) <- c("timeout.12.0SW", "timeout.12.1SW", "timeout.12.2SW", "timeout.12.ALT")  
                                         # now we can filter out blocks where there was an error on trials 1 or 2
   data <- subset (data, correct.block12 == TRUE)
+
   
+                                        # Check - does subset for final trial only want to happen here?
+  data <- subset (data, PATH.trial == 2)
   
   errors.trial3 <- calculate.errors (data$correct.trial, data$sequence_cond)
   timeouts.trial3 <- calculate.errors (data$gaveresponse.trial, data$sequence_cond)
   names(timeouts.trial3) <- c("timeout.3.0SW", "timeout.3.1SW", "timeout.3.2SW", "timeout.3.ALT")   
   names(errors.trial3) <- c("err.3.0SW", "err.3.1SW", "err.3.2SW", "err.3.ALT")
   
-
-  # Debug: what is going on with NAs in trial 3 errors
-  data <- subset (data, PATH.trial == 2)
 #  browser()
-  if (is.na(errors.trial3[1]) | is.na (errors.trial3[2])) { browser() }
+  
+                                        # or here?
+  
+#  if (is.na(errors.trial3[1]) | is.na (errors.trial3[2])) { browser() }
   ## End debug
   
                                         # filter the errors out to calc switchcost 
@@ -178,7 +182,8 @@ run.individual <- function (leaf, # parameter leaf (a data frame)
   
   results <- ddply (.data=data, .(alternation), .fun=data.analyse)
 #  browser ()
-#  if(any(is.na(results))) {browser()}
+#  if((any(is.na(results[14:17]) & !is.nan(results[14:17])) | (any(is.na(results[19:22]) & !is.nan(results[19:22]))))) {browser()}
+
   return (results)
   
 }
@@ -242,7 +247,7 @@ test.population <- function (pop, pop.results) {
 #        is.na(results.indiv$err.3.ALT)) { browser() }
 
 
-    
+#    browser()
     pop.results[(1+(nlevels*(i-1))):(i*nlevels),names(results)] <- results.indiv[,2:ncol(results.indiv)]
 
     # browser()

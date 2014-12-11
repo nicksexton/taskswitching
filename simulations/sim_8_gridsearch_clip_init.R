@@ -8,15 +8,15 @@ setwd (path.simulation)
 
 
 
-filename.output.results <- "sim_8a_gridsearch_results_clip.txt" # where to store results
+filename.output.results <- "sim_8a_gridsearch_results_clip_300.txt" # where to store results
 
 
-blocksize <- 75
-n <- 10 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+blocksize <- 300
+n <- 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Bounds for gridsearch
-model.conf.leaf.min <- c(task.input.str = 1.5, task.topdown.str = 6.0, conflict.tdwt = -1.5)
+model.conf.leaf.min <- c(task.input.str = 1.5, task.topdown.str = 6.0, conflict.tdwt = -2.5)
 model.conf.leaf.max <- c(task.input.str = 5.0, task.topdown.str = 20.0, conflict.tdwt = 0.0)
 
 
