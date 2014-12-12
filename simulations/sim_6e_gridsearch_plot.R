@@ -24,6 +24,10 @@ data.rescale.lownoise.0 = read.delim("sim_6e_gridsearch_results_rescale.txt", se
 data.rescale.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
+# Simulation 8b - researching parameter space with version of the model that scales conflict-TD weights
+# by TD control strength 
+data.8b.clip = read.delim("sim_8b_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+
 
 
 

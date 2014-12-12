@@ -154,10 +154,15 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
 
 
 plot.heatmap.n2rc.p <- function (data, condition.title) {
+
+  labs <- c(0.05, 0.95)
+  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+
   n2rc.p <- ggplot(data, aes(x=task.topdown.str, y=task.input.str, fill=twotailed (n2rc.p, n2rc)))
   n2rc.p + geom_raster() +
     facet_wrap( ~ conflict.tdwt) +
-      scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
+      scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
+                           labels=labs, breaks=labs) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
         ggtitle(paste (condition.title,
@@ -592,4 +597,4 @@ plot.heatmaps.bytaskseq <- function (data, cond.title, image.directory, file.ste
 plot.heatmaps.bytaskseq (data.clip, cond.title="Conflict Clipped\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_7a/clip", file.stem="simulation_7a_gridsearch_clip", save=TRUE)
 
 ## temp debug 
-plot.heatmaps.bytaskseq (data.temp, cond.title="Temp\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_7a/temp", file.stem="simulation_7a_gridsearch_clip", save=TRUE)
+plot.heatmaps.bytaskseq (data.sim8, cond.title="Simulation 8\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_8a", file.stem="simulation_8a_gridsearch_clip", save=TRUE)
