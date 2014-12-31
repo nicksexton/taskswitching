@@ -1,4 +1,8 @@
-# transformation function for switch/n2-rep costs with small range
+### Code for plotting graphs from gridsearch
+### Used in simulations 7a and 8a
+
+
+                                        # transformation function for switch/n2-rep costs with small range
 compress <- function (x) 2*((1/(1+exp(-0.5 * x)) - 0.5))
  
 # transformation function for switch/n2-rep costs with big range

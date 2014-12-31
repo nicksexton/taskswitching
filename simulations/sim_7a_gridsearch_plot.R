@@ -64,3 +64,14 @@ plot.heatmaps.bytaskseq (data.clip, cond.title="Conflict Clipped\nNoise=.006", i
 
 ## temp debug 
 plot.heatmaps.bytaskseq (data.sim8, cond.title="Simulation 8\nNoise=.006", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_8a", file.stem="simulation_8a_gridsearch_clip", save=TRUE)
+
+
+
+
+
+
+### Relative plots (all DVs relative to conflict.tdwt == 0, answering question of what conflict units do)
+data.sim8.ref <- data.sim8[data.sim8$conflict.tdwt==0,]
+data.sim8.relative <- merge (x=data.sim8, y=data.sim8.ref, by=c("task.input.str", "task.topdown.str", "alternation"))
+
+plot.relative.bytaskseq (data.sim8.relative, cond.title="Simulation 8", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_8b/clip/relative", file.stem="simulation_8b_clip", save=TRUE)
