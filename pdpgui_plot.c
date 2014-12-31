@@ -11,7 +11,7 @@
 #define DEFAULT_UNIT_SIZE 20
 #define DEFAULT_UNIT_PADDING 25
 #define UNIT_DISPLAY_SQUASH_CONST 8.0
-#define WEIGHT_WIDTH_SCALE 0.5
+#define WEIGHT_WIDTH_SCALE 3
 
 #define AXIS_MARGIN_X 0.1
 #define AXIS_MARGIN_Y 0.1
@@ -143,12 +143,14 @@ void pdpgui_draw_connection (cairo_t *cr,
   // default black connections
   if (weight < 0) {
     cairo_set_source_rgb (cr, 0.5, 0, 0);
-    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
+    //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
   }
   else {
     cairo_set_source_rgb (cr, 0, 0, 0);
-    width = weight * WEIGHT_WIDTH_SCALE;
+    //    width = weight * WEIGHT_WIDTH_SCALE;
   }
+
+  width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 );
   cairo_set_line_width (cr, width);
 
   if (width > 0) {
@@ -178,14 +180,15 @@ void pdpgui_draw_connection_curved (cairo_t *cr,
 
   if (weight < 0) {
     cairo_set_source_rgb (cr, 0.5, 0, 0);
-    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
+    //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
   }
   else {
     cairo_set_source_rgb (cr, 0, 0, 0);
-    width = weight * WEIGHT_WIDTH_SCALE;
+    //    width = weight * WEIGHT_WIDTH_SCALE;
   }
 
   // default black connections
+  width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 );
   cairo_set_line_width (cr, width);
 
   if (width > 0) {

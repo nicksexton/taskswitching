@@ -15,8 +15,8 @@
 #define DATAFILE_ACT "3task_koch_act.txt"
 
 #define TEXT_SIZE_HEAD 15
-#define EXPORT_IMAGE_WIDTH 600
-#define EXPORT_IMAGE_HEIGHT 400
+#define EXPORT_IMAGE_WIDTH 800
+#define EXPORT_IMAGE_HEIGHT 500
 
 
 
@@ -310,14 +310,14 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   // Conflict Inputs
   PdpguiCoords loc_conflict_input = { .x = width * 0.7, .y = height * 0.2, };
-  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.2, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
 
 
   // TD Units
 
-  PdpguiCoords loc_taskdemand = { .x = width * 0.5, .y = height * 0.3, };
-  PdpguiCoords loc_taskdemand_title = { .x = width * 0.9, .y = height * 0.3, };
+  PdpguiCoords loc_taskdemand = { .x = width * 0.5, .y = height * 0.5, };
+  PdpguiCoords loc_taskdemand_title = { .x = width * 0.9, .y = height * 0.5, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
@@ -326,10 +326,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   // Inputs
 
-  PdpguiCoords loc_input_0 = { .x = width * 0.2, .y = height * 0.8, };
-  PdpguiCoords loc_input_1 = { .x = width * 0.5, .y = height * 0.8, };
-  PdpguiCoords loc_input_2 = { .x = width * 0.8, .y = height * 0.8, };
-  PdpguiCoords loc_inputs_title = { .x = width * 0.9, .y = height * 0.8, };
+  PdpguiCoords loc_input_0 = { .x = width * 0.2, .y = height * 0.85, };
+  PdpguiCoords loc_input_1 = { .x = width * 0.5, .y = height * 0.85, };
+  PdpguiCoords loc_input_2 = { .x = width * 0.8, .y = height * 0.85, };
+  PdpguiCoords loc_inputs_title = { .x = width * 0.9, .y = height * 0.85, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_inputs_title, 0, -10, "Inputs");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_0, -22, 30, "A");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_1, -22, 30, "B");
@@ -338,15 +338,15 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   // Outputs
 
-  PdpguiCoords loc_output_0 = { .x = width * 0.2, .y = height * 0.5, };
-  PdpguiCoords loc_output_1 = { .x = width * 0.5, .y = height * 0.5, };
-  PdpguiCoords loc_output_2 = { .x = width * 0.8, .y = height * 0.5, };
-  PdpguiCoords loc_outputs_title = { .x = width * 0.9, .y = height * 0.5, };
+  PdpguiCoords loc_output_0 = { .x = width * 0.2, .y = height * 0.7, };
+  PdpguiCoords loc_output_1 = { .x = width * 0.5, .y = height * 0.7, };
+  PdpguiCoords loc_output_2 = { .x = width * 0.8, .y = height * 0.7, };
+  PdpguiCoords loc_outputs_title = { .x = width * 0.9, .y = height * 0.7, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_outputs_title, 0, -10, "Outputs");
 
 
-  PdpguiCoords loc_topdowncontrol = { .x = width * 0.3, .y = height * 0.1, };
-  PdpguiCoords loc_tdc_title = { .x = width * 0.9, .y = height * 0.1, };
+  PdpguiCoords loc_topdowncontrol = { .x = width * 0.2, .y = height * 0.1, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.1, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0,  12, "Inputs");
 
@@ -358,7 +358,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   PdpguiCoords loc_td_input2_intermed_upper = { .x = width * 0.9, .y = 0.0 };
   PdpguiCoords loc_td_input2_intermed_lower = { .x = width * 0.9, .y = height * 0.90 };
 
-  PdpguiCoords loc_channels_title = { .x = width * 0.5, .y = height * 0.9, };
+  PdpguiCoords loc_channels_title = { .x = width * 0.5, .y = height * 0.95, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_channels_title, -50, 0, "Task Processing Pathways");
 
   // intermediates for lateral connections
@@ -441,7 +441,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
 		       pdp_input_find(layer_conflict, ID_CONFLICT_INPUT)->input_weights);
 
-
+  /* Debug only
   // draw weights for lateral connections
   pdpgui_draw_weights_topdown (cr, loc_output_0, loc_output_1, 
 			       loc_outputs_lateral_intermed_upper, 
@@ -483,7 +483,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   //  pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
   //                       pdp_input_find(layer_taskdemand, ID_TOPDOWNCONTROL)->input_weights);
-
+  */
 
 
 }
