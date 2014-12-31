@@ -15,8 +15,8 @@
 #define DATAFILE_ACT "3task_koch_act.txt"
 
 #define TEXT_SIZE_HEAD 15
-#define EXPORT_IMAGE_WIDTH 600
-#define EXPORT_IMAGE_HEIGHT 400
+#define EXPORT_IMAGE_WIDTH 1200
+#define EXPORT_IMAGE_HEIGHT 800
 
 
 
@@ -310,7 +310,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   // Conflict Inputs
   PdpguiCoords loc_conflict_input = { .x = width * 0.7, .y = height * 0.2, };
-  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.2, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
 
 
@@ -346,7 +346,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
 
   PdpguiCoords loc_topdowncontrol = { .x = width * 0.3, .y = height * 0.1, };
-  PdpguiCoords loc_tdc_title = { .x = width * 0.9, .y = height * 0.1, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.1, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0,  12, "Inputs");
 
@@ -441,7 +441,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
 		       pdp_input_find(layer_conflict, ID_CONFLICT_INPUT)->input_weights);
 
-
+  /* Debug only
   // draw weights for lateral connections
   pdpgui_draw_weights_topdown (cr, loc_output_0, loc_output_1, 
 			       loc_outputs_lateral_intermed_upper, 
@@ -483,7 +483,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   //  pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
   //                       pdp_input_find(layer_taskdemand, ID_TOPDOWNCONTROL)->input_weights);
-
+  */
 
 
 }
