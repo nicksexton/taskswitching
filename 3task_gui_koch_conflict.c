@@ -294,10 +294,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdp_layer * layer_output_2 = pdp_model_component_find (simulation->model, ID_OUTPUT_2)->layer;
   pdp_layer * layer_topdowncontrol = pdp_model_component_find (simulation->model, ID_TOPDOWNCONTROL)->layer;
   pdp_layer * layer_conflict = pdp_model_component_find (simulation->model, ID_CONFLICT)->layer;
-  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
+  //  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
-  PdpguiCoords loc_conflict = { .x = width * 0.7, .y = height * 0.1, };
+  PdpguiCoords loc_conflict = { .x = width * 0.55, .y = height * 0.1, };
   PdpguiCoords loc_conflict_title = { .x = width * 0.9, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict Monitoring");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
@@ -308,20 +308,33 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   PdpguiCoords loc_conflict_td_lower = { .x = width * 0.95, .y = height * 0.8 };
 
 
+  // Draw a dashed line across the screen to separate new model content
+  PdpguiCoords dashed_separator_left = { .x = width * 0.05, .y = height * 0.2 };
+  PdpguiCoords dashed_separator_right = { .x = width * 0.95, .y = height * 0.2 };
+  cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
+  cairo_set_line_width (cr, 3);
+  double dash_pattern[2] = {5, 5};
+  cairo_set_dash(cr, dash_pattern, 2, 0); 
+  cairo_move_to (cr, dashed_separator_right.x, dashed_separator_right.y);
+  cairo_line_to (cr, dashed_separator_left.x, dashed_separator_left.y);
+  cairo_stroke(cr);  
+
   // Conflict Inputs
-  PdpguiCoords loc_conflict_input = { .x = width * 0.7, .y = height * 0.2, };
-  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.2, };
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
+  //  PdpguiCoords loc_conflict_input = { .x = width * 0.7, .y = height * 0.2, };
+  //  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.2, };
+  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
 
 
+  // Now draw the main units
   // TD Units
 
   PdpguiCoords loc_taskdemand = { .x = width * 0.5, .y = height * 0.5, };
   PdpguiCoords loc_taskdemand_title = { .x = width * 0.9, .y = height * 0.5, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
+  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
+  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
+  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
+
 
 
   // Inputs
@@ -345,11 +358,12 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_outputs_title, 0, -10, "Outputs");
 
 
-  PdpguiCoords loc_topdowncontrol = { .x = width * 0.2, .y = height * 0.1, };
-  PdpguiCoords loc_tdc_title = { .x = width * 0.1, .y = height * 0.1, };
+  /*
+  PdpguiCoords loc_topdowncontrol = { .x = width * 0.3, .y = height * 0.25, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.1, .y = height * 0.25, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, 0,  12, "Inputs");
-
+  */
 
   PdpguiCoords loc_td_input0_intermed_upper = { .x = width * 0.05, .y = 0.0 };
   PdpguiCoords loc_td_input0_intermed_lower = { .x = width * 0.05, .y = height * 0.95 };
@@ -401,10 +415,18 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_draw_layer (cr, loc_output_0, mono[0], mono[1], layer_output_0);
   pdpgui_draw_layer (cr, loc_output_1, mono[0], mono[1], layer_output_1);
   pdpgui_draw_layer (cr, loc_output_2, mono[0], mono[1], layer_output_2);
-  pdpgui_draw_layer (cr, loc_topdowncontrol, mono_grey[0], mono_grey[1], layer_topdowncontrol);
-  pdpgui_draw_layer (cr, loc_conflict, mono_grey[0], mono_grey[1], layer_conflict);
-  pdpgui_draw_layer (cr, loc_conflict_input, mono_grey[0], mono_grey[1], layer_conflict_input);
+  //  pdpgui_draw_layer (cr, loc_topdowncontrol, mono[0], mono[1], layer_topdowncontrol);
+  pdpgui_draw_layer (cr, loc_conflict, mono[0], mono[1], layer_conflict); 
 
+  // why mono grey?
+  //  pdpgui_draw_layer (cr, loc_topdowncontrol, mono_grey[0], mono_grey[1], layer_topdowncontrol);
+  //  pdpgui_draw_layer (cr, loc_conflict, mono_grey[0], mono_grey[1], layer_conflict);
+  //  pdpgui_draw_layer (cr, loc_conflict_input, mono_grey[0], mono_grey[1], layer_conflict_input);
+
+  // overlay task demand annotations on units
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -15, "A");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -15, "B");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -15, "C");
 
 
   pdpgui_draw_weights (cr, loc_input_0, loc_output_0, pdp_input_find(layer_output_0, ID_INPUT_0)->input_weights);
@@ -438,8 +460,21 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 			       loc_conflict_td_upper, loc_conflict_td_lower,
 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights);
 
-  pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
-		       pdp_input_find(layer_conflict, ID_CONFLICT_INPUT)->input_weights);
+  //  pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
+  //		       pdp_input_find(layer_conflict, ID_CONFLICT_INPUT)->input_weights);
+
+
+  // Now draw (imaginary) weights for TD to conflict units:
+  double td_conflict_weights_matrix[3][3] = {
+    {2.0, 2.0, 0.0},
+    {0.0, 2.0, 2.0},
+    {2.0, 0.0, 2.0},
+  };
+  pdp_weights_matrix * td_conflict_weights = pdp_weights_create (3,3);
+  pdp_weights_set (td_conflict_weights, 3, 3, td_conflict_weights_matrix);
+  pdpgui_draw_weights (cr, loc_taskdemand, loc_conflict, td_conflict_weights);
+  pdp_weights_free (td_conflict_weights);
+
 
   /* Debug only
   // draw weights for lateral connections

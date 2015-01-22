@@ -127,7 +127,7 @@ void pdpgui_draw_layer (cairo_t *cr,
     pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
 
     // plot text
-    pdpgui_pango_print_double (cr, centre, activation);
+    //    pdpgui_pango_print_double (cr, centre, activation); // commented for publication figure
 
   }
   return;
