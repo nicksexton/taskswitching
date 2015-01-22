@@ -253,10 +253,18 @@ void pdpgui_draw_weights_topdown (cairo_t *cr,
 			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
 			     .y = layer_centre_lower.y - DEFAULT_UNIT_SIZE };
 
+      PdpguiCoords spaced_intermed_upper = intermediate_upper;
+      spaced_intermed_upper.y += i*20;
 
-      pdpgui_draw_connection_curved (cr, upper, lower, 
-				     intermediate_upper,
-				     intermediate_lower,
+      PdpguiCoords spaced_intermed_lower = intermediate_lower;
+      spaced_intermed_lower.x += i*20;
+
+
+      pdpgui_draw_connection_curved (cr, upper, lower,
+				     spaced_intermed_upper,
+				     spaced_intermed_lower,
+				     //	intermediate_upper,
+				     // intermediate_lower,
 				     matrix->weights[j][i]);
     }
   }
