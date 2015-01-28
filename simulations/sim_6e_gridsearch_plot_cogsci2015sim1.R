@@ -61,6 +61,7 @@ compress.err <- function (x) 2*((1/(1+exp(-100 * x)) - 0.5))
 
 intersect <- function (sc, n2rc)  { max (sc, 0) * max (n2rc, 0)}
 intersectErr <- function (error.sc, error.n2rc) {max (error.sc, 0) * max (error.n2rc, 0)}
+twotailed <- function (p, effect) {  return (ifelse (effect > 0, p, 1-p))  }
 
 # Code could be vectorised!
 #data.clip.lownoise.0$intersect <- rep(0, nrow(data.clip.lownoise.0))
@@ -138,14 +139,36 @@ plot.heatmapCompress.sc <- function (data, condition.title) {
 
 
 
+## plot.heatmap.sc.p <- function (data, condition.title) {
+
+##   labs <- c(0.05, 0.95)
+##   colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+## # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+  
+##   sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc.p))
+##   sc.p + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +
+##       scale_fill_gradient2(midpoint=.05, low="red", mid="grey70", high="grey70", limits=c(0,0.1)) +
+##         ggtitle(paste (condition.title,
+##                        ", p value of Switch costs") ) +
+##   labs(fill="significance (p)") +
+##   # theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
+
+# two tailed version
 plot.heatmap.sc.p <- function (data, condition.title) {
 
-  sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc.p))
+  labs <- c(0.05, 0.95)
+  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+
+  sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=twotailed (sc.p, sc)))  
   sc.p + geom_raster() +
     facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradient2(midpoint=.05, low="red", mid="grey70", high="grey70", limits=c(0,0.1)) +
-        ggtitle(paste (condition.title,
-                       ", p value of Switch costs") ) +
+      scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
+                           labels=labs, breaks=labs) +
+        ## ggtitle(paste (condition.title,
+        ##                ", p value of Switch costs") ) +
   labs(fill="significance (p)") +
   # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
@@ -181,13 +204,31 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
 }
 
 
+## plot.heatmap.n2rc.p <- function (data, condition.title) {
+##   n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc.p))
+##   n2rc.p + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +
+##       scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
+##         ggtitle(paste (condition.title,
+##                        ", p value of N-2 Repetition costs") ) +
+##   labs(fill="significance (p)") +
+## # theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
+
+# two tailed version
 plot.heatmap.n2rc.p <- function (data, condition.title) {
-  n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc.p))
+
+  labs <- c(0.05, 0.95)
+  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+
+  n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=twotailed (n2rc.p, n2rc)))
   n2rc.p + geom_raster() +
     facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
-        ggtitle(paste (condition.title,
-                       ", p value of N-2 Repetition costs") ) +
+      scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
+                           labels=labs, breaks=labs) +
+        ## ggtitle(paste (condition.title,
+        ##                ", p value of N-2 Repetition costs") ) +
   labs(fill="significance (p)") +
 # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
@@ -203,8 +244,8 @@ plot.heatmap.sctimesn2rc <- function (data, condition.title) {
   SCtimesN2RC + geom_raster() +
     facet_grid( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
-    ggtitle(paste (condition.title,
-                   ", intersection of SCs and N2RCs") ) +
+    ## ggtitle(paste (condition.title,
+    ##                ", intersection of SCs and N2RCs") ) +
   labs(fill="compress (sqrt(n2rc x sc))") +
 #  theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
