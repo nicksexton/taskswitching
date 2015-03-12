@@ -58,9 +58,9 @@ stimulus_congruency = [
 
 sequence_levels = [
     [2, 1, 0, "CBA"], 
-    [0, 1, 0, "ABA"], 
-    [0, 1, 2, "ABC"], # diagnostic, should be exact same as CBA
-    [2, 1, 2, "CBC"] # diagnostic, should be exact same as ABA
+    [0, 1, 0, "ABA"] 
+#    [0, 1, 2, "ABC"], # diagnostic, should be exact same as CBA
+#    [2, 1, 2, "CBC"] # diagnostic, should be exact same as ABA
 ]
 
 # for rotating round stimuli/tasks
@@ -164,8 +164,12 @@ for run in run_congruency_levels:
                         stim_flip = random.randint (0, 1)
                         
                         cue = (sequence[trial] * direction + offset) % 3
-                        stim_inputs = set_stimuli (run[trial], cue, direction, offset) # To fix weird CBA/ABC not isometric bug,
-                                                                                       # direction here should be rand for every trial
+                        stim_inputs = set_stimuli (run[trial], 
+                                                   cue, 
+                                                   # To fix weird CBA/ABC not isometric bug,
+                                                   # direction here should be rand for every trial
+                                                   map_direction[random.randint (0,1)], 
+                                                   offset) 
                 
                         write_trial (block_name + "_" + str(block), 
                                      trialid, 

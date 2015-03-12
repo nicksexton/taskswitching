@@ -31,9 +31,8 @@ imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "sim
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
 
-# data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-# data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+ data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+#data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 
 # now split trial path into block and trial ID
@@ -55,8 +54,8 @@ data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue",
 # Join lookup table with simulated data
 # labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "cue_sequence", "blank")
-# data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labels.lookup)
-data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
+data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labels.lookup)
+# data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
 data <- merge(data.lookuptable, data)
 
 
