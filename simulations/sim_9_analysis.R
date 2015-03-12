@@ -26,13 +26,15 @@ library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
 
-imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_3")
+imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_9")
 
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
            "response")
 
 # data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+# data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+
 
 # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -50,7 +52,8 @@ data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue",
 # Join lookup table with simulated data
 # labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "cue_sequence", "blank")
-data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labels.lookup)
+# data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labels.lookup)
+data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
 data <- merge(data.lookuptable, data)
 
 
@@ -84,7 +87,7 @@ bargraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Task (trial 3)", y = "RT") +
-  ggtitle("Simulation 3: overall trial 3 RTs (debug)")
+  ggtitle("Simulation 9: overall trial 3 RTs (debug)")
 
 
 
@@ -98,7 +101,7 @@ linegraph +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Trial Position", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 3: n-2 repetition costs in the 3-task switching model with lateral inhibition")
+  ggtitle("Simulation 9: n-2 repetition costs in the conflict-inhibition model")
 
 imageFile <- file.path(imageDirectory, "sim_9_1_collapsed.png") 
 ggsave(imageFile)
@@ -112,7 +115,7 @@ linegraph.facet +
   stat_summary(fun.y = mean, geom = "line") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
   labs (x = "Trial Position", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 3: n-2 repetition costs in the 3-task switching model with lateral inhibition")
+  ggtitle("Simulation 9: n-2 repetition costs in the conflict-inhibition model")
 
 imageFile <- file.path(imageDirectory, "sim_9_1_congruency.png") 
 ggsave(imageFile)
