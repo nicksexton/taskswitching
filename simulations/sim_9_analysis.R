@@ -40,13 +40,16 @@ data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", 
 data.raw$trialpath <- as.character(data.raw$trialpath)
 data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", names=c('block', 'trial')))
 
-data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
-                                    ifelse (cue == 1, stim_1 == response %% 2,
-                                    ifelse (cue == 2, stim_2 == response %% 2, NA))))
-
+data.raw$correct.response <- with (data.raw, ifelse (cue == 0, stim_0,
+                                                     ifelse (cue == 1, stim_1,
+                                                             ifelse (cue == 2, stim_2, NA))))
+#data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
+#                                    ifelse (cue == 1, stim_1 == response %% 2,
+#                                    ifelse (cue == 2, stim_2 == response %% 2, NA))))
+data.raw$correct <- with (data.raw, correct.response == response %% 2)
 
 # trim unwanted columns
-data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct"))
+data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct", "correct.response"))
 
 
 # Join lookup table with simulated data
@@ -64,7 +67,39 @@ data$congruency.23 <- paste (data$congruency.2,  data$congruency.3, sep="/")
 data$congruency.12 <- paste (data$congruency.1,  data$congruency.2, sep="/")
 
 
-# filter trials for correct only
+##### Do some congruency-specific data processing here ######
+
+data$cue.prev <- c (NA, data[1:nrow(data)-1, "cue"])
+data$cue.prev <- ifelse (data$PATH.trial == 0, NA, data$cue.prev)
+# is stimulus dimension corresponding with prev performed task congruent or incongruent with
+# correct response?
+data$congruent.prevtask <- with (data, ifelse (cue.prev == 0, stim_0 == correct.response,
+                                               ifelse (cue.prev == 1, stim_1 == correct.response,
+                                                       ifelse (cue.prev == 2, stim_2 == correct.response, NA))))
+# Now create column for sequence-congruent.prevtask
+data$sequence.iso <- with (data, ifelse(sequence == "ABA" | sequence == "CBC", "ABA",
+                                        ifelse (sequence == "CBA" | sequence == "ABC", "CBA",
+                                                NA)))
+# Now to work out the sequential congruent.prevtask
+
+data.trial1 <- subset (data, PATH.trial == 1)
+sequence1.congruent.prevtask <- subset (data.trial1, select=c("PATH.block", "congruent.prevtask"))
+names (sequence1.congruent.prevtask)[names(sequence1.congruent.prevtask)=="congruent.prevtask"] <-
+  "congruent.prevtask.trial1" # rename: whether congruent stim dimension on trial 1 corresponds with trial 0 task
+
+data.trial2 <- subset (data, PATH.trial == 2)
+sequence2.congruent.prevtask <- subset (data.trial2, select=c("PATH.block", "congruent.prevtask"))
+names (sequence2.congruent.prevtask)[names(sequence2.congruent.prevtask)=="congruent.prevtask"] <-
+  "congruent.prevtask.trial2" # rename whether congruent stim dimension on trial 2 corresponds with trial 1 task
+sequence.congruent.prevtask <- merge (x=sequence1.congruent.prevtask,
+                                      y=sequence2.congruent.prevtask)
+data <- merge (x=data, y=sequence.congruent.prevtask)
+# now create a text field suitable for plotting conditions by
+data$sequence.congruent.prevtask <- with (data, paste(#sequence.iso,
+                                                      congruent.prevtask.trial1,
+                                                      congruent.prevtask.trial2))
+
+##### Now filter trials for correct only
                                         # should filter for correct sequences only!
 data = subset (data, correct == TRUE)
 
@@ -118,6 +153,23 @@ linegraph.facet +
   ggtitle("Simulation 9: n-2 repetition costs in the conflict-inhibition model")
 
 imageFile <- file.path(imageDirectory, "sim_9_1_congruency.png") 
+ggsave(imageFile)
+
+# new line graph showing where cong stim dimensions (in IC trials) correspond with prev trial
+linegraph.facet <- ggplot (data, aes(x=trial_pos, y=cycles,
+                                     linetype=sequence.iso,
+                                     group=paste (sequence.iso, sequence.congruent.prevtask),
+                                     colour=sequence.congruent.prevtask))
+linegraph.facet +
+#  facet_grid (congruency.1 ~ congruency.23) +
+  facet_grid (congruency.3 ~ congruency.12, labeller= label_both) +
+  stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.y = mean, geom = "line") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + 
+  labs (x = "Trial Position", y = "RT", group = "Sequence") +
+  ggtitle("Simulation 9: n-2 repetition costs in the conflict-inhibition model")
+
+imageFile <- file.path(imageDirectory, "sim_9_1_congruency_prevtask.png") 
 ggsave(imageFile)
 
 
