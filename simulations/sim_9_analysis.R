@@ -32,8 +32,8 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
            "response")
 
 # data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-# data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+ data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+#data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 
 # now split trial path into block and trial ID
@@ -43,9 +43,6 @@ data.raw = transform (data.raw, PATH = colsplit(trialpath, pattern = "\\:", name
 data.raw$correct.response <- with (data.raw, ifelse (cue == 0, stim_0,
                                                      ifelse (cue == 1, stim_1,
                                                              ifelse (cue == 2, stim_2, NA))))
-#data.raw$correct <- with (data.raw, ifelse (cue == 0, stim_0 == response %% 2,
-#                                    ifelse (cue == 1, stim_1 == response %% 2,
-#                                    ifelse (cue == 2, stim_2 == response %% 2, NA))))
 data.raw$correct <- with (data.raw, correct.response == response %% 2)
 
 # trim unwanted columns
@@ -53,10 +50,9 @@ data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue",
 
 
 # Join lookup table with simulated data
-# labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
 labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "cue_sequence", "blank")
-# data.lookuptable = read.delim("sim_3_lookup.txt", header = FALSE, col.names=labels.lookup)
-data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
+ data.lookuptable = read.delim("sim_9_lookup.txt", header = FALSE, col.names=labels.lookup)
+#data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
 data <- merge(data.lookuptable, data)
 
 
