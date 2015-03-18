@@ -33,8 +33,9 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
 
 # data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
- data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+# data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 #data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_9_data_BIG_2_fixed.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 
 
@@ -53,8 +54,9 @@ data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue",
 
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "cue_sequence", "blank")
- data.lookuptable = read.delim("sim_9_lookup.txt", header = FALSE, col.names=labels.lookup)
+# data.lookuptable = read.delim("sim_9_lookup.txt", header = FALSE, col.names=labels.lookup)
 #data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
+ data.lookuptable = read.delim("sim_9_lookup_BIG_2_fixed.txt", header = FALSE, col.names=labels.lookup)
 
 data <- merge(data.lookuptable, data)
 
@@ -275,6 +277,16 @@ model.trial23 <- aov (cycles ~ sequence.iso +
 anova (model.trial23)
 
 
+# Now consider effect of whether congruent dimensions match previously performed task:
+# Trials 2 and 3 are IC
+data.trial3.any.ic.ic <- subset (data.trial3, congruency.23 == "IC/IC")
+model.trial3.any.ic.ic <- aov (cycles ~ sequence.iso +
+                               congruent.prevtask.trial1 +
+                               congruent.prevtask.trial2 +
+                               sequence.iso:congruent.prevtask.trial1 +
+                               sequence.iso:congruent.prevtask.trial2 +
+                               sequence.iso:congruent.prevtask.trial1:congruent.prevtask.trial2,
+                               data=data.trial3.any.ic.ic)
 
 
 # ------------------------- OLD -----------------------------
