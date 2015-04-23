@@ -142,7 +142,7 @@ void pdpgui_draw_connection (cairo_t *cr,
 
   // default black connections
   if (weight < 0) {
-    cairo_set_source_rgb (cr, 0.5, 0, 0);
+    cairo_set_source_rgb (cr, 0.9, 0, 0);
     //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
   }
   else {
