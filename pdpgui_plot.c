@@ -139,34 +139,65 @@ void pdpgui_draw_connection (cairo_t *cr,
 			     PdpguiCoords connection_end,
 			     double weight){ 
   double width;
+  ArrowHeadType style;
+ 
+
+  /* // default black connections */
+  /* if (weight < 0) { */
+  /*   cairo_set_source_rgb (cr, 0.9, 0, 0); */
+  /*   //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE; */
+  /* } */
+  /* else { */
+  /*   cairo_set_source_rgb (cr, 0, 0, 0); */
+  /*   //    width = weight * WEIGHT_WIDTH_SCALE; */
+  /* } */
+
+  /* width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 ); */
+  /* cairo_set_line_width (cr, width); */
+
+  /* if (width > 0) { */
+  /*   cairo_set_dash(cr, NULL, 0, 0); // dashed line off */
+  /* } */
+  /* else { */
+  /*   double dash_pattern[2] = {5, 5}; */
+  /*   cairo_set_dash(cr, dash_pattern, 2, 0); */
+  /* } */
+
+  /* // remember to invert y axis */
+  /* cairo_move_to (cr, connection_start.x, connection_start.y); */
+  /* cairo_line_to (cr, connection_end.x, connection_end.y); */
+  /* cairo_stroke(cr); */
+
+
+ CairoxPoint vector[2] = {
+   {.x = connection_start.x, .y = connection_start.y},
+   {.x = connection_end.x, .y = connection_end.y},
+ };
+
 
   // default black connections
   if (weight < 0) {
     cairo_set_source_rgb (cr, 0.9, 0, 0);
-    //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
+    style = AH_CIRCLE;
   }
   else {
     cairo_set_source_rgb (cr, 0, 0, 0);
-    //    width = weight * WEIGHT_WIDTH_SCALE;
+    style = AH_SHARP;
   }
+
+  cairo_set_dash(cr, NULL, 0, 0); // dashed line off
 
   width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 );
-  cairo_set_line_width (cr, width);
+  //  width = 1.0;
 
-  if (width > 0) {
-    cairo_set_dash(cr, NULL, 0, 0); // dashed line off
-  }
-  else {
-    double dash_pattern[2] = {5, 5};
-    cairo_set_dash(cr, dash_pattern, 2, 0);
-  }
 
-  // remember to invert y axis
-  cairo_move_to (cr, connection_start.x, connection_start.y);
-  cairo_line_to (cr, connection_end.x, connection_end.y);
-  cairo_stroke(cr);
+
+
+  cairox_paint_straight_arrow (cr, style, &vector[0], 2, width, 1.0);
+  
 
 }
+
 
 
 void pdpgui_draw_connection_curved (cairo_t *cr, 
@@ -179,7 +210,7 @@ void pdpgui_draw_connection_curved (cairo_t *cr,
   double width;
 
   if (weight < 0) {
-    cairo_set_source_rgb (cr, 0.5, 0, 0);
+    cairo_set_source_rgb (cr, 0.9, 0, 0);
     //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE;
   }
   else {
@@ -231,7 +262,36 @@ void pdpgui_draw_weights (cairo_t *cr,
   }
 }
 
+
+void pdpgui_draw_weights_topdown_straight (cairo_t *cr, 
+					   PdpguiCoords layer_centre_lower,  
+					   PdpguiCoords layer_centre_upper, 
+					   pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      PdpguiCoords lower = { .x = layer_centre_lower.x 
+			    - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     //			    .y = layer_centre_lower.y - DEFAULT_UNIT_SIZE };
+			    .y = layer_centre_lower.y + DEFAULT_UNIT_SIZE };
+
+      PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     /* .y = layer_centre_upper.y + DEFAULT_UNIT_SIZE }; */
+			     .y = layer_centre_upper.y - DEFAULT_UNIT_SIZE };
+
+      //    pdpgui_draw_connection (cr, upper, lower, matrix->weights[j][i]);
+    pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+
 // plots weights from upper to lower units
+// curved connections
 void pdpgui_draw_weights_topdown (cairo_t *cr, 
 				  PdpguiCoords layer_centre_lower,  
 				  PdpguiCoords layer_centre_upper,

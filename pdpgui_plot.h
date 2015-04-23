@@ -65,6 +65,11 @@ void pdpgui_draw_weights (cairo_t *cr,
 			  PdpguiCoords layer_centre_upper, 
 			  pdp_weights_matrix * matrix);
 
+void pdpgui_draw_weights_topdown_straight (cairo_t *cr, 
+					   PdpguiCoords layer_centre_lower,  
+					   PdpguiCoords layer_centre_upper, 
+					   pdp_weights_matrix * matrix);
+
 void pdpgui_draw_weights_topdown (cairo_t *cr, 
 				  PdpguiCoords layer_centre_lower,  
 				  PdpguiCoords layer_centre_upper,

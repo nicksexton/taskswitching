@@ -323,7 +323,8 @@ void cairox_paint_circle(cairo_t *cr, double x1, double y1, double r)
 
 /*----------------------------------------------------------------------------*/
 
-static void cairox_paint_arrow_head(cairo_t *cr, ArrowHeadType head, CairoxPoint p[2], double width, double zoom)
+// static void cairox_paint_arrow_head(cairo_t *cr, ArrowHeadType head, CairoxPoint p[2], double width, double zoom)
+void cairox_paint_arrow_head(cairo_t *cr, ArrowHeadType head, CairoxPoint p[2], double width, double zoom)
 {
     CairoxPoint q[4];
     double theta = line_calculate_slope(&p[0], &p[1]);

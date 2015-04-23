@@ -53,6 +53,7 @@ extern void cairox_paint_line(cairo_t *cr, double w, double x1, double y1, doubl
 extern void cairox_paint_lines(cairo_t *cr, CairoxPoint *p, int n);
 extern void cairox_paint_polygon(cairo_t *cr, CairoxPoint *p, int n);
 extern void cairox_paint_circle(cairo_t *cr, double x1, double y1, double r);
+extern void cairox_paint_arrow_head(cairo_t *cr, ArrowHeadType head, CairoxPoint p[2], double width, double zoom); // added NS
 extern void cairox_paint_straight_arrow(cairo_t *cr, ArrowHeadType head, CairoxPoint *p, int n, double width, double zoom);
 extern void cairox_paint_curved_arrow(cairo_t *cr, ArrowHeadType head, CairoxPoint *p, int n, double width, double zoom);
 extern void cairox_paint_grid(cairo_t *cr, int w, int h, double gs);

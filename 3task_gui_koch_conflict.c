@@ -331,9 +331,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   PdpguiCoords loc_taskdemand = { .x = width * 0.45, .y = height * 0.4, };
   PdpguiCoords loc_taskdemand_title = { .x = width * 0.9, .y = height * 0.4, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
+
 
 
 
@@ -365,26 +363,26 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -25, 12, "Control");
   
 
-  PdpguiCoords loc_td_input0_intermed_upper = { .x = width * 0.05, .y = 0.0 };
-  PdpguiCoords loc_td_input0_intermed_lower = { .x = width * 0.05, .y = height * 0.95 };
-  PdpguiCoords loc_td_input1_intermed_upper = { .x = width * 0.85, .y = height * 0.20 };
-  PdpguiCoords loc_td_input1_intermed_lower = { .x = width * 0.70, .y = height * 0.90 };
-  PdpguiCoords loc_td_input2_intermed_upper = { .x = width * 0.9, .y = 0.0 };
-  PdpguiCoords loc_td_input2_intermed_lower = { .x = width * 0.9, .y = height * 0.90 };
+  /* PdpguiCoords loc_td_input0_intermed_upper = { .x = width * 0.05, .y = 0.0 }; */
+  /* PdpguiCoords loc_td_input0_intermed_lower = { .x = width * 0.05, .y = height * 0.95 }; */
+  /* PdpguiCoords loc_td_input1_intermed_upper = { .x = width * 0.85, .y = height * 0.20 }; */
+  /* PdpguiCoords loc_td_input1_intermed_lower = { .x = width * 0.70, .y = height * 0.90 }; */
+  /* PdpguiCoords loc_td_input2_intermed_upper = { .x = width * 0.9, .y = 0.0 }; */
+  /* PdpguiCoords loc_td_input2_intermed_lower = { .x = width * 0.9, .y = height * 0.90 }; */
 
   //  PdpguiCoords loc_channels_title = { .x = width * 0.5, .y = height * 0.95, };
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_channels_title, -50, 0, "Task Processing Pathways");
 
   // intermediates for lateral connections
-  PdpguiCoords loc_outputs_lateral_intermed_upper = { .x = width * 0.5, 
-						      .y = height * 0.3 };
-  PdpguiCoords loc_outputs_lateral_intermed_lower = { .x = width * 0.5, 
-						.y = height * 0.70 };
+  /* PdpguiCoords loc_outputs_lateral_intermed_upper = { .x = width * 0.5,  */
+  /* 						      .y = height * 0.3 }; */
+  /* PdpguiCoords loc_outputs_lateral_intermed_lower = { .x = width * 0.5,  */
+  /* 						.y = height * 0.70 }; */
 
-  PdpguiCoords loc_td_lateral_intermed_upper = { .x = width * 0.4, 
-						      .y = height * 0.1 };
-  PdpguiCoords loc_td_lateral_intermed_lower = { .x = width * 0.4, 
-						.y = height * 0.40 };
+  /* PdpguiCoords loc_td_lateral_intermed_upper = { .x = width * 0.4,  */
+  /* 						      .y = height * 0.1 }; */
+  /* PdpguiCoords loc_td_lateral_intermed_lower = { .x = width * 0.4,  */
+  /* 						.y = height * 0.40 }; */
 
 
   PdpguiColourRgb mono[2] = {{ 
@@ -447,20 +445,31 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_draw_weights (cr, loc_output_2, loc_taskdemand, 
 		       pdp_input_find(layer_taskdemand, ID_OUTPUT_2)->input_weights);
 
-  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_0, 
-			       loc_td_input0_intermed_upper, loc_td_input0_intermed_lower,
-			       pdp_input_find(layer_output_0, ID_TASKDEMAND)->input_weights);
-  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_1, 
-			       loc_td_input1_intermed_upper, loc_td_input1_intermed_lower,
-			       pdp_input_find(layer_output_1, ID_TASKDEMAND)->input_weights);
-  pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_2, 
-			       loc_td_input2_intermed_upper, loc_td_input2_intermed_lower,
-			       pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights);
+
+  /* pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_0,  */
+  /* 			       loc_td_input0_intermed_upper, loc_td_input0_intermed_lower, */
+  /* 			       pdp_input_find(layer_output_0, ID_TASKDEMAND)->input_weights); */
+  /* pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_1,  */
+  /* 			       loc_td_input1_intermed_upper, loc_td_input1_intermed_lower, */
+  /* 			       pdp_input_find(layer_output_1, ID_TASKDEMAND)->input_weights); */
+  /* pdpgui_draw_weights_topdown (cr, loc_taskdemand, loc_output_2,  */
+  /* 			       loc_td_input2_intermed_upper, loc_td_input2_intermed_lower, */
+  /* 			       pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights); */
+
+  // straight topdown connections for cogsci2015 submission
+  pdpgui_draw_weights_topdown_straight (cr, loc_taskdemand, loc_output_0, 
+					pdp_input_find(layer_output_0, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights_topdown_straight (cr, loc_taskdemand, loc_output_1, 
+					pdp_input_find(layer_output_1, ID_TASKDEMAND)->input_weights);
+  pdpgui_draw_weights_topdown_straight (cr, loc_taskdemand, loc_output_2, 
+					pdp_input_find(layer_output_2, ID_TASKDEMAND)->input_weights);
 
 
   // conflict monitoring weights
-  pdpgui_draw_weights_topdown (cr, loc_conflict, loc_taskdemand, 
-			       loc_conflict_td_upper, loc_conflict_td_lower,
+  /* pdpgui_draw_weights_topdown (cr, loc_conflict, loc_taskdemand,  */
+  /* 			       loc_conflict_td_upper, loc_conflict_td_lower, */
+  /* 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights); */
+  pdpgui_draw_weights_topdown_straight (cr, loc_conflict, loc_taskdemand, 
 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights);
 
   //  pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
