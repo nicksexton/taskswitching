@@ -8,8 +8,8 @@
 #include "pdpgui_plot.h"
 
 
-#define DEFAULT_UNIT_SIZE 20
-#define DEFAULT_UNIT_PADDING 25
+#define DEFAULT_UNIT_SIZE 25 // 20
+#define DEFAULT_UNIT_PADDING 30 // 25 
 #define UNIT_DISPLAY_SQUASH_CONST 8.0
 #define WEIGHT_WIDTH_SCALE 3
 
@@ -188,7 +188,7 @@ void pdpgui_draw_connection (cairo_t *cr,
   cairo_set_dash(cr, NULL, 0, 0); // dashed line off
 
   width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 );
-  //  width = 1.0;
+  // width = 1.0;
 
 
 

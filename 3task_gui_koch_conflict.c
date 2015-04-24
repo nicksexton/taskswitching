@@ -14,7 +14,7 @@
 #define DATAFILE "3task_koch_data_.txt"
 #define DATAFILE_ACT "3task_koch_act.txt"
 
-#define TEXT_SIZE_HEAD 15
+#define TEXT_SIZE_HEAD 17
 #define EXPORT_IMAGE_WIDTH 800
 #define EXPORT_IMAGE_HEIGHT 500
 
@@ -297,20 +297,21 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   //  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
-  PdpguiCoords loc_conflict = { .x = width * 0.475, .y = height * 0.1, };
-  PdpguiCoords loc_conflict_title = { .x = width * 0.9, .y = height * 0.1, };
+  PdpguiCoords loc_conflict = { .x = width * 0.473, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_offset = { .x = width * 0.478, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_title = { .x = width * 0.85, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict Monitoring");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
   //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
 
-  PdpguiCoords loc_conflict_td_upper = { .x = width * 0.05, .y = height * -0.2 };
-  PdpguiCoords loc_conflict_td_lower = { .x = width * 0.05, .y = height * 0.8 };
+  //  PdpguiCoords loc_conflict_td_upper = { .x = width * 0.05, .y = height * -0.2 };
+  //  PdpguiCoords loc_conflict_td_lower = { .x = width * 0.05, .y = height * 0.8 };
 
 
   // Draw a dashed line across the screen to separate new model content
-  PdpguiCoords dashed_separator_left = { .x = width * 0.05, .y = height * 0.2 };
-  PdpguiCoords dashed_separator_right = { .x = width * 0.95, .y = height * 0.2 };
+  PdpguiCoords dashed_separator_left = { .x = width * 0.05, .y = height * 0.25 };
+  PdpguiCoords dashed_separator_right = { .x = width * 0.95, .y = height * 0.25 };
   cairo_set_source_rgb (cr, 0.5, 0.5, 0.5);
   cairo_set_line_width (cr, 3);
   double dash_pattern[2] = {5, 5};
@@ -328,8 +329,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   // Now draw the main units
   // TD Units
 
-  PdpguiCoords loc_taskdemand = { .x = width * 0.45, .y = height * 0.4, };
-  PdpguiCoords loc_taskdemand_title = { .x = width * 0.9, .y = height * 0.4, };
+  PdpguiCoords loc_taskdemand = { .x = width * 0.448, .y = height * 0.4, };
+  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.453, .y = height * 0.4, }; // avoid overlap of weights
+
+  PdpguiCoords loc_taskdemand_title = { .x = width * 0.85, .y = height * 0.4, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
 
 
@@ -422,9 +425,9 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   //  pdpgui_draw_layer (cr, loc_conflict_input, mono_grey[0], mono_grey[1], layer_conflict_input);
 
   // overlay task demand annotations on units
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -15, "A");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -15, "B");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -15, "C");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -82, -15, "A");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -27, -15, "B");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 29, -15, "C");
 
 
   pdpgui_draw_weights (cr, loc_topdowncontrol, loc_taskdemand, 
@@ -469,7 +472,7 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   /* pdpgui_draw_weights_topdown (cr, loc_conflict, loc_taskdemand,  */
   /* 			       loc_conflict_td_upper, loc_conflict_td_lower, */
   /* 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights); */
-  pdpgui_draw_weights_topdown_straight (cr, loc_conflict, loc_taskdemand, 
+  pdpgui_draw_weights_topdown_straight (cr, loc_conflict_offset, loc_taskdemand_offset, 
 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights);
 
   //  pdpgui_draw_weights (cr, loc_conflict_input, loc_conflict, 
