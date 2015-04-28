@@ -97,8 +97,8 @@ for (i in 1:nrow(data.clip.highnoise.0)) {
   data.clip.highnoise.0[i,]$intersect <- intersect (data.clip.highnoise.0[i,]$sc, data.clip.highnoise.0[i,]$n2rc)
 #  data.clip.highnoise.0[i,]$intersect.effsize <- intersect (calculate.r (data.clip.highnoise.0[i,]$sc.t, data.clip.highnoise.0[i,]$sc.df), calculate.r ((data.clip.highnoise.0[i,]$n2rc.t, data.clip.highnoise.0[i,]$n2rc.df) * ifelse (data.clip.highnoise.0[i,]$n2rc.t > 0, -1, 1)))
   data.clip.highnoise.0[i,]$intersect.effsize <- with (data.clip.highnoise.0[i,],
-                                                       intersect (calculate.r (sc.t, sc.df),
-                                                                  calculate.r (n2rc.t, n2rc.df) * ifelse (n2rc.t > 0, -1, 1)))  
+                                                       sqrt(intersect (calculate.r (sc.t, sc.df),
+                                                                  calculate.r (n2rc.t, n2rc.df) * ifelse (n2rc.t > 0, -1, 1))))
   data.clip.highnoise.0[i,]$intersectErr <- intersectErr ((data.clip.highnoise.0[i,]$err.3.1SW -
                                                            data.clip.highnoise.0[i,]$err.3.0SW),
                                                           (data.clip.highnoise.0[i,]$err.3.ALT -
@@ -280,11 +280,11 @@ plot.effectsize.sctimesn2rc <- function (data, condition.title) {
   SCtimesN2RC <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=intersect.effsize))
   SCtimesN2RC + geom_raster() +
     facet_grid( ~ conflict.tdwt) +                                        
-    scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,0.05)) +
+    scale_fill_gradient2(low="yellow", high="grey20", na.value="white",
+                         limits=c(0,0.301),  breaks=c(0, 0.1, 0.2, 0.3)) +
     ## ggtitle(paste (condition.title,
     ##                ", intersection of SCs and N2RCs") ) +
-  labs(fill="r squared") +
-#  theme (legend.position=c(0.87,0.1))
+  labs(fill="effect sizes\ngeometric mean (r)") +
   theme (legend.position="right")  
 }
 
