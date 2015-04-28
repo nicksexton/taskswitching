@@ -25,6 +25,7 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
+library(lsr) # for etaSquared
 
 imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_9")
 
