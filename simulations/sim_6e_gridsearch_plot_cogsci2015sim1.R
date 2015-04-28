@@ -1,5 +1,6 @@
 rm (list = ls())
-setwd("~/Programming/c_pdp_models/simulations")
+#setwd("~/Programming/c_pdp_models/simulations")
+setwd("~/Thesis/data/simulation_6e")
 library (ggplot2)
 
 
@@ -63,6 +64,8 @@ intersect <- function (sc, n2rc)  { max (sc, 0) * max (n2rc, 0)}
 intersectErr <- function (error.sc, error.n2rc) {max (error.sc, 0) * max (error.n2rc, 0)}
 twotailed <- function (p, effect) {  return (ifelse (effect > 0, p, 1-p))  }
 
+calculate.r <- function (t, df) sqrt(t^2 / (t^2 + df))
+
 # Code could be vectorised!
 #data.clip.lownoise.0$intersect <- rep(0, nrow(data.clip.lownoise.0))
 #data.clip.lownoise.0$intersectErr <- rep(0, nrow(data.clip.lownoise.0))
@@ -89,9 +92,17 @@ twotailed <- function (p, effect) {  return (ifelse (effect > 0, p, 1-p))  }
 ### Highnoise
 data.clip.highnoise.0$intersect <- rep(0, nrow(data.clip.highnoise.0))
 data.clip.highnoise.0$intersectErr <- rep(0, nrow(data.clip.highnoise.0))
+data.clip.highnoise.0$intersect.effsize <- rep(0, nrow(data.clip.highnoise.0))
 for (i in 1:nrow(data.clip.highnoise.0)) {
   data.clip.highnoise.0[i,]$intersect <- intersect (data.clip.highnoise.0[i,]$sc, data.clip.highnoise.0[i,]$n2rc)
-  data.clip.highnoise.0[i,]$intersectErr <- intersectErr ((data.clip.highnoise.0[i,]$err.3.1SW - data.clip.highnoise.0[i,]$err.3.0SW), (data.clip.highnoise.0[i,]$err.3.ALT - data.clip.highnoise.0[i,]$err.3.2SW))
+#  data.clip.highnoise.0[i,]$intersect.effsize <- intersect (calculate.r (data.clip.highnoise.0[i,]$sc.t, data.clip.highnoise.0[i,]$sc.df), calculate.r ((data.clip.highnoise.0[i,]$n2rc.t, data.clip.highnoise.0[i,]$n2rc.df) * ifelse (data.clip.highnoise.0[i,]$n2rc.t > 0, -1, 1)))
+  data.clip.highnoise.0[i,]$intersect.effsize <- with (data.clip.highnoise.0[i,],
+                                                       intersect (calculate.r (sc.t, sc.df),
+                                                                  calculate.r (n2rc.t, n2rc.df) * ifelse (n2rc.t > 0, -1, 1)))  
+  data.clip.highnoise.0[i,]$intersectErr <- intersectErr ((data.clip.highnoise.0[i,]$err.3.1SW -
+                                                           data.clip.highnoise.0[i,]$err.3.0SW),
+                                                          (data.clip.highnoise.0[i,]$err.3.ALT -
+                                                           data.clip.highnoise.0[i,]$err.3.2SW))
 }
 
 #data.allow.highnoise.0$intersect <- rep(0, nrow(data.allow.highnoise.0))
@@ -139,23 +150,6 @@ plot.heatmapCompress.sc <- function (data, condition.title) {
 
 
 
-## plot.heatmap.sc.p <- function (data, condition.title) {
-
-##   labs <- c(0.05, 0.95)
-##   colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
-## # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-  
-##   sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc.p))
-##   sc.p + geom_raster() +
-##     facet_grid( ~ conflict.tdwt) +
-##       scale_fill_gradient2(midpoint=.05, low="red", mid="grey70", high="grey70", limits=c(0,0.1)) +
-##         ggtitle(paste (condition.title,
-##                        ", p value of Switch costs") ) +
-##   labs(fill="significance (p)") +
-##   # theme (legend.position=c(0.87,0.1))
-##   theme (legend.position="right")  
-## }
-
 # two tailed version
 plot.heatmap.sc.p <- function (data, condition.title) {
 
@@ -173,6 +167,25 @@ plot.heatmap.sc.p <- function (data, condition.title) {
   # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
+
+
+plot.effectsize.sc <- function (data, condition.title) {
+  
+
+  
+#  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+
+  sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=calculate.r(sc.t, sc.df)))  
+  sc.p + geom_raster() +
+    facet_grid( ~ conflict.tdwt) +
+      scale_fill_gradient2(high="red", low="blue", mid="white", limits=c(-0.5,0.5)) +
+        ## ggtitle(paste (condition.title,
+        ##                ", p value of Switch costs") ) +
+  labs(fill="effect size (r)") +
+  # theme (legend.position=c(0.87,0.1))
+  theme (legend.position="right")  
+}
+
 
 
 plot.heatmap.n2rc <- function (data, condition.title) {
@@ -204,17 +217,6 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
 }
 
 
-## plot.heatmap.n2rc.p <- function (data, condition.title) {
-##   n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc.p))
-##   n2rc.p + geom_raster() +
-##     facet_grid( ~ conflict.tdwt) +
-##       scale_fill_gradient2(midpoint=.05, low="red", high="grey70", limits=c(0,0.1)) +
-##         ggtitle(paste (condition.title,
-##                        ", p value of N-2 Repetition costs") ) +
-##   labs(fill="significance (p)") +
-## # theme (legend.position=c(0.87,0.1))
-##   theme (legend.position="right")  
-## }
 
 # two tailed version
 plot.heatmap.n2rc.p <- function (data, condition.title) {
@@ -235,6 +237,26 @@ plot.heatmap.n2rc.p <- function (data, condition.title) {
 }
 
 
+calculate.r <- function (t, df) sqrt(t^2 / (t^2 + df))
+
+plot.effectsize.n2rc <- function (data, condition.title) {
+
+
+
+#  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+  # nb direction of effect size is flipped because t values are inverted
+  sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=(calculate.r(n2rc.t, n2rc.df)* ifelse(n2rc.t>0, -1, 1) )))  
+  sc.p + geom_raster() +
+    facet_grid( ~ conflict.tdwt) +
+      scale_fill_gradient2(high="red", low="blue", mid="white", limits=c(-0.25,0.25)) +
+        ## ggtitle(paste (condition.title,
+        ##                ", p value of Switch costs") ) +
+  labs(fill="effect size (r)") +
+  # theme (legend.position=c(0.87,0.1))
+  theme (legend.position="right")  
+}
+
+
 
 
 plot.heatmap.sctimesn2rc <- function (data, condition.title) {
@@ -251,14 +273,36 @@ plot.heatmap.sctimesn2rc <- function (data, condition.title) {
   theme (legend.position="right")  
 }
 
+
+plot.effectsize.sctimesn2rc <- function (data, condition.title) {
+# plots the intersection of SCs and N2RCs by calculating the product of both DVs
+
+  SCtimesN2RC <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=intersect.effsize))
+  SCtimesN2RC + geom_raster() +
+    facet_grid( ~ conflict.tdwt) +                                        
+    scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,0.05)) +
+    ## ggtitle(paste (condition.title,
+    ##                ", intersection of SCs and N2RCs") ) +
+  labs(fill="r squared") +
+#  theme (legend.position=c(0.87,0.1))
+  theme (legend.position="right")  
+}
+
+                                     
 plot.heatmaps <- function (data, condition.title, image.directory, filename.stem, save=FALSE) {
 
-  plot.heatmap.sctimesn2rc (data, condition.title)
+  ## plot.heatmap.sctimesn2rc (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_sctimesn2rc.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=50, units="mm")
+  ## }
+
+    plot.effectsize.sctimesn2rc (data, condition.title)
   if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_sctimesn2rc.png", sep=""))
+    image.file <- file.path(image.directory, paste(filename.stem, "_effsize_scxn2rc.png", sep=""))
     ggsave(filename=image.file, width=200, height=50, units="mm")
   }
-  
+
 #  plot.heatmap.rt.0SW (data, condition.title)
 #  if (save==TRUE) {
 #    image.file <- file.path(image.directory, paste(filename.stem, "_rt0SW.png", sep=""))
@@ -277,12 +321,19 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
 #    ggsave(filename=image.file, width=200, height=250, units="mm")
 #  }  
   
-  plot.heatmap.sc.p (data, condition.title)
+  ## plot.heatmap.sc.p (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_sc_p.png", sep="")) 
+  ##   ggsave(filename=image.file, width=200, height=50, units="mm")
+  ## }
+
+  plot.effectsize.sc (data, condition.title)
   if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_sc_p.png", sep="")) 
+    image.file <- file.path(image.directory, paste(filename.stem, "_effsize_sc.png", sep="")) 
     ggsave(filename=image.file, width=200, height=50, units="mm")
   }
 
+    
 #  plot.heatmap.n2rc (data, condition.title)
 #  if (save==TRUE) {
 #    image.file <- file.path(image.directory, paste(filename.stem, "_n2rc.png", sep=""))
@@ -295,12 +346,19 @@ plot.heatmaps <- function (data, condition.title, image.directory, filename.stem
 #    ggsave(filename=image.file, width=200, height=250, units="mm")    
 #  }
   
-  plot.heatmap.n2rc.p (data, condition.title)
+  ## plot.heatmap.n2rc.p (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_n2rc_p.png", sep="") )
+  ##   ggsave(filename=image.file, width=200, height=50, units="mm")    
+  ## }
+
+  plot.effectsize.n2rc (data, condition.title)
   if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_n2rc_p.png", sep="") )
-    ggsave(filename=image.file, width=200, height=50, units="mm")    
+    image.file <- file.path(image.directory, paste(filename.stem, "_effsize_n2rc.png", sep="")) 
+    ggsave(filename=image.file, width=200, height=50, units="mm")
   }
 
+    
 }
 
 
