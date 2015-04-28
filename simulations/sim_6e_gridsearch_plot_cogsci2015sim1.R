@@ -284,7 +284,7 @@ plot.effectsize.sctimesn2rc <- function (data, condition.title) {
                          limits=c(0,0.301),  breaks=c(0, 0.1, 0.2, 0.3)) +
     ## ggtitle(paste (condition.title,
     ##                ", intersection of SCs and N2RCs") ) +
-  labs(fill="effect sizes\ngeometric mean (r)") +
+  labs(fill="co-occurrance\ngeom. mean (r)") +
   theme (legend.position="right")  
 }
 
