@@ -33,7 +33,7 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
-imageDirectory <- file.path("/media/ramdisk/simulation_6d_diagnostic") # path to save images to
+imageDirectory <- file.path("/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/simulation_10/") # path to save images to
                                         #(eg ~/Dropbox/PhD/Thesis/simulations/etc
 
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
@@ -130,7 +130,7 @@ linegraph +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
   ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1")
-#imageFile <- file.path(imageDirectory, "sim_6_0_tasks01.png") 
+#imageFile <- file.path(imageDirectory, "rts_tasks01.png") 
 #ggsave(imageFile)
 
 
@@ -198,28 +198,6 @@ by(data.task12.1$cycles, data.task12.1$sequence_cond, stat.desc)
 
 ######################################### Stat Tests ######################################
 
-
-############## FOR SYMMETRIC SWITCHING ###################
-
-data.aggregate.trial3 <-subset (data, PATH.trial==2)
-by (data.aggregate.trial3$cycles, data.aggregate.trial3$sequence_cond, stat.desc) # RT on trial 3 only
-
-# t-test for switch cost
-model.aggregate.trial3.switchcost <- t.test (cycles ~ sequence_cond,
-                                             data = subset (data.aggregate.trial3,
-                                                 sequence_cond == "0SW" | sequence_cond == "1SW"))
-model.aggregate.trial3.switchcost
-
-
-# t-test for n-2 repetition cost
-model.aggregate.trial3.n2rc <- t.test (cycles ~ sequence_cond,
-                                             data = subset (data.aggregate.trial3,
-                                                 sequence_cond == "2SW" | sequence_cond == "ALT"))
-model.aggregate.trial3.n2rc
-
-
-
-############## FOR ASYMMETRIC SWITCHING ##################
 
 
 ############## 0 and 1 ##################
@@ -324,3 +302,39 @@ model.task02.n2rc.2 <- t.test (cycles ~ sequence_cond,
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task02.n2rc.2
 
+
+
+
+############### Exgaussian analysis
+library (retimes)
+
+data.task01.EHE <- subset (data.task01, seq.3 == 0)
+data.task01.HEH <- subset (data.task01, seq.3 == 1)
+
+
+fit.exgaussian <- function (data) {
+#    params <- timefit (data$resp.RT, iter=100) # number of bootstrap iterations, 1000 in Grange, Juvina etc.
+  params <- timefit (data$cycles, iter=1000) # no bootstrap for now
+    return (params@par)
+#  return (params)
+}
+
+
+calc.n2rc.exg <- function (data) {
+#  n2rc <- mean (subset (data, data$switch.condition == "ALT")$resp.RT)-
+#    mean (subset(data, data$switch.condition == "2SW")$resp.RT)
+  n2rc.params <- fit.exgaussian (subset (data, data$sequence_cond == "ALT"))-
+    fit.exgaussian (subset (data, data$sequence_cond == "2SW"))  
+  return (n2rc.params)
+}
+
+
+calc.n2rc.exg (data.task01.HEH)
+calc.n2rc.exg (data.task01.EHE)
+
+
+fit.exgaussian (subset (data.task01.HEH, sequence_cond == "2SW"))
+fit.exgaussian (subset (data.task01.HEH, sequence_cond == "ALT"))
+
+fit.exgaussian (subset (data.task01.EHE, sequence_cond == "2SW"))
+fit.exgaussian (subset (data.task01.EHE, sequence_cond == "ALT"))

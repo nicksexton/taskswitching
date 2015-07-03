@@ -15,7 +15,7 @@ rm sim_6_act.txt
 rm sim_6_log.txt
 rm sim_6_log_small.txt
 
-./sim_4_asymmetric.py -n 500 # 500
+./sim_4_asymmetric.py -n 1000 # 500
 mv sim_4_trials.conf sim_10_trials.conf
 mv sim_4_lookup.txt sim_10_lookup.txt
 
