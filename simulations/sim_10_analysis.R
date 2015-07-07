@@ -40,7 +40,10 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
            "response")
 
                                         #Default, use this
-data.raw <- read.delim("sim_10_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+#data.raw <- read.delim("sim_10_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+ data.raw <- read.delim("sim_10-2_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+# data.raw <- read.delim("sim_10-2-1_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+#data.raw <- read.delim("sim_10-2-2_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 
 
@@ -308,8 +311,6 @@ model.task02.n2rc.2
 ############### Exgaussian analysis
 library (retimes)
 
-data.task01.EHE <- subset (data.task01, seq.3 == 0)
-data.task01.HEH <- subset (data.task01, seq.3 == 1)
 
 
 fit.exgaussian <- function (data) {
@@ -329,9 +330,11 @@ calc.n2rc.exg <- function (data) {
 }
 
 
+data.task01.EHE <- subset (data.task01, seq.3 == 0)
+data.task01.HEH <- subset (data.task01, seq.3 == 1)
+
 calc.n2rc.exg (data.task01.HEH)
 calc.n2rc.exg (data.task01.EHE)
-
 
 fit.exgaussian (subset (data.task01.HEH, sequence_cond == "2SW"))
 fit.exgaussian (subset (data.task01.HEH, sequence_cond == "ALT"))
