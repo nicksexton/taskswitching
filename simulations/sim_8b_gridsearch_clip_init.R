@@ -15,7 +15,7 @@ n <- 15 # resolution of grid to explore param space (ie total observations is n^
 max.cycles <- 500
 
 # Bounds for gridsearch
-model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -2.5, conflict.bias = -40.0)
+model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -2.4, conflict.bias = -40.0)
 model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
 
 path.ramdiskfolder <- "8b_clip_0"
