@@ -15,7 +15,7 @@ filename.output.genetic.results <- "sim_6f_gridsearch_results_highnoise_clip.txt
 
 
 blocksize <- 100
-n <- 2 # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+n <- 15 # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Bounds for gridsearch
