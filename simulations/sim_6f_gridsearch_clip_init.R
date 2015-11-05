@@ -15,11 +15,11 @@ filename.output.genetic.results <- "sim_6f_gridsearch_results_highnoise_clip.txt
 
 
 blocksize <- 100
-n <- 15 # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+n <- 16  # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Bounds for gridsearch
-model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -32.0, conflict.bias = -40.0)
+model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -30.0, conflict.bias = -40.0)
 model.conf.leaf.max <- c(conflict.gain = 100.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
 
 path.ramdiskfolder <- "6f_errors_clip_0"

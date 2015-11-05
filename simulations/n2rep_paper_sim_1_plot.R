@@ -1,3 +1,4 @@
+                                        # was: sim_6e_gridsearch_plot_cogsci2015sim1.R
 rm (list = ls())
 setwd("~/Programming/c_pdp_models/simulations")
 #setwd("~/Thesis/data/simulation_6e")
@@ -23,7 +24,7 @@ my.cols <- c("conflict.gain", "conflict.tdwt", "conflict.bias", "mean.0SW",
 data.clip.highnoise.0 = read.delim("n2rep_paper_simulation_1_results.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
                                         # trim data to only 4 weight levels (for fitting on single grid row)
-data.clip.highnoise.0 <- subset (data.clip.highnoise.0, (conflict.tdwt == 0 | conflict.tdwt == -10.714 | conflict.tdwt == -19.286 | conflict.tdwt == -27.857))
+data.clip.highnoise.0 <- subset (data.clip.highnoise.0, (conflict.tdwt == 0 | conflict.tdwt == -10 | conflict.tdwt == -20 | conflict.tdwt == -30))
 
 # ALLOW low noise version 3
 #data.allow.lownoise.0 = read.delim("sim_6e_gridsearch_allow.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
@@ -617,7 +618,7 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 
 ########## FOR COGSCI PAPER #########
-plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="cogsci_sim_1", save=TRUE)
+plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="n2rep_paper_sim_1", save=TRUE)
 
 
 

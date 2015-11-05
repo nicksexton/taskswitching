@@ -13,11 +13,11 @@ filename.output.results <- "n2rep_paper_results_sim2.txt" # where to store resul
 
 
 blocksize <- 300
-n <- 16 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+n <- 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Bounds for gridsearch
-model.conf.leaf.min <- c(task.input.str = 1.5, task.topdown.str = 6.0, conflict.tdwt = -2.4)
+model.conf.leaf.min <- c(task.input.str = 1.5, task.topdown.str = 6.0, conflict.tdwt = -2.8)
 model.conf.leaf.max <- c(task.input.str = 5.0, task.topdown.str = 20.0, conflict.tdwt = 0.0)
 
 

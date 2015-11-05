@@ -1,4 +1,5 @@
-# Simulation 8b - version of simulation 6e (ie., gridsearch of parameter space for conflict params) using version of model where conflict is weighted
+                                        # Version with ok parameter settings for n2rep_paper
+                                        # Simulation 8b - version of simulation 6e (ie., gridsearch of parameter space for conflict params) using version of model where conflict is weighted
 
 rm (list = ls())
 
