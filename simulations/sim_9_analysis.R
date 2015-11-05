@@ -25,6 +25,7 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
+library(lsr) # for etaSquared
 
 imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_9")
 
@@ -32,8 +33,11 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
            "response")
 
 # data.raw <- read.delim("sim_3_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
- data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+
+# data.raw <- read.delim("sim_9_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 #data.raw <- read.delim("sim_9_data_BIG_isomorphic.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_9_data_BIG_2_fixed.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+
 
 
 # now split trial path into block and trial ID
@@ -51,8 +55,10 @@ data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue",
 
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "cue_sequence", "blank")
- data.lookuptable = read.delim("sim_9_lookup.txt", header = FALSE, col.names=labels.lookup)
+# data.lookuptable = read.delim("sim_9_lookup.txt", header = FALSE, col.names=labels.lookup)
 #data.lookuptable = read.delim("sim_9_lookup_BIG_isomorphic.txt", header = FALSE, col.names=labels.lookup)
+ data.lookuptable = read.delim("sim_9_lookup_BIG_2_fixed.txt", header = FALSE, col.names=labels.lookup)
+
 data <- merge(data.lookuptable, data)
 
 
@@ -171,91 +177,120 @@ ggsave(imageFile)
 
 
 # ------------------------- TEMP Debugging - why is trial 2 on ii.ic.ii faster
-# for ABA than CBA?
 
-# *.IC.*
+## with (data, table (congruency_seq, sequence.congruent.prevtask, sequence))
 
-any.ic.any <- subset (data, data$congruency.2 == "IC")
-with (any.ic.any, table (cue))
-# by (any.ic.any$cycles, any.ic.any$cue, mean)
+##                                         # for ABA than CBA?
 
-with (subset (any.ic.any, PATH.trial == 1),
-      by (cycles, cue, mean))
+## # *.IC.*
 
-# Weird: ABA slower than CBA on trial 1 irrespective of cue
-with (subset (any.ic.any, PATH.trial == 1),
-      tapply (cycles, list (sequence, cue), mean))
+## any.ic.any <- subset (data, data$congruency.2 == "IC")
+## with (any.ic.any, table (cue))
+## # by (any.ic.any$cycles, any.ic.any$cue, mean)
 
-# Really weird!!
-with (subset (any.ic.any, PATH.trial == 1),
-      tapply (cycles, list (cue_sequence, sequence), mean))
-with (subset (any.ic.any, PATH.trial == 1),
-      tapply (cycles, list (cue_sequence, sequence), sd))
+## with (subset (any.ic.any, PATH.trial == 1),
+##       by (cycles, cue, mean))
 
+## # Weird: ABA slower than CBA on trial 1 irrespective of cue
+## with (subset (any.ic.any, PATH.trial == 1),
+##       tapply (cycles, list (sequence, cue), mean))
 
-
-
-# Compare - not weird
-## *.II.*
-
-any.ii.any <- subset (data, data$congruency.2 == "II")
-by (any.ii.any$cycles, any.ii.any$cue, mean)
-
-with (subset (any.ii.any, PATH.trial == 1),
-      by (cycles, cue, mean))
-
-with (subset (any.ii.any, PATH.trial == 1),
-      tapply (cycles, list (sequence, cue), mean))
-
-with (subset (any.ii.any, PATH.trial == 1),
-      tapply (cycles, list (cue_sequence, sequence), mean))
+## # Really weird!!
+## with (subset (any.ic.any, PATH.trial == 1),
+##       tapply (cycles, list (cue_sequence, sequence), mean))
+## with (subset (any.ic.any, PATH.trial == 1),
+##       tapply (cycles, list (cue_sequence, sequence), sd))
 
 
 
-# Also weird:
 
-with (subset(any.ic.any, PATH.trial == 1), boxplot(cycles~cue_sequence))
+## # Compare - not weird
+## ## *.II.*
 
+## any.ii.any <- subset (data, data$congruency.2 == "II")
+## by (any.ii.any$cycles, any.ii.any$cue, mean)
 
-with (subset(any.ii.any, PATH.trial == 1), boxplot(cycles~cue_sequence))
+## with (subset (any.ii.any, PATH.trial == 1),
+##       by (cycles, cue, mean))
 
-with (subset(any.ic.any, PATH.trial == 1 & sequence == "ABA"), hist(cycles))
-with (subset(any.ic.any, PATH.trial == 1 & sequence == "CBA"), hist(cycles))
+## with (subset (any.ii.any, PATH.trial == 1),
+##       tapply (cycles, list (sequence, cue), mean))
 
-
-
-# Drill down to single congruency condition?
-ii.ic.ii <- subset (data, data$congruency_seq == "II/IC/II")
-with (ii.ic.ii, table (cue))
-
-# Weird: ABA slower than CBA on trial 1 irrespective of cue
-with (subset (ii.ic.ii, PATH.trial == 1),
-      tapply (cycles, list (sequence, cue), mean))
-
-# Really weird!!
-with (subset (ii.ic.ii, PATH.trial == 1),
-      tapply (cycles, list (cue_sequence, sequence), mean))
-with (subset (ii.ic.ii, PATH.trial == 1),
-      tapply (cycles, list (cue_sequence, sequence), sd))
+## with (subset (any.ii.any, PATH.trial == 1),
+##       tapply (cycles, list (cue_sequence, sequence), mean))
 
 
 
-write.csv (data, "data_4conds.csv")
+## # Also weird:
+
+## with (subset(any.ic.any, PATH.trial == 1), boxplot(cycles~cue_sequence))
+
+
+## with (subset(any.ii.any, PATH.trial == 1), boxplot(cycles~cue_sequence))
+
+## with (subset(any.ic.any, PATH.trial == 1 & sequence == "ABA"), hist(cycles))
+## with (subset(any.ic.any, PATH.trial == 1 & sequence == "CBA"), hist(cycles))
+
+
+
+## # Drill down to single congruency condition?
+## ii.ic.ii <- subset (data, data$congruency_seq == "II/IC/II")
+## with (ii.ic.ii, table (cue))
+
+## # Weird: ABA slower than CBA on trial 1 irrespective of cue
+## with (subset (ii.ic.ii, PATH.trial == 1),
+##       tapply (cycles, list (sequence, cue), mean))
+
+## # Really weird!!
+## with (subset (ii.ic.ii, PATH.trial == 1),
+##       tapply (cycles, list (cue_sequence, sequence), mean))
+## with (subset (ii.ic.ii, PATH.trial == 1),
+##       tapply (cycles, list (cue_sequence, sequence), sd))
+
+
+
+## write.csv (data, "data_4conds.csv")
 
 # ------------------------- STATISTICAL ANALYSIS --------------
-# First do analysis collapsed across condition
 
-model.collapsed <- aov(cycles ~ sequence +
-                       trial_pos + 
-                       sequence:trial_pos,
-                       data = data)
-
-anova(model.collapsed)
-
+# First test for overall n-2 repetition cost
 # T-test for position 3 only
-data.pos_3 <- subset (data, trial_pos == 2)
-t.test (data.pos_3$cycles ~ data.pos_3$sequence)
+data.trial3 <- subset (data, trial_pos == 2)
+t.test (data.trial3$cycles ~ data.trial3$sequence.iso)
 
+# Effects of trial 3 congruency on trial 3 performance
+model.trial3 <- aov (cycles ~ sequence.iso +
+                     congruency.3 +
+                     sequence.iso:congruency.3,
+                     data = data.trial3)
+anova (model.trial3)
+
+
+# Effects of trial 2, 3 congruency on trial 3 performance
+model.trial23 <- aov (cycles ~ sequence.iso +
+                      congruency.2 +
+                      congruency.3 +
+                      sequence.iso:congruency.2 +
+                      sequence.iso:congruency.3 +
+                      congruency.2:congruency.3 +
+                      sequence.iso:congruency.2:congruency.3,
+                      data = data.trial3)
+anova (model.trial23)
+
+
+# Now consider effect of whether congruent dimensions match previously performed task:
+# Trials 2 and 3 are IC
+data.trial3.any.ic.ic <- subset (data.trial3, congruency.23 == "IC/IC")
+model.trial3.any.ic.ic <- aov (cycles ~ sequence.iso +
+                               congruent.prevtask.trial1 +
+                               congruent.prevtask.trial2 +
+                               sequence.iso:congruent.prevtask.trial1 +
+                               sequence.iso:congruent.prevtask.trial2 +
+                               sequence.iso:congruent.prevtask.trial1:congruent.prevtask.trial2,
+                               data=data.trial3.any.ic.ic)
+
+
+# ------------------------- OLD -----------------------------
 
 # Now break down by congruency condition.
 # Diagnostic 1 - 2x2 ANOVA, sequence x congruency_1 on RT_1 - ie. analysing position 1 trials only.
