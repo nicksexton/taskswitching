@@ -11,11 +11,11 @@ setwd (path.simulation)
 
 
 
-filename.output.genetic.results <- "sim_6f_gridsearch_results_highnoise_clip.txt" # where to store results
+#filename.output.genetic.results <- "sim_6f_gridsearch_results_highnoise_clip.txt" # where to store results
+filename.output.genetic.results <- "n2rep_paper_simulation_1_debugresults.txt" # where to store results
 
-
-blocksize <- 100
-n <- 15  # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+blocksize <- 50 # 100
+n <- 8  # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
 max.cycles <- 500
 
 # Bounds for gridsearch
