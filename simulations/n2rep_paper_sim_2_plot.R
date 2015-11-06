@@ -19,7 +19,7 @@ data.sim8 <- read.delim("n2rep_paper_results_sim2.txt", sep=c("\t"), strip.white
 
 data.sim8.ref <- data.sim8[data.sim8$conflict.tdwt==0,] # get reference data
                                         # trim data to only 4 weight levels (for fitting on single grid row)
-data.sim8 <- subset (data.sim8, (conflict.tdwt == -0.1786 | conflict.tdwt == -0.8929 | conflict.tdwt == -1.6071 | conflict.tdwt == -2.3214))
+#data.sim8 <- subset (data.sim8, (conflict.tdwt == -0.1786 | conflict.tdwt == -0.8929 | conflict.tdwt == -1.6071 | conflict.tdwt == -2.3214))
 
 
 
@@ -53,4 +53,4 @@ for (i in 1:nrow(data.sim8)) {
 
 data.sim8.relative <- merge (x=data.sim8, y=data.sim8.ref, by=c("task.input.str", "task.topdown.str", "alternation"))
 
-plot.relative.bytaskseq (data.sim8.relative, cond.title="Simulation 8", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_2", file.stem="cogsci_sim_2", save=TRUE)
+plot.relative.bytaskseq (data.sim8.relative, cond.title="Simulation 8", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_2", file.stem="n2rep_paper_sim2", save=TRUE)
