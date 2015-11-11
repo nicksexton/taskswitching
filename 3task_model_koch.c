@@ -1191,9 +1191,14 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
 
   pdp_weights_matrix *wts_conflict_taskdemand;
   double wts_conflict_taskdemand_matrix[3][3] = {
-    { conflict_taskdemand_wt * topdown_control_strength_0, 0.0, conflict_taskdemand_wt * topdown_control_strength_0 },
-    { conflict_taskdemand_wt * topdown_control_strength_1, conflict_taskdemand_wt * topdown_control_strength_1, 0.0 },
-    { 0.0, conflict_taskdemand_wt * topdown_control_strength_2, conflict_taskdemand_wt * topdown_control_strength_2 },
+    // Code that scales Task inhibition by td control strength
+    /* { conflict_taskdemand_wt * topdown_control_strength_0, 0.0, conflict_taskdemand_wt * topdown_control_strength_0 }, */
+    /* { conflict_taskdemand_wt * topdown_control_strength_1, conflict_taskdemand_wt * topdown_control_strength_1, 0.0 }, */
+    /* { 0.0, conflict_taskdemand_wt * topdown_control_strength_2, conflict_taskdemand_wt * topdown_control_strength_2 }, */
+    { conflict_taskdemand_wt, 0.0, conflict_taskdemand_wt },
+    { conflict_taskdemand_wt, conflict_taskdemand_wt, 0.0 },
+    { 0.0, conflict_taskdemand_wt, conflict_taskdemand_wt },
+
   };
 
   wts_conflict_taskdemand = pdp_weights_create (3,3);
