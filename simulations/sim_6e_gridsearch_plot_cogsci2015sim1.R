@@ -1,6 +1,6 @@
 rm (list = ls())
-#setwd("~/Programming/c_pdp_models/simulations")
-setwd("~/Thesis/data/simulation_6e")
+setwd("~/Programming/c_pdp_models/simulations")
+# setwd("~/Thesis/data/simulation_6e")
 library (ggplot2)
 
 
@@ -14,41 +14,9 @@ library (ggplot2)
 data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
                                         # trim data to only 4 weight levels (for fitting on single grid row)
-data.clip.highnoise.0 <- subset (data.clip.highnoise.0, (conflict.tdwt == 0 | conflict.tdwt == -10.714 | conflict.tdwt == -19.286 | conflict.tdwt == -27.857))
+#data.clip.highnoise.0 <- subset (data.clip.highnoise.0, (conflict.tdwt == 0 | conflict.tdwt == -10.714 | conflict.tdwt == -19.286 | conflict.tdwt == -27.857))
+data.clip.highnoise.0 <- subset (data.clip.highnoise.0, (conflict.tdwt == 0 | conflict.tdwt == -10 | conflict.tdwt == -20 | conflict.tdwt == -30))
 
-# ALLOW low noise version 3
-#data.allow.lownoise.0 = read.delim("sim_6e_gridsearch_allow.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-#data.allow.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_allow.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-# RESCALE low noise version
-#data.rescale.lownoise.0 = read.delim("sim_6e_gridsearch_results_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-#data.rescale.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_rescale.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-
-# Simulation 8b - researching parameter space with version of the model that scales conflict-TD weights
-# by TD control strength 
-#data.8b.clip = read.delim("sim_8b_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
-
-
-
-
-#recalc.means <- function (x1, x2) apply(X=cbind(x1, x2), MARGIN=1, FUN=mean) 
-
-#data.clip.lownoise.merge$mean.0SW <-recalc.means (data.clip.lownoise.merge$mean.0SW.x,
-#                                                  data.clip.lownoise.merge$mean.0SW.y)
-#data.clip.lownoise.merge$mean.1SW <-recalc.means (data.clip.lownoise.merge$mean.1SW.x,
-#                                                  data.clip.lownoise.merge$mean.1SW.y)
-#data.clip.lownoise.merge$mean.2SW <-recalc.means (data.clip.lownoise.merge$mean.2SW.x,
-#                                                  data.clip.lownoise.merge$mean.2SW.y)
-#data.clip.lownoise.merge$mean.ALT <-recalc.means (data.clip.lownoise.merge$mean.ALT.x,
-#                                                  data.clip.lownoise.merge$mean.ALT.y)
-#data.clip.lownoise.merge <- subset (data.clip.lownoise.merge, select=c(cols.to.avg))
-#data.clip.lownoise.merge$sc <- data.clip.lownoise.merge$mean.1SW - data.clip.lownoise.merge$mean.0SW
-#data.clip.lownoise.merge$n2rc <- data.clip.lownoise.merge$mean.ALT - data.clip.lownoise.merge$mean.2SW
-
-# NB 1SW > 0SW = +ve switch costs (empirical), ALT > 2SW = +ve n-2rc (empirical)
 
 # transformation function for switch/n2-rep costs with small range
 compress <- function (x) 2*((1/(1+exp(-0.5 * x)) - 0.5))
@@ -66,27 +34,6 @@ twotailed <- function (p, effect) {  return (ifelse (effect > 0, p, 1-p))  }
 
 calculate.r <- function (t, df) sqrt(t^2 / (t^2 + df))
 
-# Code could be vectorised!
-#data.clip.lownoise.0$intersect <- rep(0, nrow(data.clip.lownoise.0))
-#data.clip.lownoise.0$intersectErr <- rep(0, nrow(data.clip.lownoise.0))
-#for (i in 1:nrow(data.clip.lownoise.0)) {
-#  data.clip.lownoise.0[i,]$intersect <- intersect (data.clip.lownoise.0[i,]$sc, data.clip.lownoise.0[i,]$n2rc)
-#  data.clip.lownoise.0[i,]$intersectErr <- intersectErr ((data.clip.lownoise.0[i,]$err.3.1SW - data.clip.lownoise.0[i,]$err.3.0SW), (data.clip.lownoise.0[i,]$err.3.ALT - data.clip.lownoise.0[i,]$err.3.2SW))
-#}
-
-#data.allow.lownoise.0$intersect <- rep(0, nrow(data.allow.lownoise.0))
-#data.allow.lownoise.0$intersectErr <- rep(0, nrow(data.allow.lownoise.0))
-#for (i in 1:nrow(data.allow.lownoise.0)) {
-#  data.allow.lownoise.0[i,]$intersect <- intersect (data.allow.lownoise.0[i,]$sc, data.allow.lownoise.0[i,]$n2rc)
-#  data.allow.lownoise.0[i,]$intersectErr <- intersectErr ((data.allow.lownoise.0[i,]$err.3.1SW - data.allow.lownoise.0[i,]$err.3.0SW), (data.allow.lownoise.0[i,]$err.3.ALT - data.allow.lownoise.0[i,]$err.3.2SW))
-#}
-
-#data.rescale.lownoise.0$intersect <- rep(0, nrow(data.rescale.lownoise.0))
-#data.rescale.lownoise.0$intersectErr <- rep(0, nrow(data.rescale.lownoise.0))
-#for (i in 1:nrow(data.rescale.lownoise.0)) {
-#  data.rescale.lownoise.0[i,]$intersect <- intersect (data.rescale.lownoise.0[i,]$sc, data.rescale.lownoise.0[i,]$n2rc)
-#  data.rescale.lownoise.0[i,]$intersectErr <- intersectErr ((data.rescale.lownoise.0[i,]$err.3.1SW - data.rescale.lownoise.0[i,]$err.3.0SW), (data.rescale.lownoise.0[i,]$err.3.ALT - data.rescale.lownoise.0[i,]$err.3.2SW))
-#}
 
 
 ### Highnoise
@@ -608,7 +555,7 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 
 ########## FOR COGSCI PAPER #########
-plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="cogsci_sim_1", save=TRUE)
+plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="remake_sim_1", save=TRUE)
 
 
 
