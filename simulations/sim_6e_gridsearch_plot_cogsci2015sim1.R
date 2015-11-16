@@ -77,7 +77,7 @@ plot.heatmap.sc <- function (data, condition.title) {
     scale_fill_gradient2(midpoint=0,  mid="grey70", limits=c(-30,40)) +
     ggtitle(paste (condition.title,
                    ", Switch Costs")) +
-    labs(fill="Switch Costs\n(cycles)") +
+    labs(fill="Switch Costs\n(cycles)", x="Gain", y="Bias") +
 #   theme (legend.position=c(0.87,0.1))
     theme (legend.position="right")  
 }
@@ -90,7 +90,7 @@ plot.heatmapCompress.sc <- function (data, condition.title) {
       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
         ggtitle(paste (condition.title,
                        ", Switch costs") ) +
-    labs(fill="Switch Costs\ntransform(cycles)") +
+    labs(fill="Switch Costs\ntransform(cycles)", x="Gain", y="Bias") +
 #   theme (legend.position=c(0.87,0.1))
     theme (legend.position="top")
 }
@@ -110,7 +110,7 @@ plot.heatmap.sc.p <- function (data, condition.title) {
                            labels=labs, breaks=labs) +
         ## ggtitle(paste (condition.title,
         ##                ", p value of Switch costs") ) +
-  labs(fill="significance (p)") +
+  labs(fill="significance (p)", x="Gain", y="Bias") +
   # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -128,7 +128,7 @@ plot.effectsize.sc <- function (data, condition.title) {
       scale_fill_gradient2(high="red", low="blue", mid="white", limits=c(-0.5,0.5)) +
         ## ggtitle(paste (condition.title,
         ##                ", p value of Switch costs") ) +
-  labs(fill="effect size (r)") +
+  labs(fill="effect size (r)", x="Gain", y="Bias") +
   # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -143,7 +143,7 @@ plot.heatmap.n2rc <- function (data, condition.title) {
       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-30,40)) +
         ggtitle(paste (condition.title,
                        ", N-2 Repetition costs") ) +
-  labs(fill="N-2 Repetition Costs\n(cycles)") +
+  labs(fill="N-2 Repetition Costs\n(cycles)", x="Gain", y="Bias") +
 #  theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -158,7 +158,7 @@ plot.heatmapCompress.n2rc <- function (data, condition.title) {
     scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
     ggtitle(paste (condition.title,
                    ", N-2 Repetition costs") ) +
-  labs(fill="N-2 Repetition Costs\ntransform(cycles)") +
+  labs(fill="N-2 Repetition Costs\ntransform(cycles)", x="Gain", y="Bias") +
 #  theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -178,7 +178,7 @@ plot.heatmap.n2rc.p <- function (data, condition.title) {
                            labels=labs, breaks=labs) +
         ## ggtitle(paste (condition.title,
         ##                ", p value of N-2 Repetition costs") ) +
-  labs(fill="significance (p)") +
+  labs(fill="significance (p)", x="Gain", y="Bias") +
 # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -198,7 +198,7 @@ plot.effectsize.n2rc <- function (data, condition.title) {
       scale_fill_gradient2(high="red", low="blue", mid="white", limits=c(-0.25,0.25)) +
         ## ggtitle(paste (condition.title,
         ##                ", p value of Switch costs") ) +
-  labs(fill="effect size (r)") +
+  labs(fill="effect size (r)", x="Gain", y="Bias") +
   # theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -215,7 +215,7 @@ plot.heatmap.sctimesn2rc <- function (data, condition.title) {
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
     ## ggtitle(paste (condition.title,
     ##                ", intersection of SCs and N2RCs") ) +
-  labs(fill="compress (sqrt(n2rc x sc))") +
+  labs(fill="compress (sqrt(n2rc x sc))", x="Gain", y="Bias") +
 #  theme (legend.position=c(0.87,0.1))
   theme (legend.position="right")  
 }
@@ -231,7 +231,7 @@ plot.effectsize.sctimesn2rc <- function (data, condition.title) {
                          limits=c(0,0.301),  breaks=c(0, 0.1, 0.2, 0.3)) +
     ## ggtitle(paste (condition.title,
     ##                ", intersection of SCs and N2RCs") ) +
-  labs(fill="co-occurrance\ngeom. mean (r)") +
+  labs(fill="co-occurrance\ngeom. mean (r)", x="Gain", y="Bias") +
   theme (legend.position="right")  
 }
 
@@ -326,7 +326,7 @@ plot.heatmap.rt.0SW <- function (data, condition.title) {
     scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs, breaks=bre) +
     ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n RT (0SW condition)") ) +
-  labs(fill="log RT") +
+  labs(fill="log RT", x="Gain", y="Bias") +
   theme (legend.position=c(0.87,0.1))
 
 }
@@ -342,7 +342,7 @@ plot.heatmap.rt.1SW <- function (data, condition.title) {
       scale_fill_gradientn(colours=rt.colour.scale, na.value="black", labels=labs, breaks=bre) +
     ggtitle(paste (condition.title,
                    "\nParameter space for conflict parameters\n RT (1SW condition)") ) +
-  labs(fill="log RT") +
+  labs(fill="log RT", x="Gain", y="Bias") +
   theme (legend.position=c(0.87,0.1))
 
 }
@@ -555,7 +555,7 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 
 ########## FOR COGSCI PAPER #########
-plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="remake_sim_1", save=TRUE)
+plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="n2rep_paper_sim1", save=TRUE)
 
 
 

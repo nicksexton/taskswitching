@@ -14,9 +14,9 @@ plot.relative.sc <- function (data, condition.title) {
       scale_fill_gradient2(midpoint=0, mid="grey70") +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
-      ggtitle(paste (condition.title,
-                       "Relative Switch costs") ) +
-    labs(fill="cycles") +
+ #     ggtitle(paste (condition.title,
+ #                      "Relative Switch costs") ) +
+    labs(x="Task topdown control strength", y="Task input strength", fill="cycles") +
 #    theme (legend.position=c(0.87,0.1))
     theme (legend.position="right")      
 }
@@ -32,9 +32,10 @@ plot.relative.n2rc <- function (data, condition.title) {
     scale_fill_gradient2(midpoint=0, mid="grey70") +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
-        ggtitle(paste (condition.title,
-                       "Relative N-2 Repetition costs") ) +
-  labs(fill="cycles") +
+ #       ggtitle(paste (condition.title,
+ #                      "Relative N-2 Repetition costs") ) +
+    labs(x="Task topdown control strength", y="Task input strength", fill="cycles") +
+#          labs(fill="cycles") +
   theme (legend.position="right")
 }
 
@@ -51,9 +52,10 @@ bre <- compress.relative(labs)
                            labels=labs, breaks=bre) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
-        ggtitle(paste (condition.title,
-                   "Relative RTs, 0SW") ) +
-  labs(fill="cycles") +
+ #       ggtitle(paste (condition.title,
+ #                  "Relative RTs, 0SW") ) +
+    labs(x="Task topdown control strength", y="Task input strength", fill="cycles") +
+#          labs(fill="cycles") +
   theme (legend.position="right")
 
 }
@@ -73,9 +75,10 @@ bre <- compress.relative(labs)
                            labels=labs, breaks=bre) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
-        ggtitle(paste (condition.title,
-                   "Relative RTs, 1SW") ) +
-  labs(fill="cycles") +
+ #       ggtitle(paste (condition.title,
+ #                  "Relative RTs, 1SW") ) +
+          labs(x="Task topdown control strength", y="Task input strength", fill="cycles") +
+#          labs(fill="cycles") +
   theme (legend.position="right")
 
 }
@@ -94,10 +97,11 @@ bre <- compress.relative(labs)
                            labels=labs, breaks=bre) +
       geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
-        ggtitle(paste (condition.title,
-                   "Relative RTs, 2SW") ) +
-  labs(fill="cycles") +
-  theme (legend.position="right")
+#        ggtitle(paste (condition.title,
+#                   "Relative RTs, 2SW") ) +
+#  labs(fill="cycles") +
+          labs(x="Task topdown control strength", y="Task input strength", fill="cycles") +
+              theme (legend.position="right")
 
 }
 
@@ -115,10 +119,11 @@ bre <- compress.relative(labs)
 
         geom_segment (aes(x=5, xend=20, y=3, yend=3)) + # task input str for B,C tasks
       geom_segment (aes(x=12, xend=12, y=1.5, yend=5.0)) + # TD ctrl str for B,C tasks
-        ggtitle(paste (condition.title,
-                   "Relative RTs, ALT") ) +
-  labs(fill="cycles") +
-  theme (legend.position="right")
+#        ggtitle(paste (condition.title,
+#                   "Relative RTs, ALT") ) +
+#  labs(fill="cycles") +
+    labs(x="Task topdown control strength", y="Task input strength", fill="cycles") +
+          theme (legend.position="right")
 
 }
 
