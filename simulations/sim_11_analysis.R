@@ -61,36 +61,8 @@ data$seq.1 <- factor(data$seq.1)
 #
 ######################### DEBUG STUFF ####################################
 
-# 0SW
-data.0SW <- subset (data, sequence_cond == "0SW")
-bargraph <- ggplot (subset(data.0SW, PATH.trial == 2), aes(x=seq.3, y=cycles, group=seq.1, fill=seq.1))
-bargraph +
-  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Task (trials 2 & 3)", y = "RT", group = "task (trial 1)") +
-  ggtitle("Simulation 4: 0SW only")
 
-
-
-# RTs for 1SW condition
-data.1SW <- subset (data, sequence_cond == "1SW")
-by (data.1SW$cycles, data.1SW$seq.3, stat.desc)
-
-bargraph <- ggplot (subset(data.1SW, PATH.trial == 2), aes(x=seq.3, y=cycles, group=seq.2, fill=seq.2))
-bargraph +
-  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
-  ggtitle("Simulation 4: 1SW only")
-
-#look at middle trial
-bargraph <- ggplot (subset(data.1SW, PATH.trial == 1), aes(x=seq.2, y=cycles, group=seq.1, fill=seq.1))
-bargraph +
-  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Task (trial 2)", y = "RT", group = "task (trial 1)") +
-  ggtitle("Simulation 4: 1SW only, middle trial")
-
+data$rsi <- paste (data$rsi_n1, ":", data$rsi_n)
 
 #================ RTs for 2SW condition
 data.2SW <- subset (data, sequence_cond == "2SW")
@@ -153,12 +125,8 @@ boxplot.task2 + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") + ggti
 
 
 # Plot graph for switches between tasks 0 and 1
-data.task01 <- subset (data, PATH.trial == 2 & (
-                               (seq.3 == 0 & (seq.2 == 0 | seq.2 == 1)) |
-                               (seq.3 == 1 & (seq.2 == 1 | seq.2 == 0)) )
-                       )
 
-linegraph <- ggplot (data.task01, aes(x=sequence_cond, y=cycles, group=seq.3, fill=seq.3))
+linegraph <- ggplot (data, aes(x=sequence_cond, y=cycles, group=rsi, fill=rsi))
 linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
@@ -166,6 +134,8 @@ linegraph +
   ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1")
 imageFile <- file.path(imageDirectory, "sim_6_0_tasks01.png") 
 ggsave(imageFile)
+
+
 
 
 
