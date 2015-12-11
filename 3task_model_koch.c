@@ -505,9 +505,10 @@ int three_task_model_koch_conflict_run (pdp_model * model,
     fprintf (simulation->datafile, "%s\t", path);
     printf ("trial: %s", path);
 
-    three_task_koch_conflict_set_trial_params_from_task_store (simulation->task_store, 
-							       iter, 
-							       simulation->model_params_htable);
+    // do this at model reinit
+    //    three_task_koch_conflict_set_trial_params_from_task_store (simulation->task_store, 
+    //							       iter, 
+    //							       simulation->model_params_htable);
 
     gtk_tree_model_get (GTK_TREE_MODEL(simulation->task_store), iter, 
 			COL_TASK_ID, &trial_id,
@@ -1304,85 +1305,101 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   double squashing_param, rsi_scale_param, conflict_squashing_param;
   hebbian_learning_persistence hebb_persist;
 
-  // zero cycle counter
-  model->cycle = 0;
+  GtkTreeIter *iter = g_malloc (sizeof(GtkTreeIter));
 
+  if (!gtk_tree_model_get_iter(GTK_TREE_MODEL(simulation->task_store), iter, simulation->current_trial_path)) {
 
-  input_0 = pdp_model_component_find (model, ID_INPUT_0)->layer;
-  input_1 = pdp_model_component_find (model, ID_INPUT_1)->layer;
-  input_2 = pdp_model_component_find (model, ID_INPUT_2)->layer;
-  output_0 = pdp_model_component_find (model, ID_OUTPUT_0)->layer;
-  output_1 = pdp_model_component_find (model, ID_OUTPUT_1)->layer;
-  output_2 = pdp_model_component_find (model, ID_OUTPUT_2)->layer;
-  taskdemand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
-  conflict = pdp_model_component_find (model, ID_CONFLICT)->layer;
-  conflict_input = pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
-  topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
-
-
-  /* Reset Weights */
-  // check to make sure this effectively zeroes weights...
-  if (init == BLOCK) {
-    hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, "hebb_persist");
-    printf ("three_task_model_koch_conflict_reinit retrieved Hebbian Persistence parameter, = %d\n", hebb_persist);
-    three_task_model_reset_weights(model, hebb_persist);
+    g_free (iter);
+    printf ("error! three_task_model_dummy_run  failed to acquire valid iter from current_trial_path,"
+	    "returning FALSE\n");
+    return -1;
   }
+  else{
 
-  // Get and squash TD activations
-  if (init == TRIAL) {
+  
+    // zero cycle counter
+    model->cycle = 0;
 
-    conflict_squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
+
+    input_0 = pdp_model_component_find (model, ID_INPUT_0)->layer;
+    input_1 = pdp_model_component_find (model, ID_INPUT_1)->layer;
+    input_2 = pdp_model_component_find (model, ID_INPUT_2)->layer;
+    output_0 = pdp_model_component_find (model, ID_OUTPUT_0)->layer;
+    output_1 = pdp_model_component_find (model, ID_OUTPUT_1)->layer;
+    output_2 = pdp_model_component_find (model, ID_OUTPUT_2)->layer;
+    taskdemand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+    conflict = pdp_model_component_find (model, ID_CONFLICT)->layer;
+    conflict_input = pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
+    topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
+
+
+    three_task_koch_conflict_set_trial_params_from_task_store (simulation->task_store, 
+							       iter, 
+							       simulation->model_params_htable);
+  
+    /* Reset Weights */
+    // check to make sure this effectively zeroes weights...
+    if (init == BLOCK) {
+      hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, "hebb_persist");
+      printf ("three_task_model_koch_conflict_reinit retrieved Hebbian Persistence parameter, = %d\n", hebb_persist);
+      three_task_model_reset_weights(model, hebb_persist);
+    }
+
+    // Get and squash TD activations
+    if (init == TRIAL) {
+      
+      conflict_squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
 							      "conflict_squashing_param");
-    squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
-						     "squashing_param");
-    rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
-						     "rsi_scale_param");
-    printf ("\nsquashing TD activations by (1 - %2.1f ) ^ %2.1f:\t", squashing_param, rsi_scale_param);
+      squashing_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
+						       "squashing_param");
+      rsi_scale_param = *(double *)g_hash_table_lookup(simulation->model_params_htable, 
+						       "rsi_scale_param");
+      printf ("\nsquashing TD activations by (1 - %2.1f ) ^ %2.1f:\t", squashing_param, rsi_scale_param);
     
-    for (i = 0; i < 3; i++) {
-      initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] *
-	pow(1-squashing_param, rsi_scale_param);
-      printf ("%4.2f -> %4.2f\t", taskdemand->units_latest->activations[i], initial_activation_taskdemand[i]);
-    }
-    printf ("\n");
+      for (i = 0; i < 3; i++) {
+	initial_activation_taskdemand[i] = taskdemand->units_latest->activations[i] *
+	  pow(1-squashing_param, rsi_scale_param);
+	printf ("%4.2f -> %4.2f\t", taskdemand->units_latest->activations[i], initial_activation_taskdemand[i]);
+      }
+      printf ("\n");
 
-    // Squash conflict activations
-    printf ("\nsquashing Conflict activations by (1 - %2.1f ) ^ %2.1f:\t", 
-	    conflict_squashing_param, rsi_scale_param);
+      // Squash conflict activations
+      printf ("\nsquashing Conflict activations by (1 - %2.1f ) ^ %2.1f:\t", 
+	      conflict_squashing_param, rsi_scale_param);
     
-    for (i = 0; i < 3; i++) {
-      initial_activation_conflict[i] = conflict->units_latest->activations[i] *
-	pow(1-conflict_squashing_param, rsi_scale_param);
-      printf ("%4.2f -> %4.2f\t", conflict->units_latest->activations[i], initial_activation_conflict[i]);
+      for (i = 0; i < 3; i++) {
+	initial_activation_conflict[i] = conflict->units_latest->activations[i] *
+	  pow(1-conflict_squashing_param, rsi_scale_param);
+	printf ("%4.2f -> %4.2f\t", conflict->units_latest->activations[i], initial_activation_conflict[i]);
+      }
+      printf ("\n");
     }
-    printf ("\n");
-  }
- 
-  pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
-  pdp_layer_set_activation_starting(conflict, 3, initial_activation_conflict);
+    
+    pdp_layer_set_activation_starting(taskdemand, 3, initial_activation_taskdemand);
+    pdp_layer_set_activation_starting(conflict, 3, initial_activation_conflict);
 
-  // clear & free history
+    // clear & free history
 
 
-  pdp_model_component * comp_i;
-  for (comp_i = model->components; comp_i != NULL; comp_i = comp_i->next) {
-    pdp_units_free (comp_i->layer->units_initial.next);
-    comp_i->layer->units_latest = &(comp_i->layer->units_initial);
-    comp_i->layer->units_initial.next = NULL;
-  }
+    pdp_model_component * comp_i;
+    for (comp_i = model->components; comp_i != NULL; comp_i = comp_i->next) {
+      pdp_units_free (comp_i->layer->units_initial.next);
+      comp_i->layer->units_latest = &(comp_i->layer->units_initial);
+      comp_i->layer->units_initial.next = NULL;
+    }
 
 
   /* set initial activation */
-  pdp_layer_set_activation(input_0, 2, initial_activation_in_0);
-  pdp_layer_set_activation(input_1, 2, initial_activation_in_1);
-  pdp_layer_set_activation(input_2, 2, initial_activation_in_2);
-  pdp_layer_set_activation(output_0, 2, initial_activation_out_0);
-  pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
-  pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
-  pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
-  pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
+    pdp_layer_set_activation(input_0, 2, initial_activation_in_0);
+    pdp_layer_set_activation(input_1, 2, initial_activation_in_1);
+    pdp_layer_set_activation(input_2, 2, initial_activation_in_2);
+    pdp_layer_set_activation(output_0, 2, initial_activation_out_0);
+    pdp_layer_set_activation(output_1, 2, initial_activation_out_1);
+    pdp_layer_set_activation(output_2, 2, initial_activation_out_2);
+    pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
+    pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
 
-
+  }
   return 0;
 }
 

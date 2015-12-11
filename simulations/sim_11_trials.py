@@ -7,8 +7,8 @@
 import random
 import sys, getopt # for parsing cmd line params
 
-filename_conf = "sim_7a_trials.conf"
-filename_lookup = "sim_7a_lookup.txt"
+filename_conf = "sim_11_trials.conf"
+filename_lookup = "sim_11_lookup.txt"
 num_blocks = 100 # number of times to run each sequence type
 trialid = 0
 
@@ -60,8 +60,8 @@ sequence_levels = [
 ]
 
 # for rotating round stimuli/tasks
-map_offset = [2, 1, 0]
-map_direction = [1, -1]
+map_offset = [0] # [2, 1, 0] 
+map_direction = [1] # [1, -1]
 
 rsi_levels_n1 = [ 1.0, 2.0 ] # short, long
 rsi_levels_n = [ 1.0, 2.0 ] # short, long
@@ -125,7 +125,7 @@ def write_lookup (task_sequence_condition, task_sequence, run_cong_sequence, tri
     f.write (str(task_sequence) + "\t")
     f.write (str(position) + "\t")
     f.write (str(run_cong_sequence) + "\t")
-    f.write (str(trial_cong))
+    f.write (str(trial_cong) + "\t")
     f.write (str(rsi_n1) + "\t")
     f.write (str(rsi_n) + "\t")
     f.write ("\n")
@@ -148,9 +148,9 @@ for run in run_congruency_levels:
             # trial 0
                             for trial in range (0, 3):
 
-                                if trial = 0:
+                                if trial == 0:
                                     rsi = 1.0
-                                elif trial = 1:
+                                elif trial == 1:
                                     rsi = rsi_n1
                                 else:
                                     rsi = rsi_n
@@ -166,14 +166,16 @@ for run in run_congruency_levels:
                                              stim_inputs[0],
                                              stim_inputs[1],
                                              stim_inputs[2],
-                                             "RsiS=0", "")
+                                             "RSIs=" + str(rsi), "")
 
                                 write_lookup (sequence[3], 
                                               '/'.join(str((x * direction + offset)%3) for x in sequence[0:3]),
                                               run[3], 
                                               trialid, 
                                               trial, 
-                                              stimulus_congruency[run[trial]][3])
+                                              stimulus_congruency[run[trial]][3],
+                                              rsi_n1,
+                                              rsi_n)
 
                                 trialid += 1
 
