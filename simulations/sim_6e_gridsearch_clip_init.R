@@ -8,7 +8,7 @@ setwd (path.simulation)
 
 
 
-filename.output.genetic.results <- "sim_6e_gridsearch_results_highnoise_clip.txt" # where to store results
+filename.output.genetic.results <- "sim_6e_gridsearch_results_highnoise_clip_varycarryover_75.txt" # where to store results
 
 
 blocksize <- 100
@@ -28,7 +28,7 @@ ACTIVATION_MIN -1.0
 RESPONSE_THRESHOLD 0.15 
 STEP_SIZE 0.0015 
 SQUASHING_PARAM 0.8 
-CONFLICT_SQUASHING_PARAM 0.5 
+CONFLICT_SQUASHING_PARAM 0.75 # 0.5 ####### NOTE CHANGED SQUASHING PARAM #########
 NOISE 0.006 # default .006
 HEBBIAN_LEARNING_PERSISTENCE 1 
 RSI_SCALE_PARAM 1.0 

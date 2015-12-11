@@ -11,7 +11,10 @@ library (ggplot2)
 # CLIP Low noise version 3
 #data.clip.lownoise.0 = read.delim("sim_6e_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
-data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+#data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+#data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip_varycarryover.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE) # 25
+#data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip_varycarryover_10.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+data.clip.highnoise.0 = read.delim("sim_6e_gridsearch_results_highnoise_clip_varycarryover_75.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
                                         # trim data to only 4 weight levels (for fitting on single grid row)
 #data.clip.highnoise.0 <- subset (data.clip.highnoise.0, (conflict.tdwt == 0 | conflict.tdwt == -10.714 | conflict.tdwt == -19.286 | conflict.tdwt == -27.857))
@@ -553,9 +556,16 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 }
 
+########## Carryover 0.75  #########
+plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="sim1_carryover75", save=TRUE)
 
-########## FOR COGSCI PAPER #########
-plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="n2rep_paper_sim1", save=TRUE)
+
+########## Carryover 0.25  #########
+plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="sim1_carryover25", save=TRUE)
+
+########## Carryover 0.10  #########
+plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="sim1_carryover10", save=TRUE)
+
 
 
 
