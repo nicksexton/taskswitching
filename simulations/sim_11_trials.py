@@ -63,8 +63,22 @@ sequence_levels = [
 map_offset = [0] # [2, 1, 0] 
 map_direction = [1] # [1, -1]
 
-rsi_levels_n1 = [ 1.0, 2.0 ] # short, long
-rsi_levels_n = [ 1.0, 2.0 ] # short, long
+# simulation 11.1
+#rsi_levels_n1 = [ 0.7, 1.5 ] # short, long
+#rsi_levels_n = [ 0.7, 1.5 ] # short, long
+
+# simulation 11.2
+#rsi_levels_n1 = [ 0.3, 0.6 ] # short, long
+#rsi_levels_n = [ 0.3, 0.6 ] # short, long
+
+# simulation 11.3
+#rsi_levels_n1 = [ 0.3, 1.5 ] # short, long
+#rsi_levels_n = [ 0.3, 1.5 ] # short, long
+
+rsi_levels_n1 = [ 1.2, 2.5 ] # short, long
+rsi_levels_n = [ 1.2, 2.5 ] # short, long
+
+
 
 
 def set_stimuli (congruency, cue, direction, offset):
