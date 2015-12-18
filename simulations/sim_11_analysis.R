@@ -149,7 +149,7 @@ data$rsi <- paste (data$rsi_n1, ":", data$rsi_n)
 data.trial3 <- subset (data, PATH.trial == 2)
 
 
-# Plot graph for switches between tasks 0 and 1
+# Plot graph for switches
 
 linegraph <- ggplot (data.trial3, aes(x=sequence_cond, y=cycles, group=rsi, colour=rsi))
 linegraph +
@@ -167,26 +167,36 @@ ggsave(imageFile)
 
 
 
+                                        # 3d lattice for surface, where x and y co-ordinages are rsi_n-1 and rsi_n respectively
+
+
+tab.2SW <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="2SW"), mean)
+# wireframe (cycles ~ rsi_n1*rsi_n, data = tab.2SW, xlab="rsi n-1", ylab="rsi n", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE)
+wireframe (cycles ~ rsi_n*rsi_n1, data = tab.2SW, xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+
+
+tab.ALT <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="ALT"), mean)
+wireframe (cycles ~ rsi_n*rsi_n1, data = tab.ALT, xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial ALT", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+
+tab.2SW$rsi <- paste (tab.2SW$rsi_n1, ":", tab.2SW$rsi_n)
+tab.ALT$rsi <- paste (tab.2SW$rsi_n1, ":", tab.ALT$rsi_n)
+
+tab.n2rc <- merge (tab.2SW, tab.ALT, by = "rsi")
+colnames(tab.n2rc) <- c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "blank", "blank1", "rt.ALT")
+tab.n2rc <- subset (tab.n2rc, select =c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "rt.ALT"))
+tab.n2rc$n2rc <- tab.n2rc$rt.ALT - tab.n2rc$rt.2SW
+wireframe (n2rc ~ rsi_n*rsi_n1, data = tab.n2rc, xlab="rsi n", ylab="rsi n-1", main = "n-2 repetition cost", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+
+
+cloud (cycles ~ rsi_n*rsi_n1, data = subset(data.trial3, sequence_cond=="2SW"), xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+
+
 
 
 ######################################### Stat Tests ######################################
 
 
-## ############## FOR ASYMMETRIC SWITCHING ##################
-
-
-############## 0 and 1 ##################
-
-# Switch cost - assessing whether switch costs are reversed
-# 2X2 ANOVA:
-# Factors: sequence_cond (levels: 0SW, 1SW only), seq.3 (levels: 0, 2)
-# Hypothesis:
-#    main effect of sequence cond (ie., switch cost)
-#    main effect of seq.3 (ie., different RTs for different tasks)
-#    seq.3 x sequence_cond interaction: signf. asymmetric switch cost
-
-
-# switch cost
+# Basic ANOVA
 
 #n2 repetition cost
 model.n2rc <- aov(cycles ~ sequence_cond +
@@ -196,21 +206,44 @@ model.n2rc <- aov(cycles ~ sequence_cond +
                   data = data.trial3)
 anova(model.n2rc)
 
-## # post-hoc test: is there a significant n-2 repetition cost in each condition
-## # task 0
-## model.task01.n2rc.0 <- t.test (cycles ~ sequence_cond,
-##                                data = subset (data.task01, seq.3 == 0),
-##                                sequence_cond == "2SW" | sequence_cond == "ALT")
-## model.task01.n2rc.0
-
-## # task 1
-## model.task01.n2rc.1 <- t.test (cycles ~ sequence_cond,
-##                                data = subset (data.task01, seq.3 == 1),
-##                                sequence_cond == "2SW" | sequence_cond == "ALT")
-## model.task01.n2rc.1
 
 
+                                        # Linear Regression
+model.2SW <- lm (cycles ~ rsi_n1 + rsi_n, data = subset(data.trial3, sequence_cond == "2SW"))
+coefficients (model.2SW)
+confint (model.2SW, level=0.95)
 
-## # Test for reversed switch cost asymmetry???
+model.ALT <- lm (cycles ~ rsi_n1 + rsi_n, data = subset(data.trial3, sequence_cond == "ALT"))
+coefficients (model.ALT)
+confint (model.ALT, level=0.95)
+
+
+x <- seq (-10, 10, 1)
+y <- seq (-10, 10, 1)
+
+
+                                        # ALT = -14.57(t1) - 0.14 (t2) + 112.56
+                                        # 2SW = -12.45(t1) + 0.14 (t2) + 105.32
+
+n1 <- matrix (seq(0,2,0.1), nrow=21, ncol=1)
+n <-  matrix (seq(0,2,0.1), nrow=1, ncol=21)
+
+
+
+                                        # Create matrix for 2SW
+graph.2SW.n <- matrix(rep(n,each=21),nrow=21) * 0.14
+graph.2SW.n1 <- matrix(rep(n1,each=21),ncol=21, byrow=TRUE) * -12.45
+graph.2SW <- 105.32 + graph.2SW.n + graph.2SW.n1
+
+
+                                        # Create matrix for ALT
+graph.ALT.n <- matrix(rep(n,each=21),nrow=21) * - 0.14
+graph.ALT.n1 <- matrix(rep(n1,each=21),ncol=21, byrow=TRUE) * -14.57
+graph.ALT <- 112.56 + graph.ALT.n + graph.ALT.n1
+
+
+# graph of n2 repetition costs
+persp (x=n1, y=n, z=(graph.ALT - graph.2SW), xlab="RSI n-1", ylab="RSI n", zlab="n-2 repetition cost")
+contour (x=n1, y=n, z=(graph.ALT - graph.2SW), xlab="RSI n-1", ylab="RSI n", zlab="n-2 repetition cost")
 
 

@@ -75,8 +75,8 @@ map_direction = [1] # [1, -1]
 #rsi_levels_n1 = [ 0.3, 1.5 ] # short, long
 #rsi_levels_n = [ 0.3, 1.5 ] # short, long
 
-rsi_levels_n1 = [ 1.2, 2.5 ] # short, long
-rsi_levels_n = [ 1.2, 2.5 ] # short, long
+rsi_levels_n1 = [ 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4 ] # 
+rsi_levels_n = [ 0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.1, 2.4 ] # 
 
 
 
