@@ -15,6 +15,7 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
            "response")
 
 
+data.raw <- read.delim("sim_11_data_8x8x1000.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 data.raw <- read.delim("sim_11_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
                                         # now split trial path into block and trial ID
@@ -47,7 +48,8 @@ data.raw <- block.is.correct (data.raw)
 
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "rsi_n1", "rsi_n", "blank")
-data.lookuptable = read.delim("sim_11_lookup.txt", header = FALSE, col.names=labels.lookup)
+data.lookuptable = read.delim("sim_11_lookup_8x8x1000.txt", header = FALSE, col.names=labels.lookup)
+#data.lookuptable = read.delim("sim_11_lookup.txt", header = FALSE, col.names=labels.lookup)
 data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "rsi_n1", "rsi_n", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct.block", "correct.trial"))
 
@@ -174,9 +176,15 @@ tab.2SW <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="
 # wireframe (cycles ~ rsi_n1*rsi_n, data = tab.2SW, xlab="rsi n-1", ylab="rsi n", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE)
 wireframe (cycles ~ rsi_n*rsi_n1, data = tab.2SW, xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
 
+dev.copy(png, "sim_11_2SW_1000.png")
+dev.off()
+
 
 tab.ALT <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="ALT"), mean)
 wireframe (cycles ~ rsi_n*rsi_n1, data = tab.ALT, xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial ALT", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+
+dev.copy(png, "sim_11_ALT_1000.png")
+dev.off()
 
 tab.2SW$rsi <- paste (tab.2SW$rsi_n1, ":", tab.2SW$rsi_n)
 tab.ALT$rsi <- paste (tab.2SW$rsi_n1, ":", tab.ALT$rsi_n)
@@ -186,6 +194,9 @@ colnames(tab.n2rc) <- c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "blank", "blank1", "
 tab.n2rc <- subset (tab.n2rc, select =c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "rt.ALT"))
 tab.n2rc$n2rc <- tab.n2rc$rt.ALT - tab.n2rc$rt.2SW
 wireframe (n2rc ~ rsi_n*rsi_n1, data = tab.n2rc, xlab="rsi n", ylab="rsi n-1", main = "n-2 repetition cost", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+
+dev.copy(png, "sim_11_n2rc_1000.png")
+dev.off()
 
 
 cloud (cycles ~ rsi_n*rsi_n1, data = subset(data.trial3, sequence_cond=="2SW"), xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
@@ -236,14 +247,22 @@ graph.2SW.n1 <- matrix(rep(n1,each=21),ncol=21, byrow=TRUE) * -12.45
 graph.2SW <- 105.32 + graph.2SW.n + graph.2SW.n1
 
 
+
+
                                         # Create matrix for ALT
-graph.ALT.n <- matrix(rep(n,each=21),nrow=21) * - 0.14
+graph.ALT.n <- matrix(rep(n,each=21),nrow=21) * 0.14
 graph.ALT.n1 <- matrix(rep(n1,each=21),ncol=21, byrow=TRUE) * -14.57
 graph.ALT <- 112.56 + graph.ALT.n + graph.ALT.n1
 
 
+
+
 # graph of n2 repetition costs
 persp (x=n1, y=n, z=(graph.ALT - graph.2SW), xlab="RSI n-1", ylab="RSI n", zlab="n-2 repetition cost")
+
+dev.copy(png, "n2rc_model.png")
+dev.off()
+
 contour (x=n1, y=n, z=(graph.ALT - graph.2SW), xlab="RSI n-1", ylab="RSI n", zlab="n-2 repetition cost")
 
 
