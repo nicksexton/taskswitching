@@ -91,7 +91,7 @@ linegraph +
   ggtitle("basic RT, Data from simulation 8, n2rep paper simulation 2")
 
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_rts_all.png")
-ggsave(filename=imageFile, width = 200, height = 250, units = "mm")
+ggsave(filename=imageFile, width = 400, height = 100, units = "mm")
 
 
 ############### OVERALL RTS ##############################
@@ -104,7 +104,7 @@ linegraph +
   ggtitle("aggregate RT, Data from simulation 8, n2rep paper simulation 2")
 
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_rts_aggregate.png") 
-ggsave(filename=imageFile, width = 200, height = 250, units = "mm")
+ggsave(filename=imageFile, width = 400, height = 100, units = "mm")
 
 
 ############### NO REPEATS ##############################
@@ -118,8 +118,8 @@ linegraph +
   labs (x = "Inhibitory Weight", y = "Cost", group = "DV") +
   ggtitle("aggregate RT, no repeats (2SW and ALT only) Data from simulation 8, n2rep paper simulation 2")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_rts_agregate_norepeats.png") 
-ggsave(filename=imageFile, width = 200, height = 250, units = "mm")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_rts_aggregate_norepeats.png") 
+ggsave(filename=imageFile, width = 400, height = 100, units = "mm")
 
 
 ################ DOUBLE REPEATS ##########################
@@ -134,4 +134,70 @@ linegraph +
   ggtitle("aggregate RT, double repeats (2SW and ALT only) Data from simulation 8, n2rep paper simulation 2")
 
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_rts_aggregate_doublerepeats.png") 
-ggsave(filename=imageFile, width = 200, height = 250, units = "mm")
+ggsave(filename=imageFile, width = 400, height = 100, units = "mm")
+
+
+####################### ANALYSIS OF ERRORS #####################
+
+# Filter for just symmetric switches
+err.sim13 <- subset (data.sim8, data.sim8$task.input.str == 3 & data.sim8$task.topdown.str == 12)
+err.sim13$error.sc <- err.sim13$err.3.1SW - err.sim13$err.3.0SW
+err.sim13$error.n2rc <- err.sim13$err.3.ALT - err.sim13$err.3.2SW
+
+
+# Err set for looking at sc and n2rc varying with confl-td weight
+err.sim13.sc <- subset (err.sim13, select=c("conflict.tdwt", "alternation", "error.sc"))
+names (err.sim13.sc) <- c("conflict.tdwt", "alternation", "cost")
+err.sim13.sc$dv <- rep("error sc", nrow(err.sim13.sc))
+err.sim13.n2rc <- subset (err.sim13, select=c("conflict.tdwt", "alternation", "error.n2rc"))
+names (err.sim13.n2rc) <- c("conflict.tdwt", "alternation", "cost")
+err.sim13.n2rc$dv <- rep("error n2rc", nrow(err.sim13.sc))
+err.sim13 <- rbind (err.sim13.sc, err.sim13.n2rc)
+
+
+# Now plot switch costs and n-2 rep costs
+linegraph <- ggplot (err.sim13, aes(x=conflict.tdwt, y=cost, group=dv, fill=dv))
+linegraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+#  stat_summary(fun.err = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Inhibitory Weight", y = "Cost", group = "DV") +
+  ggtitle("Err from simulation 8, n2rep paper simulation 2")
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_errors.png") 
+ggsave(imageFile)
+
+
+# Error rates per sequence
+# (Question - what else is happening when confl-td weight is altered? is there a general effect e.g. on response times?)
+
+err.sim13.rt <- subset (data.sim8, data.sim8$task.input.str == 3 & data.sim8$task.topdown.str == 12)
+#
+err.sim13.0SW <- subset (err.sim13.rt, select=c("conflict.tdwt", "alternation", "err.3.0SW"))
+names (err.sim13.0SW) <- c("conflict.tdwt", "alternation", "RT")
+err.sim13.0SW$dv <- rep("0SW", nrow(err.sim13.0SW))
+#
+err.sim13.1SW <- subset (err.sim13.rt, select=c("conflict.tdwt", "alternation", "err.3.1SW"))
+names (err.sim13.1SW) <- c("conflict.tdwt", "alternation", "RT")
+err.sim13.1SW$dv <- rep("1SW", nrow(err.sim13.1SW))
+#
+err.sim13.2SW <- subset (err.sim13.rt, select=c("conflict.tdwt", "alternation", "err.3.2SW"))
+names (err.sim13.2SW) <- c("conflict.tdwt", "alternation", "RT")
+err.sim13.2SW$dv <- rep("2SW", nrow(err.sim13.2SW))
+#
+err.sim13.ALT <- subset (err.sim13.rt, select=c("conflict.tdwt", "alternation", "err.3.ALT"))
+names (err.sim13.ALT) <- c("conflict.tdwt", "alternation", "RT")
+err.sim13.ALT$dv <- rep("ALT", nrow(err.sim13.ALT))
+#
+err.sim13.rt <- rbind (err.sim13.0SW, err.sim13.1SW, err.sim13.2SW, err.sim13.ALT)
+
+
+
+linegraph <- ggplot (err.sim13.rt, aes(x=conflict.tdwt, y=RT, group=dv, colour=dv))
+linegraph +
+  stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+#  stat_summary(fun.err = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Inhibitory Weight", y = "Cost (Error rate)", group = "DV") +
+  ggtitle("Error rates, data from simulation 8, n2rep paper simulation 2")
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13_err_all.png")
+ggsave(filename=imageFile, width = 400, height = 100, units = "mm")
