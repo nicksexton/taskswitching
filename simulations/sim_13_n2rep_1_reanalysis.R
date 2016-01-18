@@ -22,7 +22,7 @@ my.cols <- c("conflict.gain", "conflict.tdwt", "conflict.bias", "mean.0SW",
 # answer- this data file was created by the bugged (!) version of simulation1, use this instead:
 
 # CLIP Low noise version 3
-data.raw = read.delim("sim_6e_gridsearch_results_clip.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+data.raw = read.delim("sim_13_modelv1_gridsearch.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
 # Default settings: bias -10.0, gain 75.0
