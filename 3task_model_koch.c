@@ -628,7 +628,10 @@ int three_task_model_koch_conflict_run (pdp_model * model,
 
   // Print RT
   fprintf (simulation->datafile, "%d\t", model->cycle); 
-  fprintf (simulation->datafile, "%d", stopped - 1); // response
+  fprintf (simulation->datafile, "%d\t", stopped - 1); // response
+  // Simulation 14 - print conflict unit output
+  pdp_layer_fprintf_current_output (pdp_model_component_find (model, ID_CONFLICT)->layer,
+    simulation->datafile);
   fprintf (simulation->datafile, "\n");
 
   g_free (path);
