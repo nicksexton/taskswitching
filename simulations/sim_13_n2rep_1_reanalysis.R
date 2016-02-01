@@ -22,9 +22,9 @@ my.cols <- c("conflict.gain", "conflict.tdwt", "conflict.bias", "mean.0SW",
 # answer- this data file was created by the bugged (!) version of simulation1, use this instead:
 
 # block size 200 
-data.raw = read.delim("sim_13_modelv1_gridsearch.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+#data.raw = read.delim("sim_13_modelv1_gridsearch.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 # large version block size 500
-# data.raw = read.delim("sim_13_modelv1_gridsearch_500.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
+ data.raw = read.delim("sim_13_modelv1_gridsearch_500.txt", sep=c("\t"), strip.white=TRUE, header=TRUE, stringsAsFactors=FALSE)
 
 
 # Default settings: bias -10.0, gain 75.0
@@ -91,7 +91,7 @@ bargraph +
   labs (x = "Inhibitory Weight", y = "Cost", group = "DV") +
   ggtitle("Sim13b, default bias & gain, effect of TDWT on switch & n2rep costs")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varyweight_costs.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varyweight_costs_500.png")
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 
 
@@ -104,11 +104,12 @@ ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 linegraph <- ggplot (data.sim13b.comparerepetitions.gain77, aes(x=conflict.tdwt, y=RT, group=repetitions, colour=repetitions))
 linegraph +
   stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+#  geom_errorbar (aes(ymin = mean - 
   labs (x = "Inhibitory Weight", y = "RT", group = "repetitions") +
   ggtitle("RT for repetitions (1SW, 0SW) vs. nonrepetitions (2SW, ALT), gain 77 bias 9")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_rts_aggregate.png") 
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_rts_aggregate_500.png") 
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 
 ############## RT BY CONDITION (single gain value) #########
@@ -118,7 +119,7 @@ linegraph +
   labs (x = "Inhibitory Weight", y = "RT", group = "DV") +
   ggtitle("RTs individually by condition, gain 77 bias 9")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_rts_all.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_rts_all_500.png")
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 
 
@@ -193,7 +194,7 @@ linegraph +
   labs (x = "Gain", y = "RT", group = "repetitions") +
   ggtitle("RT for repetitions (1SW, 0SW) vs. nonrepetitions (2SW, ALT), weight -10.5, Bias -9")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varygain_aggregate.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varygain_aggregate_500.png")
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 
 
@@ -220,7 +221,7 @@ bargraph +
   labs (x = "Gain", y = "Cost", group = "DV") +
   ggtitle("Varying Gain, Bias -9, Weight -10.5")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varygain_costs.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varygain_costs_500.png")
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 
 ############## -------------- Vary bias on X asix ------------- ############
@@ -244,7 +245,7 @@ bargraph +
   labs (x = "Bias", y = "Cost", group = "DV") +
   ggtitle("Varying Bias, Gain 77 Weight -10.5")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varybias_costs.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varybias_costs_500.png")
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
 
 
@@ -258,5 +259,5 @@ linegraph +
   labs (x = "Gain", y = "RT", group = "repetitions") +
   ggtitle("RT for repetitions (1SW, 0SW) vs. nonrepetitions (2SW, ALT), weight -10.5, Gain 77")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varybias_aggregate.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_13", "sim_13b_defaults_varybias_aggregate_500.png")
 ggsave(filename=imageFile, width = 300, height = 300, units = "mm")
