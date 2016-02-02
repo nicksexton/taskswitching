@@ -3,6 +3,8 @@
 # ./sim_3_clean.sh
 rm sim_14_data.txt
 rm sim_14_log.txt
+rm sim_14_trials.conf
+rm sim_14_lookup.txt
 
 ./sim_14_trials.py -n 100 # use 100 for full simulation
 
