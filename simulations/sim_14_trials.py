@@ -60,8 +60,10 @@ sequence_levels = [
 ]
 
 # for rotating round stimuli/tasks
-map_offset = [2, 1, 0]
-map_direction = [1, -1]
+#map_offset = [2, 1, 0]
+#map_direction = [1, -1]
+map_offset = [0]
+map_direction = [1]
 
 
 def set_stimuli (congruency, cue, direction, offset):
