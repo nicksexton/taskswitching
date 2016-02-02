@@ -160,7 +160,7 @@ ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 
-desc.stats.rescale <- by(data.rescale$conflict.total, data.rescale$sequence, stat.desc)
+
 
 
 
@@ -171,20 +171,35 @@ desc.stats.rescale <- by(data.rescale$conflict.total, data.rescale$sequence, sta
 model <- aov(conflict.total ~ sequence,
                        data = subset (conflict.clip(exclude.outliers(data)), trial_pos == 2))
 anova(model)
+with (subset (conflict.clip(exclude.outliers(data)), trial_pos == 2), by(conflict.total, sequence, stat.desc))
 
 
 # Clip, include outliers
 model <- aov(conflict.total ~ sequence,
                        data = subset (conflict.clip(data), trial_pos == 2))
 anova(model)
+with (subset (conflict.clip(data), trial_pos == 2), by(conflict.total, sequence, stat.desc))
 
 
 # Rescale, exclude outliers
 model <- aov(conflict.total ~ sequence,
                        data = subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2))
 anova(model)
+with (subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2), by(conflict.total, sequence, stat.desc))
 
 # Rescale, include outliers
 model <- aov(conflict.total ~ sequence,
                        data = subset (conflict.rescale(data), trial_pos == 2))
 anova(model)
+with (subset (conflict.rescale(data), trial_pos == 2), by(conflict.total, sequence, stat.desc))
+
+
+
+bargraph <- ggplot (subset(conflict.clip(exclude.outliers(data)), trial_pos == 2),  aes(x=sequence, y=conflict.total, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "Total Conflict") +
+  ggtitle("Simulation 14: Total Conflict")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14_total_conflict_by_sequence.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
