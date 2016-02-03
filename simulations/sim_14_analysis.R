@@ -118,44 +118,66 @@ corr.annotation <- function(x,y, digits = 2) {
 }
 
 
+   # For simulation 14b, only look at conflict affecting task 0
+
 
 # Trial 3, outliers excluded, neg conflict clipped
 data.clip.trial3 <- subset (conflict.clip(exclude.outliers(data)), trial_pos == 2)
-scatter.clip.excl <- ggplot (data.clip.trial3, aes(conflict.total, cycles))
+scatter.clip.excl <- ggplot (data.clip.trial3, aes(conflict.0, cycles))
 scatter.clip.excl + geom_point(aes(colour=sequence)) +
     ggtitle ("neg conflict clipped, outliers excluded") +
-        geom_text (x=0.3, y=200, label=corr.annotation(data.clip.trial3$conflict.total, data.clip.trial3$cycles), parse=TRUE)
+        geom_text (x=0.3, y=200, label=corr.annotation(data.clip.trial3$conflict.0, data.clip.trial3$cycles), parse=TRUE)
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14_excl_clip.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_excl_clip.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 
 # Trial 3, outliers excluded, neg conflict rescaled
 data.rescale.trial3 <- subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2)
-scatter.rescale.excl <- ggplot (data.rescale.trial3, aes(conflict.total, cycles))
-scatter.rescale.excl + geom_point(aes(colour=sequence)) + ggtitle ("neg conflict rescaled, outliers excluded") +  geom_text (x=1.5, y=200, label=corr.annotation(data.rescale.trial3$conflict.total, data.rescale.trial3$cycles), parse=TRUE)
+scatter.rescale.excl <- ggplot (data.rescale.trial3, aes(conflict.0, cycles))
+scatter.rescale.excl + geom_point(aes(colour=sequence)) + ggtitle ("neg conflict rescaled, outliers excluded") +  geom_text (x=0.6, y=220, label=corr.annotation(data.rescale.trial3$conflict.0, data.rescale.trial3$cycles), parse=TRUE)
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14_excl_rescale.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_excl_rescale.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 # Trial 3, outliers included, neg conflict clipped
 data.clip.trial3 <- subset (conflict.clip(data), trial_pos == 2)
 scatter.clip.incl <- ggplot (data.clip.trial3,
-                             aes(conflict.total, cycles))
-scatter.clip.incl + geom_point(aes(colour=sequence)) + ggtitle ("neg conflict clipped, outliers included") +  geom_text (x=0.5, y=400, label=corr.annotation(data.rescale.trial3$conflict.total, data.rescale.trial3$cycles), parse=TRUE)
+                             aes(conflict.0, cycles))
+scatter.clip.incl + geom_point(aes(colour=sequence)) + ggtitle ("neg conflict clipped, outliers included") +  geom_text (x=0.3, y=400, label=corr.annotation(data.rescale.trial3$conflict.0, data.rescale.trial3$cycles), parse=TRUE)
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14_incl_clip.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_incl_clip.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 # Trial 3, outliers included, neg conflict rescaled
 data.rescale.trial3 <- subset (conflict.rescale(data), trial_pos == 2)
 scatter.rescale.incl <- ggplot (data.rescale.trial3,
-                                aes(conflict.total, cycles))
-scatter.rescale.incl + geom_point(aes(colour=sequence)) + ggtitle ("neg conflict rescaled, outliers included") +  geom_text (x=1.5, y=200, label=corr.annotation(data.rescale.trial3$conflict.total, data.rescale.trial3$cycles), parse=TRUE)
+                                aes(conflict.0, cycles))
+scatter.rescale.incl + geom_point(aes(colour=sequence)) + ggtitle ("neg conflict rescaled, outliers included") +  geom_text (x=0.6, y=200, label=corr.annotation(data.rescale.trial3$conflict.0, data.rescale.trial3$cycles), parse=TRUE)
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14_incl_rescale.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_incl_rescale.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+
+
+## Looking at repeating and non-repeating sequences separately
+# 
+data.rescale.by.rep <- subset (conflict.rescale(data),
+                               trial_pos == 2 )
+data.rescale.by.rep$rep <- rep("repeat", nrow(data.rescale.by.rep))
+data.rescale.by.rep$rep[data.rescale.by.rep$sequence=="2SW" |
+                        data.rescale.by.rep$sequence == "ALT"] <- "no_repeat"
+
+scatter.rescale.incl <- ggplot (data.rescale.by.rep,
+                                aes(conflict.0, cycles))
+scatter.rescale.incl + geom_point(aes(colour=sequence)) +
+    ggtitle ("neg conflict rescaled, outliers included") +
+        facet_grid(. ~ rep)
+
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_incl_rescale.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
@@ -167,39 +189,131 @@ ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
                                         # Is there an association between RT and conflict?
 
 
-# Clip, exclude outliers
-model <- aov(conflict.total ~ sequence,
-                       data = subset (conflict.clip(exclude.outliers(data)), trial_pos == 2))
-anova(model)
-with (subset (conflict.clip(exclude.outliers(data)), trial_pos == 2), by(conflict.total, sequence, stat.desc))
+## # Clip, exclude outliers
+## model <- aov(conflict.total~ sequence,
+##                        data = subset (conflict.clip(exclude.outliers(data)), trial_pos == 2))
+## anova(model)
+## with (subset (conflict.clip(exclude.outliers(data)), trial_pos == 2), by(conflict.0, sequence, stat.desc))
 
 
-# Clip, include outliers
-model <- aov(conflict.total ~ sequence,
-                       data = subset (conflict.clip(data), trial_pos == 2))
-anova(model)
-with (subset (conflict.clip(data), trial_pos == 2), by(conflict.total, sequence, stat.desc))
+## # Clip, include outliers
+## model <- aov(conflict.total ~ sequence,
+##                        data = subset (conflict.clip(data), trial_pos == 2))
+## anova(model)
+## with (subset (conflict.clip(data), trial_pos == 2), by(conflict.0, sequence, stat.desc))
 
 
-# Rescale, exclude outliers
-model <- aov(conflict.total ~ sequence,
-                       data = subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2))
-anova(model)
-with (subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2), by(conflict.total, sequence, stat.desc))
+## # Rescale, exclude outliers
+## model <- aov(conflict.total ~ sequence,
+##                        data = subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2))
+## anova(model)
+## with (subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2), by(conflict.0, sequence, stat.desc))
+
 
 # Rescale, include outliers
 model <- aov(conflict.total ~ sequence,
                        data = subset (conflict.rescale(data), trial_pos == 2))
 anova(model)
-with (subset (conflict.rescale(data), trial_pos == 2), by(conflict.total, sequence, stat.desc))
+with (subset (conflict.rescale(data), trial_pos == 2), by(conflict.0, sequence, stat.desc))
 
 
 
-bargraph <- ggplot (subset(conflict.clip(exclude.outliers(data)), trial_pos == 2),  aes(x=sequence, y=conflict.total, group=sequence, fill=sequence))
+bargraph <- ggplot (subset(conflict.rescale(exclude.outliers(data)), trial_pos == 2),  aes(x=sequence, y=conflict.total, group=sequence, fill=sequence))
 bargraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "Total Conflict") +
   ggtitle("Simulation 14: Total Conflict")
+
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14_total_conflict_by_sequence.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+
+
+
+###### FOR LAB NOTEBOOK - compare 3 graphs, conflict.0, conflict.1 and conflict.2
+
+# Trial 3, outliers included, neg conflict rescaled
+data.rescale.trial3 <- subset (conflict.rescale(data), trial_pos == 2)
+scatter.rescale.incl <- ggplot (data.rescale.trial3,
+                                aes(conflict.0, cycles))
+scatter.rescale.incl + geom_point(aes(colour=sequence)) + ggtitle ("AB conflict, (rescaled, outliers included)") +  geom_text (x=0.6, y=200, label=corr.annotation(data.rescale.trial3$conflict.0, data.rescale.trial3$cycles), parse=TRUE) + labs (x="Conflict 0", y = "trial 3 RT")
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_incl_rescale_conflict0.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+# Trial 3, outliers included, neg conflict rescaled
+data.rescale.trial3 <- subset (conflict.rescale(data), trial_pos == 2)
+scatter.rescale.incl <- ggplot (data.rescale.trial3,
+                                aes(conflict.1, cycles))
+scatter.rescale.incl + geom_point(aes(colour=sequence)) + ggtitle ("BC conflict (rescaled, outliers included)") +  geom_text (x=0.6, y=200, label=corr.annotation(data.rescale.trial3$conflict.0, data.rescale.trial3$cycles), parse=TRUE)+ labs (x="Conflict 1", y = "trial 3 RT")
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_incl_rescale_conflict1.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+# Trial 3, outliers included, neg conflict rescaled
+data.rescale.trial3 <- subset (conflict.rescale(data), trial_pos == 2)
+scatter.rescale.incl <- ggplot (data.rescale.trial3,
+                                aes(conflict.2, cycles))
+scatter.rescale.incl + geom_point(aes(colour=sequence)) + ggtitle ("CA conflict, (rescaled, outliers included)") +  geom_text (x=0.6, y=200, label=corr.annotation(data.rescale.trial3$conflict.0, data.rescale.trial3$cycles), parse=TRUE) + labs (x="Conflict 2", y = "trial 3 RT")
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_incl_rescale_conflict2.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+
+
+
+
+bargraph <- ggplot (subset(conflict.rescale(data), trial_pos == 2),  aes(x=sequence, y=conflict.0, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "Conflict 0") +
+  ggtitle("Simulation 14: AB Conflict")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_conflict0_bysequence.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+bargraph <- ggplot (subset(conflict.rescale(data), trial_pos == 2),  aes(x=sequence, y=conflict.1, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "Conflict 1") +
+  ggtitle("Simulation 14: BC Conflict")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_conflict1_bysequence.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+bargraph <- ggplot (subset(conflict.rescale(data), trial_pos == 2),  aes(x=sequence, y=conflict.2, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "Conflict 2") +
+  ggtitle("Simulation 14: CA Conflict")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_conflict2_bysequence.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+bargraph <- ggplot (subset(conflict.rescale(data), trial_pos == 2),  aes(x=sequence, y=conflict.total, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "Total Conflict") +
+  ggtitle("Simulation 14: Total Conflict")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_conflicttotal_bysequence.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+
+bargraph <- ggplot (subset(data, trial_pos == 2),  aes(x=sequence, y=cycles, group=sequence, fill=sequence))
+bargraph +
+  stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
+  labs (x = "Sequence", y = "cycles") +
+  ggtitle("Simulation 14: RT")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_14", "sim_14b_RT_bysequence.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+
+# Rescale, exclude outliers
+model <- aov(conflict.0 ~ sequence,
+                       data = subset (data, trial_pos == 2))
+anova(model)
+with (subset (conflict.rescale(exclude.outliers(data)), trial_pos == 2), by(conflict.0, sequence, stat.desc))
+
