@@ -13,17 +13,17 @@ setwd (path.simulation)
 
 # filename.output.genetic.results <- "sim_13_modelv1_gridsearch.txt" # where to store results
 # filename.output.genetic.results <- "sim_13_modelv1_gridsearch_500.txt" # where to store results
-filename.output.genetic.results <- "sim_13_modelv1_gridsearch_1500.txt" # where to store results
+filename.output.genetic.results <- "sim_13_modelv1_gridsearch_8x8pt1.txt" # where to store results
 
 blocksize <- 1500 # 500 # 200 # 100
-n <- 15  # 15 # resolution of grid to explore param space (ie total observations is n^ncols(min)
+n <- 8  # 15 # resolution of grid, reduce to 8x8 to save time and search two consecutive spaces 
 max.cycles <- 500
 
 # Bounds for gridsearch
-model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -21.0, conflict.bias = -42.0)
+model.conf.leaf.min <- c(conflict.gain = 0.0, conflict.tdwt = -7.0, conflict.bias = -42.0)
 model.conf.leaf.max <- c(conflict.gain = 98.0, conflict.tdwt = 0.0, conflict.bias = 0.0)
 
-path.ramdiskfolder <- "6f_errors_clip_0"
+path.ramdiskfolder <- "sim13_8x8v1"
 
 # define stem in init file
 model.conf.stem = (" 
