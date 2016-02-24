@@ -630,7 +630,7 @@ int three_task_model_koch_conflict_run (pdp_model * model,
   fprintf (simulation->datafile, "%d\t", model->cycle); 
   fprintf (simulation->datafile, "%d\t", stopped - 1); // response
   // Simulation 14 - print conflict unit output
-  pdp_layer_fprintf_current_output (pdp_model_component_find (model, ID_CONFLICT)->layer,
+  pdp_layer_fprintf_current_output (pdp_model_component_find (model, ID_CONFLICT_TOTAL)->layer,
     simulation->datafile);
   fprintf (simulation->datafile, "\n");
 
@@ -813,10 +813,23 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
     } 
     pdp_layer_set_activation (conflict_input, 3, conflict_input_values);
 
+    
+    // calculate cumulative conflict
+    pdp_layer * conflict_total = pdp_model_component_find (model, ID_CONFLICT_TOTAL)->layer;
+    pdp_layer_create_units (conflict_total); // append new units history 
+
+    double conflict_total_values[3] = {0.0, 0.0, 0.0};
+        int j;
+    for (j = 0; j < 3; j ++) {
+      conflict_total_values[j] = 
+	(conflict_input->units_latest->activations[j] +
+	 conflict_total->units_latest->previous->activations[j]) // td unit i
+
+    } 
+    pdp_layer_set_activation (conflict_total, 3, conflict_total_values);
 
 
-
-
+    
     // add noise to units 
     pdp_layer_add_noise_to_units (pdp_model_component_find (model, ID_OUTPUT_0)->layer, 
 				  NOISE, random_generator);
@@ -846,6 +859,8 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
 				    pdp_model_component_find (model, ID_CONFLICT)->layer);
     pdp_layer_print_current_output (
 				    pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer);
+    pdp_layer_print_current_output (
+				    pdp_model_component_find (model, ID_CONFLICT_TOTAL)->layer);
 
 #endif
 
@@ -880,7 +895,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
 
 
   pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control, 
-    *conflict, *conflict_input;
+    *conflict, *conflict_input, *conflict_total;
 
   printf ("in three_task_model_koch_conflict_build, building the koch conflict monitoring model\n");
 
@@ -921,6 +936,8 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
 
   conflict = pdp_layer_create(ID_CONFLICT, 3, 
 				     *(double *)g_hash_table_lookup(model_params, "bias_conflict"));
+    conflict_total = pdp_layer_create(ID_CONFLICT_TOTAL, 3, 
+				     *(double *)g_hash_table_lookup(model_params, "bias_none"));
 
 
   
@@ -934,6 +951,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
   double initial_activation_topdown_control[3] = {0.0, 0.0, 0.0};
   double initial_activation_conflict[3] = {0.0, 0.0, 0.0};
   double initial_activation_conflict_input[3] = {0.0, 0.0, 0.0};
+  double initial_activation_conflict_total[3] = {0.0, 0.0, 0.0};
 
   
   double topdown_control_strength_0 = *(double *)g_hash_table_lookup(model_params, 
@@ -957,6 +975,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
   pdp_layer_set_activation(topdown_control, 3, initial_activation_topdown_control);
   pdp_layer_set_activation(conflict, 3, initial_activation_conflict);
   pdp_layer_set_activation(conflict_input, 3, initial_activation_conflict_input);
+  pdp_layer_set_activation(conflict_total, 3, initial_activation_conflict_total);
 
 
   /* <------------------------------ NETWORK CONNECTIVITY --------------------------------> */
@@ -1287,7 +1306,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   // persist_taskdemand_activation sets proportion of TD activation to carry over to
   // next trial ie. .20 = 20% of activation on previous
 
-  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control, *conflict, *conflict_input;
+  pdp_layer *input_0, *input_1, *input_2, *output_0, *output_1, *output_2, *taskdemand, *topdown_control, *conflict, *conflict_input, *conflict_total;
 
 
 
@@ -1302,6 +1321,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   double initial_activation_taskdemand[3] = {0.0, 0.0, 0.0};
   double initial_activation_conflict[3] = {0.0, 0.0, 0.0};
   double initial_activation_conflict_input[3] = {0.0, 0.0, 0.0};
+  double initial_activation_conflict_total[3] = {0.0, 0.0, 0.0};
   int i;
   double squashing_param, rsi_scale_param, conflict_squashing_param;
   hebbian_learning_persistence hebb_persist;
@@ -1320,6 +1340,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
   conflict = pdp_model_component_find (model, ID_CONFLICT)->layer;
   conflict_input = pdp_model_component_find (model, ID_CONFLICT_INPUT)->layer;
   topdown_control = pdp_model_component_find (model, ID_TOPDOWNCONTROL)->layer;
+  conflict_total = pdp_model_component_find (model, ID_CONFLICT_TOTAL)->layer;
 
 
   /* Reset Weights */
