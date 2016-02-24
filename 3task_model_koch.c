@@ -1292,6 +1292,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
   pdp_model_component_push(model, topdown_control, ID_TOPDOWNCONTROL, FALSE);
   pdp_model_component_push(model, conflict, ID_CONFLICT, TRUE); 
   pdp_model_component_push(model, conflict_input, ID_CONFLICT_INPUT, FALSE); // do not update activation, do this manually
+  pdp_model_component_push(model, conflict_total, ID_CONFLICT_TOTAL, FALSE); // do not update activation, do this manually
 
   //debug
   printf ("basic 3 task model created! Limited connectivity, just for test\n");
