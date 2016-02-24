@@ -894,6 +894,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
   printf ("ID_TOPDOWNCONTROL = %d ", ID_TOPDOWNCONTROL);
   printf ("ID_CONFLICT = %d ", ID_CONFLICT );
   printf ("ID_CONFLICT_INPUT = %d ", ID_CONFLICT_INPUT);
+  printf ("ID_CONFLICT_TOTAL = %d ", ID_CONFLICT_TOTAL);
 
   input_0 = pdp_layer_create(ID_INPUT_0, 2, 
 				*(double *)g_hash_table_lookup(model_params, "bias_none"));

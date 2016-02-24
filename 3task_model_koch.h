@@ -16,6 +16,8 @@
 #define ID_TOPDOWNCONTROL 8
 #define ID_CONFLICT 9
 #define ID_CONFLICT_INPUT 10
+#define ID_CONFLICT_TOTAL 11 // accumulators for tracking cumulative conflict
+
 
 typedef enum {NO_CONFLICT, ALLOW, CLIP, RESCALE} conflict_negative_options; 
 /*  off = no conflict, 
