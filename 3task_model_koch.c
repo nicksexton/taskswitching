@@ -823,7 +823,7 @@ int three_task_model_koch_conflict_run_step (pdp_model * model,
     for (j = 0; j < 3; j ++) {
       conflict_total_values[j] = 
 	(conflict_input->units_latest->activations[j] +
-	 conflict_total->units_latest->previous->activations[j]) // td unit i
+	 conflict_total->units_latest->previous->activations[j]); // td unit i
 
     } 
     pdp_layer_set_activation (conflict_total, 3, conflict_total_values);
