@@ -22,7 +22,7 @@ ifile=''
 ofile=''
  
 # Read command line args
-myopts, args = getopt.getopt(sys.argv[1:],"n:")
+myopts, args = getopt.getopt(sys.argv[1:],"n:t:")
  
 ###############################
 # o == option
