@@ -125,11 +125,13 @@ def generate_trials (num_trials, allow_task_repeat):
 
     block_num = 0
     block_type = ["NRP", "REP"]
+    repeats = [0, 1]
 
-
+    
     for block in range (0, num_blocks):
         blockid = str(block) + "_" + block_type[allow_task_repeat] 
-    
+        repeat_id = repeats[allow_task_repeat]
+        
         for n in range (0, num_trials): # where n is the nth trial
             if (n == 0) or (n == 1):
                 switch = 'NA'
@@ -145,7 +147,7 @@ def generate_trials (num_trials, allow_task_repeat):
 
             
             write_trial (blockid,
-                         block*num_trials + n,
+                         repeat_id*num_blocks*num_trials_default + block*num_trials + n,
                          exp_cue_mapping[tasks[n]],
                          exp_stimuli_colour[stimuli[n][0]],
                          exp_stimuli_alphabet[stimuli[n][1]],
@@ -153,7 +155,7 @@ def generate_trials (num_trials, allow_task_repeat):
                          "",
                          "")
 
-            write_lookup (block*num_trials + n,
+            write_lookup (repeat_id*num_blocks*num_trials_default + block*num_trials + n,
                           switch,
                           "NA",
                           n,
