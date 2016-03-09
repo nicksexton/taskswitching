@@ -25,14 +25,14 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
-library(lsr) # for etaSquared
+# library(lsr) # for etaSquared
 
-imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_9")
+imageDirectory <- file.path(Sys.getenv("HOME"), "Dropbox", "PhD", "Thesis", "simulation_results", "simulation_16")
 
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
-           "response", "conflict.0", "conflict.1", "conflict.2")
+           "response", "conflict.0", "conflict.1", "conflict.2", "weightchange", "weight")
 
-data.raw <- read.delim("sim_15_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_16_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 
 
@@ -46,12 +46,12 @@ data.raw$correct.response <- with (data.raw, ifelse (cue == 0, stim_0,
 data.raw$correct <- with (data.raw, correct.response == response %% 2)
 
 # trim unwanted columns
-data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct", "correct.response", "conflict.0", "conflict.1", "conflict.2"))
+data = subset(data.raw, select = c("trialid", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct", "correct.response", "conflict.0", "conflict.1", "conflict.2", "weightchange", "weight"))
 
 
 # Join lookup table with simulated data
-labels.lookup = c("trialid", "sequence", "cue_sequence", "trial_pos", "congruency_seq", "congruency_trial")
- data.lookuptable = read.delim("sim_14_lookup.txt", header = FALSE, col.names=labels.lookup)
+labels.lookup = c("trialid", "sequence", "cue_sequence", "trial.pos", "reps.allowed", "congruency_trial")
+ data.lookuptable = read.delim("sim_16_lookup.txt", header = FALSE, col.names=labels.lookup)
 
 data <- merge(data.lookuptable, data, by="trialid", sort=FALSE)
 
@@ -77,8 +77,18 @@ return (data)
 ########################
 
 
-data.rescale <- data
-data.clip <- data
+#data.rescale <- data
+#data.clip <- data
+
+
+
+aggregate (data, list (seq = data$sequence, rep = data$reps.allowed), mean)
+
+data.100 <-  subset(data, (trial.pos >= 0 & trial.pos < 20))
+aggregate (data.100, list (seq = data.100$sequence, rep = data.100$reps.allowed), mean)
+
+data.900 <-  subset(data, (trial.pos >= 300 & trial.pos < 500))
+aggregate (data.900, list (seq = data.900$sequence, rep = data.900$reps.allowed), mean)
 
                                         # Filter negative conflict (replace with zero)
 

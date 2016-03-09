@@ -135,6 +135,10 @@ typedef struct pdp_model {
 
       /* subject data ie. inputs and outputs */
 
+  // For strategic adaptation variation
+  double last_trial_cum_conflict;
+  double last_trial_weight_change;
+  
 
 } pdp_model;
 

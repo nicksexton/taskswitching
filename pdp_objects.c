@@ -724,6 +724,10 @@ pdp_model * pdp_model_create (int id, char *model_name) {
   
   this_model->components = NULL;
   this_model->cycle = 0;
+
+  // for strategic adaptation  
+  this_model->last_trial_cum_conflict = 0.0;
+  this_model->last_trial_weight_change = 1.0; // weight_change is multiplier
   return (this_model);
   
 }

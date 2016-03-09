@@ -1,7 +1,7 @@
 // #define DEBUG_NETWORK_ACTIVATION
 // #define ECHO
 // #define ECHO_ACTIVATION
-
+#define STRATEGIC_ADAPTATION_RATE 0.02
 
 #include <stdio.h>
 #include <string.h>
@@ -469,6 +469,62 @@ GHashTable *model_params_ht){
 }
 
 
+int three_task_model_koch_strategic_adaptation (pdp_model * model) {
+
+  pdp_layer *task_demand, *conflict_total;
+  pdp_weights_matrix * weights_to_update;
+  double cum_conflict_this_trial, weights_scale; // value to multiply weights by
+  int i, j;
+
+  task_demand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+  conflict_total = pdp_model_component_find (model, ID_CONFLICT_TOTAL)->layer;
+  weights_to_update = pdp_input_find (task_demand, ID_CONFLICT)->input_weights;
+  
+  // first calculate cumulative conflict
+
+  cum_conflict_this_trial = 0;
+  for (j = 0; j < 3; j ++) {
+      cum_conflict_this_trial += 
+	 conflict_total->units_latest->activations[j]; 
+    } 
+
+  
+
+  if (cum_conflict_this_trial > model->last_trial_cum_conflict) {
+    // if cum conflict went up, do opposite to last time
+    if (model->last_trial_weight_change > 1.0) {
+      weights_scale = 1 - STRATEGIC_ADAPTATION_RATE;      
+    }
+    else {
+      weights_scale = 1 + STRATEGIC_ADAPTATION_RATE;      
+    }
+  } else {
+    // if cum conflict went down, do the same as last time
+    if (model->last_trial_weight_change > 1.0) {
+      weights_scale = 1 + STRATEGIC_ADAPTATION_RATE;      
+    }
+    else {
+      weights_scale = 1 - STRATEGIC_ADAPTATION_RATE;      
+    }
+  }
+  printf ("\nCum conflict %3.2f, last trial %3.2f, Weight scale %3.2f",
+    cum_conflict_this_trial, model->last_trial_cum_conflict, weights_scale); // debug
+
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      weights_to_update->weights[i][j] *= weights_scale;
+    }
+  }
+
+  
+  model->last_trial_cum_conflict = cum_conflict_this_trial;
+  model->last_trial_weight_change = weights_scale;
+
+  return 0;
+  
+}
+
+
 /* Mirrors three_task_model_dummy_run in 3task_model_gs.c */
 int three_task_model_koch_conflict_run (pdp_model * model,  
 					ThreeTaskSimulation * simulation) {
@@ -619,10 +675,15 @@ int three_task_model_koch_conflict_run (pdp_model * model,
   } while (stopped == false && model->cycle < MAX_CYCLES);
   
 
+  // associative weights
   three_task_model_update_weights(model,
 				  learning_rate,
 				  hebb_persist);
 
+  // strategic adaptation
+  three_task_model_koch_strategic_adaptation (model); 
+
+  
   // Print activation of output units
 
 
@@ -632,6 +693,9 @@ int three_task_model_koch_conflict_run (pdp_model * model,
   // Simulation 14 - print conflict unit output
   pdp_layer_fprintf_current_output (pdp_model_component_find (model, ID_CONFLICT_TOTAL)->layer,
     simulation->datafile);
+  fprintf (simulation->datafile, "%3.2f\t", model->last_trial_weight_change);
+  double current_weight = pdp_input_find (pdp_model_component_find (model, ID_TASKDEMAND)->layer, ID_CONFLICT)->input_weights->weights[0][0];
+  fprintf (simulation->datafile, "%4.2f\t", current_weight);
   fprintf (simulation->datafile, "\n");
 
   g_free (path);
@@ -898,6 +962,12 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
     *conflict, *conflict_input, *conflict_total;
 
   printf ("in three_task_model_koch_conflict_build, building the koch conflict monitoring model\n");
+
+
+// first initialise the strategic adaptation variables
+  model->last_trial_cum_conflict = 0;
+  model->last_trial_weight_change = 1.0;
+
 
   printf ("ID_INPUT_0 = %d ", ID_INPUT_0);
   printf ("ID_INPUT_1 = %d ", ID_INPUT_1);
@@ -1350,6 +1420,26 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
     hebb_persist = *(int *)g_hash_table_lookup(simulation->model_params_htable, "hebb_persist");
     printf ("three_task_model_koch_conflict_reinit retrieved Hebbian Persistence parameter, = %d\n", hebb_persist);
     three_task_model_reset_weights(model, hebb_persist);
+
+    // reinit the strategic adaptation variables
+    model->last_trial_cum_conflict = 0;
+    model->last_trial_weight_change = 1.0;
+
+    double conflict_taskdemand_wt = *(double *)g_hash_table_lookup(simulation->
+								   model_params_htable,
+								   "conflict_taskdemand_wt");
+    double wts_conflict_taskdemand_matrix[3][3] = {
+      { conflict_taskdemand_wt, 0.0, conflict_taskdemand_wt },
+      { conflict_taskdemand_wt, conflict_taskdemand_wt, 0.0 },
+      { 0.0, conflict_taskdemand_wt, conflict_taskdemand_wt },
+    };
+
+    pdp_layer *task_demand;
+    task_demand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
+    pdp_weights_set (pdp_input_find (task_demand, ID_CONFLICT)->input_weights, 
+		     3, 3, wts_conflict_taskdemand_matrix);
+
+    
   }
 
   // Get and squash TD activations

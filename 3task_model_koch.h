@@ -34,6 +34,7 @@ bool three_task_model_koch_conflict_parameter_import_ht (gchar* param_name,
 void three_task_koch_conflict_parameters_import_commit (FileData *config_file, 
 							GHashTable *model_params);
 
+int three_task_model_koch_strategic_adaptation (pdp_model * model);
 int three_task_model_koch_conflict_run (pdp_model * model, ThreeTaskSimulation * simulation);
 
 int three_task_koch_pdp_layer_cycle_inputs (pdp_layer * some_layer, conflict_negative_options conflict_negative);
