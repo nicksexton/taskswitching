@@ -83,19 +83,55 @@ return (data)
 
 
 
-epochs <- c(0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
+                                        # epochs <- c(0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
+epochs <- c(0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000)
+
 data$epoch <- .bincode (data$trial.pos, breaks = epochs, FALSE) 
 
 data.aggr <- aggregate (data, list (block = data$PATH.block, seq = data$sequence, epoch=data$epoch, rep=data$reps.allowed), mean)
 
 rt.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=cycles, group=seq, colour=seq))
 rt.by.epoch +
-  stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-#  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Epoch (100 trials)", y = "Cycles") +
-  ggtitle("Simulation 16: strategic adaptation model, RT by epoch")
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
+      facet_grid(. ~ rep) +
+      labs (x = "Epoch (100 trials)", y = "Cycles") +
+      ggtitle("Simulation 16: strategic adaptation model, RT by epoch") 
+
+weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=rep, colour=rep))
+weight.by.epoch +
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
+      labs (x = "Epoch (100 trials)", y = "Cycles") +
+      ggtitle("Simulation 16: strategic adaptation model, Weight by epoch") 
 
 
+data.w <- subset (data.aggr, select=c("block", "seq", "epoch", "rep", "cycles"))
+data.w <- reshape(data.w,
+                  timevar = "seq",
+                  idvar=c("block", "rep", "epoch"), 
+                  direction="wide")
+
+data.w$cost.switch <- data.w$cycles.1SW - data.w$cycles.0SW
+data.w$cost.n2rep <- data.w$cycles.ALT - data.w$cycles.2SW
+
+data.cost <- reshape (data.w,
+                      v.names="cycles",
+                      varying=c("cycles.2SW","cycles.ALT", "cycles.0SW", "cycles.1SW", "cost.switch", "cost.n2rep"),
+                      timevar="DV",
+                      times=c("cycles.2SW","cycles.ALT", "cycles.0SW", "cycles.1SW", "cost.switch", "cost.n2rep"),
+                      direction="long")
+
+cost.by.epoch <- ggplot (data.cost,  aes(x=epoch, y=cycles, group=DV, colour=DV))
+cost.by.epoch +
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
+      facet_grid(. ~ rep) +
+      labs (x = "Epoch (200 trials)", y = "Cycles") +
+      ggtitle("Simulation 16: strategic adaptation model, RT by epoch") 
 
 
 
