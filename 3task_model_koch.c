@@ -1,7 +1,7 @@
 // #define DEBUG_NETWORK_ACTIVATION
 // #define ECHO
 // #define ECHO_ACTIVATION
-#define STRATEGIC_ADAPTATION_RATE 0.02
+#define STRATEGIC_ADAPTATION_RATE 0.05
 
 #include <stdio.h>
 #include <string.h>
