@@ -143,6 +143,16 @@ weight.by.epoch +
       ggtitle("Simulation 16: strategic adaptation model, Weight by epoch") 
 
 
+conflict.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=(conflict.0 + conflict.1 + conflict.2), group=block, colour=block))
+conflict.by.epoch +
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+        stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) +
+            facet_grid(. ~ rep) +
+      labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Conflict") +
+      ggtitle("Simulation 16: strategic adaptation model, Weight by epoch") 
+
+
 scatter.excl <- ggplot (data, aes(conflict.0 + conflict.1 + conflict.2, cycles))
 scatter.excl + geom_point(aes(colour=sequence)) +
             facet_grid(. ~ reps.allowed) +
