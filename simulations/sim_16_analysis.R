@@ -78,34 +78,25 @@ return (data)
 ########################
 
 
-#data.rescale <- data
-#data.clip <- data
-
 
 
                                         # epochs <- c(0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
-epochs <- c(0, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000)
+n.trials <- max (data$trial.pos)
+epochs <- round(n.trials * c(0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+                             0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0), 0)
 
 data$epoch <- .bincode (data$trial.pos, breaks = epochs, FALSE) 
 
 data.aggr <- aggregate (data, list (block = data$PATH.block, seq = data$sequence, epoch=data$epoch, rep=data$reps.allowed), mean)
 
-rt.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=cycles, group=seq, colour=seq))
-rt.by.epoch +
-    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-    stat_summary(fun.y = mean, geom = "point") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
-      facet_grid(. ~ rep) +
-      labs (x = "Epoch (100 trials)", y = "Cycles") +
-      ggtitle("Simulation 16: strategic adaptation model, RT by epoch") 
-
-weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=rep, colour=rep))
-weight.by.epoch +
-    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-    stat_summary(fun.y = mean, geom = "point") +
-    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
-      labs (x = "Epoch (100 trials)", y = "Cycles") +
-      ggtitle("Simulation 16: strategic adaptation model, Weight by epoch") 
+## rt.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=cycles, group=seq, colour=seq))
+## rt.by.epoch +
+##     stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+##     stat_summary(fun.y = mean, geom = "point") +
+##   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
+##       facet_grid(. ~ rep) +
+##       labs (x = "Epoch (100 trials)", y = "Cycles") +
+##       ggtitle("Simulation 16: strategic adaptation model, RT by epoch") 
 
 
 data.w <- subset (data.aggr, select=c("block", "seq", "epoch", "rep", "cycles"))
@@ -130,8 +121,33 @@ cost.by.epoch +
     stat_summary(fun.y = mean, geom = "point") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
       facet_grid(. ~ rep) +
-      labs (x = "Epoch (200 trials)", y = "Cycles") +
+      labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
       ggtitle("Simulation 16: strategic adaptation model, RT by epoch") 
+
+weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=rep, colour=rep))
+weight.by.epoch +
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
+      labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
+      ggtitle("Simulation 16: strategic adaptation model, Weight by epoch") 
+
+
+weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=block, colour=block))
+weight.by.epoch +
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+        stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) +
+            facet_grid(. ~ rep) +
+      labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
+      ggtitle("Simulation 16: strategic adaptation model, Weight by epoch") 
+
+
+scatter.excl <- ggplot (data, aes(conflict.0 + conflict.1 + conflict.2, cycles))
+scatter.excl + geom_point(aes(colour=sequence)) +
+            facet_grid(. ~ reps.allowed) +
+                ggtitle ("RT vs. cumulative conflict") 
+
 
 
 
