@@ -159,6 +159,26 @@ scatter.excl + geom_point(aes(colour=sequence)) +
                 ggtitle ("RT vs. cumulative conflict") 
 
 
+### function for testing learning algorithm
+
+squashing.function <- function (x) {  (5/(1+exp(-0.5 * (x) - 1)) - 4) }
+
+weight.increment <- function (cum.conflict.last, cum.conflict.this, weight.change.last, learning.rate) {
+
+
+    magn.weight.change <- learning.rate * squashing.function (cum.conflict.this - cum.conflict.last)
+                                        # returns small positive if conflict goes up
+                                        # returns large negative if conflict goes down
+    if (weight.change.last > 0) {  weight.change <- magn.weight.change * -1 }
+    else {weight.change <- magn.weight.change}
+        
+    return (weight.change)
+
+}
+
+x <- seq (-10, 10, 0.2)
+y <- squashing.function (x)
+plot (x, y)
 
 
 ##                                         # Filter negative conflict (replace with zero)

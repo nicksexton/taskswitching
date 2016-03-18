@@ -2,7 +2,7 @@
 // #define ECHO
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
-#define STRATEGIC_ADAPTATION_RATE 0.0005
+#define STRATEGIC_ADAPTATION_RATE 0.2
 // difference in conflicts is in range 10 - 50
 
 #include <stdio.h>
@@ -587,6 +587,13 @@ GHashTable *model_params_ht){
 /* } */
 
 
+double squashing_function (double delta_conflict) {
+// asymmetric squashing function, so large decreases in conflict make big changes, but big increases make smaller changes
+
+return (4/(1+exp(-0.7*delta_conflict - 1))-3);
+
+}
+
 int three_task_model_koch_strategic_adaptation (pdp_model * model) {
 
   // simulation 16b version that adds on an increment that is scaled by the between-trial difference in conflict
@@ -594,7 +601,7 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
   
   pdp_layer *task_demand, *conflict_total;
   pdp_weights_matrix * weights_to_update;
-  double cum_conflict_this_trial, weights_increment; // value to multiply weights by
+  double cum_conflict_this_trial, mag_weight_change, weights_increment; // value to multiply weights by
   int i, j;
 
   task_demand = pdp_model_component_find (model, ID_TASKDEMAND)->layer;
@@ -610,34 +617,18 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
   }
 
   
+  mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
+  
+  if (model->last_trial_weight_change > 0.0) {
+    // c(n-1) - c(n) will be pos if conflict went down, so make another change in same direction
+    weights_increment = mag_weight_change * -1;
 
-  if (cum_conflict_this_trial > model->last_trial_cum_conflict) {
-    // if cum conflict went up, do opposite to last time
-    if (model->last_trial_weight_change > 0) {
-weights_increment = STRATEGIC_ADAPTATION_RATE * -1 * cum_conflict_this_trial;
-    }
-    else {
-weights_increment = STRATEGIC_ADAPTATION_RATE * cum_conflict_this_trial;
-    }
-  } else {
-    // if cum conflict went down, do the same as last time
-    if (model->last_trial_weight_change > 0) {
-weights_increment = STRATEGIC_ADAPTATION_RATE * cum_conflict_this_trial;
-    }
-    else {
-weights_increment = STRATEGIC_ADAPTATION_RATE * -1 * cum_conflict_this_trial;
-    }
   }
+  else if (model->last_trial_weight_change < 0.0) {
+    // c(n-1) - c(n) will be pos if conflict went down, so make change in opposite direction
+    weights_increment = mag_weight_change;
 
-  /* if (model->last_trial_weight_change > 0.0) { */
-  /*   // c(n-1) - c(n) will be pos if conflict went down, so make another change in same direction */
-  /*   weights_increment = (model->last_trial_cum_conflict - cum_conflict_this_trial) * STRATEGIC_ADAPTATION_RATE; */
-
-  /* } */
-  /* else if (model->last_trial_weight_change < 0.0) { */
-  /*   // c(n-1) - c(n) will be pos if conflict went down, so make change in opposite direction */
-  /*   weights_increment = (model->last_trial_cum_conflict - cum_conflict_this_trial) * STRATEGIC_ADAPTATION_RATE * -1; */
-  /* } */
+  }
 
   printf ("\nCum conflict %3.2f, last trial %3.2f, Weight scale %3.2f",
     cum_conflict_this_trial, model->last_trial_cum_conflict, weights_increment); // debug
