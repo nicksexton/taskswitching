@@ -590,7 +590,7 @@ GHashTable *model_params_ht){
 double squashing_function (double delta_conflict) {
 // asymmetric squashing function, so large decreases in conflict make big changes, but big increases make smaller changes
 
-return (4/(1+exp(-0.7*delta_conflict - 1))-3);
+return (4/(1+exp(-1*delta_conflict - 1))-3);
 
 }
 
