@@ -3,6 +3,7 @@
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
 #define STRATEGIC_ADAPTATION_RATE 0.03
+#define STRATEGIC_ADAPTATION_MOMENTUM 0.5
 // difference in conflicts is in range 10 - 50
 
 #include <stdio.h>
@@ -631,12 +632,12 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
   
   if (model->last_trial_weight_change > 0.0) {
     // c(n-1) - c(n) will be pos if conflict went down, so make another change in same direction
-    weights_increment = mag_weight_change * -1;
+    weights_increment = STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change + mag_weight_change * -1;
 
   }
   else if (model->last_trial_weight_change < 0.0) {
     // c(n-1) - c(n) will be pos if conflict went down, so make change in opposite direction
-    weights_increment = mag_weight_change;
+    weights_increment = STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change + mag_weight_change;
 
   }
 
