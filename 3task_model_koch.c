@@ -2,7 +2,7 @@
 // #define ECHO
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
-#define STRATEGIC_ADAPTATION_RATE 0.2
+#define STRATEGIC_ADAPTATION_RATE 0.03
 // difference in conflicts is in range 10 - 50
 
 #include <stdio.h>
@@ -590,7 +590,8 @@ GHashTable *model_params_ht){
 double squashing_function (double delta_conflict) {
 // asymmetric squashing function, so large decreases in conflict make big changes, but big increases make smaller changes
 
-return (4/(1+exp(-1*delta_conflict - 1))-3);
+// return (4/(1+exp(-1*delta_conflict - 1))-3);
+return (4/(1+exp(-1*delta_conflict - 2.5))-3.7); // sim 16e, really asymmetric with only small response to increase in conflict
 
 }
 
@@ -616,8 +617,17 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
 	 conflict_total->units_latest->activations[j];
   }
 
-  
-  mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
+
+  // sigmoid function
+  //  mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
+
+  // try for simulation 16e - don't do anything if conflict goes up
+
+  //  if (cum_conflict_this_trial - model->last_trial_cum_conflict > 0)
+  //    mag_weight_change = 0.0;
+  // else
+    mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
+
   
   if (model->last_trial_weight_change > 0.0) {
     // c(n-1) - c(n) will be pos if conflict went down, so make another change in same direction
@@ -630,15 +640,15 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
 
   }
 
-  printf ("\nCum conflict %3.2f, last trial %3.2f, Weight scale %3.2f",
+  printf ("\nCum conflict %3.2f, last trial %3.2f, Weight increment %5.4f",
     cum_conflict_this_trial, model->last_trial_cum_conflict, weights_increment); // debug
 
   for (i = 0; i < 3; i++) {
     for (j = 0; j < 3; j++) {
-      if (weights_to_update->weights[i][j] < 0.0) {
+      if (weights_to_update->weights[i][j] <= -0.1) {
 	// don't reduce weights to zero, make them a tiny bit bigger
-	if (weights_to_update->weights[i][j] + weights_increment > 0.000000001)
-	  weights_to_update->weights[i][j] = -0.000000001;
+	if ((weights_to_update->weights[i][j] + weights_increment) > -0.1)
+	  weights_to_update->weights[i][j] = -0.1;
 	else
 	  weights_to_update->weights[i][j] += weights_increment;
       }
