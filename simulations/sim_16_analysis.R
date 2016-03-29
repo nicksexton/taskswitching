@@ -82,8 +82,11 @@ return (data)
 
                                         # epochs <- c(0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000)
 n.trials <- max (data$trial.pos)
-epochs <- round(n.trials * c(0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
-                             0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0), 0)
+#epochs <- round(n.trials * c(0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5,
+#                             0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0), 0)
+
+epochs <- round(n.trials * c(0.1, 0.2, 0.3, 0.4, 0.5,
+                             0.6, 0.7, 0.8, 0.9, 1.0), 0)
 
 data$epoch <- .bincode (data$trial.pos, breaks = epochs, FALSE) 
 
@@ -126,7 +129,6 @@ cost.by.epoch +
 
 ## imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16e_cost_by_epoch.png")
 ##  ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
-
 
 
 weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=rep, colour=rep))
