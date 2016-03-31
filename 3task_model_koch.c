@@ -2,8 +2,8 @@
 // #define ECHO
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
-#define STRATEGIC_ADAPTATION_RATE 0.008
-#define STRATEGIC_ADAPTATION_MOMENTUM 0.5
+#define STRATEGIC_ADAPTATION_RATE 0.0025 // 0.01
+#define STRATEGIC_ADAPTATION_MOMENTUM 0.95
 // difference in conflicts is in range 10 - 50
 
 #include <stdio.h>
@@ -588,13 +588,13 @@ GHashTable *model_params_ht){
 /* } */
 
 
-double squashing_function (double delta_conflict) {
+//double squashing_function (double delta_conflict) {
 // asymmetric squashing function, so large decreases in conflict make big changes, but big increases make smaller changes
 
 // return (4/(1+exp(-1*delta_conflict - 1))-3);
-return (4/(1+exp(-1*delta_conflict - 2.5))-3.7); // sim 16e, really asymmetric with only small response to increase in conflict
+//return (4/(1+exp(-1*delta_conflict - 2.5))-3.7); // sim 16e, really asymmetric with only small response to increase in conflict
 
-}
+//}
 
 int three_task_model_koch_strategic_adaptation (pdp_model * model) {
 
@@ -619,28 +619,36 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
   }
 
 
-  // sigmoid function
-  //  mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
 
-  // try for simulation 16e - don't do anything if conflict goes up
-
-  //  if (cum_conflict_this_trial - model->last_trial_cum_conflict > 0)
-  //    mag_weight_change = 0.0;
-  // else
-    mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
+  //    mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
 
   
+  //  if (model->last_trial_weight_change > 0.0) {
+    // c(n-1) - c(n) will be pos if conflict went down, so make another change in same direction
+    //weights_increment = (STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change) + (mag_weight_change * -1);
+
+  //  }
+  //  else if (model->last_trial_weight_change < 0.0) {
+    // c(n-1) - c(n) will be pos if conflict went down, so make change in opposite direction
+  //    weights_increment = (STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change) + mag_weight_change;
+
+  //  }
+
+
   if (model->last_trial_weight_change > 0.0) {
     // c(n-1) - c(n) will be pos if conflict went down, so make another change in same direction
-    weights_increment = (STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change) + (mag_weight_change * -1);
+    weights_increment = (STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change) +
+      (model->last_trial_cum_conflict - cum_conflict_this_trial) * STRATEGIC_ADAPTATION_RATE;
 
   }
   else if (model->last_trial_weight_change < 0.0) {
     // c(n-1) - c(n) will be pos if conflict went down, so make change in opposite direction
-    weights_increment = (STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change) + mag_weight_change;
-
+    weights_increment =  (STRATEGIC_ADAPTATION_MOMENTUM * model->last_trial_weight_change) +
+      (model->last_trial_cum_conflict - cum_conflict_this_trial) * STRATEGIC_ADAPTATION_RATE * -1;
   }
+    
 
+  
   printf ("\nCum conflict %3.2f, last trial %3.2f, Weight increment %5.4f",
     cum_conflict_this_trial, model->last_trial_cum_conflict, weights_increment); // debug
 
