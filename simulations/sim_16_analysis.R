@@ -88,7 +88,8 @@ n.trials <- max (data$trial.pos)
 epochs <- round(n.trials * c(0.1, 0.2, 0.3, 0.4, 0.5,
                              0.6, 0.7, 0.8, 0.9, 1.0), 0)
 
-data$epoch <- .bincode (data$trial.pos, breaks = epochs, FALSE) 
+                                        #data$epoch <- .bincode (data$trial.pos, breaks = epochs, right=FALSE)
+data$epoch <- .bincode (data$trial.pos, breaks = epochs, right=FALSE) 
 
 data.aggr <- aggregate (data, list (block = data$PATH.block, seq = data$sequence, epoch=data$epoch, rep=data$reps.allowed), mean)
 
@@ -111,24 +112,15 @@ data.w <- reshape(data.w,
 data.w$cost.switch <- data.w$cycles.1SW - data.w$cycles.0SW
 data.w$cost.n2rep <- data.w$cycles.ALT - data.w$cycles.2SW
 
+# temp!
+#data.w <- subset (data.w, data.w$epoch <= 4000) 
+
 data.cost <- reshape (data.w,
                       v.names="cycles",
                       varying=c("cycles.2SW","cycles.ALT", "cycles.0SW", "cycles.1SW", "cost.switch", "cost.n2rep"),
                       timevar="DV",
                       times=c("cycles.2SW","cycles.ALT", "cycles.0SW", "cycles.1SW", "cost.switch", "cost.n2rep"),
                       direction="long")
-
-cost.by.epoch <- ggplot (data.cost,  aes(x=epoch, y=cycles, group=DV, colour=DV))
-cost.by.epoch +
-    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-    stat_summary(fun.y = mean, geom = "point") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
-      facet_grid(. ~ rep) +
-      labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
-      ggtitle("Simulation 16g: strategic adaptation model, RT by epoch") 
-
-#imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16g_cost_by_epoch.png")
-# ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=rep, colour=rep))
@@ -137,10 +129,10 @@ weight.by.epoch +
     stat_summary(fun.y = mean, geom = "point") +
     stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Weight") +
-      ggtitle("Simulation 16g: strategic adaptation model, Weight by epoch") 
+      ggtitle("Simulation 16h9: strategic adaptation model, Weight by epoch") 
 
-#imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16g_weight_by_epoch.png")
-# ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16h9_weight_by_epoch.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 weight.by.epoch <- ggplot (data.aggr,  aes(x=epoch, y=weight, group=block, colour=block))
@@ -150,10 +142,22 @@ weight.by.epoch +
         stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) +
             facet_grid(. ~ rep) +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
-          ggtitle("Simulation 16: strategic adaptation model, Weight by epoch")
+          ggtitle("Simulation 16h9: strategic adaptation model, Weight by epoch")
 
-#imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16g_weight_by_epoch_individual.png")
-# ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16h9_weight_by_epoch_individual.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+
+cost.by.epoch <- ggplot (data.cost,  aes(x=epoch, y=cycles, group=DV, colour=DV))
+cost.by.epoch +
+    stat_summary(fun.y = mean, geom = "line", position = "dodge") +
+    stat_summary(fun.y = mean, geom = "point") +
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) + 
+      facet_grid(. ~ rep) +
+      labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
+      ggtitle("Simulation 16h9: strategic adaptation model, RT by epoch") 
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16h9_cost_by_epoch.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 
@@ -164,10 +168,10 @@ conflict.by.epoch +
         stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) +
             facet_grid(. ~ rep) +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Conflict") +
-          ggtitle("Simulation 16: strategic adaptation model, Conflict by epoch")
+          ggtitle("Simulation 16h9: strategic adaptation model, Conflict by epoch")
 
-#imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16g_conflict_by_epoch.png")
-# ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16h9_conflict_by_epoch.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 
@@ -178,10 +182,10 @@ conflict.by.epoch +
         stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.2), width = 0.2) +
             facet_grid(. ~ rep) +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Conflict") +
-          ggtitle("Simulation 16: strategic adaptation model, Conflict by epoch")
+          ggtitle("Simulation 16h9: strategic adaptation model, Conflict by epoch")
 
-#imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16g_conflict_by_epoch_individual.png")
-# ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_16", "sim_16h9_conflict_by_epoch_individual.png")
+ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
 

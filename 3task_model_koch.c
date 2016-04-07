@@ -2,9 +2,11 @@
 // #define ECHO
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
-#define STRATEGIC_ADAPTATION_RATE 0.0025 // 0.01
-#define STRATEGIC_ADAPTATION_MOMENTUM 0.95
+#define STRATEGIC_ADAPTATION_RATE 0.00040 // 0.00035 
+#define STRATEGIC_ADAPTATION_MOMENTUM 0.95 // 0.80 // for simulation 16h, initially
+#define PREV_CONFLICT_WEIGHTING_FACTOR  0.80 // 0.80 // 0 - 1, higher values mean previous 'trial' conflict changes slower
 // difference in conflicts is in range 10 - 50
+// for simulation 16h, difference in conflicts is more like 0 - 10
 
 #include <stdio.h>
 #include <string.h>
@@ -618,7 +620,8 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
 	 conflict_total->units_latest->activations[j];
   }
 
-
+  // fix for first trial
+  if (model->last_trial_cum_conflict == 0) model->last_trial_cum_conflict = cum_conflict_this_trial;
 
   //    mag_weight_change = STRATEGIC_ADAPTATION_RATE * squashing_function (cum_conflict_this_trial - model->last_trial_cum_conflict);  
 
@@ -649,9 +652,11 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
     
 
   
-  printf ("\nCum conflict %3.2f, last trial %3.2f, Weight increment %5.4f",
-    cum_conflict_this_trial, model->last_trial_cum_conflict, weights_increment); // debug
+  printf ("\nLast wt change %5.4f, Cum conflict last trial %3.2f, this trial %3.2f, Weight increment %5.4f",
+    model->last_trial_weight_change, model->last_trial_cum_conflict, cum_conflict_this_trial, weights_increment); // debug
 
+  printf ("weights: ");
+  
   for (i = 0; i < 3; i++) {
     for (j = 0; j < 3; j++) {
       if (weights_to_update->weights[i][j] <= -0.1) {
@@ -660,12 +665,17 @@ int three_task_model_koch_strategic_adaptation (pdp_model * model) {
 	  weights_to_update->weights[i][j] = -0.1;
 	else
 	  weights_to_update->weights[i][j] += weights_increment;
+	printf("%5.3f", weights_to_update->weights[i][j]);
       }
     }
   }
-
+  printf ("\n");
   
-  model->last_trial_cum_conflict = cum_conflict_this_trial;
+  //  model->last_trial_cum_conflict = cum_conflict_this_trial;
+  // use weighted average for simulation 16h
+  model->last_trial_cum_conflict =
+    ((model->last_trial_cum_conflict * PREV_CONFLICT_WEIGHTING_FACTOR) +
+     (cum_conflict_this_trial * (1 - PREV_CONFLICT_WEIGHTING_FACTOR)));
   model->last_trial_weight_change = weights_increment;
 
   return 0;
@@ -1117,7 +1127,7 @@ int three_task_model_koch_conflict_build (pdp_model * model, GHashTable * model_
 
 // first initialise the strategic adaptation variables
   model->last_trial_cum_conflict = 0;
-  model->last_trial_weight_change = 1.0;
+  model->last_trial_weight_change = 0.000001;
 
 
   printf ("ID_INPUT_0 = %d ", ID_INPUT_0);
@@ -1574,7 +1584,7 @@ int three_task_model_koch_conflict_reinit (pdp_model * model, init_type init, Th
 
     // reinit the strategic adaptation variables
     model->last_trial_cum_conflict = 0;
-    model->last_trial_weight_change = 1.0;
+    model->last_trial_weight_change = 0.00000001;
 
     double conflict_taskdemand_wt = *(double *)g_hash_table_lookup(simulation->
 								   model_params_htable,
