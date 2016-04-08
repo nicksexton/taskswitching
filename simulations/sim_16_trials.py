@@ -33,6 +33,8 @@ for o, a in myopts:
         num_blocks = int(a)
     elif o == '-t':
         num_trials_default = int(a)
+    elif o == '-p':
+        prob_repeat = float(a)
     else:
         print("Usage: %s -n [number of blocks] -t [number of trials per block]" % sys.argv[0])
  
@@ -88,7 +90,12 @@ def generate_trials (num_trials, allow_task_repeat):
     if allow_task_repeat:
         # now randomly generate the rest of trials (no repeats)
         for trial in range (1, num_trials):
-            tasks.append ((tasks[trial-1] + random.randint(0,2)) % 3) # randomly generate 2nd trial 
+
+            # first, is trial a repeat?
+            if random.uniform(0,1) < prob_repeat:
+                tasks.append (tasks[trial-1]) # randomly generate 2nd trial 
+            else:
+                tasks.append ((tasks[trial-1] + random.randint(1,2)) % 3) # randomly generate 2nd trial 
     else:
         for trial in range (1, num_trials):
             tasks.append ((tasks[trial-1] + random.randint(1,2)) % 3) # randomly generate 2nd trial         
