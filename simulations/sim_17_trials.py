@@ -86,51 +86,6 @@ def generate_trials (num_trials, allow_task_repeat):
 
     # first create task vector
 
-    tasks = [random.randint(0,2)] # randomly generate first trial
-
-    if allow_task_repeat:
-        # now randomly generate the rest of trials (no repeats)
-        for trial in range (1, num_trials):
-
-            # first, is trial a repeat?
-            if random.uniform(0,1) < prob_repeat:
-                tasks.append (tasks[trial-1]) # randomly generate 2nd trial
-#                print ("%d" % tasks[trial])
-            else:
-                tasks.append ((tasks[trial-1] + random.randint(1,2)) % 3) # randomly generate 2nd trial
-#                print("%d" % tasks[trial])
-    else:
-        for trial in range (1, num_trials):
-            tasks.append ((tasks[trial-1] + random.randint(1,2)) % 3) # randomly generate 2nd trial         
-#            print ("%d" % tasks[trial])
-            
-
-# now create array of stimuli dimensions
-
-    stimuli = [[-1, -1, -1]] # init the list
-    target = [random.randint(0,1)] # randomly generate target stim
-  #  stim_direction = distractor_direction[random.randint (0, 1)] # which way round to apply the stimuli in
-    stimuli[0][tasks[0]] = exp_response_code[target[0]] # randomly generate target stim
-    for stim_dim in range (1, 3): # generate the distractor stimuli for this trial
-        stimuli[0][(tasks[0]+stim_dim) % 3] = \
-            exp_response_code[(target[0]+stim_dim % 2)]
-
-    
-    for trialid in range (1, num_trials):
-        stimuli.append ([-1, -1, -1])
-
-        # randomly generate index of target stim by rotating the previous target
-        target.append ((target[trialid-1] + random.randint(1,2)) % 3)
-#        stim_direction = random.randint (0, 1) # which way round to apply distractor stimuli 
-
-        # randomly generate target stim
-        stimuli[trialid][tasks[trialid]] = exp_response_code[target[trialid]] 
-
-        # generate distractor stimuli
-#        stim_direction = distractor_direction[random.randint (0, 1)] # which way round to apply the stimuli in
-        for stim_dim in range (1, 3): # generate the distractor stimuli for this trial
-            stimuli[trialid][(tasks[trialid]+stim_dim) % 3] = \
-                exp_response_code[(target[trialid]+stim_dim) % 3]
 
 # finally, write to the files
 
@@ -142,24 +97,66 @@ def generate_trials (num_trials, allow_task_repeat):
     for block in range (0, num_blocks):
         blockid = str(block) + "_" + block_type[allow_task_repeat] 
         repeat_id = repeats[allow_task_repeat]
+
+        tasks = [random.randint(0,2)] # randomly generate first trial
+
+        if allow_task_repeat:
+            # now randomly generate the rest of trials (no repeats)
+            for trial in range (1, num_trials):
+
+                # first, is trial a repeat?
+                if random.uniform(0,1) < prob_repeat:
+                    tasks.append (tasks[trial-1]) # randomly generate 2nd trial
+#                print ("%d" % tasks[trial])
+                else:
+                    tasks.append ((tasks[trial-1] + random.randint(1,2)) % 3) # randomly generate 2nd trial
+#                print("%d" % tasks[trial])
+        else:
+            for trial in range (1, num_trials):
+                tasks.append ((tasks[trial-1] + random.randint(1,2)) % 3) # randomly generate 2nd trial         
+
+            
+        stimuli = [[-1, -1, -1]] # init the list
+        target = [random.randint(0,1)] # randomly generate target stim
+        stimuli[0][tasks[0]] = exp_response_code[target[0]] # randomly generate target stim
+        for stim_dim in range (1, 3): # generate the distractor stimuli for this trial
+            stimuli[0][(tasks[0]+stim_dim) % 3] = exp_response_code[(target[0]+stim_dim % 2)]
+
+    
+        for trialid in range (1, num_trials):
+            stimuli.append ([-1, -1, -1])
+
+            # randomly generate index of target stim by rotating the previous target
+            target.append ((target[trialid-1] + random.randint(1,2)) % 3)
+#           stim_direction = random.randint (0, 1) # which way round to apply distractor stimuli 
+
+            # randomly generate target stim
+            stimuli[trialid][tasks[trialid]] = exp_response_code[target[trialid]] 
+
+            # generate distractor stimuli
+            #stim_direction = distractor_direction[random.randint (0, 1)] # which way round to apply the stimuli in
+            for stim_dim in range (1, 3): # generate the distractor stimuli for this trial
+                stimuli[trialid][(tasks[trialid]+stim_dim) % 3] = exp_response_code[(target[trialid]+stim_dim) % 3]
+
+
         
         for n in range (0, num_trials): # where n is the nth trial
             if (n == 0) or (n == 1):
                 switch = 'NA'
-#                print ("NA")
+
             elif tasks[n] == tasks[n-1]:
                 switch = '0SW' # 2 consecutive repeats should be disallowed
-#                print ("%d 0SW" % tasks[n])
+
             else:
                 if tasks[n-1] == tasks[n-2]:
                     switch = '1SW'
-#                    print ("%d 1SW" % tasks[n])
+                    
                 elif tasks[n] == tasks[n-2]:
                     switch = 'ALT'
-#                    print ("%d ALT" % tasks[n])
+                    
                 else:
                     switch = '2SW'
-#                    print ("%d 2SW" % tasks[n])
+
                     
             
             write_trial (blockid,
