@@ -2,9 +2,9 @@
 // #define ECHO
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
-#define STRATEGIC_ADAPTATION_RATE 0.00040 // 0.00035 
-#define STRATEGIC_ADAPTATION_MOMENTUM 0.95 // 0.80 // for simulation 16h, initially
-#define PREV_CONFLICT_WEIGHTING_FACTOR  0.80 // 0.80 // 0 - 1, higher values mean previous 'trial' conflict changes slower
+#define STRATEGIC_ADAPTATION_RATE 0.01000 // 0.00035 
+#define STRATEGIC_ADAPTATION_MOMENTUM 0.45 // 0.80 // for simulation 16h, initially
+#define PREV_CONFLICT_WEIGHTING_FACTOR  0.45 // 0.80 // 0 - 1, higher values mean previous 'trial' conflict changes slower
 // difference in conflicts is in range 10 - 50
 // for simulation 16h, difference in conflicts is more like 0 - 10
 

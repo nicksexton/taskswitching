@@ -149,7 +149,7 @@ weight.by.epoch +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Weight") +
       ggtitle("Simulation 17: strategic adaptation model, Weight by epoch") 
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_1_weight_by_epoch.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_5_weight_by_epoch.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
@@ -162,7 +162,7 @@ weight.by.epoch +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
           ggtitle("Simulation 17: strategic adaptation model, Weight by epoch")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_1_weight_by_epoch_individual.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_5_weight_by_epoch_individual.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 cost.by.epoch <- ggplot (data.cost,  aes(x=epoch, y=cycles, group=DV, colour=DV))
@@ -174,7 +174,7 @@ cost.by.epoch +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Cycles") +
       ggtitle("Simulation 17: strategic adaptation model, RT by epoch") 
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_1_cost_by_epoch.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_5_cost_by_epoch.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
@@ -188,7 +188,7 @@ conflict.by.epoch +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Conflict") +
           ggtitle("Simulation 17: strategic adaptation model, Conflict by epoch")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_1_conflict_by_epoch.png")
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_5_conflict_by_epoch.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
@@ -202,7 +202,8 @@ conflict.by.epoch +
       labs (x = paste("Epoch (", epochs[1], ") trials"), y = "Conflict") +
           ggtitle("Simulation 17: strategic adaptation model, Conflict by epoch")
 
-imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_1_conflict_by_epoch_individual.png")
+
+imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_17", "sim_17_5_conflict_by_epoch_individual.png")
 ggsave(filename=imageFile, width = 200, height = 200, units = "mm")
 
 
