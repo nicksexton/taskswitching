@@ -2,7 +2,7 @@
 // #define ECHO
 // #define ECHO_ACTIVATION
 // #define STRATEGIC_ADAPTATION_RATE 0.20
-#define STRATEGIC_ADAPTATION_RATE 0.01000 // 0.00035 
+#define STRATEGIC_ADAPTATION_RATE 0
 #define STRATEGIC_ADAPTATION_MOMENTUM 0.45 // 0.80 // for simulation 16h, initially
 #define PREV_CONFLICT_WEIGHTING_FACTOR  0.45 // 0.80 // 0 - 1, higher values mean previous 'trial' conflict changes slower
 // difference in conflicts is in range 10 - 50
@@ -842,7 +842,7 @@ int three_task_model_koch_conflict_run (pdp_model * model,
 				  hebb_persist);
 
   // strategic adaptation
-  three_task_model_koch_strategic_adaptation (model); 
+  //  three_task_model_koch_strategic_adaptation (model); // disabled for simulation 18
 
   
   // Print activation of output units
