@@ -65,8 +65,7 @@ compress <- function (x) 2*((1/(1+exp(-0.5 * x)) - 0.5))
 # transformation function for switch/n2-rep costs with big range
 compress1 <- function (x) 2*((1/(1+exp(-0.1 * x)) - 0.5))
 
-# transformation function for error switch costs
-compress.err <- function (x) 2*((1/(1+exp(-100 * x)) - 0.5))
+
 
 
 intersect <- function (sc, n2rc)  { max (sc, 0) * max (n2rc, 0)}
@@ -129,53 +128,53 @@ for (i in 1:nrow(data.clip.highnoise.0)) {
 #}
 
 
-plot.heatmap.sc <- function (data, condition.title) {
+## plot.heatmap.sc <- function (data, condition.title) {
 
-#  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.tdwt, fill=sc))
-  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc))
-  sc + geom_raster() +
-#    facet_wrap( ~ conflict.bias) +
-    facet_grid( ~ conflict.tdwt) +
-    scale_fill_gradient2(midpoint=0,  mid="grey70", limits=c(-30,40)) +
-    ggtitle(paste (condition.title,
-                   ", Switch Costs")) +
-    labs(fill="Switch Costs\n(cycles)") +
-#   theme (legend.position=c(0.87,0.1))
-    theme (legend.position="right")  
-}
+## #  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.tdwt, fill=sc))
+##   sc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=sc))
+##   sc + geom_raster() +
+## #    facet_wrap( ~ conflict.bias) +
+##     facet_grid( ~ conflict.tdwt) +
+##     scale_fill_gradient2(midpoint=0,  mid="grey70", limits=c(-30,40)) +
+##     ggtitle(paste (condition.title,
+##                    ", Switch Costs")) +
+##     labs(fill="Switch Costs\n(cycles)") +
+## #   theme (legend.position=c(0.87,0.1))
+##     theme (legend.position="right")  
+## }
 
-plot.heatmapCompress.sc <- function (data, condition.title) {
+## plot.heatmapCompress.sc <- function (data, condition.title) {
   
-  sc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(sc)))
-  sc + geom_raster() +
-    facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
-        ggtitle(paste (condition.title,
-                       ", Switch costs") ) +
-    labs(fill="Switch Costs\ntransform(cycles)") +
-#   theme (legend.position=c(0.87,0.1))
-    theme (legend.position="top")
-}
+##   sc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(sc)))
+##   sc + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +
+##       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
+##         ggtitle(paste (condition.title,
+##                        ", Switch costs") ) +
+##     labs(fill="Switch Costs\ntransform(cycles)") +
+## #   theme (legend.position=c(0.87,0.1))
+##     theme (legend.position="top")
+## }
 
 
 
-# two tailed version
-plot.heatmap.sc.p <- function (data, condition.title) {
+## # two tailed version
+## plot.heatmap.sc.p <- function (data, condition.title) {
 
-  labs <- c(0.05, 0.95)
-  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+##   labs <- c(0.05, 0.95)
+##   colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
 
-  sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=twotailed (sc.p, sc)))  
-  sc.p + geom_raster() +
-    facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
-                           labels=labs, breaks=labs) +
-        ## ggtitle(paste (condition.title,
-        ##                ", p value of Switch costs") ) +
-  labs(fill="significance (p)") +
-  # theme (legend.position=c(0.87,0.1))
-  theme (legend.position="right")  
-}
+##   sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=twotailed (sc.p, sc)))  
+##   sc.p + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +
+##       scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
+##                            labels=labs, breaks=labs) +
+##         ## ggtitle(paste (condition.title,
+##         ##                ", p value of Switch costs") ) +
+##   labs(fill="significance (p)") +
+##   # theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
 
 
 plot.effectsize.sc <- function (data, condition.title) {
@@ -197,53 +196,53 @@ plot.effectsize.sc <- function (data, condition.title) {
 
 
 
-plot.heatmap.n2rc <- function (data, condition.title) {
+## plot.heatmap.n2rc <- function (data, condition.title) {
 
-  n2rc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc))
-  n2rc + geom_raster() +
-    facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-30,40)) +
-        ggtitle(paste (condition.title,
-                       ", N-2 Repetition costs") ) +
-  labs(fill="N-2 Repetition Costs\n(cycles)") +
-#  theme (legend.position=c(0.87,0.1))
-  theme (legend.position="right")  
-}
+##   n2rc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=n2rc))
+##   n2rc + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +
+##       scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-30,40)) +
+##         ggtitle(paste (condition.title,
+##                        ", N-2 Repetition costs") ) +
+##   labs(fill="N-2 Repetition Costs\n(cycles)") +
+## #  theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
 
-plot.heatmapCompress.n2rc <- function (data, condition.title) {
-# use a suitable squashing function as transf
+## plot.heatmapCompress.n2rc <- function (data, condition.title) {
+## # use a suitable squashing function as transf
 
-#  FUN = match.fun(FUN)  
-  n2rc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(n2rc)))
-  n2rc + geom_raster() +
-    facet_grid( ~ conflict.tdwt) +                                        
-    scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
-    ggtitle(paste (condition.title,
-                   ", N-2 Repetition costs") ) +
-  labs(fill="N-2 Repetition Costs\ntransform(cycles)") +
-#  theme (legend.position=c(0.87,0.1))
-  theme (legend.position="right")  
-}
+## #  FUN = match.fun(FUN)  
+##   n2rc <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(n2rc)))
+##   n2rc + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +                                        
+##     scale_fill_gradient2(midpoint=0, mid="grey70", limits=c(-1,1)) +
+##     ggtitle(paste (condition.title,
+##                    ", N-2 Repetition costs") ) +
+##   labs(fill="N-2 Repetition Costs\ntransform(cycles)") +
+## #  theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
 
 
 
-# two tailed version
-plot.heatmap.n2rc.p <- function (data, condition.title) {
+## # two tailed version
+## plot.heatmap.n2rc.p <- function (data, condition.title) {
 
-  labs <- c(0.05, 0.95)
-  colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
+##   labs <- c(0.05, 0.95)
+##   colrs <- c("red", "white", "white", "white", "white", "white", "white", "white", "white", "green")
 
-  n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=twotailed (n2rc.p, n2rc)))
-  n2rc.p + geom_raster() +
-    facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
-                           labels=labs, breaks=labs) +
-        ## ggtitle(paste (condition.title,
-        ##                ", p value of N-2 Repetition costs") ) +
-  labs(fill="significance (p)") +
-# theme (legend.position=c(0.87,0.1))
-  theme (legend.position="right")  
-}
+##   n2rc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=twotailed (n2rc.p, n2rc)))
+##   n2rc.p + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +
+##       scale_fill_gradientn(colours=colrs, na.value="black", limits=c(0,1),
+##                            labels=labs, breaks=labs) +
+##         ## ggtitle(paste (condition.title,
+##         ##                ", p value of N-2 Repetition costs") ) +
+##   labs(fill="significance (p)") +
+## # theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
 
 
 calculate.r <- function (t, df) sqrt(t^2 / (t^2 + df))
@@ -257,7 +256,7 @@ plot.effectsize.n2rc <- function (data, condition.title) {
   sc.p <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=(calculate.r(n2rc.t, n2rc.df)* ifelse(n2rc.t>0, -1, 1) )))  
   sc.p + geom_raster() +
     facet_grid( ~ conflict.tdwt) +
-      scale_fill_gradient2(high="red", low="blue", mid="white", limits=c(-0.25,0.25)) +
+      scale_fill_gradient2(high="red", low="blue", mid="white", limits=c(-0.5,0.5)) +
         ## ggtitle(paste (condition.title,
         ##                ", p value of Switch costs") ) +
   labs(fill="effect size (r)") +
@@ -268,19 +267,19 @@ plot.effectsize.n2rc <- function (data, condition.title) {
 
 
 
-plot.heatmap.sctimesn2rc <- function (data, condition.title) {
-# plots the intersection of SCs and N2RCs by calculating the product of both DVs
+## plot.heatmap.sctimesn2rc <- function (data, condition.title) {
+## # plots the intersection of SCs and N2RCs by calculating the product of both DVs
 
-  SCtimesN2RC <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(intersect)))
-  SCtimesN2RC + geom_raster() +
-    facet_grid( ~ conflict.tdwt) +                                        
-    scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
-    ## ggtitle(paste (condition.title,
-    ##                ", intersection of SCs and N2RCs") ) +
-  labs(fill="compress (sqrt(n2rc x sc))") +
-#  theme (legend.position=c(0.87,0.1))
-  theme (legend.position="right")  
-}
+##   SCtimesN2RC <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress1(intersect)))
+##   SCtimesN2RC + geom_raster() +
+##     facet_grid( ~ conflict.tdwt) +                                        
+##     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
+##     ## ggtitle(paste (condition.title,
+##     ##                ", intersection of SCs and N2RCs") ) +
+##   labs(fill="compress (sqrt(n2rc x sc))") +
+## #  theme (legend.position=c(0.87,0.1))
+##   theme (legend.position="right")  
+## }
 
 
 plot.effectsize.sctimesn2rc <- function (data, condition.title) {
@@ -412,96 +411,96 @@ plot.heatmap.rt.1SW <- function (data, condition.title) {
 
 ##### Error Plots
 
-plot.heatmap.logErrors.0SW <- function (data, condition.title) {
-#Errors(1,2) in 0SW condition
+## plot.heatmap.logErrors.0SW <- function (data, condition.title) {
+## #Errors(1,2) in 0SW condition
 
-  lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
-  bre <- log (lab) # position on legend to plot labels
-#  colrs <- c("black", "black", "red4", "red2", "red", "orangered3", "orange", "yellow")
-  colrs <- c("black", "black", "darkred", "red", "orange", "yellow")
-#  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=err.12.0SW))
-  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.12.0SW)))
-  error.rates + geom_raster() +
-   facet_wrap( ~ conflict.tdwt) +                                        
-   scale_fill_gradientn(name="Error Rate", colours=colrs,
-                        na.value="white", breaks=bre, labels=lab) +
-#scale_fill_gradientn(colours=c("black", "red4", "red3", "red2", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-   ggtitle(paste (condition.title,
-                   "\nParameter space for Errors(1,2) in 0SW condition") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
+##   lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
+##   bre <- log (lab) # position on legend to plot labels
+## #  colrs <- c("black", "black", "red4", "red2", "red", "orangered3", "orange", "yellow")
+##   colrs <- c("black", "black", "darkred", "red", "orange", "yellow")
+## #  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=err.12.0SW))
+##   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.12.0SW)))
+##   error.rates + geom_raster() +
+##    facet_wrap( ~ conflict.tdwt) +                                        
+##    scale_fill_gradientn(name="Error Rate", colours=colrs,
+##                         na.value="white", breaks=bre, labels=lab) +
+## #scale_fill_gradientn(colours=c("black", "red4", "red3", "red2", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+##    ggtitle(paste (condition.title,
+##                    "\nParameter space for Errors(1,2) in 0SW condition") ) +
+##   #labs(fill="compress (sqrt(n2rc x sc))") +
+##   theme (legend.position=c(0.87,0.1))
 
-}
+## }
 
-plot.heatmap.logErrors.1SW <- function (data, condition.title) {
-# Heatmap with errors plotted on a log scale
+## plot.heatmap.logErrors.1SW <- function (data, condition.title) {
+## # Heatmap with errors plotted on a log scale
 
-  lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
-  bre <- log (lab) # position on legend to plot labels
-  colrs <- c("black", "black", "red", "orange", "yellow")
-  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.12.1SW)))
-  error.rates + geom_raster() +
-   facet_wrap( ~ conflict.tdwt) +                                        
-   scale_fill_gradientn(name="Error Rate", colours=colrs,
-                        na.value="white", breaks=bre, labels=lab) +
-  ggtitle(paste (condition.title,
-                   "\nParameter space for Errors(1,2) in 1SW condition") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
-}
+##   lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
+##   bre <- log (lab) # position on legend to plot labels
+##   colrs <- c("black", "black", "red", "orange", "yellow")
+##   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.12.1SW)))
+##   error.rates + geom_raster() +
+##    facet_wrap( ~ conflict.tdwt) +                                        
+##    scale_fill_gradientn(name="Error Rate", colours=colrs,
+##                         na.value="white", breaks=bre, labels=lab) +
+##   ggtitle(paste (condition.title,
+##                    "\nParameter space for Errors(1,2) in 1SW condition") ) +
+##   #labs(fill="compress (sqrt(n2rc x sc))") +
+##   theme (legend.position=c(0.87,0.1))
+## }
 
-plot.heatmap.errors.1SW <- function (data, condition.title) {
-#Errors(1,2) in 1SW condition plotted on a linear scale
+## plot.heatmap.errors.1SW <- function (data, condition.title) {
+## #Errors(1,2) in 1SW condition plotted on a linear scale
   
-  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=err.12.1SW))
-#  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.12.1SW)))
-  error.rates + geom_raster() +
-  facet_wrap( ~ conflict.tdwt) +
- # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white") +
-scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-  ggtitle(paste (condition.title,
-                   "\nParameter space for Errors(1,2) in 1SW condition") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
-}
+##   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=err.12.1SW))
+## #  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.12.1SW)))
+##   error.rates + geom_raster() +
+##   facet_wrap( ~ conflict.tdwt) +
+##  # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white") +
+## scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+##   ggtitle(paste (condition.title,
+##                    "\nParameter space for Errors(1,2) in 1SW condition") ) +
+##   #labs(fill="compress (sqrt(n2rc x sc))") +
+##   theme (legend.position=c(0.87,0.1))
+## }
 
-plot.heatmap.logErrors.3.ALT <- function (data, condition.title) {
-#Errors(3) in ALT condition
+## plot.heatmap.logErrors.3.ALT <- function (data, condition.title) {
+## #Errors(3) in ALT condition
 
-  lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
-  bre <- log (lab) # position on legend to plot labels
-  colrs <- c("black", "black", "red", "orange", "yellow")
+##   lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
+##   bre <- log (lab) # position on legend to plot labels
+##   colrs <- c("black", "black", "red", "orange", "yellow")
   
-  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.3.ALT)))
-  error.rates + geom_raster() +
-  facet_wrap( ~ conflict.tdwt) +
-  scale_fill_gradientn(name="Error Rate", colours=colrs,
-                           na.value="white", breaks=bre, labels=lab) +
-# scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-    ggtitle(paste (condition.title,
-                   "\nParameter space for Errors(3) in ALT condition") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
-}
+##   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.3.ALT)))
+##   error.rates + geom_raster() +
+##   facet_wrap( ~ conflict.tdwt) +
+##   scale_fill_gradientn(name="Error Rate", colours=colrs,
+##                            na.value="white", breaks=bre, labels=lab) +
+## # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+##     ggtitle(paste (condition.title,
+##                    "\nParameter space for Errors(3) in ALT condition") ) +
+##   #labs(fill="compress (sqrt(n2rc x sc))") +
+##   theme (legend.position=c(0.87,0.1))
+## }
 
-plot.heatmap.logErrors.3.2SW <- function (data, condition.title) {
-#Errors(3) in ALT condition
+## plot.heatmap.logErrors.3.2SW <- function (data, condition.title) {
+## #Errors(3) in ALT condition
 
-  lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
-  bre <- log (lab) # position on legend to plot labels
-  colrs <- c("black", "black", "red", "orange", "yellow")
+##   lab <- c(0.005, 0.01, 0.025, 0.05, 0.1, 0.2, 0.4) # labels for legend
+##   bre <- log (lab) # position on legend to plot labels
+##   colrs <- c("black", "black", "red", "orange", "yellow")
   
-  error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.3.2SW)))
-  error.rates + geom_raster() +
-  facet_wrap( ~ conflict.tdwt) +
-  scale_fill_gradientn(name="Error Rate", colours=colrs,
-                           na.value="white", breaks=bre, labels=lab) +
-# scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
-    ggtitle(paste (condition.title,
-                   "\nParameter space for Errors(3) in 2SW condition") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
-}
+##   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=log(err.3.2SW)))
+##   error.rates + geom_raster() +
+##   facet_wrap( ~ conflict.tdwt) +
+##   scale_fill_gradientn(name="Error Rate", colours=colrs,
+##                            na.value="white", breaks=bre, labels=lab) +
+## # scale_fill_gradientn(colours=c("black", "darkred", "red", "orange", "yellow"), na.value="white", limits=c(0,0.3)) +
+##     ggtitle(paste (condition.title,
+##                    "\nParameter space for Errors(3) in 2SW condition") ) +
+##   #labs(fill="compress (sqrt(n2rc x sc))") +
+##   theme (legend.position=c(0.87,0.1))
+## }
 
 
 #plot.heatmap.errors.3.2SW <- function (data, condition.title) {
@@ -517,100 +516,106 @@ plot.heatmap.logErrors.3.2SW <- function (data, condition.title) {
 #  theme (legend.position=c(0.87,0.1))
 #}
 
+# transformation function for error switch costs
+                                        #compress.err <- function (x) 2*((1/(1+exp(-100 * x)) - 0.5))
+compress.err <- function (x) 2*((1/(1+exp(-300 * x)) - 0.5))
+
 plot.heatmap.errors.n2rc <- function (data, condition.title) {
 #Errors switch cost: Difference between Errors(3) in ALT and 2SW conditions
   
   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress.err(err.3.ALT - err.3.2SW)))
   error.rates + geom_raster() +
-    facet_wrap( ~ conflict.tdwt) +                                        
-    scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(-1,1)) + 
-    ggtitle(paste (condition.title,
-                   "\nParameter space for Error n-2RC: contrast between ALT and 2SW conditions") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
+    facet_grid( ~ conflict.tdwt) +                                        
+    scale_fill_gradient2(low="blue", high="red", na.value="black", limits=c(-1,1)) + 
+#    ggtitle(paste (condition.title,
+#                   "\nParameter space for Error n-2RC: contrast between ALT and 2SW conditions") ) +
+  labs(fill="Error rate \nn-2 repetition cost") +
+  theme (legend.position="right")    
 }
+
 
 plot.heatmap.errors.sc <- function (data, condition.title) {
 #Errors switch cost: Difference between Errors(3) in ALT and 2SW conditions
-  
   error.rates <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress.err(err.3.1SW - err.3.0SW)))
   error.rates + geom_raster() +
-    facet_wrap( ~ conflict.tdwt) +                                        
-    scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(-1,1)) + 
-    ggtitle(paste (condition.title,
-                   "\nParameter space for Error switch cost: contrast between 1SW and 0SW conditions") ) +
-  #labs(fill="compress (sqrt(n2rc x sc))") +
-  theme (legend.position=c(0.87,0.1))
+    facet_grid( ~ conflict.tdwt) +                                        
+    scale_fill_gradient2(low="blue", high="red", na.value="black", limits=c(-1,1)) + 
+#    ggtitle(paste (condition.title,
+#                   "\nParameter space for Error switch cost: contrast between 1SW and 0SW conditions") ) +
+  labs(fill="Error rate switch cost") +
+  theme (legend.position="right")  
 }
 
-  compress.intersectErr <- function (x) 2*((1/(1+exp(-500000 * x)) - 0.5))
+ #  compress.intersectErr <- function (x) 2*((1/(1+exp(-500000 * x)) - 0.5)) # original
+  compress.intersectErr <- function (x) 2*((1/(1+exp(-100000 * x)) - 0.5))
 
 plot.errormap.sctimesn2rc <- function (data, condition.title) {
 # plots the intersection of SCs and N2RCs by calculating the product of both DVs
   SCtimesN2RC <- ggplot(data, aes(x=conflict.gain, y=conflict.bias, fill=compress.intersectErr(intersectErr)))
   SCtimesN2RC + geom_raster() +
-    facet_wrap( ~ conflict.tdwt) +                                        
+    facet_grid( ~ conflict.tdwt) +                                        
     scale_fill_gradient2(low="green", high="red", na.value="black", limits=c(0,1)) +
-    ggtitle(paste (condition.title,
-                   "\nParameter space for intersection of Error SCs and N2RCs") ) +
-  theme (legend.position=c(0.87,0.1))
+#    ggtitle(paste (condition.title,
+ #                  "\nGeometric mean of \nError SCs and N2RCs") ) +
+  labs(fill="Error rate geometric mean") +
+      theme (legend.position="right")
 }
 
 
 plot.errormaps <- function (data, condition.title, image.directory, filename.stem, save=FALSE) {
-  plot.heatmap.rt.0SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_rt_0SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+  ## plot.heatmap.rt.0SW (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_rt_0SW.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=250, units="mm")
+  ## }
 
-  plot.heatmap.rt.1SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_rt_1SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+  ## plot.heatmap.rt.1SW (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_rt_1SW.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=250, units="mm")
+  ## }
 
   
-  plot.heatmap.logErrors.0SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_errors_0SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+  ## plot.heatmap.logErrors.0SW (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_errors_0SW.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=250, units="mm")
+  ## }
 
-  plot.heatmap.logErrors.1SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_errors_1SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+  ## plot.heatmap.logErrors.1SW (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_errors_1SW.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=250, units="mm")
+  ## }
 
-  plot.heatmap.logErrors.3.ALT (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_errors_ALT.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+  ## plot.heatmap.logErrors.3.ALT (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_errors_ALT.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=250, units="mm")
+  ## }
 
-  plot.heatmap.logErrors.3.2SW (data, condition.title)
-  if (save==TRUE) {
-    image.file <- file.path(image.directory, paste(filename.stem, "_errors_2SW.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
-  }
+  ## plot.heatmap.logErrors.3.2SW (data, condition.title)
+  ## if (save==TRUE) {
+  ##   image.file <- file.path(image.directory, paste(filename.stem, "_errors_2SW.png", sep=""))
+  ##   ggsave(filename=image.file, width=200, height=250, units="mm")
+  ## }
 
   plot.heatmap.errors.n2rc (data, condition.title)
   if (save==TRUE) {
     image.file <- file.path(image.directory, paste(filename.stem, "_errors_n2rc.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
+    ggsave(filename=image.file, width=200, height=50, units="mm")
   }
 
   plot.heatmap.errors.sc (data, condition.title)
   if (save==TRUE) {
     image.file <- file.path(image.directory, paste(filename.stem, "_errors_sc.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
+ggsave(filename=image.file, width=200, height=50, units="mm")
   }  
 
     plot.errormap.sctimesn2rc (data, condition.title)
   if (save==TRUE) {
     image.file <- file.path(image.directory, paste(filename.stem, "_errors_sctimesn2rc.png", sep=""))
-    ggsave(filename=image.file, width=200, height=250, units="mm")
+    ggsave(filename=image.file, width=200, height=50, units="mm")
   }  
 
 }
@@ -618,6 +623,9 @@ plot.errormaps <- function (data, condition.title, image.directory, filename.ste
 
 ########## FOR COGSCI PAPER #########
 plot.heatmaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1", filename.stem="cogsci_sim_1", save=TRUE)
+
+                                        # for revision of cogpsy paper, including error maps
+plot.errormaps (data.clip.highnoise.0, condition.title="Simulation 1", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_1_errors", filename.stem="cogsci_sim_1", save=TRUE)
 
 
 
