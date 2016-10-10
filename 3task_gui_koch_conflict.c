@@ -297,16 +297,11 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   //  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
-  PdpguiCoords loc_conflict = { .x = width * 0.473, .y = height * 0.1, };
-  PdpguiCoords loc_conflict_offset = { .x = width * 0.478, .y = height * 0.1, };
+  PdpguiCoords loc_conflict = { .x = width * 0.625, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_offset = { .x = width * 0.630, .y = height * 0.1, };
   PdpguiCoords loc_conflict_title = { .x = width * 0.85, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict Monitoring");
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -70, -75, "A");
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -21, -75, "B");
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 21, -75, "C");
 
-  //  PdpguiCoords loc_conflict_td_upper = { .x = width * 0.05, .y = height * -0.2 };
-  //  PdpguiCoords loc_conflict_td_lower = { .x = width * 0.05, .y = height * 0.8 };
 
 
   // Draw a dashed line across the screen to separate new model content
@@ -320,17 +315,13 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   cairo_line_to (cr, dashed_separator_left.x, dashed_separator_left.y);
   cairo_stroke(cr);  
 
-  // Conflict Inputs
-  //  PdpguiCoords loc_conflict_input = { .x = width * 0.7, .y = height * 0.2, };
-  //  PdpguiCoords loc_conflict_input_title = { .x = width * 0.9, .y = height * 0.2, };
-  //  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_input_title, 0, -10, "Conflict (Input)");
-
 
   // Now draw the main units
   // TD Units
 
-  PdpguiCoords loc_taskdemand = { .x = width * 0.448, .y = height * 0.4, };
-  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.453, .y = height * 0.4, }; // avoid overlap of weights
+
+  PdpguiCoords loc_taskdemand = { .x = width * 0.60, .y = height * 0.4, };
+  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.605, .y = height * 0.4, }; // avoid overlap of weights
 
   PdpguiCoords loc_taskdemand_title = { .x = width * 0.85, .y = height * 0.4, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
@@ -340,9 +331,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   // Inputs
 
-  PdpguiCoords loc_input_0 = { .x = width * 0.2, .y = height * 0.85, };
-  PdpguiCoords loc_input_1 = { .x = width * 0.65, .y = height * 0.85, };
-  PdpguiCoords loc_input_2 = { .x = width * 0.8, .y = height * 0.85, };
+
+  PdpguiCoords loc_input_0 = { .x = width * 0.40, .y = height * 0.85, };
+  PdpguiCoords loc_input_1 = { .x = width * 0.60, .y = height * 0.85, };
+  PdpguiCoords loc_input_2 = { .x = width * 0.80, .y = height * 0.85, };
   PdpguiCoords loc_inputs_title = { .x = width * 0.9, .y = height * 0.85, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_inputs_title, 0, -10, "Inputs");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_0, -22, 30, "A");
@@ -352,16 +344,17 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
   // Outputs
 
-  PdpguiCoords loc_output_0 = { .x = width * 0.2, .y = height * 0.7, };
-  PdpguiCoords loc_output_1 = { .x = width * 0.65, .y = height * 0.7, };
-  PdpguiCoords loc_output_2 = { .x = width * 0.8, .y = height * 0.7, };
+
+  PdpguiCoords loc_output_0 = { .x = width * 0.40, .y = height * 0.7, };
+  PdpguiCoords loc_output_1 = { .x = width * 0.60, .y = height * 0.7, };
+  PdpguiCoords loc_output_2 = { .x = width * 0.80, .y = height * 0.7, };
   PdpguiCoords loc_outputs_title = { .x = width * 0.9, .y = height * 0.7, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_outputs_title, 0, -10, "Outputs");
 
 
   
-  PdpguiCoords loc_topdowncontrol = { .x = width * 0.45, .y = height * 0.80, };
-  PdpguiCoords loc_tdc_title = { .x = width * 0.45, .y = height * 0.88, };
+  PdpguiCoords loc_topdowncontrol = { .x = width * 0.20, .y = height * 0.50, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.10, .y = height * 0.40, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -30, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -25, 12, "Control");
   
