@@ -54,7 +54,7 @@ void pdpgui_draw_unit_activation_hsl (cairo_t *cr,
   cairo_fill(cr);
 
   //  cairo_set_source_rgb (cr, colour_on.r, colour_on.g, colour_on.b);
-  cairox_select_colour_scale (cr, 1 - activation);
+  cairox_select_colour_scale (cr, 1 - activation); 
 
   cairo_arc (cr, unit_centre.x, unit_centre.y, DEFAULT_UNIT_SIZE*(activation/2 + 0.5), 0, 2*G_PI);
   cairo_fill(cr);
@@ -123,8 +123,9 @@ void pdpgui_draw_layer (cairo_t *cr,
     double activation = layer->units_latest->activations[n];
     double squashed = 1 / (1 + exp(-UNIT_DISPLAY_SQUASH_CONST * activation));
 
-    //    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
-    pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
+    // pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    pdpgui_draw_unit (cr, centre, colour_off, colour_on, 0.8); // for publication
+    // pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
 
     // plot text
     //    pdpgui_pango_print_double (cr, centre, activation); // commented for publication figure
@@ -154,8 +155,9 @@ void pdpgui_draw_layer_vertical (cairo_t *cr,
     double activation = layer->units_latest->activations[n];
     double squashed = 1 / (1 + exp(-UNIT_DISPLAY_SQUASH_CONST * activation));
 
-    //    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
-    pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
+        pdpgui_draw_unit (cr, centre, colour_off, colour_on, 0.8); // for publication
+    // pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    // pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed); // use greyscale for publication
 
     // plot text
     //    pdpgui_pango_print_double (cr, centre, activation); // commented for publication figure
@@ -187,8 +189,9 @@ void pdpgui_draw_layer_diagonal (cairo_t *cr,
     double activation = layer->units_latest->activations[n];
     double squashed = 1 / (1 + exp(-UNIT_DISPLAY_SQUASH_CONST * activation));
 
-    //    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
-    pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
+    pdpgui_draw_unit (cr, centre, colour_off, colour_on, 0.8); // for publication
+    // pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    // pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
 
     // plot text
     //    pdpgui_pango_print_double (cr, centre, activation); // commented for publication figure
@@ -206,24 +209,26 @@ void pdpgui_draw_connection (cairo_t *cr,
   ArrowHeadType style;
  
 
-
  CairoxPoint vector[2] = {
    {.x = connection_start.x, .y = connection_start.y},
    {.x = connection_end.x, .y = connection_end.y},
  };
 
+   double asymmetric_dash[2] = {5, 7};
 
   // default black connections
   if (weight < 0) {
-    cairo_set_source_rgb (cr, 0.9, 0, 0);
+    cairo_set_source_rgb (cr, 0.5, 0.5, 0.5); // greyscale
+    cairo_set_dash (cr, asymmetric_dash, 2, 0); 
     style = AH_CIRCLE;
   }
   else {
     cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_set_dash (cr, NULL, 0, 0); // dash off
     style = AH_SHARP;
   }
 
-  cairo_set_dash(cr, NULL, 0, 0); // dashed line off
+  //  cairo_set_dash(cr, NULL, 0, 0); // dashed line off
 
   width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 );
   // width = 1.0;

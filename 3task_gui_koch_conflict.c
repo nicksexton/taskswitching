@@ -297,10 +297,11 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   //  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
-  PdpguiCoords loc_conflict = { .x = width * 0.625, .y = height * 0.1, };
-  PdpguiCoords loc_conflict_offset = { .x = width * 0.630, .y = height * 0.1, };
+  PdpguiCoords loc_conflict = { .x = width * 0.700, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_offset = { .x = width * 0.705, .y = height * 0.1, };
   PdpguiCoords loc_conflict_title = { .x = width * 0.85, .y = height * 0.1, };
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict Monitoring");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict");
+    pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, 10, "Monitoring");
 
 
 
@@ -320,10 +321,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   // TD Units
 
 
-  PdpguiCoords loc_taskdemand = { .x = width * 0.60, .y = height * 0.36, };
-  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.605, .y = height * 0.36, }; // avoid overlap of weights
+  PdpguiCoords loc_taskdemand = { .x = width * 0.65, .y = height * 0.46, };
+  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.655, .y = height * 0.46, }; // avoid overlap of weights
 
-  PdpguiCoords loc_taskdemand_title = { .x = width * 0.85, .y = height * 0.3, };
+  PdpguiCoords loc_taskdemand_title = { .x = width * 0.85, .y = height * 0.46, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
 
 
@@ -332,10 +333,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   // Inputs
 
 
-  PdpguiCoords loc_input_0 = { .x = width * 0.40, .y = height * 0.85, };
-  PdpguiCoords loc_input_1 = { .x = width * 0.60, .y = height * 0.85, };
-  PdpguiCoords loc_input_2 = { .x = width * 0.80, .y = height * 0.85, };
-  PdpguiCoords loc_inputs_title = { .x = width * 0.9, .y = height * 0.85, };
+  PdpguiCoords loc_input_0 = { .x = width * 0.25, .y = height * 0.85, };
+  PdpguiCoords loc_input_1 = { .x = width * 0.45, .y = height * 0.85, };
+  PdpguiCoords loc_input_2 = { .x = width * 0.65, .y = height * 0.85, };
+  PdpguiCoords loc_inputs_title = { .x = width * 0.85, .y = height * 0.85, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_inputs_title, 0, -10, "Inputs");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_0, -22, 30, "A");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_input_1, -22, 30, "B");
@@ -345,19 +346,24 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   // Outputs
 
 
-  PdpguiCoords loc_output_0 = { .x = width * 0.40, .y = height * 0.7, };
-  PdpguiCoords loc_output_1 = { .x = width * 0.60, .y = height * 0.7, };
-  PdpguiCoords loc_output_2 = { .x = width * 0.80, .y = height * 0.7, };
-  PdpguiCoords loc_outputs_title = { .x = width * 0.9, .y = height * 0.7, };
+  PdpguiCoords loc_output_0 = { .x = width * 0.25, .y = height * 0.7, };
+  PdpguiCoords loc_output_1 = { .x = width * 0.45, .y = height * 0.7, };
+  PdpguiCoords loc_output_2 = { .x = width * 0.65, .y = height * 0.7, };
+  PdpguiCoords loc_outputs_title = { .x = width * 0.85, .y = height * 0.7, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_outputs_title, 0, -10, "Outputs");
 
 
   
-  PdpguiCoords loc_topdowncontrol = { .x = width * 0.20, .y = height * 0.50, };
-  PdpguiCoords loc_tdc_title = { .x = width * 0.10, .y = height * 0.40, };
+  PdpguiCoords loc_topdowncontrol = { .x = width * 0.10, .y = height * 0.50, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.15, .y = height * 0.28, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -30, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -25, 12, "Control");
-  
+
+    // overlay unit annotations, make for TDC
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, -100, "A");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, -45, "B");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, 10, "C");
+
 
 
 
@@ -367,8 +373,11 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
       .b = 0.1 
     }, {
       .r = 0.7, 
-      .g = 0.1, 
-      .b = 0.1 
+      .g = 0.7, 
+      .b = 0.7 
+      /* .r = 0.7,  */
+      /* .g = 0.1,  */
+      /* .b = 0.1  */
     }};
 
   PdpguiColourRgb mono_grey[2] = {{ 
@@ -393,10 +402,6 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   pdpgui_draw_layer (cr, loc_conflict, mono[0], mono[1], layer_conflict); 
 
 
-  // overlay task demand annotations on units
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -82, -15, "A");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, -27, -15, "B");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_taskdemand, 29, -15, "C");
 
   // vertical to diagonal
   pdpgui_draw_weights_vd (cr, loc_topdowncontrol, loc_taskdemand, 
