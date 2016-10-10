@@ -297,8 +297,8 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   //  pdp_layer * layer_conflict_input = pdp_model_component_find (simulation->model, ID_CONFLICT_INPUT)->layer;
 
 
-  PdpguiCoords loc_conflict = { .x = width * 0.750, .y = height * 0.1, };
-  PdpguiCoords loc_conflict_offset = { .x = width * 0.755, .y = height * 0.1, };
+  PdpguiCoords loc_conflict = { .x = width * 0.50, .y = height * 0.1, };
+  PdpguiCoords loc_conflict_offset = { .x = width * 0.505, .y = height * 0.1, };
   PdpguiCoords loc_conflict_title = { .x = width * 0.90, .y = height * 0.1, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, -10, "Conflict");
     pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_conflict_title, 0, 10, "Monitoring");
@@ -321,10 +321,10 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
   // TD Units
 
 
-  PdpguiCoords loc_taskdemand = { .x = width * 0.70, .y = height * 0.46, };
-  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.705, .y = height * 0.46, }; // avoid overlap of weights
+  PdpguiCoords loc_taskdemand = { .x = width * 0.56, .y = height * 0.46, };
+  PdpguiCoords loc_taskdemand_offset = { .x = width * 0.565, .y = height * 0.46, }; // avoid overlap of weights
 
-  PdpguiCoords loc_taskdemand_title = { .x = width * 0.90, .y = height * 0.46, };
+  PdpguiCoords loc_taskdemand_title = { .x = width * 0.90, .y = height * 0.49, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_taskdemand_title, 0, -10, "Task Demand");
 
 
@@ -354,15 +354,15 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
 
   
-  PdpguiCoords loc_topdowncontrol = { .x = width * 0.10, .y = height * 0.50, };
-  PdpguiCoords loc_tdc_title = { .x = width * 0.15, .y = height * 0.30, };
+  PdpguiCoords loc_topdowncontrol = { .x = width * 0.10, .y = height * 0.46, };
+  PdpguiCoords loc_tdc_title = { .x = width * 0.15, .y = height * 0.25, };
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -30, -10, "Top Down");
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD, loc_tdc_title, -25, 12, "Control");
 
     // overlay unit annotations, make for TDC
   pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, -100, "A");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, -45, "B");
-  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, 10, "C");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, -40, "B");
+  pdpgui_pango_print_annotation (cr, TEXT_SIZE_HEAD + 10, loc_topdowncontrol, -50, 20, "C");
 
 
 
@@ -437,17 +437,31 @@ void draw_architecture (cairo_t *cr, int width, int height, ThreeTaskSimulation 
 
 
   // conflict monitoring weights
-  // vertical to diagonal
-  pdpgui_draw_weights_topdown_straight_hd (cr, loc_conflict_offset, loc_taskdemand_offset,
-  			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights);
+
+  // draw (imaginary) weights for TD to conflict units for better symmetry:
+  double conflict_td_weights_matrix[3][3] = {
+    {-2.0, -2.0, 0.0},
+    {-2.0, 0.0, -2.0},
+    {0.0, -2.0, -2.0},
+  };
+  pdp_weights_matrix * conflict_td_weights = pdp_weights_create (3,3);
+  pdp_weights_set (conflict_td_weights, 3, 3, conflict_td_weights_matrix);
+  pdpgui_draw_weights_topdown_straight_hd (cr, loc_conflict_offset, loc_taskdemand_offset, conflict_td_weights);
+  pdp_weights_free (conflict_td_weights);
+
+
+
+  /* // vertical to diagonal */
+  /* pdpgui_draw_weights_topdown_straight_hd (cr, loc_conflict_offset, loc_taskdemand_offset, */
+  /* 			       pdp_input_find(layer_taskdemand, ID_CONFLICT)->input_weights); */
 
 
 
   // Now draw (imaginary) weights for TD to conflict units:
   double td_conflict_weights_matrix[3][3] = {
     {2.0, 2.0, 0.0},
-    {0.0, 2.0, 2.0},
     {2.0, 0.0, 2.0},
+    {0.0, 2.0, 2.0},
   };
   pdp_weights_matrix * td_conflict_weights = pdp_weights_create (3,3);
   pdp_weights_set (td_conflict_weights, 3, 3, td_conflict_weights_matrix);
