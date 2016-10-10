@@ -47,6 +47,18 @@ void pdpgui_draw_layer (cairo_t *cr,
 			PdpguiColourRgb colour_on,
 			pdp_layer * layer);
 
+void pdpgui_draw_layer_vertical (cairo_t *cr, 
+				 PdpguiCoords layer_centre, 
+				 PdpguiColourRgb colour_off,
+				 PdpguiColourRgb colour_on,
+				 pdp_layer * layer);
+
+void pdpgui_draw_layer_diagonal (cairo_t *cr, 
+				 PdpguiCoords layer_centre, 
+				 PdpguiColourRgb colour_off,
+				 PdpguiColourRgb colour_on,
+				 pdp_layer * layer);
+
 void pdpgui_draw_connection (cairo_t *cr, 
 			     PdpguiCoords connection_start, 
 			     PdpguiCoords connection_end,
@@ -65,10 +77,38 @@ void pdpgui_draw_weights (cairo_t *cr,
 			  PdpguiCoords layer_centre_upper, 
 			  pdp_weights_matrix * matrix);
 
+void pdpgui_draw_weights_hd (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			     pdp_weights_matrix * matrix);
+
+
+void pdpgui_draw_weights_dh (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			     pdp_weights_matrix * matrix);
+
+
+void pdpgui_draw_weights_vd (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			  pdp_weights_matrix * matrix);
+
 void pdpgui_draw_weights_topdown_straight (cairo_t *cr, 
 					   PdpguiCoords layer_centre_lower,  
 					   PdpguiCoords layer_centre_upper, 
 					   pdp_weights_matrix * matrix);
+
+void pdpgui_draw_weights_topdown_straight_hd (cairo_t *cr, 
+					      PdpguiCoords layer_centre_lower,  
+					      PdpguiCoords layer_centre_upper, 
+					      pdp_weights_matrix * matrix);
+
+void pdpgui_draw_weights_topdown_straight_dh (cairo_t *cr, 
+					      PdpguiCoords layer_centre_lower,  
+					      PdpguiCoords layer_centre_upper, 
+					      pdp_weights_matrix * matrix);
+
 
 void pdpgui_draw_weights_topdown (cairo_t *cr, 
 				  PdpguiCoords layer_centre_lower,  

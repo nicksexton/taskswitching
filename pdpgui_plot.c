@@ -133,6 +133,70 @@ void pdpgui_draw_layer (cairo_t *cr,
   return;
 }
 
+// draws the layer vertically
+void pdpgui_draw_layer_vertical (cairo_t *cr, 
+				 PdpguiCoords layer_centre, 
+				 PdpguiColourRgb colour_off,
+				 PdpguiColourRgb colour_on,
+				 pdp_layer * layer) {
+
+
+
+  int n; 
+  for (n = 0; n < layer->size; n ++) {
+    
+    PdpguiCoords centre = { .x = layer_centre.x,
+			    .y = layer_centre.y
+			    - ((double)(layer->size)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + n * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING)};
+
+    // squash unit activation (0 to 1) here!
+    double activation = layer->units_latest->activations[n];
+    double squashed = 1 / (1 + exp(-UNIT_DISPLAY_SQUASH_CONST * activation));
+
+    //    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
+
+    // plot text
+    //    pdpgui_pango_print_double (cr, centre, activation); // commented for publication figure
+
+  }
+  return;
+}
+
+// draws the layer diagonally - bottom left to top right
+void pdpgui_draw_layer_diagonal (cairo_t *cr, 
+				 PdpguiCoords layer_centre, 
+				 PdpguiColourRgb colour_off,
+				 PdpguiColourRgb colour_on,
+				 pdp_layer * layer) {
+
+
+
+  int n; 
+  for (n = 0; n < layer->size; n ++) {
+    
+    PdpguiCoords centre = { .x = layer_centre.x
+			    - ((double)(layer->size)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + n * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			    .y = layer_centre.y
+			    - ((double)(layer->size)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + n * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING)};
+
+    // squash unit activation (0 to 1) here!
+    double activation = layer->units_latest->activations[n];
+    double squashed = 1 / (1 + exp(-UNIT_DISPLAY_SQUASH_CONST * activation));
+
+    //    pdpgui_draw_unit (cr, centre, colour_off, colour_on, layer->units_latest->activations[n]);
+    pdpgui_draw_unit_activation_hsl (cr, centre, colour_off, squashed);
+
+    // plot text
+    //    pdpgui_pango_print_double (cr, centre, activation); // commented for publication figure
+
+  }
+  return;
+}
+
 
 void pdpgui_draw_connection (cairo_t *cr, 
 			     PdpguiCoords connection_start, 
@@ -141,32 +205,6 @@ void pdpgui_draw_connection (cairo_t *cr,
   double width;
   ArrowHeadType style;
  
-
-  /* // default black connections */
-  /* if (weight < 0) { */
-  /*   cairo_set_source_rgb (cr, 0.9, 0, 0); */
-  /*   //    width = -1.0 * weight * WEIGHT_WIDTH_SCALE; */
-  /* } */
-  /* else { */
-  /*   cairo_set_source_rgb (cr, 0, 0, 0); */
-  /*   //    width = weight * WEIGHT_WIDTH_SCALE; */
-  /* } */
-
-  /* width = WEIGHT_WIDTH_SCALE * (1/(1+exp(-1*(abs(weight)))) -0.5 ); */
-  /* cairo_set_line_width (cr, width); */
-
-  /* if (width > 0) { */
-  /*   cairo_set_dash(cr, NULL, 0, 0); // dashed line off */
-  /* } */
-  /* else { */
-  /*   double dash_pattern[2] = {5, 5}; */
-  /*   cairo_set_dash(cr, dash_pattern, 2, 0); */
-  /* } */
-
-  /* // remember to invert y axis */
-  /* cairo_move_to (cr, connection_start.x, connection_start.y); */
-  /* cairo_line_to (cr, connection_end.x, connection_end.y); */
-  /* cairo_stroke(cr); */
 
 
  CairoxPoint vector[2] = {
@@ -262,6 +300,85 @@ void pdpgui_draw_weights (cairo_t *cr,
   }
 }
 
+// horizontal (default) to diagonal
+void pdpgui_draw_weights_hd (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			  pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      PdpguiCoords lower = { .x = layer_centre_lower.x 
+			    - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			    .y = layer_centre_lower.y - DEFAULT_UNIT_SIZE };
+      
+      PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_upper.y + DEFAULT_UNIT_SIZE
+			     - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			     + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),};
+      
+      pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+// horizontal (default) to diagonal
+void pdpgui_draw_weights_dh (cairo_t *cr, 
+			  PdpguiCoords layer_centre_lower,  
+			  PdpguiCoords layer_centre_upper, 
+			  pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      PdpguiCoords lower = { .x = layer_centre_lower.x 
+			    - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			    .y = layer_centre_lower.y - DEFAULT_UNIT_SIZE
+			     - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			     + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING)};
+
+
+      PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_upper.y + DEFAULT_UNIT_SIZE };
+      
+      pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+// vertical to diagonal layer
+void pdpgui_draw_weights_vd (cairo_t *cr, 
+			     PdpguiCoords layer_centre_lower,  
+			     PdpguiCoords layer_centre_upper, 
+			     pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      PdpguiCoords lower = { .x = layer_centre_lower.x + DEFAULT_UNIT_SIZE,
+			    .y = layer_centre_lower.y - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),};
+
+      PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_upper.y + DEFAULT_UNIT_SIZE
+			     - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			     + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),};
+
+      pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+
 
 void pdpgui_draw_weights_topdown_straight (cairo_t *cr, 
 					   PdpguiCoords layer_centre_lower,  
@@ -283,6 +400,66 @@ void pdpgui_draw_weights_topdown_straight (cairo_t *cr,
 			     .y = layer_centre_upper.y - DEFAULT_UNIT_SIZE };
 
       //    pdpgui_draw_connection (cr, upper, lower, matrix->weights[j][i]);
+    pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+// horizontal (upper) to diagonal
+void pdpgui_draw_weights_topdown_straight_hd (cairo_t *cr, 
+					      PdpguiCoords layer_centre_lower,  
+					      PdpguiCoords layer_centre_upper, 
+					      pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      // sending unit ie upper
+      PdpguiCoords lower = { .x = layer_centre_lower.x 
+			    - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     //			    .y = layer_centre_lower.y - DEFAULT_UNIT_SIZE };
+			    .y = layer_centre_lower.y + DEFAULT_UNIT_SIZE };
+
+      // receiving unit ie lower
+            PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_upper.y - DEFAULT_UNIT_SIZE
+			     - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			     + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),};
+
+
+    pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
+    }
+  }
+}
+
+
+// horizontal (upper) to diagonal
+void pdpgui_draw_weights_topdown_straight_dh (cairo_t *cr, 
+					      PdpguiCoords layer_centre_lower,  
+					      PdpguiCoords layer_centre_upper, 
+					      pdp_weights_matrix * matrix) {
+  int i, j;
+  for (i = 0; i < matrix->size_input; i ++){ // sending units
+    for (j = 0; j < matrix->size_output; j ++) {
+      // sending unit ie upper
+      PdpguiCoords lower = { .x = layer_centre_lower.x 
+			     - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			     + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_lower.y + DEFAULT_UNIT_SIZE
+			     - ((double)(matrix->size_input)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			     + i * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),};
+      
+      // receiving unit ie lower
+      PdpguiCoords upper = { .x = layer_centre_upper.x 
+			    - ((double)(matrix->size_output)/2) * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING) 
+			    + j * (DEFAULT_UNIT_SIZE + DEFAULT_UNIT_PADDING),
+			     .y = layer_centre_upper.y - DEFAULT_UNIT_SIZE };
+
+
+
     pdpgui_draw_connection (cr, lower, upper, matrix->weights[j][i]);
     }
   }
