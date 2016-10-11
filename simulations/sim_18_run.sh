@@ -6,7 +6,7 @@ rm sim_18_log.txt
 rm sim_18_trials.conf
 rm sim_18_lookup.txt
 
-./sim_18_trials.py -n 1 -t 10000 -p 0.33 # -p is probability of a repeat trial
+./sim_18_trials.py -n 100 -t 1000 -p 0.33 # -p is probability of a repeat trial
 
 
 ../3task_basic_koch_conflict -t sim_18_trials.conf -m sim_18_model.conf > sim_18_log.txt
