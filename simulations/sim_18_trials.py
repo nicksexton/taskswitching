@@ -188,7 +188,7 @@ def generate_trials (num_trials, allow_task_repeat):
 #trials = generate_singletask (100, 1)
 #trials = generate_trials (100, False)
 generate_trials (num_trials_default, True)
-generate_trials (num_trials_default, False)
+#generate_trials (num_trials_default, False) # shouldn't be here for sim 18!!
 
 
 
