@@ -137,17 +137,64 @@ data.aggr <- ddply (big.data, "PATH.block.1", process)
 
 
 
+    
+
+data.shaped.inhib <- data.aggr[,1:11] 
+data.shaped.inhib$inhibition <- "Backward Inhibition"
+names (data.shaped.inhib) <- c("model", "rt.0SW", "rt.1SW", "rt.2SW", "rt.ALT", "rt.BLK", "err.0SW", "err.1SW", "err.2SW", "err.ALT", "err.BLK", "inhibition")
+data.shaped.noinhib <- cbind (data.aggr[,1], data.aggr[,12:21])
+data.shaped.noinhib$inhibition <- "No Backward Inhibition"
+names(data.shaped.noinhib) <- c("model", "rt.0SW", "rt.1SW", "rt.2SW", "rt.ALT", "rt.BLK", "err.0SW", "err.1SW", "err.2SW", "err.ALT", "err.BLK", "inhibition")
+data.shaped <- rbind (data.shaped.inhib, data.shaped.noinhib)
+
+
+
+data.shaped$rt.switch.cost <- data.shaped$rt.1SW - data.shaped$rt.0SW
+data.shaped$err.switch.cost <- data.shaped$err.1SW - data.shaped$err.0SW
+data.shaped$rt.n2rep.cost <- data.shaped$rt.ALT - data.shaped$rt.2SW
+data.shaped$err.n2rep.cost <- data.shaped$err.ALT - data.shaped$err.2SW
+
+## data.long <- rbind (
+##     cbind(data.shaped$model, data.shaped$rt.0SW, data.shaped$inhibition, rep("rt.0SW", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$rt.1SW, data.shaped$inhibition, rep("rt.1SW", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$rt.1SW, data.shaped$inhibition, rep("rt.2SW", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$rt.1SW, data.shaped$inhibition, rep("rt.ALT", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$rt.1SW, data.shaped$inhibition, rep("rt.BLK", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.0SW, data.shaped$inhibition, rep("err.0SW", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.1SW, data.shaped$inhibition, rep("err.1SW", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.1SW, data.shaped$inhibition, rep("err.2SW", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.1SW, data.shaped$inhibition, rep("err.ALT", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.1SW, data.shaped$inhibition, rep("err.BLK", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$rt.switch.cost, data.shaped$inhibition, rep("rt.switch.cost", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.switch.cost, data.shaped$inhibition, rep("err.switch.cost", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$rt.n2rep.cost, data.shaped$inhibition, rep("rt.n2rep.cost", nrow(data.shaped))),
+##     cbind(data.shaped$model, data.shaped$err.n2rep.cost, data.shaped$inhibition, rep("err.n2rep.cost", nrow(data.shaped)))
+## )
+
+data.long <- rbind (
+    cbind(data.shaped$model, data.shaped$rt.0SW, data.shaped$err.0SW, data.shaped$inhibition, rep("0SW", nrow(data.shaped))),
+    cbind(data.shaped$model, data.shaped$rt.1SW, data.shaped$err.1SW, data.shaped$inhibition, rep("1SW", nrow(data.shaped))),
+    cbind(data.shaped$model, data.shaped$rt.2SW, data.shaped$err.2SW, data.shaped$inhibition, rep("2SW", nrow(data.shaped))),
+    cbind(data.shaped$model, data.shaped$rt.ALT, data.shaped$err.ALT, data.shaped$inhibition, rep("ALT", nrow(data.shaped))),
+    cbind(data.shaped$model, data.shaped$rt.BLK, data.shaped$err.BLK, data.shaped$inhibition, rep("BLK", nrow(data.shaped))),
+    cbind(data.shaped$model, data.shaped$rt.switch.cost, data.shaped$err.switch.cost, data.shaped$inhibition, rep("switch.cost", nrow(data.shaped))),
+    cbind(data.shaped$model, data.shaped$rt.n2rep.cost, data.shaped$err.n2rep.cost, data.shaped$inhibition, rep("n2rep.cost", nrow(data.shaped)))
+)
+
+data.long <- data.frame(data.long)
+
+names(data.long) <- c("model", "RT", "Error Rate", "Inhibition", "Sequence")
+
 # RTs for 1SW condition
 
 
 order <- c("BLK", "0SW", "1SW", "2SW", "ALT")
 
-bargraph <- ggplot (data, aes(x=sequence, y=cycles, group=inhibition, fill=inhibition))
+bargraph <- ggplot (data.long, aes(x=Sequence, y=RT, group=Inhibition, fill=Inhibition))
 bargraph +
     stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
-    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-#  labs (x = "Task (trial 3)", y = "RT", group = "task (trial 2)") +
-    scale_x_discrete (limits=order) +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) +
+#    scale_x_discrete (limits=order) +
         ggtitle("Simulation 1: RTs") + theme(legend.position="bottom") +
             scale_fill_grey(start = 0.3, end = 0.7)
 
