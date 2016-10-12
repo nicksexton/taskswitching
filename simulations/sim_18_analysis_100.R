@@ -74,12 +74,15 @@ data.noinhib <- merge(data.lookuptable, data.noinhib, by="trialid", sort=FALSE)
 data <- rbind (data.inhib, data.noinhib)
 
                                         # trim 100 - 199: generated in error
-data <- subset(data, data$PATH.block.1 < 100)
+#data <- subset(data, data$PATH.block.1 < 100)
 
 process <- function (my.data) {
 
 ##### Calculate error rates ######
     my.data.errorrates.inhib <- with (subset (my.data, my.data$inhibition == "Backward Inhibition"), table (sequence, correct))
+    if (length (my.data.errorrates.inhib) == 5) { # to manage situation where no errors made 
+        my.data.errorrates.inhib <- cbind (c(0, 0, 0, 0, 0), my.data.errorrates.inhib)
+    }
 
 
 #    browser()
@@ -102,7 +105,7 @@ process <- function (my.data) {
     errorrates.noinhib$inhibition <- "No Backward Inhibition"
 
 
-    errorrates <- cbind (data.frame(t(errorrates.inhib$errors), t(errorrates.noinhib$errors)))
+    errorrates <- data.frame(cbind (t(errorrates.inhib$errors), t(errorrates.noinhib$errors)))
     names (errorrates) <- c("err.0SW.inhib", "err.1SW.inhib", "err.2SW.inhib", "err.ALT.inhib", "err.BLK.inhib",
                             "err.0SW.noinhib", "err.1SW.noinhib", "err.2SW.noinhib", "err.ALT.noinhib", "err.BLK.noinhib")
     
@@ -182,15 +185,18 @@ data.long <- rbind (
 )
 
 data.long <- data.frame(data.long)
+data.long$error.rate <- as.numeric(as.character(data.long$error.rate))
+data.long$rt <- as.numeric(as.character(data.long$rt))
 
-names(data.long) <- c("model", "RT", "Error Rate", "Inhibition", "Sequence")
+
+names(data.long) <- c("model", "rt", "error.rate", "inhibition", "sequence")
 
 # RTs for 1SW condition
 
 
 order <- c("BLK", "0SW", "1SW", "2SW", "ALT")
 
-bargraph <- ggplot (data.long, aes(x=Sequence, y=RT, group=Inhibition, fill=Inhibition))
+bargraph <- ggplot (data.long, aes(x=sequence, y=rt, group=inhibition, fill=inhibition))
 bargraph +
     stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
     stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) +
@@ -201,17 +207,22 @@ bargraph +
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_18", "n2rep_paper_sim0_rt.png")
 ggsave(filename=imageFile, width = 120, height = 150, units = "mm")
 
-            
+
+
+
                                         #todo
                                         # re-order so BLK is left-most on x-axis
 
 
 
-error.rate.graph <- ggplot (errorrates, aes(x=sequence, y=errors, group=inhibition, fill=inhibition)) +
-    scale_x_discrete (limits=order)
-error.rate.graph + geom_bar (stat="identity", position="dodge") +
-    ggtitle ("Simulation 1: Error rates") + theme(legend.position="bottom") +
-        scale_fill_grey(start = 0.3, end = 0.7)
+error.rate.graph <- ggplot (data.long, aes(x=sequence, y=error.rate, group=inhibition, fill=inhibition))
+error.rate.graph +
+    stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
+    stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) +
+#    scale_x_discrete (limits=order) +
+        ggtitle("Simulation 1: RTs") + theme(legend.position="bottom") +
+            scale_fill_grey(start = 0.3, end = 0.7)
+
 
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_18", "n2rep_paper_sim0_errors.png")
 ggsave(filename=imageFile, width = 120, height = 150, units = "mm")
