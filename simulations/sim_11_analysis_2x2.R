@@ -15,7 +15,7 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
            "response")
 
 
-data.raw <- read.delim("sim_11_data_8x8x1000.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_11_data_2x2.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
 #data.raw <- read.delim("sim_11_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
@@ -44,12 +44,16 @@ block.is.correct <- function (x) {
   return (x)
 }
 
-
 data.raw <- block.is.correct (data.raw)
+
+
+
+
+
 
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "rsi_n1", "rsi_n", "blank")
-data.lookuptable = read.delim("sim_11_lookup_8x8x1000.txt", header = FALSE, col.names=labels.lookup)
+data.lookuptable = read.delim("sim_11_lookup_2x2.txt", header = FALSE, col.names=labels.lookup)
 #data.lookuptable = read.delim("sim_11_lookup.txt", header = FALSE, col.names=labels.lookup)
 data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "rsi_n1", "rsi_n", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct.block", "correct.trial"))
@@ -67,6 +71,8 @@ data <- data.raw
 # filter trials for correct only
                                         # should filter for correct sequences only!
 data = subset (data.raw, correct.block == TRUE)
+
+=
 
                                         #
 # exclude outliers (RTs +/- 3 SDs) for each task (irrespective of trial position or switch condition)
@@ -158,25 +164,22 @@ data.trial3.plotsimple$rsi_n <- as.factor (data.trial3.plotsimple$rsi_n) # so it
 
 # Plot graph for switches
 
-linegraph <- ggplot (subset(data.trial3.plotsimple, (data.trial3.plotsimple$rsi_n == 0.9 | data.trial3.plotsimple$rsi_n == 1.5) & (
-                                          data.trial3.plotsimple$rsi_n1 == 0.9 | data.trial3.plotsimple$rsi_n1 == 1.5)),
+linegraph <- ggplot (data.trial3.plotsimple, 
                      aes(x=sequence_cond, y=cycles, group=rsi, linetype=rsi_n, colour=rsi_n1))
 linegraph +
   stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-      stat_summary(fun.data = mean_cl_boot, geom = "errorbar") +
+      stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width=0.2) +
 #          geom_line (aes(linetype=rsi)) + 
   labs (x = "Sequence", y = "RT", colour = expression(tau[1]), linetype = expression(tau[2])) +
       ggtitle("Simulation 3: Variable intertrial intervals") +
-          theme (legend.position="bottom") + 
-            scale_colour_grey(start = 0.3, end = 0.7)
-
+          theme (legend.position="right") + 
+              scale_colour_grey(start = 0.3, end = 0.7)
 
                                         #imageFile <- file.path(imageDirectory, "sim_11_07-15.png") 
                                         #imageFile <- file.path(imageDirectory, "sim_11_03-06.png")
                                         #imageFile <- file.path(imageDirectory, "sim_11_03-15.png")
-imageFile <- file.path(imageDirectory, "sim_3_6_15.png") 
-
-ggsave(imageFile)
+imageFile <- file.path(imageDirectory, "sim_11_07-15.png") 
+ggsave(imageFile, width=150, height=120, units = "mm")
 
 
 
@@ -223,10 +226,15 @@ cloud (cycles ~ rsi_n*rsi_n1, data = subset(data.trial3, sequence_cond=="2SW"), 
 #n2 repetition cost
 model.n2rc <- aov(cycles ~ sequence_cond +
                       rsi_n1 + rsi_n +
-                      sequence_cond:rsi_n1 + sequence_cond:rsi_n +
-                      sequence_cond:rsi_n1:rsi_n,                  
+                          rsi_n:rsi_n1 +
+                          sequence_cond:rsi_n1 + sequence_cond:rsi_n +
+                          sequence_cond:rsi_n1:rsi_n,
                   data = data.trial3)
 anova(model.n2rc)
+
+
+ezmodel <- ezANOVA(data = data.trial3, dv = .(cycles), wid = .(), between = .(rsi_n1, rsi_n, sequence_cond), within = .(), type = 3, detailed = TRUE)
+ezmodel
 
 
 

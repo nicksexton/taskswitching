@@ -16,7 +16,8 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
 
 
 data.raw <- read.delim("sim_11_data_8x8x1000.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.raw <- read.delim("sim_11_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+
+#data.raw <- read.delim("sim_11_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
                                         # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -150,20 +151,33 @@ data$rsi <- paste (data$rsi_n1, ":", data$rsi_n)
                                         # look only at trial 3
 data.trial3 <- subset (data, PATH.trial == 2)
 
+data.trial3.plotsimple <- data.trial3
+
+data.trial3.plotsimple$rsi_n1 <- as.factor (data.trial3.plotsimple$rsi_n1) # so it can be mapped to linetype in the graph
+data.trial3.plotsimple$rsi_n <- as.factor (data.trial3.plotsimple$rsi_n) # so it can be mapped to linetype in the graph
 
 # Plot graph for switches
 
-linegraph <- ggplot (data.trial3, aes(x=sequence_cond, y=cycles, group=rsi, colour=rsi))
+data.2x2 <- subset (subset(data.trial3.plotsimple, (data.trial3.plotsimple$rsi_n == 0.9 | data.trial3.plotsimple$rsi_n == 1.5) & (
+                                          data.trial3.plotsimple$rsi_n1 == 0.9 | data.trial3.plotsimple$rsi_n1 == 1.5)))
+
+linegraph <- ggplot (data.2x2,
+                     aes(x=sequence_cond, y=cycles, group=rsi, linetype=rsi_n, colour=rsi_n1))
 linegraph +
   stat_summary(fun.y = mean, geom = "line", position = "dodge") +
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar") +
-  labs (x = "Sequence", y = "RT", group = "RSI (preceding trial n-1:n)") +
-      ggtitle("Simulation 11, varied intertrial intervals")
+      stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width=0.2) +
+#          geom_line (aes(linetype=rsi)) + 
+  labs (x = "Sequence", y = "RT", colour = expression(tau[1]), linetype = expression(tau[2])) +
+      ggtitle("Simulation 3: Variable intertrial intervals") +
+          theme (legend.position="right") + 
+              scale_colour_grey(start = 0.3, end = 0.7)
+
+
 
                                         #imageFile <- file.path(imageDirectory, "sim_11_07-15.png") 
                                         #imageFile <- file.path(imageDirectory, "sim_11_03-06.png")
                                         #imageFile <- file.path(imageDirectory, "sim_11_03-15.png")
-imageFile <- file.path(imageDirectory, "sim_11_12-25.png") 
+imageFile <- file.path(imageDirectory, "sim_3_09-15.png") 
 
 ggsave(imageFile)
 
@@ -171,19 +185,20 @@ ggsave(imageFile)
 
                                         # 3d lattice for surface, where x and y co-ordinages are rsi_n-1 and rsi_n respectively
 
+greyscale <- colorRampPalette(c("grey90", "grey10"))
 
 tab.2SW <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="2SW"), mean)
 # wireframe (cycles ~ rsi_n1*rsi_n, data = tab.2SW, xlab="rsi n-1", ylab="rsi n", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE)
-wireframe (cycles ~ rsi_n*rsi_n1, data = tab.2SW, xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+wireframe (cycles ~ rsi_n*rsi_n1, data = tab.2SW, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 00, x = -75))
 
-dev.copy(png, "sim_11_2SW_1000.png")
+dev.copy(png, "sim_3_2SW_1000.png")
 dev.off()
 
 
 tab.ALT <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="ALT"), mean)
-wireframe (cycles ~ rsi_n*rsi_n1, data = tab.ALT, xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial ALT", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+wireframe (cycles ~ rsi_n*rsi_n1, data = tab.ALT, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial ALT", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 0, x = -75))
 
-dev.copy(png, "sim_11_ALT_1000.png")
+dev.copy(png, "sim_3_ALT_1000.png")
 dev.off()
 
 tab.2SW$rsi <- paste (tab.2SW$rsi_n1, ":", tab.2SW$rsi_n)
@@ -193,9 +208,9 @@ tab.n2rc <- merge (tab.2SW, tab.ALT, by = "rsi")
 colnames(tab.n2rc) <- c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "blank", "blank1", "rt.ALT")
 tab.n2rc <- subset (tab.n2rc, select =c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "rt.ALT"))
 tab.n2rc$n2rc <- tab.n2rc$rt.ALT - tab.n2rc$rt.2SW
-wireframe (n2rc ~ rsi_n*rsi_n1, data = tab.n2rc, xlab="rsi n", ylab="rsi n-1", main = "n-2 repetition cost", drape = TRUE, colourkey = TRUE, screen=list(z=-200, y = 0, x = -75))
+wireframe (n2rc ~ rsi_n*rsi_n1, data = tab.n2rc, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "n-2 repetition cost", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 0, x = -75))
 
-dev.copy(png, "sim_11_n2rc_1000.png")
+dev.copy(png, "sim_3_n2rc_1000.png")
 dev.off()
 
 
