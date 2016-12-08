@@ -266,6 +266,9 @@ model.trial3 <- aov (cycles ~ sequence.iso +
 anova (model.trial3)
 
 
+                                        # writeup update - do with ezANOVA to get generalised eta squared
+etaSquared(model.trial3, type=2, anova=FALSE)
+
 # Effects of trial 2, 3 congruency on trial 3 performance
 model.trial23 <- aov (cycles ~ sequence.iso +
                       congruency.2 +
