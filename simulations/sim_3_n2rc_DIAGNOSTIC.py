@@ -43,17 +43,40 @@ for o, a in myopts:
 run_congruency_levels = [
     [0, 0, 0, "II/II/II"], # 0 = II, 1 = IC
     [0, 0, 1, "II/II/IC"],
+    [0, 0, 2, "II/II/CC"],
     [0, 1, 0, "II/IC/II"],
-    [1, 0, 0, "IC/II/II"],
     [0, 1, 1, "II/IC/IC"],
+    [0, 1, 2, "II/IC/CC"],
+    [0, 2, 0, "II/CC/II"],
+    [0, 2, 1, "II/CC/IC"],
+    [0, 2, 2, "II/CC/CC"],
+    [1, 0, 0, "IC/II/II"],
     [1, 0, 1, "IC/II/IC"],
+    [1, 0, 2, "IC/II/CC"],
     [1, 1, 0, "IC/IC/II"],
     [1, 1, 1, "IC/IC/IC"],
+    [1, 1, 2, "IC/IC/CC"],
+    [1, 2, 0, "IC/CC/II"],
+    [1, 2, 1, "IC/CC/IC"],
+    [1, 2, 2, "IC/CC/CC"],
+    [2, 0, 0, "CC/II/II"],
+    [2, 0, 1, "CC/II/IC"],
+    [2, 0, 2, "CC/II/CC"],
+    [2, 1, 0, "CC/IC/II"],
+    [2, 1, 1, "CC/IC/IC"],
+    [2, 1, 2, "CC/IC/CC"],
+    [2, 2, 0, "CC/CC/II"],
+    [2, 2, 1, "CC/CC/IC"],
+    [2, 2, 2, "CC/CC/CC"],
+
+    
+
 ]
 
 stimulus_congruency = [
     [0, 1, 1, "II"], #target, distractor 1, distractor 2
-    [0, 0, 1, "IC"]
+    [0, 0, 1, "IC"],
+    [0, 0, 0, "CC"]
 ]
 
 sequence_levels = [
