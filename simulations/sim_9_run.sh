@@ -11,4 +11,4 @@ rm sim_9_log.txt
 
 # mv 3task_act.txt sim_9_act.txt
 rm 3task_act.txt 
-mv 3task_data.txt sim_9_data.txt
+mv 3task_data.txt sim_9_data_graded.txt
