@@ -253,12 +253,14 @@ bargraph <- ggplot (data.long, aes(x=sequence, y=rt, group=inhibition, fill=inhi
 bargraph +
     stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
     stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) +
-    scale_x_discrete (limits=order, labels=c("BLK", "0SW", "1SW", "2SW", "ALT", "switch cost", "n-2 repetition\n cost")) +
-        ggtitle("Simulation 1: RTs") + theme(legend.position="bottom") +
-            scale_fill_grey(start = 0.3, end = 0.7)
+    scale_x_discrete (limits=order, labels=c("BLK", "0SW", "1SW", "2SW", "ALT", "switch\ncost", "n-2\nrepetition\ncost")) +
+        ggtitle("Simulation 1: RTs") + theme_bw() + theme(legend.position="bottom") +
+            scale_fill_grey(start = 0.3, end = 0.7) 
+
+
 
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_18", "n2rep_paper_sim0_rt.png")
-ggsave(filename=imageFile, width = 120, height = 150, units = "mm")
+ggsave(filename=imageFile, width = 100, height = 120, units = "mm")
 
 
 
@@ -272,14 +274,14 @@ error.rate.graph <- ggplot (data.long, aes(x=sequence, y=error.rate, group=inhib
 error.rate.graph +
     stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
     stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) +
-        scale_x_discrete (limits=order, labels=c("BLK", "0SW", "1SW", "2SW", "ALT", "switch cost", "n-2 repetition\n cost")) +
+        scale_x_discrete (limits=order, labels=c("BLK", "0SW", "1SW", "2SW", "ALT", "switch\ncost", "n-2\nrepetition\ncost")) +
             scale_y_continuous (breaks=c(0.0, 0.002, 0.004, 0.006, 0.008), labels=c("0.0%", "0.2%", "0.4%", "0.6%", "0.8%")) +
-        ggtitle("Simulation 1: Error Rates") + theme(legend.position="bottom") +
+        ggtitle("Simulation 1: Error Rates") + theme_bw() + theme(legend.position="bottom") +
             scale_fill_grey(start = 0.3, end = 0.7)
 
 
 imageFile <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_18", "n2rep_paper_sim0_errors.png")
-ggsave(filename=imageFile, width = 120, height = 150, units = "mm")
+ggsave(filename=imageFile, width = 100, height = 120, units = "mm")
 
 
 
