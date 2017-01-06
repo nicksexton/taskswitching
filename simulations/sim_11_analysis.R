@@ -15,9 +15,9 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
            "response")
 
 
-#data.raw <- read.delim("sim_11_data_8x8x1000.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+data.raw <- read.delim("sim_11_data_8x8x1000.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
-data.raw <- read.delim("sim_11_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
+#data.raw <- read.delim("sim_11_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
                                         # now split trial path into block and trial ID
 data.raw$trialpath <- as.character(data.raw$trialpath)
@@ -49,8 +49,8 @@ data.raw <- block.is.correct (data.raw)
 
 # Join lookup table with simulated data
 labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "rsi_n1", "rsi_n", "blank")
-#data.lookuptable = read.delim("sim_11_lookup_8x8x1000.txt", header = FALSE, col.names=labels.lookup)
-data.lookuptable = read.delim("sim_11_lookup.txt", header = FALSE, col.names=labels.lookup)
+data.lookuptable = read.delim("sim_11_lookup_8x8x1000.txt", header = FALSE, col.names=labels.lookup)
+#data.lookuptable = read.delim("sim_11_lookup.txt", header = FALSE, col.names=labels.lookup)
 data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "rsi_n1", "rsi_n", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct.block", "correct.trial"))
 
@@ -167,10 +167,10 @@ linegraph +
   stat_summary(fun.y = mean, geom = "line", position = "dodge") +
       stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width=0.2) +
 #          geom_line (aes(linetype=rsi)) + 
-  labs (x = "Sequence", y = "RT", colour = expression(tau[1]), linetype = expression(tau[2])) +
+  labs (x = "Sequence", y = "RT", colour = expression(tau[n-1]), linetype = expression(tau[n])) +
       ggtitle("Simulation 3: Variable intertrial intervals") +
-          theme (legend.position="right") + 
-              scale_colour_grey(start = 0.3, end = 0.7)
+          theme_bw() + theme (legend.position="right") + 
+              scale_colour_grey(start = 0.1, end = 0.4)
 
 
 
@@ -178,8 +178,8 @@ linegraph +
                                         #imageFile <- file.path(imageDirectory, "sim_11_03-06.png")
                                         #imageFile <- file.path(imageDirectory, "sim_11_03-15.png")
 imageFile <- file.path(imageDirectory, "sim_3_09-15.png") 
+ggsave(filename=imageFile, width = 100, height = 120, units = "mm")
 
-ggsave(imageFile)
 
 
 
@@ -189,14 +189,61 @@ greyscale <- colorRampPalette(c("grey90", "grey10"))
 
 tab.2SW <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="2SW"), mean)
 # wireframe (cycles ~ rsi_n1*rsi_n, data = tab.2SW, xlab="rsi n-1", ylab="rsi n", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE)
-wireframe (cycles ~ rsi_n*rsi_n1, data = tab.2SW, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 00, x = -75))
+#wireframe (cycles ~ rsi_n*rsi_n1, data = tab.2SW, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial 2SW", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 00, x = -75))
+wireframe (cycles ~ rsi_n*rsi_n1,
+           data = tab.2SW,
+           zlab=list(
+               label="RT",
+               cex=2.0),
+           xlab=list(
+               label=expression(tau[n]),
+               cex=2.0),
+           ylab=list(
+               label=expression(tau[n-1]),
+               cex=2.0),
+           main = list(
+               label="RT of 3rd trial 2SW",
+               cex=2.0),
+           drape = TRUE,
+           colourkey = TRUE,
+           col.regions=greyscale(100),
+           screen=list(z=-140, y = 00, x = -75),
+           scales=list(arrows=FALSE, axis=list(text=list, cex=3.0)))
 
 dev.copy(png, "sim_3_2SW_1000.png")
 dev.off()
 
 
 tab.ALT <- aggregate (cycles ~rsi_n1+rsi_n, subset(data.trial3, sequence_cond=="ALT"), mean)
-wireframe (cycles ~ rsi_n*rsi_n1, data = tab.ALT, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "RT of 3rd trial ALT", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 0, x = -75))
+wireframe (cycles ~ rsi_n*rsi_n1,
+           data = tab.ALT,
+           zlab=list(
+               label="RT",
+               cex=2.0),
+           xlab=list(
+               label=expression(tau[n]),
+               cex=2.0),
+           ylab=list(
+               label=expression(tau[n-1]),
+               cex=2.0),
+           main = list(
+               label="RT of 3rd trial ALT",
+               cex=2.0),
+           drape = TRUE,
+           colourkey = TRUE,
+           col.regions=greyscale(100),
+           screen=list(z=-140, y = 00, x = -75),
+           scales=list(arrows=FALSE, axis=list(text=list, cex=3.0)))
+## wireframe (cycles ~ rsi_n*rsi_n1,
+##            data = tab.ALT,
+##            zlab="RT\n(cycles)",
+##            xlab=expression(tau[n]),
+##            ylab=expression(tau[n-1]),
+##            main = "RT of 3rd trial ALT",
+##            drape = TRUE,
+##            colourkey = TRUE,
+##            col.regions=greyscale(100),
+##            screen=list(z=-140, y = 0, x = -75))
 
 dev.copy(png, "sim_3_ALT_1000.png")
 dev.off()
@@ -208,7 +255,27 @@ tab.n2rc <- merge (tab.2SW, tab.ALT, by = "rsi")
 colnames(tab.n2rc) <- c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "blank", "blank1", "rt.ALT")
 tab.n2rc <- subset (tab.n2rc, select =c("rsi", "rsi_n1", "rsi_n", "rt.2SW", "rt.ALT"))
 tab.n2rc$n2rc <- tab.n2rc$rt.ALT - tab.n2rc$rt.2SW
-wireframe (n2rc ~ rsi_n*rsi_n1, data = tab.n2rc, zlab="RT\n(cycles)", xlab="rsi n", ylab="rsi n-1", main = "n-2 repetition cost", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 0, x = -75))
+wireframe (n2rc ~ rsi_n*rsi_n1,
+           data = tab.n2rc,
+           zlab=list(
+               label="RT",
+               cex=2.0),
+           xlab=list(
+               label=expression(tau[n]),
+               cex=2.0),
+           ylab=list(
+               label=expression(tau[n-1]),
+               cex=2.0),
+           main = list(
+               label="n-2 repetition cost",
+               cex=2.0),
+           drape = TRUE,
+           colourkey = TRUE,
+           col.regions=greyscale(100),
+           screen=list(z=-140, y = 00, x = -75),
+           scales=list(arrows=FALSE, axis=list(text=list, cex=3.0)))
+
+#wireframe (n2rc ~ rsi_n*rsi_n1, data = tab.n2rc, zlab="RT\n(cycles)", xlab=expression(tau[n]), ylab=expression(tau[n-1]), main = "n-2 repetition cost", drape = TRUE, colourkey = TRUE, col.regions=greyscale(100), screen=list(z=-140, y = 0, x = -75))
 
 dev.copy(png, "sim_3_n2rc_1000.png")
 dev.off()
