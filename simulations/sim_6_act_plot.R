@@ -265,13 +265,24 @@ plot.triple.activation <- function (data.subset, title) {
   unique.trials <- data.frame (unique (data.subset[c("trialid", "trial_pos", "RT")]))
   quantiles <- by (unique.trials$RT, unique.trials$trial_pos, quantile)
 
+  ## stats.plot <- data.frame (trial_pos =
+  ##                           factor(c(0, 1, 2)),
+  ##                           median = c(quantiles[["0"]][[3]], quantiles[["1"]][[3]], quantiles[["2"]][[3]]),
+  ##                           qu = c(quantiles[["0"]][[4]], quantiles[["1"]][[4]], quantiles[["2"]][[4]]),
+  ##                           ql = c(quantiles[["0"]][[2]], quantiles[["1"]][[2]], quantiles[["2"]][[2]]))
+
+                                        # Plot vertical line for mean, rather than median
+                                        # median and quartiles doesn't capture n-2 repetition cost, which is in the tail of the distribution
+  
+  mean.rt <- by (unique.trials$RT, unique.trials$trial_pos, mean) 
+
   stats.plot <- data.frame (trial_pos =
                             factor(c(0, 1, 2)),
-                            median = c(quantiles[["0"]][[3]], quantiles[["1"]][[3]], quantiles[["2"]][[3]]),
-                            qu = c(quantiles[["0"]][[4]], quantiles[["1"]][[4]], quantiles[["2"]][[4]]),
-                            ql = c(quantiles[["0"]][[2]], quantiles[["1"]][[2]], quantiles[["2"]][[2]]))
-  
+                            mean = c(mean.rt[["0"]][[1]], mean.rt[["1"]][[1]], mean.rt[["2"]][[1]]))
 
+  
+# browser()
+  
   # filter data (exclude top and bottom deciles from averaging)
 data.filtered <- filter.data.decile (data.subset)
 
@@ -279,17 +290,6 @@ data.filtered <- filter.data.decile (data.subset)
   plotdata <- prepare.data (data.filtered)
   
   
-  ## act.plot <- ggplot(plotdata,
-  ##                  aes(x=cycle, y=activation, colour=task)) +
-  ##                    facet_grid (layer ~ trial_pos) +
-  ##                      geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
-  ##                        geom_line() +
-  ##                          scale_fill_manual(values=colours.scale) +
-  ##                            scale_colour_manual(values=colours.scale) +
-  ##                              ggtitle (title) +
-  ##                                geom_vline(aes(xintercept=median), data = stats.plot) + # median
-  ##                                  geom_vline(aes(xintercept=qu), data = stats.plot) + # upper quartile
-  ##                                    geom_vline(aes(xintercept=ql), data = stats.plot) # lower quartile
 
 
   act.plot <- ggplot(plotdata,
@@ -300,9 +300,7 @@ data.filtered <- filter.data.decile (data.subset)
                            scale_fill_manual(values=colours.scale) +
                              scale_colour_manual(values=colours.scale) +
                                ggtitle (title) +
-                                 geom_vline(aes(xintercept=median), data = stats.plot) + # median
-                                   geom_vline(aes(xintercept=qu), data = stats.plot) + # upper quartile
-                                       geom_vline(aes(xintercept=ql), data = stats.plot) + # lower quartile
+                                 geom_vline(aes(xintercept=mean), data = stats.plot) + # median
     guides(colour="legend", fill="legend", alpha="none") +
     theme_bw() + theme (legend.position="right") + 
         coord_cartesian(xlim=c(0, 150))  +
