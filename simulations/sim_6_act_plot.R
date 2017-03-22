@@ -78,7 +78,8 @@ activations <- merge (activations.filtered, data[, c("trialpath", "trialid", "RT
 # trims subsetted data for outliers (top and bottom deciles)
 filter.data.decile <- function (data) {
 
-  decile <- function(x) quantile(x, prob=seq(0, 1, length=11), type=5, names=FALSE) 
+                                        #  decile <- function(x) quantile(x, prob=seq(0, 1, length=11), type=5, names=FALSE)
+  decile <- function(x) quantile(x, prob=seq(0, 1, length=21), type=5, names=FALSE) 
   unique.trials <- function(x) data.frame (unique (x[c("trialid", "trial_pos", "RT")]))
   
   
@@ -88,7 +89,7 @@ filter.data.decile <- function (data) {
 
   filter <- function(x, n) subset(x, !((trial_pos == toString(n)) &
                                        (x$RT < data.deciles[[toString(n)]][2] |
-                                         x$RT >= data.deciles[[toString(n)]][10])))
+                                         x$RT >= data.deciles[[toString(n)]][20])))
 
   data.filtered <- filter (data, 0)
   data.filtered <- filter (data.filtered, 1)
@@ -272,23 +273,44 @@ plot.triple.activation <- function (data.subset, title) {
   
 
   # filter data (exclude top and bottom deciles from averaging)
-  data.filtered <- filter.data.decile (data.subset)
+data.filtered <- filter.data.decile (data.subset)
 
   # arrange data in right format
   plotdata <- prepare.data (data.filtered)
   
   
+  ## act.plot <- ggplot(plotdata,
+  ##                  aes(x=cycle, y=activation, colour=task)) +
+  ##                    facet_grid (layer ~ trial_pos) +
+  ##                      geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
+  ##                        geom_line() +
+  ##                          scale_fill_manual(values=colours.scale) +
+  ##                            scale_colour_manual(values=colours.scale) +
+  ##                              ggtitle (title) +
+  ##                                geom_vline(aes(xintercept=median), data = stats.plot) + # median
+  ##                                  geom_vline(aes(xintercept=qu), data = stats.plot) + # upper quartile
+  ##                                    geom_vline(aes(xintercept=ql), data = stats.plot) # lower quartile
+
+
   act.plot <- ggplot(plotdata,
                    aes(x=cycle, y=activation, colour=task)) +
                      facet_grid (layer ~ trial_pos) +
-                       geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha = 0.01, fill=task)) +
+                       geom_ribbon(aes(ymin=activation - sd, ymax = activation + sd, alpha=0.01, fill=task)) +
                          geom_line() +
                            scale_fill_manual(values=colours.scale) +
                              scale_colour_manual(values=colours.scale) +
                                ggtitle (title) +
                                  geom_vline(aes(xintercept=median), data = stats.plot) + # median
                                    geom_vline(aes(xintercept=qu), data = stats.plot) + # upper quartile
-                                     geom_vline(aes(xintercept=ql), data = stats.plot) # lower quartile
+                                       geom_vline(aes(xintercept=ql), data = stats.plot) + # lower quartile
+    guides(colour="legend", fill="legend", alpha="none") +
+    theme_bw() + theme (legend.position="right") + 
+        coord_cartesian(xlim=c(0, 150))  +
+            scale_y_continuous( name= "Activation") +
+                scale_x_continuous (name="Cycle", breaks=c(0, 25, 50, 75, 100, 125, 150)) +
+                    labs (fill="Unit", colour="Unit")
+
+
 
 
   
@@ -333,25 +355,24 @@ symmetric.1SW <- subset(activations,
 #
 
 
-plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "Symmetric tasks, 2-Switch (CBA)")
-imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_2SW.png") 
+plot.symmetric.2SW <- plot.triple.activation (symmetric.2SW, "2-Switch (CBA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_act_2SW.png") 
 ggsave(imageFile, width=300, height=200, units="mm")
 plot.symmetric.2SW
 
-
-plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Symmetric tasks, Alt-Switch (ABA)")
-imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_ALT.png") 
+plot.symmetric.ALT <- plot.triple.activation (symmetric.ALT, "Alt-Switch (ABA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_act_ALT.png") 
 ggsave(imageFile, width=300, height=200, units="mm")
 plot.symmetric.ALT
 
 
-plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "Symmetric tasks, 1-Switch (BBA)")
-imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_1SW.png") 
+plot.symmetric.1SW <- plot.triple.activation (symmetric.1SW, "1-Switch (BBA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_act_1SW.png") 
 ggsave(imageFile, width=300, height=200, units="mm")
 plot.symmetric.1SW
 
-plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "Symmetric tasks, 0-Switch (BAA)")
-imageFile <- file.path(imageDirectory, "sim_6_symmetric_activation_0SW.png") 
+plot.symmetric.0SW <- plot.triple.activation (symmetric.0SW, "0-Switch (BAA)")
+imageFile <- file.path(imageDirectory, "sim_6_symmetric_act_0SW.png") 
 ggsave(imageFile, width=300, height=200, units="mm")
 plot.symmetric.0SW
 
