@@ -7,11 +7,14 @@ library (reshape2) # for melt
 library (ggplot2) # for ggplot2
 library(pastecs) # for descriptive statistics
 
-activations.file = "sim_6_act_small.txt"
-data.file = "sim_6_data_small.txt"
-lookup.file = "sim_6_lookup_small.txt"
+activations.file = "sim_6_act.txt" # for full activations? *thesis writeup)
+#activations.file = "sim_6_act_small.txt" # doesn't appear to be recent (thesis writeup)
+data.file = "sim_6_data.txt"
+#data.file = "sim_6_data_small.txt"
+lookup.file = "sim_6_lookup.txt"
+#lookup.file = "sim_6_lookup_small.txt"
 
-#activations
+                                        #activations
 labels.data = c(
   "path", "cycle",
   "topdown.0", "topdown.1", "topdown.2",
@@ -253,9 +256,8 @@ plot.triple.activation <- function (data.subset, title) {
                      "#00BB00", # green
                      "#0000FF", # blue
                      "#BBBB00", # yellow
-                     "#00BBBB", # cyan
-                     "#BB00BB") # magenta
-
+                     "#BB00BB", # magenta
+                     "#00BBBB") # cyan
 
 
 # calculate quartiles to plot Q1/Q2/Q3 RTs on graph
@@ -288,6 +290,8 @@ plot.triple.activation <- function (data.subset, title) {
                                    geom_vline(aes(xintercept=qu), data = stats.plot) + # upper quartile
                                      geom_vline(aes(xintercept=ql), data = stats.plot) # lower quartile
 
+
+  
   return (act.plot)
   
 }
