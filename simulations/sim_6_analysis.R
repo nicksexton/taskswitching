@@ -213,8 +213,12 @@ linegraph <- ggplot (data.task01, aes(x=sequence_cond, y=cycles, group=seq.3, fi
 linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1")
+  labs (x = "Sequence", y = "RT (cycles)", group = "Sequence") +
+      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1") +
+    scale_fill_discrete("Task") +
+    theme_bw() + theme (legend.position="bottom") + 
+    scale_fill_grey(start = 0.1, end = 0.4) 
+
 imageFile <- file.path(imageDirectory, "sim_6_0_tasks01.png") 
 ggsave(imageFile)
 
@@ -230,8 +234,12 @@ linegraph <- ggplot (data.task02, aes(x=sequence_cond, y=cycles, group=seq.3, fi
 linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2")
+  labs (x = "Sequence", y = "RT (cycles)", group = "Sequence") +
+      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2") +
+              scale_fill_discrete("Task") +
+    theme_bw() + theme (legend.position="bottom") + 
+    scale_fill_grey(start = 0.1, end = 0.4) 
+
 imageFile <- file.path(imageDirectory, "sim_6_0_tasks02.png") 
 ggsave(imageFile)
 
@@ -246,8 +254,12 @@ linegraph <- ggplot (data.task12, aes(x=sequence_cond, y=cycles, group=seq.3, fi
 linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
-  labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6: Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2")
+  labs (x = "Sequence", y = "RT *cycles)", group = "Sequence") +
+  ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2") +
+    scale_fill_discrete("Task") +
+    theme_bw() + theme (legend.position="bottom") + 
+    scale_fill_grey(start = 0.1, end = 0.4) 
+
 imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
 ggsave(imageFile)
 
