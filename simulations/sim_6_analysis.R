@@ -33,7 +33,7 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
-imageDirectory <- file.path("/media/ramdisk/simulation_6d_diagnostic") # path to save images to
+imageDirectory <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_6") # path to save images to
                                         #(eg ~/Dropbox/PhD/Thesis/simulations/etc
 
 labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cycles",
@@ -219,7 +219,7 @@ linegraph +
     theme_bw() + theme (legend.position="bottom") + 
     scale_fill_grey(start = 0.1, end = 0.4) 
 
-imageFile <- file.path(imageDirectory, "sim_6_0_tasks01.png") 
+imageFile <- file.path(imageDirectory, "sim_6_0_tasks01_symmetric.png") 
 ggsave(imageFile)
 
 
@@ -240,7 +240,7 @@ linegraph +
     theme_bw() + theme (legend.position="bottom") + 
     scale_fill_grey(start = 0.1, end = 0.4) 
 
-imageFile <- file.path(imageDirectory, "sim_6_0_tasks02.png") 
+imageFile <- file.path(imageDirectory, "sim_6_0_tasks02_symmetric.png") 
 ggsave(imageFile)
 
 
@@ -260,7 +260,7 @@ linegraph +
     theme_bw() + theme (legend.position="bottom") + 
     scale_fill_grey(start = 0.1, end = 0.4) 
 
-imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
+imageFile <- file.path(imageDirectory, "sim_6_0_tasks12_symmetric.png") 
 ggsave(imageFile)
 
 
