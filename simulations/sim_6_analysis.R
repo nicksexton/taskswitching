@@ -33,6 +33,7 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
+library (compute.es) # for effect sizes
 imageDirectory <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_6") # path to save images to
                                         #(eg ~/Dropbox/PhD/Thesis/simulations/etc
 
@@ -113,6 +114,7 @@ data$seq.1 <- factor(data$seq.1)
 ######################### DEBUG STUFF ####################################
 
 # 0SW
+
 data.0SW <- subset (data, sequence_cond == "0SW")
 bargraph <- ggplot (subset(data.0SW, PATH.trial == 2), aes(x=seq.3, y=cycles, group=seq.1, fill=seq.1))
 bargraph +
@@ -264,6 +266,12 @@ imageFile <- file.path(imageDirectory, "sim_6_0_tasks12_symmetric.png")
 ggsave(imageFile)
 
 
+
+# descriptive statistics, collapsed across tasks (symmetrical assumed)
+data.symmetric <- subset (data, PATH.trial == 2)
+by(data.symmetric$cycles, data.symmetric$sequence_cond, stat.desc)
+
+
 # descriptive statistics, tasks 0 (easy) and 1 (intermediate)
 data.task01.1 <- subset(data.task01, data.task01$seq.3==1) # harder task (1)
 by(data.task01.1$cycles, data.task01.1$sequence_cond, stat.desc)
@@ -302,12 +310,21 @@ model.aggregate.trial3.switchcost <- t.test (cycles ~ sequence_cond,
                                                  sequence_cond == "0SW" | sequence_cond == "1SW"))
 model.aggregate.trial3.switchcost
 
+# effect size
+tes (t=model.aggregate.trial3.switchcost$statistic,
+     n.1 = nrow (subset(data.aggregate.trial3, data.aggregate.trial3$sequence_cond == "0SW")),
+     n.2 = nrow (subset(data.aggregate.trial3, data.aggregate.trial3$sequence_cond == "1SW"))) 
+         
 
 # t-test for n-2 repetition cost
 model.aggregate.trial3.n2rc <- t.test (cycles ~ sequence_cond,
                                              data = subset (data.aggregate.trial3,
                                                  sequence_cond == "2SW" | sequence_cond == "ALT"))
 model.aggregate.trial3.n2rc
+
+tes (t=model.aggregate.trial3.n2rc$statistic,
+     n.1 = nrow (subset(data.aggregate.trial3, data.aggregate.trial3$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.aggregate.trial3, data.aggregate.trial3$sequence_cond == "ALT"))) 
 
 
 
