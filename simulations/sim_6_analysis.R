@@ -44,6 +44,7 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
                                         #Default, use this
 data.raw <- read.delim("sim_6_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
+
                                         # Temp, just for diagnostic
 # data.raw <- read.delim("/media/ramdisk/simulation_6d_diagnostic/sim_6_data.txt", header=FALSE, sep=c("", ":"), col.names=labels.data)
 
