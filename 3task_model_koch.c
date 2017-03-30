@@ -1,6 +1,6 @@
 // #define DEBUG_NETWORK_ACTIVATION
 // #define ECHO
- #define ECHO_ACTIVATION
+//  #define ECHO_ACTIVATION
 
 
 #include <stdio.h>
