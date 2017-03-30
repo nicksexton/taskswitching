@@ -34,6 +34,7 @@ library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
 library (compute.es) # for effect sizes
+library (lsr) # for eta squared
 imageDirectory <- file.path("~/Dropbox/PhD/Thesis/simulation_results/simulation_6") # path to save images to
                                         #(eg ~/Dropbox/PhD/Thesis/simulations/etc
 
@@ -216,12 +217,14 @@ linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT (cycles)", group = "Sequence") +
-      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1") +
+#      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1") +
+      ggtitle("Symmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 1") +
     scale_fill_discrete("Task") +
     theme_bw() + theme (legend.position="bottom") + 
     scale_fill_grey(start = 0.1, end = 0.4) 
 
-imageFile <- file.path(imageDirectory, "sim_6_0_tasks01_symmetric.png") 
+imageFile <- file.path(imageDirectory, "sim_6_0_tasks01_symmetric.png")
+#imageFile <- file.path(imageDirectory, "sim_6_0_tasks01.png") # asymmetric
 ggsave(imageFile)
 
 
@@ -237,12 +240,14 @@ linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT (cycles)", group = "Sequence") +
-      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2") +
-              scale_fill_discrete("Task") +
+#      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2") +
+      ggtitle("Symmetric switch costs and n-2 repetition costs\n Switches between tasks 0 and 2") +
+          scale_fill_discrete("Task") +
     theme_bw() + theme (legend.position="bottom") + 
     scale_fill_grey(start = 0.1, end = 0.4) 
 
 imageFile <- file.path(imageDirectory, "sim_6_0_tasks02_symmetric.png") 
+#imageFile <- file.path(imageDirectory, "sim_6_0_tasks02.png") 
 ggsave(imageFile)
 
 
@@ -257,12 +262,14 @@ linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT *cycles)", group = "Sequence") +
-  ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2") +
+#      ggtitle("Asymmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2") +
+  ggtitle("Symmetric switch costs and n-2 repetition costs\n Switches between tasks 1 and 2") +          
     scale_fill_discrete("Task") +
     theme_bw() + theme (legend.position="bottom") + 
     scale_fill_grey(start = 0.1, end = 0.4) 
 
-imageFile <- file.path(imageDirectory, "sim_6_0_tasks12_symmetric.png") 
+imageFile <- file.path(imageDirectory, "sim_6_0_tasks12_symmetric.png")
+#imageFile <- file.path(imageDirectory, "sim_6_0_tasks12.png") 
 ggsave(imageFile)
 
 
@@ -348,6 +355,7 @@ model.task01.sc <- aov(cycles ~ sequence_cond +
                        sequence_cond:seq.3,
                        data = subset(data.task01, sequence_cond == "0SW" | sequence_cond == "1SW"))
 anova(model.task01.sc)
+etaSquared (x=model.task01.sc)
 
 #n2 repetition cost
 model.task01.n2rc <- aov(cycles ~ sequence_cond +
@@ -355,6 +363,28 @@ model.task01.n2rc <- aov(cycles ~ sequence_cond +
                        sequence_cond:seq.3,
                        data = subset(data.task01, sequence_cond == "ALT" | sequence_cond == "2SW"))
 anova(model.task01.n2rc)
+etaSquared (x=model.task01.n2rc)
+
+# post-hoc t-test, switch costs
+model.task01.sc.0 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task01, seq.3 == 0),
+                               sequence_cond == "1SW" | sequence_cond == "0SW")
+model.task01.sc.0
+tes (t=model.task01.sc.0$statistic,
+     n.1 = nrow (subset(data.task01, data.task01$seq.3 == 0 & data.task01$sequence_cond == "1SW")),
+     n.2 = nrow (subset(data.task01, data.task01$seq.3 == 0 & data.task01$sequence_cond == "0SW"))) 
+
+model.task01.sc.1 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task01, seq.3 == 1),
+                               sequence_cond == "1SW" | sequence_cond == "0SW")
+model.task01.sc.1
+tes (t=model.task01.sc.1$statistic,
+     n.1 = nrow (subset(data.task01, data.task01$seq.3 == 1 & data.task01$sequence_cond == "1SW")),
+     n.2 = nrow (subset(data.task01, data.task01$seq.3 == 1 & data.task01$sequence_cond == "0SW"))) 
+
+
+
+
 
 # post-hoc test: is there a significant n-2 repetition cost in each condition
 # task 0
@@ -362,12 +392,19 @@ model.task01.n2rc.0 <- t.test (cycles ~ sequence_cond,
                                data = subset (data.task01, seq.3 == 0),
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task01.n2rc.0
+tes (t=model.task01.n2rc.0$statistic,
+     n.1 = nrow (subset(data.task01, data.task01$seq.3 == 0 & data.task01$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.task01, data.task01$seq.3 == 0 & data.task01$sequence_cond == "ALT"))) 
+
 
 # task 1
 model.task01.n2rc.1 <- t.test (cycles ~ sequence_cond,
                                data = subset (data.task01, seq.3 == 1),
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task01.n2rc.1
+tes (t=model.task01.n2rc.1$statistic,
+     n.1 = nrow (subset(data.task01, data.task01$seq.3 == 1 & data.task01$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.task01, data.task01$seq.3 == 1 & data.task01$sequence_cond == "ALT"))) 
 
 
 
@@ -383,6 +420,7 @@ model.task12.sc <- aov(cycles ~ sequence_cond +
                        sequence_cond:seq.3,
                        data = subset(data.task12, sequence_cond == "0SW" | sequence_cond == "1SW"))
 anova(model.task12.sc)
+etaSquared (x=model.task12.sc)
 
 #n2 repetition cost
 model.task12.n2rc <- aov(cycles ~ sequence_cond +
@@ -390,6 +428,26 @@ model.task12.n2rc <- aov(cycles ~ sequence_cond +
                        sequence_cond:seq.3,
                        data = subset(data.task12, sequence_cond == "ALT" | sequence_cond == "2SW"))
 anova(model.task12.n2rc)
+etaSquared (x=model.task12.n2rc)
+
+# post hoc t-test, switch costs
+model.task12.sc.1 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task12, seq.3 == 1),
+                               sequence_cond == "1SW" | sequence_cond == "0SW")
+model.task12.sc.1
+tes (t=model.task12.sc.1$statistic,
+     n.1 = nrow (subset(data.task12, data.task12$seq.3 == 1 & data.task12$sequence_cond == "1SW")),
+     n.2 = nrow (subset(data.task12, data.task12$seq.3 == 1 & data.task12$sequence_cond == "0SW"))) 
+
+model.task12.sc.2 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task12, seq.3 == 2),
+                               sequence_cond == "1SW" | sequence_cond == "0SW")
+model.task12.sc.2
+tes (t=model.task12.sc.2$statistic,
+     n.1 = nrow (subset(data.task12, data.task12$seq.3 == 2 & data.task12$sequence_cond == "1SW")),
+     n.2 = nrow (subset(data.task12, data.task12$seq.3 == 2 & data.task12$sequence_cond == "0SW"))) 
+
+
 
 # post-hoc test: is there a significant n-2 repetition cost in each condition
 # task 1
@@ -397,12 +455,20 @@ model.task12.n2rc.1 <- t.test (cycles ~ sequence_cond,
                                data = subset (data.task12, seq.3 == 1),
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task12.n2rc.1
+tes (t=model.task12.n2rc.1$statistic,
+     n.1 = nrow (subset(data.task12, data.task12$seq.3 == 1 & data.task12$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.task12, data.task12$seq.3 == 1 & data.task12$sequence_cond == "ALT"))) 
+
 
 # task 2
 model.task12.n2rc.2 <- t.test (cycles ~ sequence_cond,
                                data = subset (data.task12, seq.3 == 2),
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task12.n2rc.2
+tes (t=model.task12.n2rc.2$statistic,
+     n.1 = nrow (subset(data.task12, data.task12$seq.3 == 2 & data.task12$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.task12, data.task12$seq.3 == 2 & data.task12$sequence_cond == "ALT"))) 
+
 
 ############## 0 and 2 ##################
 
@@ -412,6 +478,7 @@ model.task02.sc <- aov(cycles ~ sequence_cond +
                        sequence_cond:seq.3,
                        data = subset(data.task02, sequence_cond == "0SW" | sequence_cond == "1SW"))
 anova(model.task02.sc)
+etaSquared (x=model.task02.sc)
 
 #n2 repetition cost
 model.task02.n2rc <- aov(cycles ~ sequence_cond +
@@ -419,6 +486,27 @@ model.task02.n2rc <- aov(cycles ~ sequence_cond +
                        sequence_cond:seq.3,
                        data = subset(data.task02, sequence_cond == "ALT" | sequence_cond == "2SW"))
 anova(model.task02.n2rc)
+etaSquared (x=model.task02.n2rc)
+
+# post hoc t-test, switch costs
+model.task02.sc.0 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task02, seq.3 == 0),
+                               sequence_cond == "1SW" | sequence_cond == "0SW")
+model.task02.sc.0
+tes (t=model.task02.sc.0$statistic,
+     n.1 = nrow (subset(data.task02, data.task02$seq.3 == 0 & data.task02$sequence_cond == "0SW")),
+     n.2 = nrow (subset(data.task02, data.task02$seq.3 == 0 & data.task02$sequence_cond == "1SW"))) 
+
+model.task02.sc.2 <- t.test (cycles ~ sequence_cond,
+                               data = subset (data.task02, seq.3 == 2),
+                               sequence_cond == "1SW" | sequence_cond == "0SW")
+model.task02.sc.2
+tes (t=model.task02.sc.2$statistic,
+     n.1 = nrow (subset(data.task02, data.task02$seq.3 == 2 & data.task02$sequence_cond == "0SW")),
+     n.2 = nrow (subset(data.task02, data.task02$seq.3 == 2 & data.task02$sequence_cond == "1SW"))) 
+
+
+
 
 # post-hoc test: is there a significant n-2 repetition cost in each condition
 # task 1
@@ -426,10 +514,17 @@ model.task02.n2rc.0 <- t.test (cycles ~ sequence_cond,
                                data = subset (data.task02, seq.3 == 0),
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task02.n2rc.0
+tes (t=model.task02.n2rc.0$statistic,
+     n.1 = nrow (subset(data.task02, data.task02$seq.3 == 0 & data.task02$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.task02, data.task02$seq.3 == 0 & data.task02$sequence_cond == "ALT"))) 
+
 
 # task 2
 model.task02.n2rc.2 <- t.test (cycles ~ sequence_cond,
                                data = subset (data.task02, seq.3 == 2),
                                sequence_cond == "2SW" | sequence_cond == "ALT")
 model.task02.n2rc.2
+tes (t=model.task02.n2rc.2$statistic,
+     n.1 = nrow (subset(data.task02, data.task02$seq.3 == 2 & data.task02$sequence_cond == "2SW")),
+     n.2 = nrow (subset(data.task02, data.task02$seq.3 == 2 & data.task02$sequence_cond == "ALT"))) 
 
