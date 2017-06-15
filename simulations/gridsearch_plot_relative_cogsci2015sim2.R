@@ -341,17 +341,17 @@ plot.relative.bytaskseq <- function (data, cond.title, image.directory, file.ste
 
 
   plot.relative (subset(data, data$alternation=="AB"),
-#                        condition.title=paste("Task sequence AB\n",cond.title, sep=""),
+#                 condition.title=paste("Task sequence AB\n",cond.title, sep=""),
                  condition.title=paste("",cond.title, sep=""),
                  image.directory=image.directory,
                  filename.stem=paste(file.stem, "AB_", sep=""),
                  save=save)
 
-#  plot.relative (subset(data, data$alternation=="BA"),
-#                  condition.title=paste("Task sequence BA\n",cond.title, sep=""),
-#                  image.directory=image.directory,
-#                  filename.stem=paste(file.stem, "BA_", sep=""),
-#                  save=save)
+## plot.relative (subset(data, data$alternation=="BA"),
+##                 condition.title=paste("Task sequence BA\n",cond.title, sep=""),
+##                 image.directory=image.directory,
+##                 filename.stem=paste(file.stem, "BA_", sep=""),
+##                 save=save)
 
 #  plot.errormaps (subset(data, data$alternation=="BA"),
 #                        condition.title=paste("Task sequence BA\n",cond.title, sep=""),

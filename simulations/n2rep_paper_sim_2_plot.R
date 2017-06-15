@@ -19,18 +19,19 @@ data.sim8 <- read.delim("n2rep_paper_results_sim2.txt", sep=c("\t"), strip.white
 
 data.sim8.ref <- data.sim8[data.sim8$conflict.tdwt==0,] # get reference data
                                         # trim data to only 4 weight levels (for fitting on single grid row)
-data.sim8 <- subset (data.sim8, (conflict.tdwt == -0.1786 | conflict.tdwt == -0.8929 | conflict.tdwt == -1.6071 | conflict.tdwt == -2.3214))
+#data.sim8 <- subset (data.sim8, (conflict.tdwt == -0.1786 | conflict.tdwt == -0.8929 | conflict.tdwt == -1.6071 | conflict.tdwt == -2.3214))
+data.sim8 <- subset (data.sim8, (conflict.tdwt == -0.2 | conflict.tdwt == -1 | conflict.tdwt == -1.8 | conflict.tdwt == -2.6))
 
 
 
 # Code could be vectorised!
 data.sim8$intersect <- rep(0, nrow(data.sim8))
 data.sim8$intersectErr <- rep(0, nrow(data.sim8))
-progress <- txtProgressBar (min=0, max=nrow(data.sim8), style=3)
+#progress <- txtProgressBar (min=0, max=nrow(data.sim8), style=3)
 for (i in 1:nrow(data.sim8)) {
   data.sim8[i,]$intersect <- intersect (data.sim8[i,]$sc, data.sim8[i,]$n2rc)
   data.sim8[i,]$intersectErr <- intersectErr ((data.sim8[i,]$err.3.1SW - data.sim8[i,]$err.3.0SW), (data.sim8[i,]$err.3.ALT - data.sim8[i,]$err.3.2SW))
-  setTxtProgressBar(progress, i)  
+#  setTxtProgressBar(progress, i)  
 }
 
 
@@ -53,4 +54,4 @@ for (i in 1:nrow(data.sim8)) {
 
 data.sim8.relative <- merge (x=data.sim8, y=data.sim8.ref, by=c("task.input.str", "task.topdown.str", "alternation"))
 
-plot.relative.bytaskseq (data.sim8.relative, cond.title="Simulation 8", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_2", file.stem="cogsci_sim_2", save=TRUE)
+plot.relative.bytaskseq (data.sim8.relative, cond.title="Simulation 8", image.directory="/home/nickdbn/Dropbox/PhD/Thesis/simulation_results/cogsci_2015/simulation_2/thesis_version", file.stem="cogsci_sim_2", save=TRUE)
