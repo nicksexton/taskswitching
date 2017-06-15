@@ -20,7 +20,7 @@ rm sim_6_data_conflict_rescale.txt
 rm sim_6_log.txt
 rm sim_6_log_small.txt
 
-./sim_4_asymmetric.py -n 200
+./sim_4_asymmetric.py -n 1000
 mv sim_4_trials.conf sim_6_trials.conf
 mv sim_4_lookup.txt sim_6_lookup.txt
 

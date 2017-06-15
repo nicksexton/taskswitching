@@ -35,7 +35,8 @@ rm (list = ls())
 library(ggplot2) # for graphs
 library(pastecs) # for descriptive statistics
 library(reshape2) # for transform
-# library (lineprof) # for profiling
+library (compute.es) # for effect sizes
+                                        # library (lineprof) # for profiling
 
 source ("sim_6_analysis_functions.R")
 
@@ -45,11 +46,11 @@ labels.data = c("trialpath", "trialid", "cue", "stim_0", "stim_1", "stim_2", "cy
 #
 data.off <- read.delim("sim_6_data_conflict_off.txt",
                          header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.allow <- read.delim("sim_6_data_conflict_neg_allow.txt",
+data.allow <- read.delim("sim_6_data_conflict_allow.txt",
                          header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.clip <- read.delim("sim_6_data_conflict_neg_clip.txt",
+data.clip <- read.delim("sim_6_data_conflict_clip.txt",
                         header=FALSE, sep=c("", ":"), col.names=labels.data)
-data.rescale <- read.delim("sim_6_data_conflict_neg_rescale.txt",
+data.rescale <- read.delim("sim_6_data_conflict_rescale.txt",
                            header=FALSE, sep=c("", ":"), col.names=labels.data)
                                         # now split trial path into block and trial ID
 data.off <- cbind (data.off, conflict="no conflict")
@@ -60,14 +61,33 @@ data.rescale <- cbind (data.rescale, conflict="rescale")
 
 # Need to clean data (ie work out block.correct) before binding multiple data sets together
 
+labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
+data.lookuptable = read.delim("sim_6_lookup.txt", header = FALSE, col.names=labels.lookup)
+data.off <- merge(data.lookuptable, data.off, by.x = "trialid", by.y = "trialid")
+data.allow <- merge(data.lookuptable, data.allow, by.x = "trialid", by.y = "trialid")
+data.clip <- merge(data.lookuptable, data.clip, by.x = "trialid", by.y = "trialid")
+data.rescale <- merge(data.lookuptable, data.rescale, by.x = "trialid", by.y = "trialid")
 
+data.off <- split.trialpath(data.off)
+data.allow <- split.trialpath(data.allow)
+data.clip <- split.trialpath(data.clip)
+data.rescale <- split.trialpath(data.rescale)
 
+data.off$correct.trial <- trial.is.correct (data.off, 500)
+data.allow$correct.trial <- trial.is.correct (data.allow, 500)
+data.clip$correct.trial <- trial.is.correct (data.clip, 500)
+data.rescale$correct.trial <- trial.is.correct (data.rescale, 500)
+
+data.off <- block.is.correct (data.off)
+data.allow <- block.is.correct (data.allow)
+data.clip <- block.is.correct (data.clip)
+data.rescale <- block.is.correct (data.rescale)
 
 
 data.raw <- rbind (data.off, data.allow, data.clip, data.rescale) # commented while testing only single method
 
-data.processed <- split.trialpath (data.raw)
-data.processed$correct.trial <- trial.is.correct (data.processed, 500)
+#data.processed <- split.trialpath (data.raw)
+#data.processed$correct.trial <- trial.is.correct (data.processed, 500)
 
 # l <- lineprof (data.off <- process.data (data.off))
 
@@ -78,13 +98,13 @@ data.processed$correct.trial <- trial.is.correct (data.processed, 500)
 #system.time (data.off.1 <- block.is.correct2 (data.processed))
 
 #system.time (data.off.1 <- block.is.correct3 (data.processed))
-data.raw <- block.is.correct (data.processed)
+#data.raw <- block.is.correct (data.processed)
                                         #
 #
 # Join lookup table with simulated data
-labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
-data.lookuptable = read.delim("sim_6_lookup.txt", header = FALSE, col.names=labels.lookup)
-data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
+#labels.lookup = c("trialid", "sequence_cond", "sequence", "trial_pos", "congruency_seq", "congruency_trial", "blank")
+#data.lookuptable = read.delim("sim_6_lookup.txt", header = FALSE, col.names=labels.lookup)
+#data.raw <- merge(data.lookuptable, data.raw, by.x = "trialid", by.y = "trialid")
 
 data.raw = subset(data.raw, select = c("trialid", "sequence_cond", "sequence", "PATH.block", "PATH.trial", "cue", "stim_0", "stim_1", "stim_2", "response", "cycles", "correct.trial", "correct.block", "conflict"))
 #
@@ -105,7 +125,7 @@ data.raw = transform (data.raw, seq = colsplit(sequence, pattern = "/", names=c(
 exclude.outliers <- function (x, field, max, min) subset(x, x$field > min || x$field < max)
 
 #data = subset (data.raw, correct.block == TRUE)
-data = subset (data.raw, correct == TRUE)
+data = subset (data.raw, correct.block == TRUE)
 
 
 
@@ -138,6 +158,7 @@ data = subset (data.raw, correct == TRUE)
 #by(data.task2$cycles, data.task2$seq.2, stat.desc)
 #
 #
+data <- data.raw
 data$seq.3 <- factor(data$seq.3)
 data$seq.2 <- factor(data$seq.2)
 data$seq.1 <- factor(data$seq.1)
@@ -178,13 +199,17 @@ boxplot.rescale + geom_boxplot() + labs (x = "sequence", y = "RT (cycles)") +
 data.all <- subset (data,
                     PATH.trial == 2)
 
-linegraph <- ggplot (data.all, aes(x=sequence_cond, y=cycles, group=conflict, fill=conflict))
+linegraph <- ggplot (data.all, aes(x=conflict, y=cycles, group=sequence_cond, fill=sequence_cond))
 linegraph +
   stat_summary(fun.y = mean, geom = "bar", position = "dodge") +
   stat_summary(fun.data = mean_cl_boot, geom = "errorbar", position = position_dodge(width = 0.90), width = 0.2) + 
   labs (x = "Sequence", y = "RT", group = "Sequence") +
-  ggtitle("Simulation 6c: Switch costs and n-2 repetition costs\n Effect of negative conflict treatments")
- imageFile <- file.path(imageDirectory, "sim_6c_treatment_0.png") 
+  scale_fill_discrete("Task") +
+  ggtitle("Simulation 6c: Switch costs and n-2 repetition costs\n Effect of negative conflict treatments") +
+  theme_bw() + theme (legend.position="bottom") + 
+    scale_fill_grey(start = 0.1, end = 0.9) 
+
+imageFile <- file.path(imageDirectory, "sim_6c_treatment_0.png") 
  ggsave(imageFile)
 
 
@@ -217,6 +242,13 @@ test.switchcost <- function (x)
 test.n2rc <- function (x)
   t.test (cycles ~ sequence_cond, data = subset(x, sequence_cond == "2SW" | sequence_cond =="ALT"))
 
+effsize.switchcost <- function (x)
+    tes (t=test.switchcost(x)$statistic, n.1=nrow(subset(x, sequence_cond=="0SW")), n.2=nrow(subset(x, sequence_cond=="1SW")))
+
+effsize.n2rc <- function (x)
+    tes (t=test.n2rc(x)$statistic, n.1=nrow(subset(x, sequence_cond=="2SW")), n.2=nrow(subset(x, sequence_cond=="ALT")))
+
+
 calculate.switchcost <- function (x){
   data.frame (
     mean.0SW = calculate.RT.mean (x, "0SW"),
@@ -244,25 +276,31 @@ data.off <- subset(data.all, conflict=="no conflict")
 tabulate.RT (data.off)
 calculate.switchcost (data.off)
 calculate.n2rc (data.off)
+effsize.switchcost(data.off)
+effsize.n2rc(data.off)
+
 
 
 data.allow <- subset(data.all, conflict=="allow")
 tabulate.RT (data.allow)
 calculate.switchcost (data.allow)
 calculate.n2rc (data.allow)
-
+effsize.switchcost(data.allow)
+effsize.n2rc(data.allow)
 
 data.clip <- subset(data.all, conflict=="clip") # 
 tabulate.RT (data.clip)
 calculate.switchcost (data.clip)
 calculate.n2rc (data.clip)
-
+effsize.switchcost(data.clip)
+effsize.n2rc(data.clip)
 
 data.rescale <- subset(data.all, conflict=="rescale") # 
 tabulate.RT (data.rescale)
 calculate.switchcost (data.rescale)
 calculate.n2rc (data.rescale)
-
+effsize.switchcost(data.rescale)
+effsize.n2rc(data.rescale)
 
 
 

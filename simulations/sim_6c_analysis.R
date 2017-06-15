@@ -63,7 +63,7 @@ data.rescale <- cbind (data.rescale, conflict="rescale")
 # data.raw <- rbind (data.off, data.allow, data.clip, data.rescale) # commented while testing only single method
 
 data.processed <- split.trialpath (data.off)
-data.processed$correct.trial <- trial.is.correct (data.processed)
+data.processed$correct.trial <- trial.is.correct (data.processed, 500)
 
 # l <- lineprof (data.off <- process.data (data.off))
 system.time (data.off.1 <- block.is.correct (data.processed))
